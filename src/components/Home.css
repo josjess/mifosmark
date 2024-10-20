@@ -1,0 +1,52 @@
+.home-layout {
+    position: absolute;
+    top: 50px;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.main-content {
+    flex: 1;
+    padding: 20px;
+    margin-left: 250px;
+}
+
+.banner {
+    text-align: center;
+    padding: 40px;
+    background-color: #f1f1f1;
+    margin-top: 50px;
+}
+
+.info-section {
+    display: flex;
+    justify-content: space-around;
+    padding: 20px;
+}
+
+.info-card {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    text-align: center;
+    flex-basis: 30%;
+}
+
+@media (max-width: 768px) {
+    .info-section {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .info-card {
+        margin-bottom: 20px;
+        width: 80%;
+    }
+
+    .main-content {
+        margin-left: 0; /* Removes margin for smaller screens */
+    }
+}
