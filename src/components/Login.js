@@ -6,6 +6,8 @@ import { AuthContext } from '../context/AuthContext';
 import { NotificationContext } from '../context/NotificationContext';
 import { useLoading } from '../context/LoadingContext';
 
+<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    
 const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
