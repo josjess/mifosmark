@@ -1,5 +1,6 @@
 let API_CONFIG = {
-    baseURL: 'https://demo.mifos.io/fineract-provider/api/v1'
+   /* baseURL: 'https://demo.mifos.io/fineract-provider/api/v1' */
+    baseURL: 'http://217.182.74.110:8080/fineract-provider/api/v1'
 };
 
 export const loadConfig = async () => {
