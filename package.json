@@ -20,7 +20,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
-  "proxy": "https://demo.mifos.io",
+  "proxy": "http://217.182.74.110:8080",
   "eslintConfig": {
     "extends": [
       "react-app",
