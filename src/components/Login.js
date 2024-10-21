@@ -51,7 +51,7 @@ const Login = () => {
 
                 login(userData);
 
-                navigate('/dashboard');
+                navigate('/');
             } else {
                 showNotification(data.message || 'Login failed', 'error');
             }
@@ -63,43 +63,45 @@ const Login = () => {
     };
 
     return (
-        <div className="login-container">
-            <header className="login-header">
-                <h1>Welcome Back!</h1>
-                <p>Please log in to continue</p>
-            </header>
+        <div className="body">
+            <div className="login-container">
+                <header className="login-header">
+                    <h1>Welcome Back!</h1>
+                    <p>Please log in to continue</p>
+                </header>
 
-            <section className="login-form">
-                <form onSubmit={handleLogin}>
-                    <div className="form-group">
-                        <label htmlFor="username">Username</label>
-                        <input
-                            type="text"
-                            id="username"
-                            placeholder="Enter your username"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            required
-                        />
-                    </div>
+                <section className="login-form">
+                    <form onSubmit={handleLogin}>
+                        <div className="form-group">
+                            <label htmlFor="username">Username</label>
+                            <input
+                                type="text"
+                                id="username"
+                                placeholder="Enter your username"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                                required
+                            />
+                        </div>
 
-                    <div className="form-group">
-                        <label htmlFor="password">Password</label>
-                        <input
-                            type="password"
-                            id="password"
-                            placeholder="Enter your password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                        />
-                    </div>
+                        <div className="form-group">
+                            <label htmlFor="password">Password</label>
+                            <input
+                                type="password"
+                                id="password"
+                                placeholder="Enter your password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                            />
+                        </div>
 
-                    <button type="submit" className="login-btn">
-                        Login
-                    </button>
-                </form>
-            </section>
+                        <button type="submit" className="login-btn">
+                            Login
+                        </button>
+                    </form>
+                </section>
+            </div>
         </div>
     );
 };
