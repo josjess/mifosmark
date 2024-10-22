@@ -167,28 +167,132 @@ const Dashboard = () => {
                 </header>
 
                 <section className="card-grid">
-                    <div className="card"><FaUser className="card-icon"/><h3>Total Clients</h3><p>{totalClients}</p>
+                    <div className="card">
+                        <div className="card-header">
+                            <div className="icon-container">
+                                <FaUser className="card-icon"/>
+                            </div>
+                            <h3>Total Clients</h3>
+                        </div>
+                        <p>{totalClients}</p>
                     </div>
-                    <div className="card"><FaUser className="card-icon"/><h3>Active Clients</h3><p>{activeClients}</p>
+                    <div className="card">
+                        <div className="card-header">
+                            <div className="icon-container">
+                                <FaUser className="card-icon"/>
+                            </div>
+                            <h3>Active Clients</h3>
+                        </div>
+                        <p>{activeClients}</p>
                     </div>
-                    <div className="card"><FaUser className="card-icon"/><h3>Inactive Clients</h3>
-                        <p>{inactiveClients}</p></div>
-                    <div className="card"><FaUser className="card-icon"/><h3>Pending Clients</h3><p>{newClients}</p></div>
-                    <div className="card"><FaMoneyCheckAlt className="card-icon"/><h3>Principal Outstanding</h3>
-                        <p>{principalOutstanding}</p></div>
-                    <div className="card"><FaHandHoldingUsd className="card-icon"/><h3>Interest Outstanding</h3>
-                        <p>{interestOutstanding}</p></div>
-                    <div className="card"><FaBalanceScale className="card-icon"/><h3>Total Outstanding</h3>
-                        <p>{totalOutstanding}</p></div>
-                    <div className="card"><FaChartLine className="card-icon"/><h3>Interest This Month</h3>
-                        <p>{interestThisMonth}</p></div>
-                    <div className="card"><FaExclamationTriangle className="card-icon"/><h3>Principal Overdue</h3>
-                        <p>{principalOverdue}</p></div>
-                    <div className="card"><FaExclamationTriangle className="card-icon" /><h3>Interest Overdue</h3><p>{interestOverdue}</p></div>
-                    <div className="card"><FaBalanceScale className="card-icon" /><h3>Total Overdue</h3><p>{totalOverdue}</p></div>
-                    <div className="card"><FaExclamationTriangle className="card-icon" /><h3>Non-Performing Assets</h3><p>{nonPerformingAssets}</p></div>
-                    <div className="card"><FaBalanceScale className="card-icon" /><h3>Loans for Approval</h3><p>{loansForApproval}</p></div>
-                    <div className="card"><FaBalanceScale className="card-icon" /><h3>Loans for Disapproval</h3><p>{loansForDisapproval}</p></div>
+                    <div className="card">
+                        <div className="card-header">
+                            <div className="icon-container">
+                                <FaUser className="card-icon"/>
+                            </div>
+                            <h3>Inactive Clients</h3>
+                        </div>
+                        <p>{inactiveClients}</p>
+                    </div>
+                    <div className="card">
+                        <div className="card-header">
+                            <div className="icon-container">
+                                <FaUser className="card-icon"/>
+                            </div>
+                            <h3>Pending Clients</h3>
+                        </div>
+                        <p>{newClients}</p>
+                    </div>
+                    <div className="card">
+                        <div className="card-header">
+                            <div className="icon-container">
+                                <FaMoneyCheckAlt className="card-icon"/>
+                            </div>
+                            <h3>Principal Outstanding</h3>
+                        </div>
+                        <p>{principalOutstanding}</p>
+                    </div>
+                    <div className="card">
+                        <div className="card-header">
+                            <div className="icon-container">
+                                <FaHandHoldingUsd className="card-icon"/>
+                            </div>
+                            <h3>Interest Outstanding</h3>
+                        </div>
+                        <p>{interestOutstanding}</p>
+                    </div>
+                    <div className="card">
+                        <div className="card-header">
+                            <div className="icon-container">
+                                <FaBalanceScale className="card-icon"/>
+                            </div>
+                            <h3>Total Outstanding</h3>
+                        </div>
+                        <p>{totalOutstanding}</p>
+                    </div>
+                    <div className="card">
+                        <div className="card-header">
+                            <div className="icon-container">
+                                <FaChartLine className="card-icon"/>
+                            </div>
+                            <h3>Interest This Month</h3>
+                        </div>
+                        <p>{interestThisMonth}</p>
+                    </div>
+                    <div className="card">
+                        <div className="card-header">
+                            <div className="icon-container">
+                                <FaExclamationTriangle className="card-icon"/>
+                            </div>
+                            <h3>Principal Overdue</h3>
+                        </div>
+                        <p>{principalOverdue}</p>
+                    </div>
+                    <div className="card">
+                        <div className="card-header">
+                            <div className="icon-container">
+                                <FaExclamationTriangle className="card-icon"/>
+                            </div>
+                            <h3>Interest Overdue</h3>
+                        </div>
+                        <p>{interestOverdue}</p>
+                    </div>
+                    <div className="card">
+                        <div className="card-header">
+                            <div className="icon-container">
+                                <FaBalanceScale className="card-icon"/>
+                            </div>
+                            <h3>Total Overdue</h3>
+                        </div>
+                        <p>{totalOverdue}</p>
+                    </div>
+                    <div className="card">
+                        <div className="card-header">
+                            <div className="icon-container">
+                                <FaExclamationTriangle className="card-icon"/>
+                            </div>
+                            <h3>Non-Performing Assets</h3>
+                        </div>
+                        <p>{nonPerformingAssets}</p>
+                    </div>
+                    <div className="card">
+                        <div className="card-header">
+                            <div className="icon-container">
+                                <FaBalanceScale className="card-icon"/>
+                            </div>
+                            <h3>Loans for Approval</h3>
+                        </div>
+                        <p>{loansForApproval}</p>
+                    </div>
+                    <div className="card">
+                        <div className="card-header">
+                            <div className="icon-container">
+                                <FaBalanceScale className="card-icon"/>
+                            </div>
+                            <h3>Loans for Disapproval</h3>
+                        </div>
+                        <p>{loansForDisapproval}</p>
+                    </div>
                 </section>
             </main>
         </div>
