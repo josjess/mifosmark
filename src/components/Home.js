@@ -1,11 +1,22 @@
-import React from 'react';
+import React, {useContext, useEffect} from 'react';
 import {FaUsers, FaUserPlus, FaUserShield, FaChartBar} from 'react-icons/fa';
 import './Home.css';
 import {FaCalculator} from "react-icons/fa6";
 import {useNavigate} from "react-router-dom";
+import {AuthContext} from "../context/AuthContext";
+import {NotificationContext} from "../context/NotificationContext";
 
 const Home = () => {
     const navigate = useNavigate();
+    const { isAuthenticated } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
+
+    useEffect(() => {
+        if (!isAuthenticated) {
+            showNotification('Kindly Login to access our services!', 'error');
+            navigate('/login');
+        }
+    }, [isAuthenticated, navigate, showNotification]);
 
     return (
         <div className="home-layout">
