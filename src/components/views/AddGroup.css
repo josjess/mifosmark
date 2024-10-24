@@ -1,0 +1,158 @@
+.form-container {
+    max-width: 900px;
+    margin-left: 250px;
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.form-container h2 {
+    font-size: 36px;
+    color: #2C3E50;
+    margin-bottom: 25px;
+    text-align: center;
+    padding-bottom: 10px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group select {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    width: auto;
+}
+
+.form-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-direction: row;
+    gap: 10px;
+    margin-bottom: 40px;
+}
+
+.checkbox-input {
+    width: auto;
+    height: auto;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+.client-search-group {
+    margin-bottom: 40px;
+}
+
+.client-search-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.client-search-input {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    flex: 1;
+    margin-right: 10px;
+}
+
+.add-client-button {
+    padding: 10px 15px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.add-client-button:hover {
+    background-color: #2980b9;
+}
+
+.added-clients ul {
+    margin-top: 15px;
+    list-style: none;
+    padding: 0;
+}
+
+.added-clients li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #f8f8f8;
+    margin-bottom: 10px;
+    border-radius: 4px;
+}
+
+.remove-client-button {
+    padding: 6px 12px;
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.remove-client-button:hover {
+    background-color: #c0392b;
+}
+
+.form-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    margin-bottom: 70px;
+}
+
+.submit-button,
+.cancel-button {
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 50px;
+    cursor: pointer;
+}
+
+.submit-button {
+    background-color: #28a745;
+    color: white;
+}
+
+.submit-button:hover {
+    background-color: #23913c;
+}
+
+.form-buttons .cancel-button {
+    background-color: #dc3545;
+    color: white;
+    border-radius: 50px;
+}
+
+.form-buttons .cancel-button:hover {
+    background-color: #c82333;
+}

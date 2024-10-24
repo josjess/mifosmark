@@ -1,11 +1,10 @@
 import React, { useContext, useState } from 'react';
-import { FaHome, FaUser, FaBuilding, FaUsers, FaSignOutAlt, FaWallet, FaCog } from 'react-icons/fa';
+import {FaHome, FaUser, FaBuilding, FaUsers, FaSignOutAlt, FaWallet, FaCog, FaClipboardList} from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { NotificationContext } from '../context/NotificationContext';
 import { TbChevronDown, TbChevronUp } from 'react-icons/tb';
 import './Sidebar.css';
-import {FaClipboardList} from "react-icons/fa6";
 
 const Sidebar = () => {
     const { logout } = useContext(AuthContext);

@@ -21,7 +21,7 @@ const Home = () => {
                         <button className="action-button">
                             <FaUsers className="button-icon"/> Manage Users & Roles
                         </button>
-                        <button className="action-button">
+                        <button className="action-button" onClick={() => navigate('/addclient')}>
                             <FaUserPlus className="button-icon"/> Onboard a New Client
                         </button>
                     </div>
