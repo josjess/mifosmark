@@ -10,6 +10,9 @@ import Centers from './components/views/Centers';
 import Accounting from './components/views/Accounting';
 import Reports from './components/views/Reports';
 import Admin from './components/views/Admin';
+import AddClient from "./components/views/AddClient";
+import AddGroup from "./components/views/AddGroup";
+import AddCenter from "./components/views/AddCenter";
 import { AuthProvider } from './context/AuthContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { LoadingProvider } from './context/LoadingContext';
@@ -18,6 +21,7 @@ import './App.css';
 import Navbar from "./components/Navbar";
 import LoadingOverlay from "./components/LoadingOverlay";
 import Sidebar from "./components/Sidebar";
+import ProtectedLayout from './ProtectedLayout';
 
 const App = () => {
     useEffect(() => {
@@ -37,15 +41,20 @@ const App = () => {
                     {!isLoginPage && <Navbar />}
                     {!isLoginPage && <Sidebar className="sidebar" />}
                     <Routes>
-                        <Route path="/" element={<Home />} />
                         <Route path="/login" element={<Login />} />
-                        <Route path="/dashboard" element={<Dashboard />} />
-                        <Route path="/clients" element={<Clients />} />
-                        <Route path="/groups" element={<Groups />} />
-                        <Route path="/centers" element={<Centers />} />
-                        <Route path="/accounting" element={<Accounting />} />
-                        <Route path="/reports" element={<Reports />} />
-                        <Route path="/admin" element={<Admin />} />
+                        <Route element={<ProtectedLayout />}>
+                            <Route path="/" element={<Home />} />
+                            <Route path="/dashboard" element={<Dashboard />} />
+                            <Route path="/clients" element={<Clients />} />
+                            <Route path="/groups" element={<Groups />} />
+                            <Route path="/centers" element={<Centers />} />
+                            <Route path="/accounting" element={<Accounting />} />
+                            <Route path="/reports" element={<Reports />} />
+                            <Route path="/admin" element={<Admin />} />
+                            <Route path="/addclient" element={<AddClient />} />
+                            <Route path="/addgroup" element={<AddGroup />} />
+                            <Route path="/addcenter" element={<AddCenter />} />
+                        </Route>
                     </Routes>
                 </NotificationProvider>
             </LoadingProvider>

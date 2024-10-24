@@ -41,21 +41,21 @@
     color: #666;
 }
 
-/* Login Form */
 .login-form {
     width: 100%;
 }
 
-.form-group {
+.login-form .form-group {
     margin-bottom: 20px;
+    width: 100%;
 }
 
-.form-group label {
+.login-form .form-group label {
     font-size: 14px;
     color: #555;
 }
 
-.form-group input {
+.login-form .form-group input[type="text"] {
     width: 100%;
     padding: 12px;
     border: 1px solid #ddd;
@@ -65,7 +65,7 @@
     transition: border-color 0.3s ease;
 }
 
-.form-group input:focus {
+.login-form .form-group input:focus {
     outline: none;
     border-color: #4a90e2;
     box-shadow: 0 0 4px rgba(74, 144, 226, 0.4);

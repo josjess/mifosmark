@@ -1,46 +1,147 @@
-/* General Layout for Views */
 .view-layout {
     display: flex;
     flex-direction: column;
-    margin-left: 250px; /* Assuming sidebar width is 250px */
+    margin-left: 250px;
     padding: 20px;
-    background-color: #f5f7fa; /* Light background */
+    background-color: #f5f7fa;
     min-height: 100vh;
     position: relative;
 }
+.view-header .view-title {
+    font-size: 32px;
+    font-weight: 700;
+    color: #2c3e50;
+    font-family: 'Poppins', sans-serif;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin: 0;
+    position: relative;
+}
+
+.view-header .view-title::before {
+    content: '';
+    position: absolute;
+    width: 60px;
+    height: 4px;
+    background-color: #28a745;
+    bottom: -10px;
+    left: 0;
+    border-radius: 2px;
+}
 
 .view-header {
-    font-size: 2em;
-    margin-bottom: 20px;
-    color: #333;
-    font-weight: 700;
-    text-align: left;
-}
-
-.view-content {
-    background-color: #ffffff;
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    flex-grow: 1;
     display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    margin-top: 40px;
+    background-color: #f0f4f8;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
 }
 
-.view-content p {
+.action-buttons button {
+    padding: 12px 18px;
+    margin-left: 10px;
+    background-color: #6A82FB;
+    color: white;
+    border: none;
+    border-radius: 30px;
     font-size: 16px;
-    color: #666;
-    line-height: 1.6;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.navbar-spacing {
-    margin-top: 80px;
+.action-buttons button:hover {
+    background-color: #5b73e6;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
-@media (max-width: 768px) {
-    .view-layout {
-        margin-left: 0;
-        padding: 10px;
-    }
+.action-buttons .add-button {
+    background-color: #28a745;
+}
+
+.action-buttons .add-button:hover {
+    background-color: #23913c;
+}
+
+.search-bar {
+    display: flex;
+    justify-content: flex-start;
+    margin: 20px 0;
+}
+
+.search-input {
+    padding: 10px;
+    width: 300px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-right: 10px;
+}
+
+.search-button {
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.client-table {
+    margin-top: 20px;
+    max-height: 400px;
+    overflow-y: auto;
+    scrollbar-width: none;
+}
+
+.client-table::-webkit-scrollbar {
+    width: 0px;
+}
+
+.client-table table tr {
+    cursor: pointer;
+}
+
+.client-table table tr:hover {
+    background-color: #f0f0f0;
+}
+.client-table table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.client-table th, .client-table td {
+    padding: 12px;
+    border: 1px solid #ddd;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.client-table th {
+    background-color: #f0f0f0;
+}
+
+.pagination {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.pagination-button {
+    padding: 8px 12px;
+    margin: 0 5px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
 }

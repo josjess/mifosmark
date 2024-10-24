@@ -1,22 +1,11 @@
-import React, {useContext, useEffect} from 'react';
+import React from 'react';
 import {FaUsers, FaUserPlus, FaUserShield, FaChartBar} from 'react-icons/fa';
 import './Home.css';
 import {FaCalculator} from "react-icons/fa6";
 import {useNavigate} from "react-router-dom";
-import {AuthContext} from "../context/AuthContext";
-import {NotificationContext} from "../context/NotificationContext";
 
 const Home = () => {
     const navigate = useNavigate();
-    const { isAuthenticated } = useContext(AuthContext);
-    const { showNotification } = useContext(NotificationContext);
-
-    useEffect(() => {
-        if (!isAuthenticated) {
-            showNotification('Kindly Login to access our services!', 'error');
-            navigate('/login');
-        }
-    }, [isAuthenticated, navigate, showNotification]);
 
     return (
         <div className="home-layout">
@@ -32,7 +21,7 @@ const Home = () => {
                         <button className="action-button">
                             <FaUsers className="button-icon"/> Manage Users & Roles
                         </button>
-                        <button className="action-button">
+                        <button className="action-button" onClick={() => navigate('/addclient')}>
                             <FaUserPlus className="button-icon"/> Onboard a New Client
                         </button>
                     </div>
