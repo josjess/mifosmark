@@ -10,7 +10,7 @@ const ProtectedLayout = () => {
 
     useEffect(() => {
         if (!isAuthenticated) {
-            showNotification('Kindly login to access our services!', 'error');
+            showNotification('login to access our services!', 'error');
             navigate('/login');
         }
     }, [isAuthenticated, navigate, showNotification]);

@@ -178,7 +178,7 @@ const AddClientForm = () => {
                     <div className={`stage ${step === 1 ? 'current' : step > 1 ? 'completed' : ''}`}
                          onClick={() => setStep(1)}>
                         <div className="circle"></div>
-                        <span>Basic Details</span>
+                        <span>Basic User Info</span>
                     </div>
                     <div className={`stage ${step === 2 ? 'current' : step > 2 ? 'completed' : ''}`}
                          onClick={() => setStep(2)}>
@@ -722,7 +722,7 @@ const AddClientForm = () => {
                                 <tr>
                                     <th>Address Type</th>
                                     <th>Address Line 1</th>
-                                    <th>Address Line 2</th>
+                                    {/*<th>Address Line 2</th>*/}
                                     <th>Country</th>
                                     <th>Province/State</th>
                                     <th>City</th>
@@ -740,7 +740,7 @@ const AddClientForm = () => {
                                         <tr key={index}>
                                             <td>{address.addressType}</td>
                                             <td>{address.addressLine1}</td>
-                                            <td>{address.addressLine2}</td>
+                                            {/*<td>{address.addressLine2}</td>*/}
                                             <td>{address.country}</td>
                                             <td>{address.province}</td>
                                             <td>{address.city}</td>

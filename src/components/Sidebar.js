@@ -7,7 +7,7 @@ import { TbChevronDown, TbChevronRight } from 'react-icons/tb';
 import './Sidebar.css';
 
 const Sidebar = () => {
-    const { logout } = useContext(AuthContext);
+    const { user, logout } = useContext(AuthContext);
     const navigate = useNavigate();
     const { showNotification } = useContext(NotificationContext);
 
@@ -23,14 +23,21 @@ const Sidebar = () => {
         setOpenDropdown((prev) => (prev === dropdownName ? null : dropdownName));
     };
 
+    const username = user?.username || "User";
+    const officeName = user?.officeName || "Office";
+
     return (
         <aside className="sidebar">
+            <div className="user-info">
+                <div className="user-icon">
+                    {user ? username.charAt(0).toUpperCase() : "?"}
+                </div>
+                <div className="user-details">
+                    <h2>{username}</h2>
+                    <p>Office: {officeName}</p>
+                </div>
+            </div>
             <ul className="side-nav-links">
-                {/*<li onClick={() => navigate('/')} className="side-nav-item">*/}
-                {/*    <div className="nav-left">*/}
-                {/*        <FaHome className="nav-icon"/> Home*/}
-                {/*    </div>*/}
-                {/*</li>*/}
                 <li onClick={() => navigate('/dashboard')} className="side-nav-item">
                     <div className="nav-left">
                         <FaUser className="nav-icon"/> Dashboard
@@ -45,7 +52,7 @@ const Sidebar = () => {
                     </div>
                     {openDropdown === 'accounting' && (
                         <ul className="dropdown">
-                            <li onClick={() => navigate('/#frequent-postings')}>Frequent Postings</li>
+                            <li onClick={() => navigate('/accounting#frequent-postings')}>Frequent Postings</li>
                             <li onClick={() => navigate('/#journal-entries')}>Add Journal Entries</li>
                             <li onClick={() => navigate('/#closing-entries')}>Closing Entries</li>
                             <li onClick={() => navigate('/#chart-of-accounts')}>Chart of Accounts</li>
@@ -67,7 +74,7 @@ const Sidebar = () => {
                     </div>
                     {openDropdown === 'reports' && (
                         <ul className="dropdown">
-                            <li onClick={() => navigate('/#reports/all')}>All</li>
+                            <li onClick={() => navigate('/reports#reports/all')}>All</li>
                             <li onClick={() => navigate('/#reports/clients')}>Clients</li>
                             <li onClick={() => navigate('/#reports/loans')}>Loans</li>
                             <li onClick={() => navigate('/#reports/savings')}>Savings</li>
@@ -87,7 +94,7 @@ const Sidebar = () => {
                     </div>
                     {openDropdown === 'admin' && (
                         <ul className="dropdown">
-                            <li onClick={() => navigate('/#admin/users')}>Users</li>
+                            <li onClick={() => navigate('/admin#admin/users')}>Users</li>
                             <li onClick={() => navigate('/#admin/organization')}>Organization</li>
                             <li onClick={() => navigate('/#admin/products')}>Products</li>
                             <li onClick={() => navigate('/#admin/templates')}>Templates</li>

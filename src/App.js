@@ -23,6 +23,8 @@ import LoadingOverlay from "./components/LoadingOverlay";
 import Sidebar from "./components/Sidebar";
 import ProtectedLayout from './ProtectedLayout';
 
+import FrequentPosting from "./components/accounting/FrequentPosting";
+
 const App = () => {
     useEffect(() => {
         loadConfig().then();
@@ -54,6 +56,8 @@ const App = () => {
                             <Route path="/addclient" element={<AddClient />} />
                             <Route path="/addgroup" element={<AddGroup />} />
                             <Route path="/addcenter" element={<AddCenter />} />
+
+                            <Route path="/frequent-postings" element={<FrequentPosting />} />
                         </Route>
                     </Routes>
                 </NotificationProvider>

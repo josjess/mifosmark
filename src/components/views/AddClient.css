@@ -26,20 +26,21 @@
 .form-container-client h2 {
     font-size: 28px;
     color: #2C3E50;
-    font-weight: 650;
-    margin-bottom: 25px;
-    margin-top: 50px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    margin-top: 20px;
     text-align: center;
     position: relative;
     display: inline-block;
-    padding-left: 20px;
+    padding: 8px 0;
+    border-bottom: 2px solid #1ABC9C;
 }
 
 .with-indicator {
     display: flex;
     align-items: flex-start;
     background-color: #122b40;
-    border-radius: 10px;
+    border-radius: 25px;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
     max-height: 600px;
 }
@@ -49,10 +50,10 @@
     flex-direction: column;
     align-items: center;
     width: 200px;
-    background: #092742;
+    background: none;
     height: 100%;
     padding: 20px;
-    border-radius: 50px;
+    /*border-radius: 50px;*/
 }
 
 .stage {
@@ -117,7 +118,12 @@
     justify-content: space-between;
     margin-top: 20px;
 }
-
+.client-form .checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
 .next-button, .back-button {
     padding: 10px 20px;
     border: none;
@@ -307,6 +313,7 @@ textarea {
     display: flex;
     flex-direction: column;
     margin-bottom: 30px;
+    align-items: flex-start;
 }
 .form-container-client .form-group .checkbox{
     display: block;
