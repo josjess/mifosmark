@@ -1,9 +1,9 @@
 import React, { useContext, useState } from 'react';
-import {FaHome, FaUser, FaBuilding, FaUsers, FaSignOutAlt, FaWallet, FaCog, FaClipboardList} from 'react-icons/fa';
+import { FaUser, FaBuilding, FaUsers, FaSignOutAlt, FaWallet, FaCog, FaClipboardList} from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { NotificationContext } from '../context/NotificationContext';
-import { TbChevronDown, TbChevronUp } from 'react-icons/tb';
+import { TbChevronDown, TbChevronRight } from 'react-icons/tb';
 import './Sidebar.css';
 
 const Sidebar = () => {
@@ -26,11 +26,11 @@ const Sidebar = () => {
     return (
         <aside className="sidebar">
             <ul className="side-nav-links">
-                <li onClick={() => navigate('/')} className="side-nav-item">
-                    <div className="nav-left">
-                        <FaHome className="nav-icon"/> Home
-                    </div>
-                </li>
+                {/*<li onClick={() => navigate('/')} className="side-nav-item">*/}
+                {/*    <div className="nav-left">*/}
+                {/*        <FaHome className="nav-icon"/> Home*/}
+                {/*    </div>*/}
+                {/*</li>*/}
                 <li onClick={() => navigate('/dashboard')} className="side-nav-item">
                     <div className="nav-left">
                         <FaUser className="nav-icon"/> Dashboard
@@ -40,7 +40,7 @@ const Sidebar = () => {
                     <div className="nav-left">
                         <FaWallet className="nav-icon"/> Accounting
                         <span className="dropdown-arrow">
-                            {openDropdown === 'accounting' ? <TbChevronUp/> : <TbChevronDown/>}
+                            {openDropdown === 'accounting' ? <TbChevronDown/> : <TbChevronRight/>}
                         </span>
                     </div>
                     {openDropdown === 'accounting' && (
@@ -62,7 +62,7 @@ const Sidebar = () => {
                     <div className="nav-left">
                         <FaClipboardList className="nav-icon"/> Reports
                         <span className="dropdown-arrow">
-                            {openDropdown === 'reports' ? <TbChevronUp/> : <TbChevronDown/>}
+                            {openDropdown === 'reports' ? <TbChevronDown/> : <TbChevronRight/>}
                         </span>
                     </div>
                     {openDropdown === 'reports' && (
@@ -82,7 +82,7 @@ const Sidebar = () => {
                     <div className="nav-left">
                         <FaCog className="nav-icon"/> Admin
                         <span className="dropdown-arrow">
-                            {openDropdown === 'admin' ? <TbChevronUp/> : <TbChevronDown/>}
+                            {openDropdown === 'admin' ? <TbChevronDown/> : <TbChevronRight/>}
                         </span>
                     </div>
                     {openDropdown === 'admin' && (

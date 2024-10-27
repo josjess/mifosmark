@@ -1,7 +1,7 @@
 import React, {useEffect} from 'react';
 import {BrowserRouter as Router, Routes, Route, useLocation} from 'react-router-dom';
 import { loadConfig } from './config';
-import Home from './components/Home';
+// import Home from './components/Home';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import Clients from './components/views/Clients';
@@ -43,7 +43,7 @@ const App = () => {
                     <Routes>
                         <Route path="/login" element={<Login />} />
                         <Route element={<ProtectedLayout />}>
-                            <Route path="/" element={<Home />} />
+                            <Route path="/" element={<Dashboard />} />
                             <Route path="/dashboard" element={<Dashboard />} />
                             <Route path="/clients" element={<Clients />} />
                             <Route path="/groups" element={<Groups />} />
