@@ -1,7 +1,7 @@
 import React, {useEffect} from 'react';
 import {BrowserRouter as Router, Routes, Route, useLocation} from 'react-router-dom';
 import { loadConfig } from './config';
-import Home from './components/Home';
+// import Home from './components/Home';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import Clients from './components/views/Clients';
@@ -23,6 +23,8 @@ import LoadingOverlay from "./components/LoadingOverlay";
 import Sidebar from "./components/Sidebar";
 import ProtectedLayout from './ProtectedLayout';
 
+import FrequentPosting from "./components/accounting/FrequentPosting";
+
 const App = () => {
     useEffect(() => {
         loadConfig().then();
@@ -43,7 +45,7 @@ const App = () => {
                     <Routes>
                         <Route path="/login" element={<Login />} />
                         <Route element={<ProtectedLayout />}>
-                            <Route path="/" element={<Home />} />
+                            <Route path="/" element={<Dashboard />} />
                             <Route path="/dashboard" element={<Dashboard />} />
                             <Route path="/clients" element={<Clients />} />
                             <Route path="/groups" element={<Groups />} />
@@ -54,6 +56,8 @@ const App = () => {
                             <Route path="/addclient" element={<AddClient />} />
                             <Route path="/addgroup" element={<AddGroup />} />
                             <Route path="/addcenter" element={<AddCenter />} />
+
+                            <Route path="/frequent-postings" element={<FrequentPosting />} />
                         </Route>
                     </Routes>
                 </NotificationProvider>

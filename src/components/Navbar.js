@@ -1,5 +1,5 @@
 import React, {useContext} from 'react';
-import { FaBell, FaCog, FaSignOutAlt } from 'react-icons/fa';
+import { FaBell, FaCog } from 'react-icons/fa';
 import './Navbar.css';
 import { AuthContext } from '../context/AuthContext';
 import {useNavigate} from "react-router-dom";
@@ -35,7 +35,7 @@ const Navbar = () => {
                         <FaCog />
                     </button>
                     <button className="logout-button" onClick={handleLogout} >
-                        <FaSignOutAlt /> Sign Out
+                        Sign Out
                     </button>
                 </div>
             </div>

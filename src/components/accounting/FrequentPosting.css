@@ -1,0 +1,93 @@
+.form-container-client {
+    margin-left: 250px;
+    padding: 20px 30px;
+    background: #f5f7fa;
+    color: white;
+    border-radius: 10px;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.with-indicator {
+    display: flex;
+    background-color: #122b40;
+    border-radius: 25px;
+    max-height: 600px;
+}
+
+.stage-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 200px;
+    height: 100%;
+    padding: 20px;
+}
+
+.stage {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    cursor: pointer;
+    padding: 15px;
+    margin: 10px;
+    border-radius: 20px;
+}
+
+.stage .circle {
+    width: 28px;
+    height: 28px;
+    border: 2px solid #4d6072;
+    border-radius: 50%;
+    margin-right: 12px;
+    background-color: transparent;
+}
+
+.stage.completed .circle, .stage.current .circle {
+    background-color: #131a97;
+}
+
+.client-form {
+    flex-grow: 1;
+    padding: 20px 20px 20px 25px;
+}
+
+.navigation-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.next-button, .back-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.next-button {
+    background-color: #4c84ff;
+    color: white;
+}
+
+.back-button {
+    background-color: rgba(189, 2, 2, 0.85);
+    color: white;
+}
+
+.review-section {
+    padding: 20px;
+    border: 1px solid #e0e0e0;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+}
+
+.submit-button {
+    padding: 12px 24px;
+    font-size: 16px;
+    background-color: #2e6816;
+    border: none;
+    border-radius: 50px;
+    color: white;
+    cursor: pointer;
+}

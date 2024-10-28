@@ -3,7 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from '../context/AuthContext';
 import { NotificationContext } from '../context/NotificationContext';
 import { useLoading } from '../context/LoadingContext';
-import {FaUser, FaExclamationTriangle, FaChartLine, FaBalanceScale, FaHandHoldingUsd, FaMoneyCheckAlt} from 'react-icons/fa';
+import {
+    FaUser,
+    FaExclamationTriangle,
+    FaChartLine,
+    FaBalanceScale,
+    FaHandHoldingUsd,
+    FaMoneyCheckAlt,
+    FaUsers, FaUserPlus
+} from 'react-icons/fa';
 import './Dashboard.css';
 import {API_CONFIG} from "../config";
 import Sidebar from "./Sidebar";
@@ -152,7 +160,7 @@ const Dashboard = () => {
         principalOverdue, interestOverdue, totalOverdue, nonPerformingAssets, loansForApproval, loansForDisapproval
     } = dashboardData;
 
-    const { username, officeName } = user || {};
+
 
     return (
         <div className="dashboard-layout">
@@ -162,8 +170,20 @@ const Dashboard = () => {
 
             <main className="main-content">
                 <header className="dashboard-header">
-                    <h1>Welcome, {username}</h1>
-                    <p>Office: {officeName}</p>
+                    <div className="header-content">
+                        <div className="title-section">
+                            <h1>Dashboard</h1>
+                            <p>Key metrics and insights</p>
+                        </div>
+                        <div className="top-right-buttons">
+                            <button className="action-button">
+                                <FaUsers className="button-icon"/> Manage Users & Roles
+                            </button>
+                            <button className="action-button" onClick={() => navigate('/addclient')}>
+                                <FaUserPlus className="button-icon"/> Onboard a New Client
+                            </button>
+                        </div>
+                    </div>
                 </header>
 
                 <section className="card-grid">
