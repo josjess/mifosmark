@@ -52,8 +52,8 @@ const Sidebar = () => {
                     </div>
                     {openDropdown === 'accounting' && (
                         <ul className="dropdown">
-                            <li onClick={() => navigate('/accounting#frequent-postings')}>Frequent Postings</li>
-                            <li onClick={() => navigate('/#journal-entries')}>Add Journal Entries</li>
+                            <li onClick={() => navigate('/frequent-postings')}>Frequent Postings</li>
+                            <li onClick={() => navigate('/add-journal-entries')}>Add Journal Entries</li>
                             <li onClick={() => navigate('/#closing-entries')}>Closing Entries</li>
                             <li onClick={() => navigate('/#chart-of-accounts')}>Chart of Accounts</li>
                             <li onClick={() => navigate('/#financial-mappings')}>Financial Activity Mappings</li>

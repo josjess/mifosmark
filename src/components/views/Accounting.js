@@ -17,15 +17,15 @@ const Accounting = () => {
     const navigate = useNavigate();
 
     const options = [
-        { label: 'Frequent Postings', description: 'Quick access entries', icon: FaFileInvoiceDollar, path: '/accounting#frequent-postings', color: '#6a82fb' },
-        { label: 'Add Journal Entries', description: 'Create new records', icon: FaJournalWhills, path: '/#add-journal-entries', color: '#70bc0e' },
-        { label: 'Closing Entries', description: 'End-of-period actions', icon: FaChartLine, path: '/#closing-entries', color: '#ff7b42' },
-        { label: 'Chart of Accounts', description: 'Manage accounts', icon: FaBook, path: '/#chart-of-accounts', color: '#4a90e2' },
-        { label: 'Financial Activity Mappings', description: 'Map transactions', icon: FaMapSigns, path: '/#financial-activity-mappings', color: '#fbb03b' },
-        { label: 'Migrate Opening Balances', description: 'Transfer balances', icon: FaExchangeAlt, path: '/#migrate-opening-balances', color: '#9b51e0' },
-        { label: 'Accounting Rules', description: 'Set up rules', icon: FaCogs, path: '/#accounting-rules', color: '#1abc9c' },
-        { label: 'Accruals', description: 'Deferred revenue', icon: FaMoneyCheck, path: '/#accruals', color: '#f67280' },
-        { label: 'Provisioning Entries', description: 'Allowance records', icon: FaBalanceScale, path: '/#provisioning-entries', color: '#3498db' }
+        { label: 'Frequent Postings', description: 'Quick access entries', icon: FaFileInvoiceDollar, path: '/frequent-postings', color: '#6a82fb' },
+        { label: 'Add Journal Entries', description: 'Create new records', icon: FaJournalWhills, path: '/add-journal-entries', color: '#70bc0e' },
+        { label: 'Closing Entries', description: 'End-of-period actions', icon: FaChartLine, path: '/accounting#closing-entries', color: '#ff7b42' },
+        { label: 'Chart of Accounts', description: 'Manage accounts', icon: FaBook, path: '/accounting#chart-of-accounts', color: '#4a90e2' },
+        { label: 'Financial Activity Mappings', description: 'Map transactions', icon: FaMapSigns, path: '/accounting#financial-activity-mappings', color: '#fbb03b' },
+        { label: 'Migrate Opening Balances', description: 'Transfer balances', icon: FaExchangeAlt, path: '/accounting#migrate-opening-balances', color: '#9b51e0' },
+        { label: 'Accounting Rules', description: 'Set up rules', icon: FaCogs, path: '/accounting#accounting-rules', color: '#1abc9c' },
+        { label: 'Accruals', description: 'Deferred revenue', icon: FaMoneyCheck, path: '/accounting#accruals', color: '#f67280' },
+        { label: 'Provisioning Entries', description: 'Allowance records', icon: FaBalanceScale, path: '/accounting#provisioning-entries', color: '#3498db' }
     ];
 
     const columns = [
