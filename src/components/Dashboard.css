@@ -1,9 +1,11 @@
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f5f7fa;
+    background-color: #132639;
     overflow-x: hidden;
-    height: 100vh;
-    padding: 50px 0 0;
+    /*overflow-y: hidden;*/
+    max-height: 60vh;
+    padding-top: 50px;
     -ms-overflow-style: none;
     scrollbar-width: none;
 }
