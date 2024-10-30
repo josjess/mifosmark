@@ -74,10 +74,10 @@ const AddJournalEntries = () => {
     };
 
     return (
-        <div className="form-container-client">
-            <h2>
-                <Link to="/accounting" className="breadcrumb-link">Accounting</Link> . Add Journal Entries
-            </h2>
+        <div className="form-container-journals">
+            {/*<h2 className={'journal-head'}>*/}
+            {/*    Add Journal Entries*/}
+            {/*</h2>*/}
 
             <div className="with-indicator">
                 <div className="stage-indicator">

@@ -18,7 +18,7 @@ const Accounting = () => {
 
     const options = [
         { label: 'Frequent Postings', description: 'Quick access entries', icon: FaFileInvoiceDollar, path: '/frequent-postings', color: '#6a82fb' },
-        { label: 'Add Journal Entries', description: 'Create new records', icon: FaJournalWhills, path: '/add-journal-entries', color: '#70bc0e' },
+        { label: 'Add Journal Entries', description: 'Create new records', icon: FaJournalWhills, path: '/journal-entries', color: '#70bc0e' },
         { label: 'Closing Entries', description: 'End-of-period actions', icon: FaChartLine, path: '/accounting#closing-entries', color: '#ff7b42' },
         { label: 'Chart of Accounts', description: 'Manage accounts', icon: FaBook, path: '/accounting#chart-of-accounts', color: '#4a90e2' },
         { label: 'Financial Activity Mappings', description: 'Map transactions', icon: FaMapSigns, path: '/accounting#financial-activity-mappings', color: '#fbb03b' },

@@ -27,6 +27,7 @@ import FrequentPosting from "./components/accounting/FrequentPosting";
 import AddJournalEntries from "./components/accounting/AddJournalEntries";
 import SearchJournalEntries from "./components/accounting/SearchJournalEntries";
 import FinancialActivityMappings from "./components/accounting/FinancialActivityMappings";
+import JournalEntries from "./components/accounting/JournalEntries"
 
 const App = () => {
     useEffect(() => {
@@ -61,7 +62,7 @@ const App = () => {
                             <Route path="/addcenter" element={<AddCenter />} />
 
                             <Route path="/frequent-postings" element={<FrequentPosting />} />
-                            <Route path="/add-journal-entries" element={<AddJournalEntries />} />
+                            <Route path="/journal-entries" element={<JournalEntries />} />
                             <Route path="/search-journal-entries" element={<SearchJournalEntries />} />
                             <Route path="/financial-activity-mappings" element={<FinancialActivityMappings />} />
                         </Route>
