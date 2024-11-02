@@ -97,7 +97,7 @@ const Sidebar = () => {
                             <li onClick={() => navigate('/users')}>Users</li>
                             <li onClick={() => navigate('/organization')}>Organization</li>
                             <li onClick={() => navigate('/products')}>Products</li>
-                            <li onClick={() => navigate('/#admin/templates')}>Templates</li>
+                            <li onClick={() => navigate('/templates')}>Templates</li>
                             <li onClick={() => navigate('/system')}>System</li>
                         </ul>
                     )}

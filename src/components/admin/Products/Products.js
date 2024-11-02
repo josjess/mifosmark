@@ -13,19 +13,19 @@ const Products = () => {
         {
             groupTitle: "Loans & Savings",
             tiles: [
-                { title: 'Loan Products', icon: <FaWallet />, description: 'Various loan options', color: '#3498db', link: '/loan-products' },
-                { title: 'Savings Products', icon: <FaPiggyBank />, description: 'Savings schemes', color: '#27ae60', link: '/savings-products' },
-                { title: 'Share Products', icon: <FaChartPie />, description: 'Share options', color: '#8e44ad', link: '/share-products' },
-                { title: 'Charges', icon: <FaMoneyCheckAlt />, description: 'Service fees', color: '#e67e22', link: '/charges' }
+                { title: 'Loan Products', icon: <FaWallet />, description: 'Various loan options', color: '#3498db', link: '#/loan-products' },
+                { title: 'Savings Products', icon: <FaPiggyBank />, description: 'Savings schemes', color: '#27ae60', link: '#/savings-products' },
+                { title: 'Share Products', icon: <FaChartPie />, description: 'Share options', color: '#8e44ad', link: '#/share-products' },
+                { title: 'Charges', icon: <FaMoneyCheckAlt />, description: 'Service fees', color: '#e67e22', link: '#/charges' }
             ]
         },
         {
             groupTitle: "Rates & Configurations",
             tiles: [
-                { title: 'Rates', icon: <FaPercentage />, description: 'Interest rates', color: '#c0392b', link: '/rates' },
-                { title: 'Products Mix', icon: <FaBoxes />, description: 'Combined offerings', color: '#2980b9', link: '/products-mix' },
-                { title: 'Fixed Deposit Products', icon: <FaUniversity />, description: 'Fixed deposits', color: '#f39c12', link: '/fixed-deposit-products' },
-                { title: 'Recurring Deposit Products', icon: <FaRecycle />, description: 'Recurring deposits', color: '#d35400', link: '/recurring-deposit-products' }
+                { title: 'Rates', icon: <FaPercentage />, description: 'Interest rates', color: '#c0392b', link: '#/rates' },
+                { title: 'Products Mix', icon: <FaBoxes />, description: 'Combined offerings', color: '#2980b9', link: '#/products-mix' },
+                { title: 'Fixed Deposit Products', icon: <FaUniversity />, description: 'Fixed deposits', color: '#f39c12', link: '#/fixed-deposit-products' },
+                { title: 'Recurring Deposit Products', icon: <FaRecycle />, description: 'Recurring deposits', color: '#d35400', link: '#/recurring-deposit-products' }
             ]
         },
         {

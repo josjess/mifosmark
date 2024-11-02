@@ -40,6 +40,7 @@ import Users from "./components/admin/Users/Users";
 import Organization from "./components/admin/Organization/Organization";
 import Products from "./components/admin/Products/Products"
 import System from "./components/admin/System/System";
+import Templates from "./components/admin/Templates/Templates";
 
 const App = () => {
     useEffect(() => {
@@ -89,6 +90,7 @@ const App = () => {
                             <Route path="/organization" element={<Organization />} />
                             <Route path="/products" element={<Products />} />
                             <Route path="/system" element={<System />} />
+                            <Route path="/templates" element={<Templates />} />
 
                         </Route>
                     </Routes>
