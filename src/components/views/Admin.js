@@ -7,11 +7,11 @@ const Admin = () => {
     const navigate = useNavigate();
 
     const options = [
-        { label: 'Users', description: 'Manage user roles', icon: FaUserShield, path: '/#admin/users', color: '#6a82fb' },
-        { label: 'Organization', description: 'Structure & hierarchy', icon: FaBuilding, path: '/#admin/organization', color: '#70bc0e' },
-        { label: 'Products', description: 'Product catalog', icon: FaBoxes, path: '/#admin/products', color: '#ff7b42' },
-        { label: 'Templates', description: 'Document templates', icon: FaClipboard, path: '/#admin/templates', color: '#4a90e2' },
-        { label: 'System', description: 'System settings', icon: FaCog, path: '/#admin/system', color: '#1abc9c' }
+        { label: 'Users', description: 'Manage user roles', icon: FaUserShield, path: '/users', color: '#6a82fb' },
+        { label: 'Organization', description: 'Structure & hierarchy', icon: FaBuilding, path: '/organization', color: '#70bc0e' },
+        { label: 'Products', description: 'Product catalog', icon: FaBoxes, path: '/products', color: '#ff7b42' },
+        { label: 'Templates', description: 'Document templates', icon: FaClipboard, path: '#/#admin/templates', color: '#4a90e2' },
+        { label: 'System', description: 'System settings', icon: FaCog, path: '/system', color: '#1abc9c' }
     ];
 
     const columns = [

@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import AddJournalEntries from './AddJournalEntries';
 import ViewJournalEntries from './ViewJournalEntries';
+import MigrateOpeningBalances from './MigrateOpeningBalances';
 import './JournalEntries.css';
-import {Link} from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const JournalEntries = () => {
     const [activeTab, setActiveTab] = useState('add');
 
     return (
         <div className="journal-entries-screen">
-            <h2 className={"journal-head"}>
+            <h2 className="journal-head">
                 <Link to="/accounting" className="breadcrumb-link">Accounting</Link> . Journal Entries
             </h2>
 
@@ -26,10 +27,18 @@ const JournalEntries = () => {
                 >
                     View/Search Journal Entries
                 </button>
+                <button
+                    onClick={() => setActiveTab('migrate')}
+                    className={`tab-button ${activeTab === 'migrate' ? 'active' : ''}`}
+                >
+                    Migrate Opening Balances
+                </button>
             </div>
 
             <div className="tab-content">
-                {activeTab === 'add' ? <AddJournalEntries /> : <ViewJournalEntries />}
+                {activeTab === 'add' && <AddJournalEntries />}
+                {activeTab === 'view' && <ViewJournalEntries />}
+                {activeTab === 'migrate' && <MigrateOpeningBalances />}
             </div>
         </div>
     );

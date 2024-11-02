@@ -23,11 +23,23 @@ import LoadingOverlay from "./components/LoadingOverlay";
 import Sidebar from "./components/Sidebar";
 import ProtectedLayout from './ProtectedLayout';
 
+/* Accounting */
 import FrequentPosting from "./components/accounting/FrequentPosting";
-import AddJournalEntries from "./components/accounting/AddJournalEntries";
+// import AddJournalEntries from "./components/accounting/AddJournalEntries";
 import SearchJournalEntries from "./components/accounting/SearchJournalEntries";
 import FinancialActivityMappings from "./components/accounting/FinancialActivityMappings";
 import JournalEntries from "./components/accounting/JournalEntries"
+import ClosingEntries from "./components/accounting/ClosingEntries";
+import ChartofAccounts from "./components/accounting/ChartofAccounts";
+import AccountingTabs from "./components/accounting/AccountingRules";
+import Accruals from "./components/accounting/Accruals";
+import ProvisioningEntries from "./components/accounting/ProvisioningEntries";
+
+/* Admin */
+import Users from "./components/admin/Users/Users";
+import Organization from "./components/admin/Organization/Organization";
+import Products from "./components/admin/Products/Products"
+import System from "./components/admin/System/System";
 
 const App = () => {
     useEffect(() => {
@@ -61,10 +73,23 @@ const App = () => {
                             <Route path="/addgroup" element={<AddGroup />} />
                             <Route path="/addcenter" element={<AddCenter />} />
 
+                            {/* Accounting */}
                             <Route path="/frequent-postings" element={<FrequentPosting />} />
                             <Route path="/journal-entries" element={<JournalEntries />} />
                             <Route path="/search-journal-entries" element={<SearchJournalEntries />} />
                             <Route path="/financial-activity-mappings" element={<FinancialActivityMappings />} />
+                            <Route path="/closing-entries" element={<ClosingEntries />} />
+                            <Route path="/chart-of-accounts" element={<ChartofAccounts />} />
+                            <Route path="/accounting-rules" element={<AccountingTabs />} />
+                            <Route path="/accruals" element={<Accruals />} />
+                            <Route path="/provisioning-entries" element={<ProvisioningEntries />} />
+
+                            {/* Admin */}
+                            <Route path="/users" element={<Users />} />
+                            <Route path="/organization" element={<Organization />} />
+                            <Route path="/products" element={<Products />} />
+                            <Route path="/system" element={<System />} />
+
                         </Route>
                     </Routes>
                 </NotificationProvider>

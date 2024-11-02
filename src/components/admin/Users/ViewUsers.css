@@ -1,10 +1,10 @@
-.view-journal-entries {
+.view-users {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     padding: 20px;
     background-color: #f4f6f8;
 }
 
-.view-journal-entries-title {
+.view-users-title {
     font-size: 1.8em;
     color: #333;
     font-weight: 500;
@@ -47,7 +47,7 @@
     background-color: #0056b3;
 }
 
-.journal-entries-table {
+.users-table {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 20px;
@@ -57,35 +57,34 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.journal-entries-table th,
-.journal-entries-table td {
+.users-table th,
+.users-table td {
     padding: 15px;
     text-align: left;
     font-size: 0.95em;
     border-bottom: 1px solid #e0e0e0;
 }
 
-.journal-entries-table th {
+.users-table th {
     background-color: #0066cc;
     color: #ffffff;
     font-weight: 600;
-    /*text-transform: uppercase;*/
     letter-spacing: 0.03em;
 }
 
-.journal-entries-table tbody tr:nth-child(even) {
+.users-table tbody tr:nth-child(even) {
     background-color: #f8fbfd;
 }
 
-.journal-entries-table tbody tr:nth-child(odd) {
+.users-table tbody tr:nth-child(odd) {
     background-color: #ffffff;
 }
 
-.journal-entries-table tbody tr {
+.users-table tbody tr {
     transition: background-color 0.2s ease;
 }
 
-.journal-entries-table tbody tr:hover {
+.users-table tbody tr:hover {
     background-color: #eaf4fb;
 }
 
@@ -119,9 +118,6 @@
     cursor: not-allowed;
 }
 
-.clickable-row {
-    cursor: pointer;
-}
 .page-size-selector {
     display: flex;
     align-items: center;
@@ -134,4 +130,8 @@
     font-size: 0.9em;
     border: 1px solid #ccc;
     border-radius: 5px;
+}
+
+.clickable-row {
+    cursor: pointer;
 }

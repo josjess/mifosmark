@@ -53,14 +53,14 @@ const Sidebar = () => {
                     {openDropdown === 'accounting' && (
                         <ul className="dropdown">
                             <li onClick={() => navigate('/frequent-postings')}>Frequent Postings</li>
-                            <li onClick={() => navigate('/journal-entries')}>Add Journal Entries</li>
-                            <li onClick={() => navigate('/#closing-entries')}>Closing Entries</li>
-                            <li onClick={() => navigate('/#chart-of-accounts')}>Chart of Accounts</li>
-                            <li onClick={() => navigate('/#financial-mappings')}>Financial Activity Mappings</li>
-                            <li onClick={() => navigate('/#migrate-balances')}>Migrate Opening Balances</li>
-                            <li onClick={() => navigate('/#accounting-rules')}>Accounting Rules</li>
-                            <li onClick={() => navigate('/#accruals')}>Accruals</li>
-                            <li onClick={() => navigate('/#provisioning-entries')}>Provisioning Entries</li>
+                            <li onClick={() => navigate('/journal-entries')}>Journal Entries</li>
+                            <li onClick={() => navigate('/closing-entries')}>Closing Entries</li>
+                            <li onClick={() => navigate('/chart-of-accounts')}>Chart of Accounts</li>
+                            <li onClick={() => navigate('/financial-activity-mappings')}>Financial Activity Mappings</li>
+                            {/*<li onClick={() => navigate('/#migrate-balances')}>Migrate Opening Balances</li>*/}
+                            <li onClick={() => navigate('/accounting-rules')}>Accounting Rules</li>
+                            <li onClick={() => navigate('/accruals')}>Accruals</li>
+                            <li onClick={() => navigate('/provisioning-entries')}>Provisioning Entries</li>
                         </ul>
                     )}
                 </li>
@@ -94,11 +94,11 @@ const Sidebar = () => {
                     </div>
                     {openDropdown === 'admin' && (
                         <ul className="dropdown">
-                            <li onClick={() => navigate('/admin#admin/users')}>Users</li>
-                            <li onClick={() => navigate('/#admin/organization')}>Organization</li>
-                            <li onClick={() => navigate('/#admin/products')}>Products</li>
+                            <li onClick={() => navigate('/users')}>Users</li>
+                            <li onClick={() => navigate('/organization')}>Organization</li>
+                            <li onClick={() => navigate('/products')}>Products</li>
                             <li onClick={() => navigate('/#admin/templates')}>Templates</li>
-                            <li onClick={() => navigate('/#admin/system')}>System</li>
+                            <li onClick={() => navigate('/system')}>System</li>
                         </ul>
                     )}
                 </li>

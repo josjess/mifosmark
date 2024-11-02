@@ -1,0 +1,108 @@
+.provisioning-table-container {
+    padding: 0 20px 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f9f9fb;
+}
+
+.provisioning-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.provisioning-table th,
+.provisioning-table td {
+    padding: 15px;
+    text-align: left;
+    font-size: 0.95em;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.provisioning-table th {
+    background-color: #0066cc;
+    color: #ffffff;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}
+
+.provisioning-table tbody tr:nth-child(even) {
+    background-color: #f8fbfd;
+}
+
+.provisioning-table tbody tr:hover {
+    background-color: #eaf4fb;
+}
+
+.page-size-selector {
+    margin-bottom: 15px;
+    font-size: 0.9em;
+}
+
+.page-size-selector label {
+    margin-right: 10px;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.pagination button {
+    padding: 8px 14px;
+    font-size: 1em;
+    color: #007bff;
+    background: none;
+    border: 1px solid #007bff;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.pagination button:hover {
+    background-color: #007bff;
+    color: #ffffff;
+}
+
+.pagination button:disabled {
+    color: #b0b0b0;
+    border-color: #b0b0b0;
+    cursor: not-allowed;
+}
+
+.no-data {
+    text-align: center;
+    font-style: italic;
+    color: #888;
+    padding: 20px;
+}
+
+.clickable-row {
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.clickable-row:hover {
+    background-color: #eaf4fb;
+}
+
+.provisioning-action-button {
+    padding: 5px 10px;
+    font-size: 0.85em;
+    color: #007bff;
+    background: none;
+    border: 1px solid #007bff;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.provisioning-action-button:hover {
+    background-color: #007bff;
+    color: #ffffff;
+}

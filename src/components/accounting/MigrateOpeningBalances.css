@@ -1,0 +1,223 @@
+.migrate-opening-balances-page {
+    padding: 30px;
+    font-family: Arial, sans-serif;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    border-radius: 20px;
+}
+.migrate-opening-balances-page span {
+    color: red;
+}
+
+select, input[type="date"], input[type="number"] {
+    padding: 8px;
+    font-size: 1em;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.search-button {
+    align-self: flex-end;
+    padding: 10px 20px;
+    font-size: 1em;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.search-button:hover {
+    background-color: #0056b3;
+}
+
+.opening-balance-details {
+    margin-top: 20px;
+}
+
+.opening-balances-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.opening-balances-table th,
+.opening-balances-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.opening-balances-table th {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.error-text {
+    color: red;
+    font-size: 0.9em;
+}
+.merged-type-cell {
+    vertical-align: top;
+}
+.opening-balance-details .form-group {
+    display: flex;
+    align-items: center;
+    margin-right: 20px;
+}
+
+.opening-balance-details .form-group label {
+    font-weight: 600;
+    margin-right: 10px;
+}
+
+.opening-balance-details .form-group input[type="date"],
+.opening-balance-details .form-group span {
+    font-size: 1em;
+    margin-left: 5px;
+}
+
+.opening-balance-details {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+}
+
+.opening-balances-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.opening-balances-table th,
+.opening-balances-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.merged-type-cell {
+    vertical-align: top;
+    text-align: left;
+}
+.search-form {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    width: 100%;
+    max-width: 800px;
+}
+
+.search-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex: 1;
+}
+
+.search-button-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    height: 100%;
+    margin-top: 20px;
+}
+
+select, input[type="date"], input[type="number"] {
+    padding: 8px;
+    font-size: 1em;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.search-button {
+    padding: 10px 20px;
+    font-size: 1em;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.search-button:hover {
+    background-color: #0056b3;
+}
+
+.error-text {
+    color: red;
+    font-size: 0.9em;
+}
+.contra-and-date-container {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+    color: #000000;
+    max-width: 800px;
+    margin-top: 20px;
+}
+
+.contra-section,
+.date-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+
+.contra-section span {
+    color: #313528;
+}
+.contra-section label,
+.date-section label {
+    color: #353333;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+.date-section input[type="date"] {
+    width: 100%;
+    max-width: 200px;
+    padding: 8px;
+    font-size: 1em;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    color: #000000;
+}
+.opening-balance-form-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin-top: 40px;
+}
+
+.opening-balance-submit-button, .opening-balance-cancel-button {
+    padding: 10px 20px;
+    font-size: 1em;
+    font-weight: 500;
+    text-align: center;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+    user-select: none;
+}
+
+.opening-balance-submit-button {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.opening-balance-cancel-button {
+    background-color: #f44336;
+    color: #fff;
+}
+
+.opening-balance-submit-button:hover {
+    background-color: #0056b3;
+}
+
+.opening-balance-cancel-button:hover {
+    background-color: #d32f2f;
+}

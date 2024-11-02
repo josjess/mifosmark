@@ -1,17 +1,33 @@
-// components/accounting/FinancialActivityMappings.js
-import React from 'react';
+import React, { useState } from 'react';
+import FinancialActivityMappingsTable from './ViewFinancialActivityMappings';
+import AddFinancialActivityMappingForm from './AddFinancialActivityMapping';
+import './FinancialActivityMappings.css';
 import { Link } from 'react-router-dom';
-import './FrequentPosting.css';
 
 const FinancialActivityMappings = () => {
+    const [activeTab, setActiveTab] = useState('table');
+
     return (
-        <div className="form-container-client">
-            <h2>
-                <Link to="/accounting" className="breadcrumb-link">Accounting</Link> / Financial Activity Mappings
+        <div className="financial-mappings-container">
+            <h2 className="financial-mappings-head">
+                <Link to="/accounting" className="breadcrumb-link">Accounting .</Link> <span> Financial Activity Mappings</span>
             </h2>
-            <div className="client-form">
-                {/* Table structure with Financial Activity and Account Name columns */}
-                {/* Button to define a new mapping */}
+            <div className="financial-tab-container">
+                <button
+                    className={`financial-tab-button ${activeTab === 'table' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('table')}
+                >
+                    Financial Activity Mappings
+                </button>
+                <button
+                    className={`financial-tab-button ${activeTab === 'form' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('form')}
+                >
+                    Add New Mapping
+                </button>
+            </div>
+            <div className="financial-tab-content">
+                {activeTab === 'table' ? <FinancialActivityMappingsTable /> : <AddFinancialActivityMappingForm />}
             </div>
         </div>
     );

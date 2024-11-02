@@ -1,0 +1,99 @@
+.organization-page {
+    background-color: #132639;
+    margin-left: 250px;
+    min-height: 100vh;
+    padding: 40px;
+    color: #ffffff;
+    font-family: 'Poppins', sans-serif;
+}
+
+.group-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    justify-content: center;
+}
+
+.tile-group {
+    background: #1a3a50;
+    padding: 20px;
+    border-radius: 15px;
+    max-width: 430px;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+.group-title {
+    font-size: 1.5rem;
+    color: #ffffff;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.tiles-wrapper {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.tile {
+    background: linear-gradient(135deg, #1d4d6d, #213f5a);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 25px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    max-width: 180px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.tile:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.tile-icon {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+}
+
+.tile-title {
+    font-size: 1.2rem;
+    color: #ffffff;
+    margin-bottom: 6px;
+    text-align: center;
+}
+
+.tile-description {
+    font-size: 0.9rem;
+    color: #b2b8c3;
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    .tile-group {
+        max-width: 100%;
+    }
+
+    .tiles-wrapper {
+        grid-template-columns: 1fr;
+    }
+}
+.page-heading {
+    font-size: 30px;
+    color: #ffffff;
+    margin-bottom: 40px;
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+
+.breadcrumb-link {
+    color: #4c84ff;
+    text-decoration: none;
+}
+
+
