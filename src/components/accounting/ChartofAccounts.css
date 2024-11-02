@@ -1,0 +1,69 @@
+.chart-accounts-container {
+    padding: 50px 20px 20px;
+    margin-left: 250px;
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+}
+
+.chart-accounts-head {
+    font-size: 1.8em;
+    color: #333;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+}
+
+.breadcrumb-link {
+    text-decoration: none;
+    color: #007bff;
+    font-weight: bold;
+    transition: color 0.3s;
+}
+
+.breadcrumb-link:hover {
+    color: #0056b3;
+}
+
+.chart-tab-container {
+    display: flex;
+    width: 100%;
+    margin: 0 auto;
+    border-bottom: 2px solid #ddd;
+}
+
+.chart-tab-button {
+    flex: 1;
+    text-align: center;
+    padding: 15px 0;
+    font-size: 1.1em;
+    font-weight: 500;
+    cursor: pointer;
+    background: none;
+    color: #555;
+    border: none;
+    transition: color 0.3s, border-bottom-color 0.3s;
+    position: relative;
+}
+
+.chart-tab-button:hover {
+    color: #007bff;
+}
+
+.chart-tab-button.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background-color: #007bff;
+    border-radius: 10px;
+}
+
+.chart-tab-content {
+    margin-top: 20px;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 5px;
+}

@@ -1,0 +1,62 @@
+.accounting-rules-screen {
+    padding: 20px;
+    background-color: #f5f7fa;
+    margin-left: 250px;
+    font-family: Arial, sans-serif;
+}
+
+.accounting-rules-head {
+    font-size: 1.8em;
+    color: #2C3E50;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+}
+
+.breadcrumb-link {
+    text-decoration: none;
+    color: #007bff;
+    font-weight: bold;
+    transition: color 0.3s;
+}
+
+.breadcrumb-link:hover {
+    color: #0056b3;
+}
+
+.accounting-tab-container {
+    display: flex;
+    width: 100%;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #ddd;
+}
+
+.accounting-tab-button {
+    flex: 1;
+    padding: 15px;
+    font-size: 1.1em;
+    font-weight: 500;
+    text-align: center;
+    background: none;
+    color: #555;
+    border: none;
+    cursor: pointer;
+    transition: color 0.3s, border-bottom-color 0.3s;
+}
+
+.accounting-tab-button:hover {
+    color: #007bff;
+}
+
+.accounting-tab-button.active {
+    color: #007bff;
+    border-bottom: 3px solid #007bff;
+}
+
+.accounting-tab-content {
+    margin-top: 20px;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 5px;
+}

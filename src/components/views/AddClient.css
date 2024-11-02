@@ -312,7 +312,7 @@ textarea {
 .form-container-client .form-group {
     display: flex;
     flex-direction: column;
-    margin-bottom: 30px;
+    /*margin-bottom: 30px;*/
     align-items: flex-start;
 }
 .form-container-client .form-group .checkbox{
@@ -582,19 +582,19 @@ table select:disabled {
 
 .review-section-column p {
     font-size: 1em;
-    color: #555;
+    color: #ffffff;
     margin: 5px 0;
     line-height: 1.6;
 }
 
 .review-section-column p strong {
-    color: #333;
+    color: #ffffff;
     font-weight: 600;
 }
 
 .review-section-column h4 {
     font-size: 1.1em;
-    color: #444;
+    color: #ffffff;
     margin-top: 15px;
     margin-bottom: 10px;
 }
