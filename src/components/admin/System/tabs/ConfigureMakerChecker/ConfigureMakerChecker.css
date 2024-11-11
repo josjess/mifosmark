@@ -1,0 +1,168 @@
+.configure-maker-checker {
+    padding: 60px 20px 20px;
+    background-color: #f7f9fc;
+    margin-left: 250px;
+    font-family: 'Arial', sans-serif;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+.configure-maker-checker-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 15px 20px;
+    border-bottom: 2px solid #e0e0e0;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.table-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 1em;
+}
+
+.table-controls label {
+    font-weight: 500;
+    color: #34495e;
+}
+
+.configure-maker-action-buttons {
+    display: flex;
+    gap: 15px;
+}
+
+.edit-button,
+.submit-button,
+.cancel-button {
+    padding: 12px 18px;
+    font-size: 1em;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.edit-button {
+    background-color: #3498db;
+    color: #ffffff;
+    border: none;
+}
+
+.edit-button:hover {
+    background-color: #2980b9;
+}
+
+.submit-button {
+    background-color: #2ecc71;
+    color: #ffffff;
+    border: none;
+}
+
+.submit-button:hover {
+    background-color: #27ae60;
+}
+
+.cancel-button {
+    background-color: #e74c3c;
+    color: #ffffff;
+    border: none;
+}
+
+.cancel-button:hover {
+    background-color: #c0392b;
+}
+
+.maker-checker-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.table-row {
+    display: flex;
+    border-bottom: 1px solid #e0e0e0;
+    transition: background-color 0.3s ease;
+}
+
+.group-row {
+    cursor: pointer;
+    background-color: #f5f7fa;
+    font-weight: bold;
+    border-top: 1px solid #f8ebeb;
+    padding: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.group-row:hover {
+    background-color: #e8f1fb;
+}
+
+.table-cell {
+    flex: 1;
+    padding: 15px;
+    text-align: left;
+}
+
+.group-title {
+    font-size: 1.2em;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.group-repeater {
+    text-transform: capitalize;
+    font-size: 0.95em;
+    color: #7f8c8d;
+    font-style: italic;
+}
+
+.activity-placeholder {
+    background-color: transparent;
+}
+
+.activity-row:hover {
+    background-color: #f9f9fb;
+}
+
+.activity-name label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1em;
+    color: #34495e;
+    font-weight: 500;
+}
+
+.activity-name input[type='checkbox'] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+
+@media (max-width: 768px) {
+    .configure-maker-checker {
+        margin-left: 0;
+        padding: 10px;
+    }
+
+    .table-controls {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .maker-checker-table {
+        font-size: 0.9em;
+    }
+}

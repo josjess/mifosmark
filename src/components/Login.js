@@ -27,9 +27,9 @@ const Login = () => {
             const response = await fetch(`${API_CONFIG.baseURL}/authentication`, {
                 method: 'POST',
                 headers: {
+                    'Accept': 'application/json',
                     'Content-Type': 'application/json',
-                    'Authorization': `Basic ${apiCredentials}`,
-                    'X-Mifos-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': 'default',
                 },
                 body: JSON.stringify(loginData),
             });

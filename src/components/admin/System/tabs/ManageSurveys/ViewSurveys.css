@@ -1,0 +1,89 @@
+.surveys-table-container {
+    padding: 20px;
+    background-color: #f9f9fb;
+    border-radius: 8px;
+    box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.table-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.page-size-selector {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.page-size-selector label {
+    font-weight: 600;
+    text-align: right;
+    color: #4a4a4a;
+}
+
+.page-size-selector select {
+    padding: 10px 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f7f9fc;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.page-size-selector select:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 6px rgba(52, 152, 219, 0.4);
+    outline: none;
+    background-color: #ffffff;
+}
+
+.surveys-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.surveys-table th,
+.surveys-table td {
+    padding: 15px;
+    text-align: left;
+    font-size: 0.95em;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.surveys-table th {
+    background-color: #0066cc;
+    color: #ffffff;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.9em;
+}
+
+.surveys-table tbody tr:nth-child(even) {
+    background-color: #e2eaf1;
+}
+
+.surveys-table tbody tr:hover {
+    background-color: #eaf4fb;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.surveys-table tbody td {
+    vertical-align: middle;
+}
+
+.no-data {
+    text-align: center;
+    font-style: italic;
+    color: #888;
+    padding: 20px;
+    font-size: 1em;
+}
+

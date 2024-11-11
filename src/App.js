@@ -42,6 +42,19 @@ import Products from "./components/admin/Products/Products"
 import System from "./components/admin/System/System";
 import Templates from "./components/admin/Templates/Templates";
 
+/* Admin-System */
+import ManageDataTables from "./components/admin/System/tabs/ManageDataTables/ManageDataTables";
+import ManageCodes from "./components/admin/System/tabs/ManageCodes/ManageCodes";
+import ManageRolesPermissions from "./components/admin/System/tabs/ManageRolesPermissions/ManageRolesPermissions";
+import ConfigureMakerChecker from "./components/admin/System/tabs/ConfigureMakerChecker/ConfigureMakerChecker";
+import ManageHooks from "./components/admin/System/tabs/ManageHooks/ManageHooks";
+import ManageSurveys from "./components/admin/System/tabs/ManageSurveys/ManageSurveys";
+import ManageReports from "./components/admin/System/tabs/ManageReports/ManageReports";
+import AccountPreferences from "./components/admin/System/tabs/AccountNumberPrefences/AccountPreferences";
+import ManageExternalEvents from "./components/admin/System/tabs/ManageExternalEvents/ManageExternalEvents";
+import Configurations from "./components/admin/System/tabs/Configuration/Configurations";
+import EntityMapping from "./components/admin/System/tabs/EntityToEntity/EntityMapping";
+
 const App = () => {
     useEffect(() => {
         loadConfig().then();
@@ -91,6 +104,19 @@ const App = () => {
                             <Route path="/products" element={<Products />} />
                             <Route path="/system" element={<System />} />
                             <Route path="/templates" element={<Templates />} />
+
+                            {/* Admin/ System */}
+                            <Route path="/manage-data-tables" element={<ManageDataTables />} />
+                            <Route path="/manage-codes" element={<ManageCodes />} />
+                            <Route path="/manage-roles-permissions" element={<ManageRolesPermissions />} />
+                            <Route path="/configure-maker-checker" element={<ConfigureMakerChecker />} />
+                            <Route path="/manage-hooks" element={<ManageHooks />} />
+                            <Route path="/manage-surveys" element={<ManageSurveys />} />
+                            <Route path="/manage-reports" element={<ManageReports />} />
+                            <Route path="/account-preferences" element={<AccountPreferences />} />
+                            <Route path="/manage-external-events" element={<ManageExternalEvents />} />
+                            <Route path="/configurations" element={<Configurations />} />
+                            <Route path="/entity-mappings" element={<EntityMapping />} />
 
                         </Route>
                     </Routes>

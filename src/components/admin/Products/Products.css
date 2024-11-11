@@ -7,83 +7,65 @@
     font-family: 'Poppins', sans-serif;
 }
 
-.products-groups-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 30px;
-    justify-content: space-evenly;
-}
-
-.products-bubble-group {
-    background: linear-gradient(135deg, #132f4c, #1a3a50);
-    border-radius: 10%;
-    padding: 30px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    max-width: 600px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
-    overflow: hidden;
-}
-
-.products-group-title {
-    font-size: 1.3rem;
-    color: #b2b8c3;
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.products-tiles-container {
+.products-tiles-grid {
     display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 20px;
-    grid-template-columns: 1fr 1fr;
+    justify-content: center;
 }
 
 .products-tile {
-    background: linear-gradient(135deg, #1d4d6d, #203a5a);
+    background: linear-gradient(135deg, #1d4d6d, #213f5a);
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 10px;
-    border-radius: 15px;
+    padding: 25px;
+    border-radius: 20px;
     cursor: pointer;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    width: 140px;
-    height: 140px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
 .products-tile:hover {
     transform: scale(1.05);
-    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
 .products-tile-icon {
-    font-size: 2rem;
-    margin-bottom: 8px;
+    font-size: 2.5rem;
+    margin-bottom: 12px;
 }
 
 .products-tile-title {
-    font-size: 1rem;
+    font-size: 1.2rem;
     color: #ffffff;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
     text-align: center;
 }
 
 .products-tile-description {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     color: #b2b8c3;
     text-align: center;
 }
 
-@media (max-width: 768px) {
-    .products-bubble-group {
-        width: 100%;
-        border-radius: 30px;
-        max-width: 100%;
-    }
+.products-page-heading {
+    font-size: 30px;
+    color: #ffffff;
+    margin-bottom: 40px;
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+}
 
-    .products-tiles-container {
-        grid-template-columns: 1fr;
+.breadcrumb-link {
+    color: #4c84ff;
+    text-decoration: none;
+}
+
+@media (max-width: 768px) {
+    .products-tiles-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     }
 }

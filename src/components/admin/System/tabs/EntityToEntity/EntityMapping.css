@@ -1,0 +1,171 @@
+.entity-mapping-page {
+    padding: 60px 20px;
+    background-color: #f9f9fb;
+    margin-left: 250px;
+    min-height: 100vh;
+}
+
+.page-heading {
+    font-size: 1.8em;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 20px;
+}
+
+.mapping-controls {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.mapping-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.mapping-table th,
+.mapping-table td {
+    padding: 15px;
+    text-align: left;
+    font-size: 18px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.mapping-table th {
+    background-color: #0066cc;
+    color: #ffffff;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.9em;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.mapping-table tbody tr:hover {
+    background-color: #eaf4fb;
+    cursor: pointer;
+}
+
+.no-data {
+    text-align: center;
+    font-style: italic;
+    color: #888;
+    padding: 20px;
+    font-size: 1em;
+}
+
+.pagination {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.pagination button {
+    padding: 8px 14px;
+    font-size: 1em;
+    color: #007bff;
+    background: none;
+    border: 1px solid #007bff;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.pagination button:hover {
+    background-color: #007bff;
+    color: #ffffff;
+}
+
+.pagination button:disabled {
+    color: #b0c4de;
+    border-color: #b0c4de;
+    cursor: not-allowed;
+}
+.mapping-icon {
+    margin: 0 6px;
+    vertical-align: middle;
+    color: #007bff;
+    font-size: 1.2em;
+}
+
+
+.entity-mapping-form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 0;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.entity-form {
+    padding: 10px;
+}
+
+.entity-mapping-form-title {
+    font-size: 20px;
+    padding: 10px;
+    font-weight: bold;
+    color: #333333;
+}
+.entity-mapping-form-row {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
+    gap: 20px;
+    margin-top: 15px;
+    width: 100%;
+}
+
+.entity-mapping-form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+    flex: 1;
+}
+
+.entity-mapping-form-group label {
+    font-size: 18px;
+    font-weight: 600;
+    color: #4a4a4a;
+    margin-bottom: 10px;
+}
+
+.entity-mapping-select {
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    width: 100%;
+    background-color: #f9f9fb;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.entity-mapping-select:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 6px rgba(52, 152, 219, 0.4);
+    outline: none;
+}
+
+.entity-mapping-submit-button {
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #ffffff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.entity-mapping-submit-button:hover {
+    background-color: #0056b3;
+}
+span {
+    color: red;
+}

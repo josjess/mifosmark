@@ -1,0 +1,17 @@
+.data-table-form {
+    background-color: #0f2b40;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    color: #ffffff;
+}
+
+.data-table-form h3 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+
+.data-table-form p {
+    font-size: 1rem;
+    color: #b2b8c3;
+}

@@ -3,15 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from '../context/AuthContext';
 import { NotificationContext } from '../context/NotificationContext';
 import { useLoading } from '../context/LoadingContext';
-import {
-    FaUser,
-    FaExclamationTriangle,
-    FaChartLine,
-    FaBalanceScale,
-    FaHandHoldingUsd,
-    FaMoneyCheckAlt,
-    FaUsers, FaUserPlus
-} from 'react-icons/fa';
+import {FaUser, FaExclamationTriangle, FaChartLine, FaBalanceScale, FaHandHoldingUsd, FaMoneyCheckAlt, FaUsers, FaUserPlus} from 'react-icons/fa';
 import './Dashboard.css';
 import {API_CONFIG} from "../config";
 import Sidebar from "./Sidebar";

@@ -1,0 +1,24 @@
+.preference-form-container {
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: 20px auto;
+    text-align: center;
+    font-family: 'Arial', sans-serif;
+}
+
+.form-title {
+    font-size: 1.8em;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 20px;
+}
+
+.placeholder-message {
+    font-size: 1.2em;
+    font-style: italic;
+    color: #7f8c8d;
+    margin-top: 10px;
+}
