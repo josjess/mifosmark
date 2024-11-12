@@ -54,6 +54,16 @@ import AccountPreferences from "./components/admin/System/tabs/AccountNumberPref
 import ManageExternalEvents from "./components/admin/System/tabs/ManageExternalEvents/ManageExternalEvents";
 import Configurations from "./components/admin/System/tabs/Configuration/Configurations";
 import EntityMapping from "./components/admin/System/tabs/EntityToEntity/EntityMapping";
+import ExternalServices from "./components/admin/System/tabs/ExternalServices/ExternalServices";
+import TwoFactorAuthentication from "./components/admin/System/tabs/TwoFactor/TwoFactorConfig";
+import AuditTrails from "./components/admin/System/tabs/AuditTrails/AuditTrails";
+import ManageSchedulerJobs from "./components/admin/System/tabs/ManageSchedulerJobs/ManageSchedulerJobs";
+
+/* Admin/ System / External-Services */
+import AmazonS3Service from "./components/admin/System/tabs/ExternalServices/AmazonS3Service";
+import EmailService from "./components/admin/System/tabs/ExternalServices/EmailService";
+import SmsService from "./components/admin/System/tabs/ExternalServices/SmsService";
+import NotificationService from "./components/admin/System/tabs/ExternalServices/NotificationService";
 
 const App = () => {
     useEffect(() => {
@@ -117,6 +127,16 @@ const App = () => {
                             <Route path="/manage-external-events" element={<ManageExternalEvents />} />
                             <Route path="/configurations" element={<Configurations />} />
                             <Route path="/entity-mappings" element={<EntityMapping />} />
+                            <Route path="/external-services" element={<ExternalServices />} />
+                            <Route path="/two-factor" element={<TwoFactorAuthentication />} />
+                            <Route path="/audit-trails" element={<AuditTrails />} />
+                            <Route path="/manage-scheduler-jobs" element={<ManageSchedulerJobs />} />
+
+                            {/* Admin/ System / External-Services */}
+                            <Route path="/amzons3" element={<AmazonS3Service />} />
+                            <Route path="/email-service" element={<EmailService />} />
+                            <Route path="/sms-service" element={<SmsService />} />
+                            <Route path="/notification-service" element={<NotificationService />} />
 
                         </Route>
                     </Routes>

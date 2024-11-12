@@ -1,0 +1,107 @@
+.two-factor-page {
+    background-color: #132639;
+    margin-left: 250px;
+    min-height: 90vh;
+    padding: 40px;
+    color: #ffffff;
+    font-family: 'Poppins', sans-serif;
+}
+
+.breadcrumb-link {
+    color: #4c84ff;
+    text-decoration: none;
+    font-weight: bold;
+    margin-right: 5px;
+    transition: color 0.3s ease;
+}
+
+.breadcrumb-link:hover {
+    color: #1a66cc;
+}
+
+.breadcrumb-separator {
+    margin: 0 8px;
+    color: #b2b8c3;
+}
+
+.breadcrumb-current {
+    color: #ffffff;
+    font-weight: bold;
+}
+
+.two-factor-content {
+    background: linear-gradient(135deg, #1d4d6d, #213f5a);
+    border-radius: 12px;
+    padding: 40px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.two-factor-heading {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.heading-icon {
+    font-size: 3rem;
+    color: #4c84ff;
+}
+
+.two-factor-heading h1 {
+    font-size: 32px;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+.coming-soon-section {
+    text-align: center;
+    color: #ffffff;
+}
+
+.coming-soon-title {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #f39c12;
+    margin-bottom: 15px;
+}
+
+.coming-soon-description {
+    font-size: 1rem;
+    color: #e2e8f0;
+    margin-bottom: 25px;
+}
+
+.coming-soon-image-container {
+    margin-bottom: 25px;
+}
+
+.coming-soon-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.coming-soon-footer {
+    font-size: 1rem;
+    color: #b2b8c3;
+}
+
+@media (max-width: 768px) {
+    .two-factor-content {
+        padding: 20px;
+    }
+
+    .heading-icon {
+        font-size: 2.5rem;
+    }
+
+    .two-factor-heading h1 {
+        font-size: 28px;
+    }
+
+    .coming-soon-title {
+        font-size: 1.5rem;
+    }
+}

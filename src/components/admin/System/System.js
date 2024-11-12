@@ -1,10 +1,6 @@
 import React from 'react';
 import './System.css';
-import {
-    FaDatabase, FaCode, FaUserShield, FaTasks, FaLink, FaProjectDiagram,
-    FaPoll, FaClipboardList, FaCalendarCheck, FaCogs, FaCalendarAlt, FaServer,
-    FaLock, FaKey, FaChartBar
-} from 'react-icons/fa';
+import {FaDatabase, FaCode, FaUserShield, FaTasks, FaLink, FaProjectDiagram, FaPoll, FaClipboardList, FaCalendarCheck, FaCogs, FaCalendarAlt, FaServer, FaKey, FaCloud} from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 import {FaGauge} from "react-icons/fa6";
 
@@ -20,13 +16,13 @@ const System = () => {
         { title: 'Entity to Entity Mapping', icon: <FaProjectDiagram />, description: 'Mapping entities', color: '#2980b9', link: '/entity-mappings' },
         { title: 'Manage Surveys', icon: <FaPoll />, description: 'Survey configurations', color: '#f39c12', link: '/manage-surveys' },
         { title: 'Manage External Events', icon: <FaGauge />, description: 'External Events Configuration', color: '#f39c12', link: '/manage-external-events' },
-        { title: 'Audit Trails', icon: <FaClipboardList />, description: 'Track changes', color: '#d35400', link: '#/audit-trails' },
+        { title: 'Audit Trails', icon: <FaClipboardList />, description: 'Track changes', color: '#d35400', link: '/audit-trails' },
         { title: 'Manage Reports', icon: <FaCalendarCheck />, description: 'Reports setup', color: '#1abc9c', link: '/manage-reports' },
-        { title: 'Manage Jobs/ Scheduler Jobs', icon: <FaCogs />, description: 'Automated tasks', color: '#9b59b6', link: '#/scheduler-jobs' },
+        { title: 'Manage Jobs/ Scheduler Jobs', icon: <FaCogs />, description: 'Automated tasks', color: '#9b59b6', link: '/manage-scheduler-jobs' },
         { title: 'Configurations', icon: <FaCalendarAlt />, description: 'System settings', color: '#8398ff', link: '/configurations' },
         { title: 'Account Number Preferences', icon: <FaServer />, description: 'Account preferences', color: '#5a84b5', link: '/account-preferences' },
-        { title: 'External Services', icon: <FaChartBar />, description: 'Integrate services', color: '#e74c3c', link: '#/external-services' },
-        { title: 'Two-Factor Configuration', icon: <FaKey />, description: '2FA setup', color: '#2ecc71', link: '#/two-factor-configuration' }
+        { title: 'External Services', icon: <FaCloud />, description: 'Integrate services', color: '#e74c3c', link: '/external-services' },
+        { title: 'Two-Factor Configuration', icon: <FaKey />, description: '2FA setup', color: '#2ecc71', link: '/two-factor' }
     ];
 
     return (
