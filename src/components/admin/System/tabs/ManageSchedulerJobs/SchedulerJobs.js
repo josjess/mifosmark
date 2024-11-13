@@ -356,17 +356,21 @@ const SchedulerJobs = () => {
                                 '-'
                             )}
                         </td>
-                        <td>
+                        <td
+                            className="error-log-cell"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                if (job.lastRunHistory?.jobRunErrorLog) {
+                                    openErrorModal(job.lastRunHistory.jobRunErrorLog);
+                                }
+                            }}
+                        >
                             {job.lastRunHistory?.jobRunErrorLog ? (
-                                <button
-                                    className="custom-error-log-button"
-                                    onClick={() => openErrorModal(job.lastRunHistory.jobRunErrorLog)}
-                                >
-                                    View
-                                </button>
-                            ) : ''}
+                                <button className="custom-error-log-button">View</button>
+                            ) : (
+                                '-'
+                            )}
                         </td>
-
                     </tr>
                 ))}
                 </tbody>
@@ -379,7 +383,7 @@ const SchedulerJobs = () => {
                             className="custom-modal-close-button"
                             onClick={closeErrorModal}
                         >
-                            &times;
+                        &times;
                         </button>
                         <h2 className="custom-modal-title">Error Details</h2>
                         <pre className="custom-modal-error-log">{errorDetails}</pre>

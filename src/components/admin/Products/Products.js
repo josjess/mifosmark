@@ -2,7 +2,7 @@ import React from 'react';
 import './Products.css';
 import {
     FaPiggyBank, FaWallet, FaChartPie, FaMoneyCheckAlt, FaPercentage, FaBoxes,
-    FaUniversity, FaRecycle, FaBalanceScale, FaChartLine
+    FaUniversity, FaRecycle, FaBalanceScale, FaChartLine, FaShieldAlt, FaCalendarTimes
 } from 'react-icons/fa';
 import {Link, useNavigate} from 'react-router-dom';
 
@@ -10,21 +10,23 @@ const Products = () => {
     const navigate = useNavigate();
 
     const tiles = [
-        { title: 'Loan Products', icon: <FaWallet />, description: 'Various loan options', color: '#3498db', link: '#/loan-products' },
-        { title: 'Savings Products', icon: <FaPiggyBank />, description: 'Savings schemes', color: '#27ae60', link: '#/savings-products' },
-        { title: 'Share Products', icon: <FaChartPie />, description: 'Share options', color: '#8e44ad', link: '#/share-products' },
-        { title: 'Charges', icon: <FaMoneyCheckAlt />, description: 'Service fees', color: '#e67e22', link: '#/charges' },
+        { title: 'Loan Products', icon: <FaWallet />, description: 'Various loan options', color: '#3498db', link: '/loan-products' },
+        { title: 'Savings Products', icon: <FaPiggyBank />, description: 'Savings schemes', color: '#27ae60', link: '/savings-products' },
+        { title: 'Share Products', icon: <FaChartPie />, description: 'Share options', color: '#8e44ad', link: '/share-products' },
+        { title: 'Charges', icon: <FaMoneyCheckAlt />, description: 'Service fees', color: '#e67e22', link: '/charges' },
+        { title: 'Collateral Management', icon: <FaShieldAlt />, description: 'Define collaterals for Collateral Management', color: '#e67e22', link: '/collateral' },
+        { title: 'Delinquency Buckets', icon: <FaCalendarTimes />, description: 'Define delinquency day ranges', color: '#e67e22', link: '#/deliquency' },
         { title: 'Rates', icon: <FaPercentage />, description: 'Interest rates', color: '#c0392b', link: '#/rates' },
         { title: 'Products Mix', icon: <FaBoxes />, description: 'Combined offerings', color: '#2980b9', link: '#/products-mix' },
         { title: 'Fixed Deposit Products', icon: <FaUniversity />, description: 'Fixed deposits', color: '#f39c12', link: '#/fixed-deposit-products' },
         { title: 'Recurring Deposit Products', icon: <FaRecycle />, description: 'Recurring deposits', color: '#d35400', link: '#/recurring-deposit-products' },
-        { title: 'Manage Tax Configurations', icon: <FaBalanceScale />, description: 'Tax settings', color: '#1abc9c', link: '/tax-configurations' },
-        { title: 'Floating Rates', icon: <FaChartLine />, description: 'Flexible rates', color: '#9b59b6', link: '/floating-rates' }
+        { title: 'Manage Tax Configurations', icon: <FaBalanceScale />, description: 'Tax settings', color: '#1abc9c', link: '#/tax-configurations' },
+        { title: 'Floating Rates', icon: <FaChartLine />, description: 'Flexible rates', color: '#9b59b6', link: '#/floating-rates' }
     ];
 
     return (
         <div className="products-page">
-            <h2 className="page-heading">
+            <h2 className="system-page-heading">
                 <Link to="/admin" className="breadcrumb-link">Admin</Link> . Products
             </h2>
             <div className="products-tiles-grid">

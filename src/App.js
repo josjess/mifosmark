@@ -64,6 +64,14 @@ import AmazonS3Service from "./components/admin/System/tabs/ExternalServices/Ama
 import EmailService from "./components/admin/System/tabs/ExternalServices/EmailService";
 import SmsService from "./components/admin/System/tabs/ExternalServices/SmsService";
 import NotificationService from "./components/admin/System/tabs/ExternalServices/NotificationService";
+import NotFound from "./components/NotFound";
+
+/* Products */
+import LoanProducts from "./components/admin/Products/tabs/LoanProducts/LoanProducts";
+import SavingsProducts from "./components/admin/Products/tabs/SavingsProducts/SavingsProducts";
+import ShareProducts from "./components/admin/Products/tabs/ShareProducts/ShareProducts";
+import Charges from "./components/admin/Products/tabs/charges/Charges";
+import Collaterals from "./components/admin/Products/tabs/Collateral/Collaterals";
 
 const App = () => {
     useEffect(() => {
@@ -85,6 +93,7 @@ const App = () => {
                     <Routes>
                         <Route path="/login" element={<Login />} />
                         <Route element={<ProtectedLayout />}>
+                            <Route path='*' element={<NotFound />} />
                             <Route path="/" element={<Dashboard />} />
                             <Route path="/dashboard" element={<Dashboard />} />
                             <Route path="/clients" element={<Clients />} />
@@ -137,6 +146,13 @@ const App = () => {
                             <Route path="/email-service" element={<EmailService />} />
                             <Route path="/sms-service" element={<SmsService />} />
                             <Route path="/notification-service" element={<NotificationService />} />
+
+                            {/* Products */}
+                            <Route path="/loan-products" element={<LoanProducts />} />
+                            <Route path="/savings-products" element={<SavingsProducts />} />
+                            <Route path="/share-products" element={<ShareProducts />} />
+                            <Route path="/charges" element={<Charges />} />
+                            <Route path="/collateral" element={<Collaterals />} />
 
                         </Route>
                     </Routes>
