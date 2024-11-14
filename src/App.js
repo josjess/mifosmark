@@ -72,6 +72,20 @@ import SavingsProducts from "./components/admin/Products/tabs/SavingsProducts/Sa
 import ShareProducts from "./components/admin/Products/tabs/ShareProducts/ShareProducts";
 import Charges from "./components/admin/Products/tabs/charges/Charges";
 import Collaterals from "./components/admin/Products/tabs/Collateral/Collaterals";
+import ProductsMix from "./components/admin/Products/tabs/ProductsMix/ProductsMix";
+import FixedDepositProducts from "./components/admin/Products/tabs/FixedDepositsProducts/FixedDepositProducts";
+import RecurringDepositProducts from "./components/admin/Products/tabs/RecurringDepositProducts/RecurringDepositProducts";
+import FloatingRates from "./components/admin/Products/tabs/FloatingRates/FloatingRates";
+import ManageDelinquency from "./components/admin/Products/tabs/ManageDelinquency/ManageDelinquency";
+import ManageTaxConfigurations from "./components/admin/Products/tabs/ManageTaxConfigurations/ManageTaxConfigurations";
+
+/* Delinquency Buckets */
+import DelinquencyBuckets from "./components/admin/Products/tabs/ManageDelinquency/DelinquencyBuckets/DelinquencyBuckets";
+import DelinquencyRanges from "./components/admin/Products/tabs/ManageDelinquency/DelinquencyRanges/DelinquencyRanges";
+
+/* Tax Configurations */
+import TaxComponents from "./components/admin/Products/tabs/ManageTaxConfigurations/TaxComponents/TaxComponents";
+import TaxGroups from "./components/admin/Products/tabs/ManageTaxConfigurations/TaxGroups/TaxGroups";
 
 const App = () => {
     useEffect(() => {
@@ -153,6 +167,20 @@ const App = () => {
                             <Route path="/share-products" element={<ShareProducts />} />
                             <Route path="/charges" element={<Charges />} />
                             <Route path="/collateral" element={<Collaterals />} />
+                            <Route path="/products-mix" element={<ProductsMix />} />
+                            <Route path="/fixed-deposit-products" element={<FixedDepositProducts />} />
+                            <Route path="/recurring-deposit-products" element={<RecurringDepositProducts />} />
+                            <Route path="/floating-rates" element={<FloatingRates />} />
+                            <Route path="/manage-delinquency" element={<ManageDelinquency />} />
+                            <Route path="/manage-tax-configurations" element={<ManageTaxConfigurations />} />
+
+                            {/* Manage Delinquency */}
+                            <Route path="/delinquency-buckets" element={<DelinquencyBuckets />} />
+                            <Route path="/delinquency-ranges" element={<DelinquencyRanges />} />
+
+                            {/* Tax Configurations */}
+                            <Route path="/tax-components" element={<TaxComponents />} />
+                            <Route path="/tax-groups" element={<TaxGroups />} />
 
                         </Route>
                     </Routes>

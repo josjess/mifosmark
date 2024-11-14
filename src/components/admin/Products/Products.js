@@ -15,13 +15,12 @@ const Products = () => {
         { title: 'Share Products', icon: <FaChartPie />, description: 'Share options', color: '#8e44ad', link: '/share-products' },
         { title: 'Charges', icon: <FaMoneyCheckAlt />, description: 'Service fees', color: '#e67e22', link: '/charges' },
         { title: 'Collateral Management', icon: <FaShieldAlt />, description: 'Define collaterals for Collateral Management', color: '#e67e22', link: '/collateral' },
-        { title: 'Delinquency Buckets', icon: <FaCalendarTimes />, description: 'Define delinquency day ranges', color: '#e67e22', link: '#/deliquency' },
-        { title: 'Rates', icon: <FaPercentage />, description: 'Interest rates', color: '#c0392b', link: '#/rates' },
-        { title: 'Products Mix', icon: <FaBoxes />, description: 'Combined offerings', color: '#2980b9', link: '#/products-mix' },
-        { title: 'Fixed Deposit Products', icon: <FaUniversity />, description: 'Fixed deposits', color: '#f39c12', link: '#/fixed-deposit-products' },
-        { title: 'Recurring Deposit Products', icon: <FaRecycle />, description: 'Recurring deposits', color: '#d35400', link: '#/recurring-deposit-products' },
-        { title: 'Manage Tax Configurations', icon: <FaBalanceScale />, description: 'Tax settings', color: '#1abc9c', link: '#/tax-configurations' },
-        { title: 'Floating Rates', icon: <FaChartLine />, description: 'Flexible rates', color: '#9b59b6', link: '#/floating-rates' }
+        { title: 'Delinquency Buckets', icon: <FaCalendarTimes />, description: 'Define delinquency day ranges', color: '#e67e22', link: '/manage-delinquency' },
+        { title: 'Products Mix', icon: <FaBoxes />, description: 'Combined offerings', color: '#2980b9', link: '/products-mix' },
+        { title: 'Fixed Deposit Products', icon: <FaUniversity />, description: 'Fixed deposits', color: '#f39c12', link: '/fixed-deposit-products' },
+        { title: 'Recurring Deposit Products', icon: <FaRecycle />, description: 'Recurring deposits', color: '#d35400', link: '/recurring-deposit-products' },
+        { title: 'Manage Tax Configurations', icon: <FaBalanceScale />, description: 'Tax settings', color: '#1abc9c', link: '/manage-tax-configurations' },
+        { title: 'Floating Rates', icon: <FaChartLine />, description: 'Configure Floating rates', color: '#9b59b6', link: '/floating-rates' }
     ];
 
     return (

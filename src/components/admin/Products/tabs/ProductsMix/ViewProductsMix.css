@@ -1,0 +1,46 @@
+.view-products-mix {
+    padding: 20px;
+}
+
+.table-controls {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.filter-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.products-mix-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+}
+
+.products-mix-table th,
+.products-mix-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+.products-mix-table th {
+    background: #007bff;
+    color: #fff;
+}
+
+.no-data {
+    text-align: center;
+    font-style: italic;
+    color: #999;
+    padding: 20px;
+}
+
+.pagination {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
