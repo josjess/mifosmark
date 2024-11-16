@@ -1,0 +1,78 @@
+.create-products-mix {
+    padding: 30px;
+    background-color: #293f5e;
+    border-radius: 20px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.products-mix-heading {
+    font-size: 1.8rem;
+    color: #ffffff;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.products-mix-form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+}
+
+.products-mix-label {
+    font-size: 1rem;
+    color: #ffffff;
+    margin-bottom: 10px;
+}
+
+.products-mix-select {
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #ffffff;
+    outline: none;
+}
+
+.products-mix-select:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+}
+
+.products-mix-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.products-mix-cancel-button,
+.products-mix-submit-button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.products-mix-cancel-button {
+    background-color: #e74c3c;
+}
+
+.products-mix-cancel-button:hover {
+    background-color: #c0392b;
+}
+
+.products-mix-submit-button {
+    background-color: #2ecc71;
+}
+
+.products-mix-submit-button:hover {
+    background-color: #27ae60;
+}
+
+.products-mix-submit-button:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+}

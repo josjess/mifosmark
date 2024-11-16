@@ -1,0 +1,187 @@
+.create-delinquency-bucket {
+    padding: 30px;
+    background-color: #293f5e;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.delinquency-bucket-heading {
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #ffffff;
+}
+
+.delinquency-bucket-form-group {
+    margin-bottom: 20px;
+}
+
+.delinquency-bucket-label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: white;
+}
+
+.delinquency-bucket-input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    outline: none;
+}
+
+.delinquency-add-ranges {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.delinquency-add-description {
+    font-size: 1rem;
+    font-weight: 600;
+    color: white;
+}
+
+.delinquency-add-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 25px;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #ffffff;
+    background-color: #4a7a0b;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.delinquency-add-button:hover {
+    background-color: #368025;
+}
+
+.delinquency-ranges-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.delinquency-ranges-table th,
+.delinquency-ranges-table td {
+    padding: 12px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+.delinquency-ranges-table th {
+    background-color: #293f5e;
+    color: #fff;
+}
+
+.delinquency-add-icon {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: white;
+}
+
+.delinquency-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.delinquency-modal-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    width: 400px;
+    text-align: center;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
+}
+
+.delinquency-modal-heading {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+.delinquency-modal-form-group {
+    margin-bottom: 20px;
+}
+
+.delinquency-modal-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.delinquency-modal-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.delinquency-modal-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.delinquency-modal-action-button {
+    padding: 10px 20px;
+    font-weight: bold;
+    font-size: 1rem;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    color: #fff;
+}
+
+.delinquency-modal-cancel-button {
+    background-color: #e74c3c;
+}
+
+.delinquency-modal-add-button {
+    color: #ffffff;
+    background-color: #4a7a0b;
+}
+
+.delinquency-bucket-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 40px;
+}
+
+.delinquency-action-button {
+    padding: 12px 20px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.delinquency-submit-button {
+    color: #ffffff;
+    background-color: #4a7a0b;
+}
+
+.delinquency-submit-button:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+}

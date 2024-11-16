@@ -31,7 +31,7 @@ const Organization = () => {
 
     return (
         <div className="organization-page">
-            <h2 className="page-heading">
+            <h2 className="system-page-heading">
                 <Link to="/admin" className="breadcrumb-link">Admin</Link> . Organization
             </h2>
             <div className="tiles-grid">

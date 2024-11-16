@@ -57,6 +57,15 @@ const ViewCharges = () => {
         console.log('Selected Charge:', charge);
     };
 
+    const formatCurrency = (amount, currencySymbol) => {
+        if (!amount || !currencySymbol) return '-';
+        const formattedAmount = Number(amount).toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        });
+        return `${currencySymbol} ${formattedAmount}`;
+    };
+
     return (
         <div className="view-charges">
             <div className="table-controls">
@@ -115,13 +124,17 @@ const ViewCharges = () => {
                             onClick={() => handleRowClick(charge)}
                             className="clickable-row"
                         >
-                            <td>{charge.name || '-'}</td>
+                            <td>{charge.name || ''}</td>
 
-                            <td>{charge.chargeAppliesTo?.value || '-'}</td>
+                            <td>{charge.chargeAppliesTo?.value || ''}</td>
 
-                            <td>{charge.chargeTimeType?.value || '-'}</td>
+                            <td>{charge.chargeTimeType?.value || ''}</td>
 
-                            <td>{charge.amount ? ` ${charge.currency?.displaySymbol|| ''} ${charge.amount} ` : '-'}</td>
+                            <td>
+                                {charge.amount
+                                    ? formatCurrency(charge.amount, charge.currency?.displaySymbol || '')
+                                    : '-'}
+                            </td>
 
                             <td>{charge.penalty ? 'Yes' : 'No'}</td>
 

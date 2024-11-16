@@ -42,7 +42,7 @@ const ViewProductsMix = () => {
 
     const filteredProductsMix = () =>
         productsMix.filter((product) =>
-            product.name && product.name.toLowerCase().includes(filter.toLowerCase())
+            product.productName && product.productName.toLowerCase().includes(filter.toLowerCase())
         );
 
     const paginatedData = filteredProductsMix().slice(
@@ -87,11 +87,11 @@ const ViewProductsMix = () => {
                 {paginatedData.length > 0 ? (
                     paginatedData.map((product) => (
                         <tr
-                            key={product.id}
+                            key={product.productId}
                             onClick={() => handleRowClick(product)}
                             className="clickable-row"
                         >
-                            <td>{product.name}</td>
+                            <td>{product.productName}</td>
                         </tr>
                     ))
                 ) : (

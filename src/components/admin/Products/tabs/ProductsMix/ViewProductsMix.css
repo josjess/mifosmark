@@ -1,19 +1,6 @@
 .view-products-mix {
     padding: 20px;
 }
-
-.table-controls {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-}
-
-.filter-container {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-
 .products-mix-table {
     width: 100%;
     border-collapse: collapse;
@@ -30,17 +17,4 @@
 .products-mix-table th {
     background: #007bff;
     color: #fff;
-}
-
-.no-data {
-    text-align: center;
-    font-style: italic;
-    color: #999;
-    padding: 20px;
-}
-
-.pagination {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
 }
