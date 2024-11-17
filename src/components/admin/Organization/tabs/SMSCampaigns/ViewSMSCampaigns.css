@@ -1,0 +1,27 @@
+.view-sms-campaigns {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.sms-campaigns-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.sms-campaigns-table th,
+.sms-campaigns-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+.sms-campaigns-table th {
+    background-color: #007bff;
+    color: white;
+}
+
+.sms-campaigns-table tbody tr:hover {
+    background-color: #f9f9f9;
+    cursor: pointer;
+}

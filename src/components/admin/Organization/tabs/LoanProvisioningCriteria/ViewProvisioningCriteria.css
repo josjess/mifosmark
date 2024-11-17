@@ -1,0 +1,26 @@
+.view-provisioning-criteria {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.provisioning-criteria-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.provisioning-criteria-table th,
+.provisioning-criteria-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+.provisioning-criteria-table th {
+    background-color: #007bff;
+    color: white;
+}
+
+.provisioning-criteria-table tbody tr:hover {
+    background-color: #f9f9f9;
+    cursor: pointer;
+}

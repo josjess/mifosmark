@@ -1,0 +1,49 @@
+.view-payment-types {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.payment-types-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.payment-types-table th,
+.payment-types-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+.payment-types-table th {
+    background-color: #007bff;
+    color: white;
+}
+
+.payment-types-table tbody tr:hover {
+    background-color: #f9f9f9;
+    cursor: pointer;
+}
+
+.action-icon {
+    margin-right: 10px;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.edit-icon {
+    color: #4caf50;
+}
+
+.edit-icon:hover {
+    color: #388e3c;
+}
+
+.delete-icon {
+    color: #f44336;
+}
+
+.delete-icon:hover {
+    color: #d32f2f;
+}

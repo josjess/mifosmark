@@ -1,0 +1,69 @@
+.bulk-loan-reassignment-page {
+    padding: 50px 20px;
+    margin-left: 250px;
+    font-family: 'Poppins', sans-serif;
+    background-color: #f8f9fa;
+    min-height: 90vh;
+}
+
+.bulk-loan-reassignment-form-container {
+    max-width: 600px;
+    background: #ffffff;
+    border-radius: 15px;
+    padding: 20px 30px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.bulk-loan-reassignment-field {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.bulk-loan-reassignment-label {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.bulk-loan-reassignment-select,
+.bulk-loan-reassignment-input {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.bulk-loan-reassignment-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.bulk-loan-reassignment-submit-btn,
+.bulk-loan-reassignment-cancel-btn {
+    padding: 12px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.bulk-loan-reassignment-submit-btn {
+    background-color: #28a745;
+    color: white;
+}
+
+.bulk-loan-reassignment-submit-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.bulk-loan-reassignment-cancel-btn {
+    background-color: #dc3545;
+    color: white;
+}
+
+.bulk-loan-reassignment-cancel-btn:hover {
+    background-color: #c82333;
+}

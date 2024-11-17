@@ -1,0 +1,25 @@
+.view-adhoc-query {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.adhoc-query-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.adhoc-query-table th, .adhoc-query-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+.adhoc-query-table th {
+    background-color: #007bff;
+    color: white;
+}
+
+.adhoc-query-table tbody tr:hover {
+    background-color: #f9f9f9;
+    cursor: pointer;
+}

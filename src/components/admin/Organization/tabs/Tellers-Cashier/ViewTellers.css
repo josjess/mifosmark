@@ -1,0 +1,27 @@
+.view-tellers {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.tellers-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.tellers-table th,
+.tellers-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+.tellers-table th {
+    background-color: #007bff;
+    color: white;
+}
+
+.tellers-table tbody tr:hover {
+    background-color: #f9f9f9;
+    cursor: pointer;
+}

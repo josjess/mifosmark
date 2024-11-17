@@ -87,6 +87,28 @@ import DelinquencyRanges from "./components/admin/Products/tabs/ManageDelinquenc
 import TaxComponents from "./components/admin/Products/tabs/ManageTaxConfigurations/TaxComponents/TaxComponents";
 import TaxGroups from "./components/admin/Products/tabs/ManageTaxConfigurations/TaxGroups/TaxGroups";
 
+/* Organisation*/
+import ManageOffices from "./components/admin/Organization/tabs/ManageOffices/ManageOffices";
+import ManageHolidays from "./components/admin/Organization/tabs/ManageHolidays/ManageHolidays";
+import ManageEmployees from "./components/admin/Organization/tabs/ManageEmployees/ManageEmployees";
+import LoanProvisioningCriteria from "./components/admin/Organization/tabs/LoanProvisioningCriteria/LoanProvisioningCriteria";
+import EntityDataTableChecks from "./components/admin/Organization/tabs/EntityDataTableChecks/EntityDataTable";
+import CurrencyConfiguration from "./components/admin/Organization/tabs/CurrencyConfiguration/CurrencyConfiguration";
+import ManageFunds from "./components/admin/Organization/tabs/ManageFunds/ManageFunds";
+import TellersCashiers from "./components/admin/Organization/tabs/Tellers-Cashier/TellersCashiers";
+import PaymentTypes from "./components/admin/Organization/tabs/PaymentTypes/PaymentTypes";
+import ManageSMSCampaigns from "./components/admin/Organization/tabs/SMSCampaigns/SmsCampaigns";
+import AdHocQuery from "./components/admin/Organization/tabs/AdHocQuery/AdHocQuery";
+import PasswordPreferences from "./components/admin/Organization/tabs/PasswordPreferences/PasswordPreferences";
+import WorkingDays from "./components/admin/Organization/tabs/WorkingDays/WorkingDays";
+import BulkLoanReassignment from "./components/admin/Organization/tabs/BulkLoanReassignment/BulkLoanReassignment";
+import StandingInstructionsHistory from "./components/admin/Organization/tabs/StandingInstructions/StandingInstructionsHistory";
+import FundMapping from "./components/admin/Organization/tabs/FundMapping/FundMapping";
+import ManageInvestors from "./components/admin/Organization/tabs/ManageInvestors/ManageInvestors";
+
+/* Viewing routes */
+import ViewHoliday from "./components/admin/Organization/tabs/ManageHolidays/ViewHoliday";
+
 const App = () => {
     useEffect(() => {
         loadConfig().then();
@@ -181,6 +203,28 @@ const App = () => {
                             {/* Tax Configurations */}
                             <Route path="/tax-components" element={<TaxComponents />} />
                             <Route path="/tax-groups" element={<TaxGroups />} />
+
+                            {/* Organisation */}
+                            <Route path="/manage-offices" element={<ManageOffices />} />
+                            <Route path="/manage-holidays" element={<ManageHolidays />} />
+                            <Route path="/manage-employees" element={<ManageEmployees />} />
+                            <Route path="/loan-provisioning-criteria" element={<LoanProvisioningCriteria />} />
+                            <Route path="/entity-data-table-checks" element={<EntityDataTableChecks />} />
+                            <Route path="/currency-configuration" element={<CurrencyConfiguration />} />
+                            <Route path="/manage-funds" element={<ManageFunds />} />
+                            <Route path="/teller-cashier-management" element={<TellersCashiers />} />
+                            <Route path="/payment-types" element={<PaymentTypes />} />
+                            <Route path="/sms-campaigns" element={<ManageSMSCampaigns />} />
+                            <Route path="/ad-hoc-query" element={<AdHocQuery />} />
+                            <Route path="/password-preferences" element={<PasswordPreferences />} />
+                            <Route path="/working-days" element={<WorkingDays />} />
+                            <Route path="/bulk-loan-reassignment" element={<BulkLoanReassignment />} />
+                            <Route path="/standing-instructions-history" element={<StandingInstructionsHistory />} />
+                            <Route path="/fund-mapping" element={<FundMapping />} />
+                            <Route path="/manage-investors" element={<ManageInvestors />} />
+
+                            {/* viewing routes */}
+                            <Route path="/holidays/view/:id" element={<ViewHoliday />} />
 
                         </Route>
                     </Routes>
