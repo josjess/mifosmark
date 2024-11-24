@@ -6,6 +6,10 @@ import { Link } from 'react-router-dom';
 const AdHocQuery = () => {
     const [activeTab, setActiveTab] = useState('viewAdHocQuery');
 
+    const handleFormSubmitSuccess = () => {
+        setActiveTab('viewAdHocQuery');
+    };
+
     return (
         <div className="tab-products-page">
             <h2 className="page-heading">
@@ -27,7 +31,9 @@ const AdHocQuery = () => {
             </div>
             <div className="tab-content">
                 {activeTab === 'viewAdHocQuery' && <ViewAdHocQuery />}
-                {activeTab === 'createAdHocQuery' && <CreateAdHocQuery />}
+                {activeTab === 'createAdHocQuery' && (
+                    <CreateAdHocQuery onFormSubmitSuccess={handleFormSubmitSuccess} />
+                )}
             </div>
         </div>
     );

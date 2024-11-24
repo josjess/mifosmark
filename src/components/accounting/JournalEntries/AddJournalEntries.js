@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaPlus } from 'react-icons/fa';
-import './FrequentPosting.css';
+import '../FrequentPosting/FrequentPosting.css';
 
 const AddJournalEntries = () => {
     const [step, setStep] = useState(1);

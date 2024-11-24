@@ -82,19 +82,19 @@ const CreateHoliday = () => {
                 day: "2-digit",
                 month: "long",
                 year: "numeric",
-            }); // Produces "20 November 2024" format
+            });
         };
 
         const payload = {
             name,
             description,
-            fromDate: formatDateForPayload(fromDate), // Properly formatted date
-            toDate: formatDateForPayload(toDate), // Properly formatted date
+            fromDate: formatDateForPayload(fromDate),
+            toDate: formatDateForPayload(toDate),
             repaymentsRescheduledTo: repaymentType === "2" ? formatDateForPayload(repaymentScheduledTo) : null,
             reschedulingType: parseInt(repaymentType, 10),
-            offices: selectedOffices.map((id) => ({ officeId: id })), // Properly structured offices
-            dateFormat: "dd MMMM yyyy", // Required date format
-            locale: "en", // Locale as required
+            offices: selectedOffices.map((id) => ({ officeId: id })),
+            dateFormat: "dd MMMM yyyy",
+            locale: "en",
         };
 
         startLoading();

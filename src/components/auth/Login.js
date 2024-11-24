@@ -1,10 +1,10 @@
 import React, { useState, useContext } from 'react';
 import './Login.css';
 import { useNavigate } from 'react-router-dom';
-import { API_CONFIG } from "../config";
-import { AuthContext } from '../context/AuthContext';
-import { NotificationContext } from '../context/NotificationContext';
-import { useLoading } from '../context/LoadingContext';
+import { API_CONFIG } from "../../config";
+import { AuthContext } from '../../context/AuthContext';
+import { NotificationContext } from '../../context/NotificationContext';
+import { useLoading } from '../../context/LoadingContext';
 
 const Login = () => {
     const [username, setUsername] = useState('');

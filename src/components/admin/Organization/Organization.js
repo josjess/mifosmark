@@ -24,7 +24,7 @@ const Organization = () => {
         { title: 'Working Days', icon: <FaCalendarWeek />, description: 'Working days config', color: '#1abc9c', link: '/working-days' },
         { title: 'Payment Types', icon: <FaCreditCard />, description: 'Payment settings', color: '#e74c3c', link: '/payment-types' },
         { title: 'SMS Campaigns', icon: <FaSms />, description: 'Campaigns setup', color: '#3498db', link: '/sms-campaigns' },
-        { title: 'Bulk Imports', icon: <FaUpload />, description: 'Import bulk data', color: '#9b59b6', link: '#/bulk-imports' }
+        { title: 'Bulk Imports', icon: <FaUpload />, description: 'Import bulk data', color: '#9b59b6', link: '/bulk-imports' }
     ];
 
     return (

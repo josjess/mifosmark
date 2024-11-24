@@ -1,7 +1,6 @@
-// components/accounting/SearchJournalEntries.js
 import React from 'react';
 import { Link } from 'react-router-dom';
-import './FrequentPosting.css';
+import '../FrequentPosting/FrequentPosting.css';
 
 const SearchJournalEntries = () => {
     return (

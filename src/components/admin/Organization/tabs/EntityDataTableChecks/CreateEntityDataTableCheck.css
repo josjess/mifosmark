@@ -1,6 +1,6 @@
 .create-entity-datatable-check-container {
     padding: 20px;
-    background-color: #f5f5f5;
+    background-color: #293f5e;
     border-radius: 8px;
     max-width: 600px;
     margin: auto;
@@ -17,12 +17,13 @@
     font-size: 1.5rem;
     font-weight: bold;
     text-align: center;
-    color: #333;
+    color: #ffffff;
     margin-bottom: 10px;
 }
 
 .create-entity-datatable-check-group {
     display: flex;
+    flex: 1;
     flex-direction: column;
     gap: 8px;
 }
@@ -30,7 +31,7 @@
 .create-entity-datatable-check-label {
     font-weight: bold;
     font-size: 0.9rem;
-    color: #555;
+    color: #ffffff;
 }
 
 .create-entity-datatable-check-required {
@@ -43,7 +44,7 @@
     border: 1px solid #ccc;
     border-radius: 4px;
     font-size: 1rem;
-    color: #333;
+    color: #000000;
 }
 
 .create-entity-datatable-check-select:focus {
@@ -54,7 +55,7 @@
 
 .create-entity-datatable-check-actions {
     display: flex;
-    justify-content: center;
+    justify-content: flex-end;
 }
 
 .create-entity-datatable-check-submit {
@@ -63,7 +64,7 @@
     background-color: #007bff;
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 20px;
     cursor: pointer;
     transition: background-color 0.3s ease;
 }

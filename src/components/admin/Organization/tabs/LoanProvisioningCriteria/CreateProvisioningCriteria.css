@@ -1,0 +1,208 @@
+.create-provisioning-criteria-container {
+    padding: 20px;
+    background-color: #293f5e;
+    border-radius: 30px;
+    max-width: 900px;
+    margin: auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.create-provisioning-criteria-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.create-provisioning-criteria-title,
+.create-provisioning-criteria-subtitle {
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: center;
+    color: #ffffff;
+    margin-bottom: 10px;
+}
+
+.create-provisioning-criteria-group {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.create-provisioning-criteria-label {
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: #ffffff;
+}
+
+.create-required {
+    color: red;
+    margin-left: 5px;
+}
+
+.create-provisioning-criteria-input,
+.create-provisioning-criteria-select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+    color: #000000;
+}
+
+.create-provisioning-criteria-input:focus,
+.create-provisioning-criteria-select:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+.create-provisioning-criteria-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+}
+
+.create-provisioning-criteria-checkbox {
+    display: flex;
+    align-items: center;
+}
+
+.create-provisioning-criteria-checkbox-label {
+    margin-left: 8px;
+    font-size: 0.9rem;
+    color: #ffffff;
+}
+
+.create-provisioning-criteria-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 5px;
+    background: #d3d3d3;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.create-provisioning-criteria-table th,
+.create-provisioning-criteria-table td {
+    padding: 12px;
+    text-align: left;
+    font-size: 0.9rem;
+    color: #000000;
+}
+
+.create-provisioning-criteria-table th {
+    background-color: #007bff;
+    color: #000000;
+    font-weight: bold;
+}
+
+.create-provisioning-criteria-table tr:nth-child(even) {
+    background-color: #999ca3;
+}
+
+.create-provisioning-criteria-table tr:nth-child(even):hover {
+    background-color: #d6d9e4;
+}
+
+.create-provisioning-criteria-table tr:hover {
+    background-color: #c8cef1;
+    cursor: pointer;
+}
+
+.create-provisioning-criteria-actions {
+    display: flex;
+    justify-content: center;
+}
+
+.create-provisioning-criteria-submit {
+    padding: 12px 20px;
+    font-size: 1rem;
+    background-color: #5b9f08;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.create-provisioning-criteria-submit:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.create-provisioning-criteria-submit:hover:not(:disabled) {
+    background-color: #09930f;
+}
+
+.create-provisioning-criteria-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.create-provisioning-criteria-modal-content {
+    background-color: #293f5e;
+    padding: 20px;
+    border-radius: 20px;
+    min-width: 400px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.create-modal-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #fbfbfb;
+}
+
+.create-provisioning-criteria-modal-content .create-provisioning-criteria-group {
+    margin-bottom: 15px;
+}
+
+.create-provisioning-criteria-modal-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.create-provisioning-criteria-cancel,
+.create-provisioning-criteria-confirm {
+    padding: 10px 20px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.create-provisioning-criteria-cancel {
+    background-color: #982727;
+    color: #ffffff;
+}
+
+.create-provisioning-criteria-cancel:hover {
+    background-color: #6c2727;
+}
+
+.create-provisioning-criteria-confirm {
+    background-color: #226005;
+    color: white;
+}
+
+.create-provisioning-criteria-confirm:hover:not(:disabled) {
+    background-color: #079326;
+}
+
+.create-provisioning-criteria-confirm:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}

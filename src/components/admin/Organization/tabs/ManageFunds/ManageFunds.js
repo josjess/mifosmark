@@ -6,6 +6,10 @@ import { Link } from 'react-router-dom';
 const ManageFunds = () => {
     const [activeTab, setActiveTab] = useState('viewFunds');
 
+    const handleTabSwitch = () => {
+        setActiveTab('viewFunds');
+    };
+
     return (
         <div className="tab-products-page">
             <h2 className="page-heading">
@@ -27,7 +31,8 @@ const ManageFunds = () => {
             </div>
             <div className="tab-content">
                 {activeTab === 'viewFunds' && <ViewFunds />}
-                {activeTab === 'createFund' && <CreateFund />}
+                {activeTab === 'createFund' &&
+                    <CreateFund onFormSubmitSuccess={handleTabSwitch} />}
             </div>
         </div>
     );

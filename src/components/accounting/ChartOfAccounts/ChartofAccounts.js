@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import ChartOfAccountsTable from './ViewChartofAccounts';
-import AddAccountForm from './GLAccounts/AddGlAccountForm';
+import AddAccountForm from '../GLAccounts/AddGlAccountForm';
 import './ChartofAccounts.css';
 import {Link} from "react-router-dom";
 

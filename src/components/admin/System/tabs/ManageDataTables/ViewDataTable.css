@@ -61,7 +61,7 @@
     color: #4a4a4a;
 }
 
-.filter-container input {
+.filter-container input, .filter-container select {
     padding: 12px;
     font-size: 1em;
     border: 1px solid #ccc;

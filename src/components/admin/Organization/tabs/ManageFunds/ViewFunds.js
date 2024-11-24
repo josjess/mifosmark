@@ -14,6 +14,13 @@ const ViewFunds = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
 
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modalData, setModalData] = useState({
+        id: null,
+        name: '',
+        externalId: '',
+    });
+
     useEffect(() => {
         fetchFunds();
     }, []);
@@ -51,8 +58,56 @@ const ViewFunds = () => {
     );
 
     const handleRowClick = (fund) => {
-        console.log('Selected Fund:', fund);
+        setModalData({
+            id: fund.id,
+            name: fund.name,
+            externalId: fund.externalId || '',
+        });
+        setIsModalOpen(true);
     };
+
+    const handleModalChange = (field, value) => {
+        setModalData((prev) => ({ ...prev, [field]: value }));
+    };
+
+    const handleModalSubmit = async () => {
+        const payload = {
+            name: modalData.name,
+            externalId: modalData.externalId,
+        };
+
+        startLoading();
+        try {
+            await axios.put(`${API_CONFIG.baseURL}/funds/${modalData.id}`, payload, {
+                headers: {
+                    Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                    "Fineract-Platform-TenantId": "default",
+                    "Content-Type": "application/json",
+                },
+            });
+            setIsModalOpen(false);
+            fetchFunds();
+        } catch (error) {
+            console.error("Error updating fund:", error);
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const isDuplicate = (field, value) => {
+        return funds.some(
+            (fund) => fund[field] === value && fund.id !== modalData.id
+        );
+    };
+
+    const duplicateNameMessage = isDuplicate('name', modalData.name)
+        ? 'A fund with this name already exists.'
+        : '';
+
+    const duplicateExternalIdMessage = isDuplicate('externalId', modalData.externalId)
+        ? 'A fund with this External ID already exists.'
+        : '';
+
 
     return (
         <div className="view-funds">
@@ -132,6 +187,63 @@ const ViewFunds = () => {
                     >
                         End
                     </button>
+                </div>
+            )}
+
+            {isModalOpen && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">Edit Fund</h4>
+                        <div className="create-provisioning-criteria-group">
+                            <label htmlFor="fundName" className="create-provisioning-criteria-label">Name</label>
+                            <input
+                                type="text"
+                                id="fundName"
+                                value={modalData.name}
+                                onChange={(e) => handleModalChange('name', e.target.value)}
+                                className="create-provisioning-criteria-input"
+                                required
+                            />
+                            {duplicateNameMessage && (
+                                <p className="create-provisioning-criteria-warning">{duplicateNameMessage}</p>
+                            )}
+                        </div>
+                        <div className="create-provisioning-criteria-group">
+                            <label htmlFor="externalId" className="create-provisioning-criteria-label">External
+                                ID</label>
+                            <input
+                                type="text"
+                                id="externalId"
+                                value={modalData.externalId}
+                                onChange={(e) => handleModalChange('externalId', e.target.value)}
+                                className="create-provisioning-criteria-input"
+                            />
+                            {duplicateExternalIdMessage && (
+                                <p className="create-provisioning-criteria-warning">{duplicateExternalIdMessage}</p>
+                            )}
+                        </div>
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button
+                                onClick={() => setIsModalOpen(false)}
+                                className="create-provisioning-criteria-cancel"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleModalSubmit}
+                                className="create-provisioning-criteria-confirm"
+                                disabled={
+                                    !modalData.name ||
+                                    isDuplicate('name', modalData.name) ||
+                                    isDuplicate('externalId', modalData.externalId) ||
+                                    (modalData.name === funds.find((fund) => fund.id === modalData.id)?.name &&
+                                        modalData.externalId === funds.find((fund) => fund.id === modalData.id)?.externalId)
+                                }
+                            >
+                                Submit
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

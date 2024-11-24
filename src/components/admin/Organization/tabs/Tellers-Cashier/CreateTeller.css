@@ -1,0 +1,106 @@
+.create-teller-container {
+    padding: 20px;
+    background-color: #293f5e;
+    border-radius: 20px;
+    max-width: 600px;
+    margin: auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.create-teller-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.create-teller-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: center;
+    color: #ffffff;
+}
+
+.create-teller-group {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.create-teller-label {
+    font-weight: bold;
+    font-size: 16px;
+    color: #ffffff;
+}
+
+.create-teller-input,
+.create-teller-select,
+.create-teller-textarea {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+    color: #333;
+}
+textarea {
+    width: 100%;
+    height: 80px;
+    padding: 10px;
+    font-size: 1rem;
+    font-family: Arial, sans-serif;
+    color: #333;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    resize: vertical;
+    background-color: #f9f9f9;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+textarea:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    background-color: #ffffff;
+}
+
+.create-teller-row {
+    display: flex;
+    gap: 20px;
+}
+
+.create-teller-status label {
+    margin-right: 20px;
+    font-size: 18px;
+    color: #ffffff;
+    gap: 20px;
+}
+.create-teller-status input[type="radio"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+.create-teller-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.create-teller-submit {
+    padding: 12px 20px;
+    font-size: 1rem;
+    background-color: #51870f;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.create-teller-submit:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.create-teller-submit:hover:not(:disabled) {
+    background-color: #4e830e;
+}

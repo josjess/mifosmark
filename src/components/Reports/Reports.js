@@ -7,13 +7,13 @@ const Reports = () => {
     const navigate = useNavigate();
 
     const options = [
-        { label: 'All', description: 'All available reports', icon: FaFileAlt, path: '/#reports/all', color: '#6a82fb' },
-        { label: 'Clients', description: 'Client-focused reports', icon: FaUser, path: '/#reports/clients', color: '#70bc0e' },
-        { label: 'Loans', description: 'Loan reports and insights', icon: FaFileInvoice, path: '/#reports/loans', color: '#ff7b42' },
-        { label: 'Savings', description: 'Savings data reports', icon: FaPiggyBank, path: '/#reports/savings', color: '#4a90e2' },
-        { label: 'Funds', description: 'Fund allocations', icon: FaChartPie, path: '/#reports/funds', color: '#fbb03b' },
-        { label: 'Accounting', description: 'Financial accounts', icon: FaCogs, path: '/#reports/accounting', color: '#1abc9c' },
-        { label: 'XBRL', description: 'Financial statements', icon: FaBalanceScale, path: '/#reports/xbrl', color: '#3498db' }
+        { label: 'All', description: 'All available reports', icon: FaFileAlt, path: '/reports/all', color: '#6a82fb' },
+        { label: 'Clients', description: 'Client-focused reports', icon: FaUser, path: '/reports/clients', color: '#70bc0e' },
+        { label: 'Loans', description: 'Loan reports and insights', icon: FaFileInvoice, path: '/reports/loans', color: '#ff7b42' },
+        { label: 'Savings', description: 'Savings data reports', icon: FaPiggyBank, path: '/reports/savings', color: '#4a90e2' },
+        { label: 'Funds', description: 'Fund allocations', icon: FaChartPie, path: '/reports/funds', color: '#fbb03b' },
+        { label: 'Accounting', description: 'Financial accounts', icon: FaCogs, path: '/reports/accounting', color: '#1abc9c' },
+        { label: 'XBRL', description: 'Financial statements', icon: FaBalanceScale, path: '/reports/xbrl', color: '#3498db' }
     ];
 
     const columns = [

@@ -6,6 +6,10 @@ import { Link } from 'react-router-dom';
 const PaymentTypes = () => {
     const [activeTab, setActiveTab] = useState('viewPaymentTypes');
 
+    const handleFormSubmitSuccess = () => {
+        setActiveTab('viewPaymentTypes');
+    };
+
     return (
         <div className="tab-products-page">
             <h2 className="page-heading">
@@ -27,7 +31,9 @@ const PaymentTypes = () => {
             </div>
             <div className="tab-content">
                 {activeTab === 'viewPaymentTypes' && <ViewPaymentTypes />}
-                {activeTab === 'createPaymentType' && <CreatePaymentType />}
+                {activeTab === 'createPaymentType' && (
+                    <CreatePaymentType onFormSubmitSuccess={handleFormSubmitSuccess} />
+                )}
             </div>
         </div>
     );

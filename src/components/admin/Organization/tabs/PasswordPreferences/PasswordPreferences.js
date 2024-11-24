@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../../../../../context/AuthContext';
 import { useLoading } from '../../../../../context/LoadingContext';
@@ -76,7 +76,7 @@ const PasswordPreferences = () => {
     return (
         <div className="password-preferences-screen">
             <h2 className="page-heading">
-                <a href="/organization" className="breadcrumb-link">Organization</a> . Password Preferences
+                <Link to="/organization" className="breadcrumb-link">Organization</Link> . Password Preferences
             </h2>
             <div className="preferences-form-container">
                 <fieldset className="preferences-fieldset">

@@ -50,10 +50,6 @@ const ViewCurrencyConfiguration = () => {
         currentPage * pageSize
     );
 
-    const handleRowClick = (currency) => {
-        console.log('Selected Currency:', currency);
-    };
-
     return (
         <div className="view-currency-configuration">
             <div className="table-controls">
@@ -93,7 +89,6 @@ const ViewCurrencyConfiguration = () => {
                         <tr
                             key={currency.code}
                             className="clickable-row"
-                            onClick={() => handleRowClick(currency)}
                         >
                             <td>{currency.name || ' '}</td>
                             <td>{currency.code || ' '}</td>

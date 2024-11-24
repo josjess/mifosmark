@@ -1,10 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import './BulkImport.css';
+import React, {useState, useEffect, useContext} from 'react';
+import {Link, useParams} from 'react-router-dom';
 import axios from 'axios';
+import { AuthContext } from '../../../../../context/AuthContext';
+import { useLoading } from '../../../../../context/LoadingContext';
+import { API_CONFIG } from '../../../../../config';
+import './BulkImport.css';
+import {FaDownload, FaUpload} from "react-icons/fa";
+import {FaArrowRotateRight} from "react-icons/fa6";
 
 const BulkImport = () => {
-    const { entityType } = useParams(); // Get the entity type from the URL
+    const { user } = useContext(AuthContext);
+    const { startLoading, stopLoading } = useLoading();
+
+    const { entityType } = useParams();
     const [offices, setOffices] = useState([]);
     const [staff, setStaff] = useState([]);
     const [selectedOffice, setSelectedOffice] = useState('');
@@ -13,7 +21,6 @@ const BulkImport = () => {
     const [file, setFile] = useState(null);
     const [uploadHistory, setUploadHistory] = useState([]);
 
-    // Map entityType to human-readable titles and additional fields
     const entityConfig = {
         offices: { title: 'Office' },
         users: { title: 'User', fields: ['office', 'staff'] },
@@ -24,7 +31,7 @@ const BulkImport = () => {
         chartofaccounts: { title: 'Chart of Accounts', fields: ['office', 'staff'] },
         centers: { title: 'Center', fields: ['office', 'staff'] },
         clients: { title: 'Client', fields: ['office', 'staff', 'legalForm'] },
-        employes: { title: 'Employee', fields: ['office'] },
+        employees: { title: 'Employee', fields: ['office'] },
         loanrepayments: { title: 'Loan Repayment', fields: ['office'] },
         savingstransactions: { title: 'Savings Transaction', fields: ['office'] },
         fixeddeposittransactions: { title: 'Fixed Deposit Transaction', fields: ['office'] },
@@ -33,130 +40,253 @@ const BulkImport = () => {
         guarantors: { title: 'Guarantor', fields: ['office'] },
     };
 
+    // console.log(entityType)
     const config = entityConfig[entityType.toLowerCase()] || { title: 'Import' };
 
-    // Fetch offices on component mount
     useEffect(() => {
         const fetchOffices = async () => {
-            const response = await axios.get('https://test.meysa.co.ke/fineract-provider/api/v1/offices');
-            setOffices(response.data);
+            startLoading();
+            try {
+                const response = await axios.get(`${API_CONFIG.baseURL}/offices`, {
+                    headers: {
+                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                        'Fineract-Platform-TenantId': 'default',
+                        'Content-Type': 'application/json',
+                    },
+                });
+                setOffices(response.data);
+            } catch (error) {
+                console.error('Error fetching offices:', error);
+            } finally {
+                stopLoading();
+            }
         };
         fetchOffices();
     }, []);
 
-    // Fetch staff when an office is selected
     useEffect(() => {
         if (selectedOffice) {
             const fetchStaff = async () => {
-                const response = await axios.get(
-                    `https://test.meysa.co.ke/fineract-provider/api/v1/staff?officeId=${selectedOffice}`
-                );
-                setStaff(response.data);
+                startLoading();
+                try {
+                    const response = await axios.get(
+                        `${API_CONFIG.baseURL}/staff?officeId=${selectedOffice}`,
+                        {
+                            headers: {
+                                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                                'Fineract-Platform-TenantId': 'default',
+                                'Content-Type': 'application/json',
+                            },
+                        }
+                    );
+                    setStaff(response.data);
+                } catch (error) {
+                    console.error('Error fetching staff:', error);
+                } finally {
+                    stopLoading();
+                }
             };
             fetchStaff();
         }
     }, [selectedOffice]);
 
-    // Fetch upload history
     useEffect(() => {
         const fetchUploadHistory = async () => {
-            const response = await axios.get(
-                `https://test.meysa.co.ke/fineract-provider/api/v1/imports?entityType=${entityType}`
-            );
-            setUploadHistory(response.data);
+            startLoading();
+            try {
+                const response = await axios.get(
+                    `${API_CONFIG.baseURL}/imports?entityType=${entityType}`,
+                    {
+                        headers: {
+                            Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                            'Fineract-Platform-TenantId': 'default',
+                            'Content-Type': 'application/json',
+                        },
+                    }
+                );
+                setUploadHistory(response.data);
+            } catch (error) {
+                console.error('Error fetching upload history:', error);
+            } finally {
+                stopLoading();
+            }
         };
         fetchUploadHistory();
     }, [entityType]);
 
     const handleFileUpload = async () => {
-        // Upload logic here
-        if (!file) return;
-        console.log('Uploading file:', file);
+        if (!file) {
+            alert('Please select a file before uploading.');
+            return;
+        }
+        startLoading();
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            await axios.post(
+                `${API_CONFIG.baseURL}/imports/upload?entityType=${entityType}`,
+                formData,
+                {
+                    headers: {
+                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                        'Fineract-Platform-TenantId': 'default',
+                        'Content-Type': 'multipart/form-data',
+                    },
+                }
+            );
+            // alert('File uploaded successfully!');
+            setFile(null);
+        } catch (error) {
+            console.error('Error uploading file:', error);
+            // alert('Failed to upload file.');
+        } finally {
+            stopLoading();
+        }
     };
 
     const handleDownloadTemplate = async () => {
-        // Download template logic
-        console.log('Downloading template for:', entityType);
+        const endpoint = `${API_CONFIG.baseURL}/${entityType}/downloadtemplate`;
+        const params = {
+            tenantIdentifier: 'default',
+            locale: 'en',
+            dateFormat: 'dd MMMM yyyy',
+        };
+
+        try {
+            startLoading();
+
+            const response = await axios.get(endpoint, {
+                params,
+                headers: {
+                    Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                    'Fineract-Platform-TenantId': 'default',
+                    'Content-Type': 'application/json',
+                },
+                responseType: 'blob',
+            });
+
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+
+            const contentDisposition = response.headers['content-disposition'];
+            const filename = contentDisposition
+                ? contentDisposition.split('filename=')[1]
+                : `${entityType}-template.xlsx`;
+
+            link.setAttribute('download', filename.replace(/"/g, ''));
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+
+        } catch (error) {
+            console.error('Error downloading template:', error);
+        } finally {
+            stopLoading();
+        }
     };
 
     return (
         <div className="bulk-import-page">
-            <h2 className="page-title">{config.title} Import</h2>
-
-            {/* Form for Download Template */}
-            <div className="form-section">
-                <h3>{config.title} Template</h3>
-                <div className="form-fields">
-                    {config.fields?.includes('office') && (
-                        <div className="form-group">
-                            <label>Office</label>
-                            <select
-                                value={selectedOffice}
-                                onChange={(e) => setSelectedOffice(e.target.value)}
-                            >
-                                <option value="">Select Office</option>
-                                {offices.map((office) => (
-                                    <option key={office.id} value={office.id}>
-                                        {office.nameDecorated}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                    )}
-                    {config.fields?.includes('staff') && (
-                        <div className="form-group">
-                            <label>Staff</label>
-                            <select
-                                value={selectedStaff}
-                                onChange={(e) => setSelectedStaff(e.target.value)}
-                                disabled={!selectedOffice}
-                            >
-                                <option value="">Select Staff</option>
-                                {staff.map((member) => (
-                                    <option key={member.id} value={member.id}>
-                                        {member.displayName}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                    )}
-                    {config.fields?.includes('legalForm') && (
-                        <div className="form-group">
-                            <label>Legal Form</label>
-                            <select
-                                value={legalForm}
-                                onChange={(e) => setLegalForm(e.target.value)}
-                            >
-                                <option value="">Select Legal Form</option>
-                                <option value="Entity">Entity</option>
-                                <option value="Person">Person</option>
-                            </select>
-                        </div>
-                    )}
+            <h2 className="page-heading">
+                <Link to="/organization" className="breadcrumb-link">Organization </Link><Link to="/bulk-imports" className="breadcrumb-link">. Bulk Imports </Link> . {config.title} Import
+            </h2>
+            <div className="bulk-import-form-container">
+                <div className="bulk-import-download-form">
+                    <h3 className="bulk-import-download-title">{config.title} Template</h3>
+                    <div className="bulk-import-form-fields">
+                        {config.fields?.includes('office') && (
+                            <div className="bulk-import-form-group">
+                                <label className="bulk-import-label">Office</label>
+                                <select
+                                    className="bulk-import-select"
+                                    value={selectedOffice}
+                                    onChange={(e) => setSelectedOffice(e.target.value)}
+                                >
+                                    <option value="">Select Office</option>
+                                    {offices.map((office) => (
+                                        <option key={office.id} value={office.id}>
+                                            {office.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+                        {config.fields?.includes('staff') && (
+                            <div className="bulk-import-form-group">
+                                <label className="bulk-import-label">Staff</label>
+                                <select
+                                    className="bulk-import-select"
+                                    value={selectedStaff}
+                                    onChange={(e) => setSelectedStaff(e.target.value)}
+                                    disabled={!selectedOffice}
+                                >
+                                    <option value="">Select Staff</option>
+                                    {staff.map((member) => (
+                                        <option key={member.id} value={member.id}>
+                                            {member.displayName}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+                        {config.fields?.includes('legalForm') && (
+                            <div className="bulk-import-form-group">
+                                <label className="bulk-import-label">Legal Form</label>
+                                <select
+                                    className="bulk-import-select"
+                                    value={legalForm}
+                                    onChange={(e) => setLegalForm(e.target.value)}
+                                >
+                                    <option value="">Select Legal Form</option>
+                                    <option value="Entity">Entity</option>
+                                    <option value="Person">Person</option>
+                                </select>
+                            </div>
+                        )}
+                    </div>
+                    <button
+                        className="bulk-import-download-button"
+                        onClick={handleDownloadTemplate}
+                    >
+                        <FaDownload className="icon"/> Download Template
+                    </button>
                 </div>
-                <button onClick={handleDownloadTemplate}>Download Template</button>
+
+                <div className="bulk-import-upload-form">
+                    <h3 className="bulk-import-upload-title">Upload {config.title}</h3>
+                    <div className="bulk-import-form-group">
+                        <label className="bulk-import-label">Select File</label>
+                        <input
+                            className="bulk-import-file-input"
+                            type="file"
+                            accept=".xlsx, .xls"
+                            onChange={(e) => setFile(e.target.files[0])}
+                        />
+                    </div>
+                    <button
+                        className="bulk-import-upload-button"
+                        onClick={handleFileUpload}
+                        disabled={!file}
+                    >
+                        <FaUpload className="icon"/> Upload
+                    </button>
+                </div>
             </div>
 
-            {/* Form for Upload */}
-            <div className="form-section">
-                <h3>Upload {config.title}</h3>
-                <div className="form-group">
-                    <label>Select File</label>
-                    <input
-                        type="file"
-                        accept=".xlsx, .xls"
-                        onChange={(e) => setFile(e.target.files[0])}
-                    />
+            <div className="bulk-import-table-section">
+                <div className="bulk-import-header">
+                    <h3 className="bulk-import-table-title">Documents</h3>
+                    <button
+                        className="bulk-import-refresh-button"
+                        // onClick={handleFileUpload}
+                        // disabled={!file}
+                    >
+                        <FaArrowRotateRight className="icon"/> Refresh
+                    </button>
                 </div>
-                <button onClick={handleFileUpload} disabled={!file}>
-                    Upload
-                </button>
-            </div>
-
-            {/* Upload History Table */}
-            <div className="table-section">
-                <h3>Upload History</h3>
-                <table>
+                <table className="bulk-import-table">
                     <thead>
                     <tr>
                         <th>Name</th>
@@ -170,20 +300,26 @@ const BulkImport = () => {
                     </tr>
                     </thead>
                     <tbody>
-                    {uploadHistory.map((entry, index) => (
-                        <tr key={index}>
-                            <td>{entry.name}</td>
-                            <td>{entry.importTime}</td>
-                            <td>{entry.endTime}</td>
-                            <td>{entry.completed ? 'Yes' : 'No'}</td>
-                            <td>{entry.totalRecords}</td>
-                            <td>{entry.successCount}</td>
-                            <td>{entry.failureCount}</td>
-                            <td>
-                                <button>Download</button>
-                            </td>
+                    {uploadHistory.length > 0 ? (
+                        uploadHistory.map((entry, index) => (
+                            <tr key={index}>
+                                <td>{entry.name}</td>
+                                <td>{entry.importTime}</td>
+                                <td>{entry.endTime}</td>
+                                <td>{entry.completed ? 'Yes' : 'No'}</td>
+                                <td>{entry.totalRecords}</td>
+                                <td>{entry.successCount}</td>
+                                <td>{entry.failureCount}</td>
+                                <td>
+                                    <button className="bulk-import-download-btn">Download</button>
+                                </td>
+                            </tr>
+                        ))
+                    ) : (
+                        <tr>
+                            <td colSpan="8" className="no-data">Ops! No Uploaded documents!</td>
                         </tr>
-                    ))}
+                    )}
                     </tbody>
                 </table>
             </div>

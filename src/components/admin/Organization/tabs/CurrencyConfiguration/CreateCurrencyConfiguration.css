@@ -1,0 +1,111 @@
+.create-edit-currencies-container {
+    padding: 20px;
+    background-color: #293f5e;
+    border-radius: 8px;
+    max-width: 600px;
+    margin: auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.create-edit-currencies-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.create-edit-currencies-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: center;
+    color: #fbfbfb;
+}
+
+.create-edit-currencies-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.create-edit-currencies-label {
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: #ffffff;
+}
+
+.create-edit-currencies-select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+    color: #333;
+}
+
+.create-edit-currencies-table-container {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #d3cdcd;
+    border-radius: 15px;
+}
+
+.create-edit-currencies-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.currency-column {
+    width: 50%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.currency-name {
+    font-size: 0.9rem;
+    color: #ffffff;
+}
+
+.currency-code {
+    font-size: 0.8rem;
+    color: #ffffff;
+    margin-left: 8px;
+}
+
+.create-edit-currencies-trash-icon {
+    float: right;
+    color: #d9534f;
+    cursor: pointer;
+    margin-left: 10px;
+    font-size: 1.3rem;
+}
+
+.create-edit-currencies-trash-icon:hover {
+    color: #c9302c;
+}
+
+.create-edit-currencies-actions {
+    display: flex;
+    justify-content: center;
+}
+
+.create-edit-currencies-submit {
+    padding: 12px 20px;
+    font-size: 1rem;
+    background-color: #70c30c;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.create-edit-currencies-submit:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.create-edit-currencies-submit:hover:not(:disabled) {
+    background-color: #619e17;
+}

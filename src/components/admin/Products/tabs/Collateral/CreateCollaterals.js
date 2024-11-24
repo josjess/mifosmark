@@ -62,7 +62,6 @@ const CreateCollateral = () => {
                 },
             });
             alert("Collateral created successfully!");
-            // Reset form fields
             setName("");
             setQuality("");
             setUnitType("");

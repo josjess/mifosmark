@@ -2,10 +2,15 @@ import React, { useState } from 'react';
 import ViewEmployees from './ViewEmployees';
 import CreateEmployee from './CreateEmployee';
 import ImportEmployees from './ImportEmployees';
-import { Link } from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 
 const ManageEmployees = () => {
     const [activeTab, setActiveTab] = useState('viewEmployees');
+    const navigate = useNavigate();
+
+    const handleFormSubmitSuccess = () => {
+        setActiveTab('viewEmployees');
+    };
 
     return (
         <div className="tab-products-page">
@@ -25,17 +30,28 @@ const ManageEmployees = () => {
                 >
                     Create Employee
                 </button>
+                {/*<button*/}
+                {/*    className={`tab-button ${activeTab === 'importEmployees' ? 'active' : ''}`}*/}
+                {/*    onClick={() => setActiveTab('importEmployees')}*/}
+                {/*>*/}
+                {/*    Import Employees*/}
+                {/*</button>*/}
                 <button
                     className={`tab-button ${activeTab === 'importEmployees' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('importEmployees')}
+                    onClick={() => {
+                        setActiveTab('importEmployees');
+                        navigate(`/bulk-imports/employees`);
+                    }}
                 >
-                    Import Employees
+                    Import Offices
                 </button>
             </div>
             <div className="tab-content">
-                {activeTab === 'viewEmployees' && <ViewEmployees />}
-                {activeTab === 'createEmployee' && <CreateEmployee />}
-                {activeTab === 'importEmployees' && <ImportEmployees />}
+                {activeTab === 'viewEmployees' && <ViewEmployees/>}
+                {activeTab === 'createEmployee' && (
+                    <CreateEmployee onFormSubmitSuccess={handleFormSubmitSuccess}/>
+                )}
+                {activeTab === 'importEmployees' && <ImportEmployees/>}
             </div>
         </div>
     );

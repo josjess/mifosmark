@@ -1,0 +1,75 @@
+.create-adhoc-query-container {
+    padding: 20px;
+    background-color: #293f5e;
+    border-radius: 10px;
+    max-width: 700px;
+    margin: 20px auto;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    font-family: 'Poppins', sans-serif;
+}
+
+.create-adhoc-query-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.create-adhoc-query-title {
+    text-align: center;
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #fff;
+}
+
+.create-adhoc-query-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.create-adhoc-query-label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+}
+
+.required {
+    color: red;
+    font-weight: bold;
+}
+
+.create-adhoc-query-input,
+.create-adhoc-query-select,
+.create-adhoc-query-textarea {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #fff;
+}
+
+.create-adhoc-query-textarea {
+    resize: none;
+    height: 80px;
+}
+
+.create-adhoc-query-submit {
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.create-adhoc-query-submit:hover {
+    background-color: #0056b3;
+}
+.create-adhoc-query-actions {
+    display: flex;
+    justify-content: flex-end;
+}

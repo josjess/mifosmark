@@ -1,0 +1,77 @@
+.create-fund-container {
+    padding: 20px;
+    background-color: #293f5e;
+    border-radius: 8px;
+    max-width: 500px;
+    margin: auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.create-fund-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.create-fund-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: center;
+    color: #ffffff;
+}
+
+.create-fund-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.create-fund-label {
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: #ffffff;
+}
+
+.create-fund-required {
+    color: red;
+    margin-left: 5px;
+}
+
+.create-fund-input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+    color: #333;
+}
+
+.create-fund-input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+.create-fund-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.create-fund-submit {
+    padding: 12px 20px;
+    font-size: 1rem;
+    background-color: #19670d;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.create-fund-submit:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.create-fund-submit:hover:not(:disabled) {
+    background-color: #5b9f08;
+}

@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
-import { AuthContext } from '../../context/AuthContext';
-import { API_CONFIG } from '../../config';
+import { AuthContext } from '../../../context/AuthContext';
+import { API_CONFIG } from '../../../config';
 import './MigrateOpeningBalances.css';
-import {useLoading} from "../../context/LoadingContext";
+import {useLoading} from "../../../context/LoadingContext";
 import {useNavigate} from "react-router-dom";
 
 const MigrateOpeningBalancesPage = () => {

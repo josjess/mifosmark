@@ -1,9 +1,9 @@
 import React, {useContext} from 'react';
 import { FaBell, FaCog } from 'react-icons/fa';
 import './Navbar.css';
-import { AuthContext } from '../context/AuthContext';
+import { AuthContext } from '../../context/AuthContext';
 import {useNavigate} from "react-router-dom";
-import {NotificationContext} from "../context/NotificationContext";
+import {NotificationContext} from "../../context/NotificationContext";
 
 const Navbar = () => {
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../../../../../context/AuthContext';
 import { useLoading } from '../../../../../context/LoadingContext';
@@ -113,7 +113,7 @@ const WorkingDays = () => {
     return (
         <div className="working-days-container">
             <h2 className="page-heading">
-                <a href="/organization" className="breadcrumb-link">Organization</a> . Working Days
+                <Link to="/organization" className="breadcrumb-link">Organization</Link> . Working Days
             </h2>
             <div className="working-days-form">
                 <fieldset className="working-days-fieldset">

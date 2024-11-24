@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../../../../../context/AuthContext';
 import { useLoading } from '../../../../../context/LoadingContext';
@@ -124,7 +124,7 @@ const BulkLoanReassignment = () => {
     return (
         <div className="bulk-loan-reassignment-page">
             <h2 className="page-heading">
-                <a href="/organization" className="breadcrumb-link">Organization</a> . Bulk Loan Reassignment
+                <Link to="/organization" className="breadcrumb-link">Organization</Link> . Bulk Loan Reassignment
             </h2>
             <div className="bulk-loan-reassignment-form-container">
                 <div className="bulk-loan-reassignment-field">

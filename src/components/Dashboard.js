@@ -6,7 +6,7 @@ import { useLoading } from '../context/LoadingContext';
 import {FaUser, FaExclamationTriangle, FaChartLine, FaBalanceScale, FaHandHoldingUsd, FaMoneyCheckAlt, FaUsers, FaUserPlus} from 'react-icons/fa';
 import './Dashboard.css';
 import {API_CONFIG} from "../config";
-import Sidebar from "./Sidebar";
+import Sidebar from "./Navigation/Sidebar";
 
 const Dashboard = () => {
     const { isAuthenticated, user } = useContext(AuthContext);

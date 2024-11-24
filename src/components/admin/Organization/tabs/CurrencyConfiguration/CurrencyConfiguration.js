@@ -6,6 +6,10 @@ import { Link } from 'react-router-dom';
 const CurrencyConfiguration = () => {
     const [activeTab, setActiveTab] = useState('viewCurrencies');
 
+    const handleTabSwitch = () => {
+        setActiveTab('viewCurrencies');
+    };
+
     return (
         <div className="tab-products-page">
             <h2 className="page-heading">
@@ -22,12 +26,14 @@ const CurrencyConfiguration = () => {
                     className={`tab-button ${activeTab === 'createCurrency' ? 'active' : ''}`}
                     onClick={() => setActiveTab('createCurrency')}
                 >
-                    Create/Edit Currency
+                    Create/Edit Currencies
                 </button>
             </div>
             <div className="tab-content">
                 {activeTab === 'viewCurrencies' && <ViewCurrencyConfiguration />}
-                {activeTab === 'createCurrency' && <CreateCurrencyConfiguration />}
+                {activeTab === 'createCurrency' && (
+                    <CreateCurrencyConfiguration onSuccess={handleTabSwitch} />
+                )}
             </div>
         </div>
     );

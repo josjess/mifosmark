@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../../../../../context/AuthContext';
 import { useLoading } from '../../../../../context/LoadingContext';
@@ -141,7 +141,7 @@ const StandingInstructionsHistory = () => {
     return (
         <div className="standing-instructions-history-container">
             <h2 className="page-heading">
-                <a href="/organization" className="breadcrumb-link">Organization</a> . Standing Instructions History
+                <Link to="/organization" className="breadcrumb-link">Organization</Link> . Standing Instructions History
             </h2>
             {showForm ? (
                 <div className="standing-instructions-history-form-container">

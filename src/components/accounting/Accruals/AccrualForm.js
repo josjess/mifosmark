@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import axios from 'axios';
-import { AuthContext } from '../../context/AuthContext';
-import { API_CONFIG } from '../../config';
+import { AuthContext } from '../../../context/AuthContext';
+import { API_CONFIG } from '../../../config';
 import './Accruals.css';
 import {useNavigate} from "react-router-dom";
 

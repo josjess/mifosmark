@@ -1,8 +1,8 @@
 import React, { useContext, useState } from 'react';
 import { FaUser, FaBuilding, FaUsers, FaSignOutAlt, FaWallet, FaCog, FaClipboardList} from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
-import { NotificationContext } from '../context/NotificationContext';
+import { AuthContext } from '../../context/AuthContext';
+import { NotificationContext } from '../../context/NotificationContext';
 import { TbChevronDown, TbChevronRight } from 'react-icons/tb';
 import './Sidebar.css';
 
@@ -74,13 +74,13 @@ const Sidebar = () => {
                     </div>
                     {openDropdown === 'reports' && (
                         <ul className="dropdown">
-                            <li onClick={() => navigate('/reports#reports/all')}>All</li>
-                            <li onClick={() => navigate('/#reports/clients')}>Clients</li>
-                            <li onClick={() => navigate('/#reports/loans')}>Loans</li>
-                            <li onClick={() => navigate('/#reports/savings')}>Savings</li>
-                            <li onClick={() => navigate('/#reports/funds')}>Funds</li>
-                            <li onClick={() => navigate('/#reports/accounting')}>Accounting</li>
-                            <li onClick={() => navigate('/#reports/xbrl')}>XBRL</li>
+                            <li onClick={() => navigate('/reports/all')}>All</li>
+                            <li onClick={() => navigate('/reports/clients')}>Clients</li>
+                            <li onClick={() => navigate('/reports/loans')}>Loans</li>
+                            <li onClick={() => navigate('/reports/savings')}>Savings</li>
+                            <li onClick={() => navigate('/reports/funds')}>Funds</li>
+                            <li onClick={() => navigate('/reports/accounting')}>Accounting</li>
+                            <li onClick={() => navigate('/reports/xbrl')}>XBRL</li>
                         </ul>
                     )}
                 </li>
