@@ -29,7 +29,7 @@ const Login = () => {
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': 'foursmiles',
                 },
                 body: JSON.stringify(loginData),
             });
