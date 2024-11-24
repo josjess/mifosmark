@@ -1,5 +1,5 @@
 let API_CONFIG = {
-    baseURL: 'https://test.meysa.co.ke/fineract-provider/api/v1',
+    baseURL: 'https://foursmiles.mifosconnect.com/fineract-provider/api/v1/',
 };
 
 export const loadConfig = async () => {
