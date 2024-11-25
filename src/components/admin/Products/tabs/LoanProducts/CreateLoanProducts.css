@@ -1,0 +1,327 @@
+.staged-form-create-loan-product {
+    margin: 20px auto;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.staged-form-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 30px;
+    text-align: center;
+}
+.staged-form-create-loan-product h4, h5 {
+    font-size: 20px;
+    margin-bottom: 20px;
+    margin-top: 10px;
+}
+.staged-form-stage-tracker {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.staged-form-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    flex: 1;
+}
+
+.staged-form-stage.staged-form-completed .staged-form-stage-circle {
+    background-color: #4caf50;
+    color: white;
+}
+
+.staged-form-stage.staged-form-active .staged-form-stage-circle {
+    border: 2px solid #007bff;
+    color: #007bff;
+}
+
+.staged-form-stage.staged-form-unvisited .staged-form-stage-circle {
+    background-color: #f1f1f1;
+    color: #cccccc;
+}
+
+.staged-form-stage .staged-form-stage-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid #cccccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-bottom: 10px;
+    background-color: #fff;
+    z-index: 1;
+    cursor: pointer;
+}
+
+.staged-form-stage .staged-form-stage-label {
+    font-size: 0.9rem;
+    color: #555555;
+}
+
+.staged-form-stage-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.staged-form-button-previous,
+.staged-form-button-next,
+.staged-form-button-preview {
+    padding: 10px 20px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.staged-form-button-previous {
+    background-color: #6c757d;
+    color: white;
+}
+
+.staged-form-button-next {
+    background-color: #007bff;
+    color: white;
+}
+
+.staged-form-button-preview {
+    background-color: #28a745;
+    color: white;
+}
+
+.staged-form-disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.staged-form-field {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    max-width: 500px;
+}
+
+.staged-form-field label {
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #4a4a4a;
+    font-size: 0.95rem;
+}
+
+.staged-form-input,
+.staged-form-select,
+.staged-form-textarea {
+    padding: 12px 15px;
+    font-size: 1rem;
+    border: 1px solid #dcdcdc;
+    border-radius: 6px;
+    background-color: #f9f9f9;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    color: #333;
+}
+
+.staged-form-input:focus,
+.staged-form-select:focus,
+.staged-form-textarea:focus {
+    outline: none;
+    border-color: #007bff;
+    background-color: #ffffff;
+    box-shadow: 0 2px 6px rgba(0, 123, 255, 0.2);
+}
+
+.staged-form-textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.staged-form-error {
+    border-color: #dc3545;
+    background-color: #ffe6e6;
+    box-shadow: 0 2px 6px rgba(220, 53, 69, 0.2);
+}
+
+.staged-form-required {
+    color: #e63946;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-left: 5px;
+}
+
+.staged-form-row {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    margin-bottom: 20px;
+    justify-content: space-between;
+}
+
+.staged-form-description {
+    margin-top: 10px;
+}
+
+.staged-form-field label input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+.staged-form-input:hover,
+.staged-form-select:hover,
+.staged-form-textarea:hover {
+    background-color: #f1f1f1;
+}
+
+.staged-form-stage-content {
+    padding: 20px 50px;
+}
+
+.staged-form-section-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #353a45;
+    margin-bottom: 20px;
+    margin-top: 30px;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 5px;
+}
+
+.staged-form-section-subtitle {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 15px;
+}
+.staged-form-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.staged-form-table th,
+.staged-form-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.staged-form-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+.staged-form-button-add {
+    background-color: #28a745;
+    color: #fff;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-left: auto;
+    transition: background-color 0.3s ease;
+}
+
+.staged-form-button-add:hover {
+    background-color: #218838;
+}
+.staged-form-icon-button-edit,
+.staged-form-icon-button-delete {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 5px;
+    margin-right: 15px;
+    transition: color 0.3s ease;
+}
+.staged-form-icon-button-edit {
+    color: #057a15;
+}
+.staged-form-icon-button-delete {
+    color: #b30000;
+}
+
+.staged-form-icon-button:last-child {
+    margin-right: 0;
+}
+
+.staged-modal-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 99999;
+}
+
+.staged-modal-content {
+    background: #fff;
+    padding: 30px;
+    border-radius: 15px;
+    width: 500px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    position: relative;
+}
+.modal-staged-form-title {
+    color: #2b2929;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    margin-bottom: 30px;
+}
+.staged-modal-content .staged-form-field {
+    margin-bottom: 20px;
+}
+.staged-form-modal-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 40px;
+}
+.staged-form-modal-button-submit,
+.staged-form-modal-button-cancel {
+    padding: 10px 20px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    color: white;
+}
+.staged-form-modal-button-submit {
+    background-color: #218838;
+}
+.staged-form-modal-button-cancel {
+    background-color: #e82939;
+}
+.staged-form-radio-group {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.staged-form-radio-option {
+    font-size: 24px;
+    margin-right: auto;
+    color: #272525;
+}
+
+.staged-form-create-loan-product input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+}
+
