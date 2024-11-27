@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useState} from 'react';
 import { FaPlus } from 'react-icons/fa';
 import './AddClient.css';
-import {useNavigate} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import { API_CONFIG } from '../../config';
 import axios from 'axios';
 import { useLoading } from '../../context/LoadingContext';
@@ -171,7 +171,9 @@ const AddClientForm = () => {
 
     return (
         <div className="form-container-client">
-            <h2>Onboard New Client</h2>
+            <h2 className="page-heading">
+                <Link to="/clients" className="breadcrumb-link">Clients</Link> . Onboard New Client
+            </h2>
 
             <div className="with-indicator">
                 <div className="stage-indicator">
@@ -273,7 +275,7 @@ const AddClientForm = () => {
                                     </div>
                                     <div className="form-group">
                                         <div className="checkbox">
-                                        <input type="checkbox" checked={isActive}
+                                            <input type="checkbox" checked={isActive}
                                                    onChange={() => setIsActive(!isActive)}/>
                                             <label>Activate Client</label>
                                         </div>
@@ -297,7 +299,7 @@ const AddClientForm = () => {
                                     </div>
                                     <div className="form-group">
                                         <div className="checkbox">
-                                        <input type="checkbox" checked={isActive}
+                                            <input type="checkbox" checked={isActive}
                                                    onChange={() => setIsActive(!isActive)}/>
                                             <label>Activate Client</label>
                                         </div>
@@ -306,7 +308,9 @@ const AddClientForm = () => {
                             )}
                             <div className="navigation-buttons">
                                 <button onClick={handleCancel} className="cancel-button">cancel</button>
-                                <button onClick={goNext} className="next-button" disabled={!((step === 1 && isStep1Complete))}>Next</button>
+                                <button onClick={goNext} className="next-button"
+                                        disabled={!((step === 1 && isStep1Complete))}>Next
+                                </button>
                             </div>
                         </>
                     )}
@@ -476,7 +480,8 @@ const AddClientForm = () => {
                                     <div className="form-row">
                                         <div className="form-group">
                                             <label>Submitted On</label>
-                                            <input type="date" defaultValue={new Date().toISOString().split('T')[0]} value={submittedOn}
+                                            <input type="date" defaultValue={new Date().toISOString().split('T')[0]}
+                                                   value={submittedOn}
                                                    onChange={(e) => setSubmittedOn(e.target.value)}
                                             />
                                         </div>
@@ -492,7 +497,9 @@ const AddClientForm = () => {
                             )}
                             <div className="navigation-buttons">
                                 <button onClick={goBack} className="back-button">Back</button>
-                                <button onClick={goNext} className="next-button" disabled={!((step === 2 && isStep2Complete))}>Next</button>
+                                <button onClick={goNext} className="next-button"
+                                        disabled={!((step === 2 && isStep2Complete))}>Next
+                                </button>
                             </div>
                         </>
                     )}
@@ -942,7 +949,8 @@ const AddClientForm = () => {
                             </div>
                             <div className="navigation-buttons">
                                 <button onClick={goBack} className="back-button">Back</button>
-                                <button type="submit" className="submit-button" disabled={!isFormComplete}>Submit</button>
+                                <button type="submit" className="submit-button" disabled={!isFormComplete}>Submit
+                                </button>
                             </div>
                         </>
                     )}

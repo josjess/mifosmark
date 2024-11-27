@@ -1,24 +1,82 @@
-.preference-form-container {
+.account-preference-form-container {
     padding: 30px;
     background-color: #ffffff;
     border-radius: 8px;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     max-width: 600px;
     margin: 20px auto;
-    text-align: center;
     font-family: 'Arial', sans-serif;
 }
 
-.form-title {
+.account-preference-form-title {
     font-size: 1.8em;
     font-weight: 600;
     color: #2c3e50;
     margin-bottom: 20px;
+    text-align: center;
 }
 
-.placeholder-message {
-    font-size: 1.2em;
-    font-style: italic;
-    color: #7f8c8d;
-    margin-top: 10px;
+.account-preference-form-group {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.account-preference-form-label {
+    font-size: 1em;
+    font-weight: 600;
+    color: #34495e;
+    margin-bottom: 8px;
+}
+
+.account-preference-form-label span {
+    color: #e74c3c;
+}
+
+.account-preference-form-select {
+    padding: 10px;
+    font-size: 1em;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    color: #333;
+    background-color: #fff;
+    box-shadow: inset 0px 1px 3px rgba(0, 0, 0, 0.1);
+    transition: border-color 0.3s ease;
+}
+
+.account-preference-form-select:focus {
+    border-color: #3498db;
+    outline: none;
+    box-shadow: 0px 0px 6px rgba(52, 152, 219, 0.3);
+}
+
+.account-preference-form-select:disabled {
+    background-color: #f8f8f8;
+    color: #aaa;
+}
+
+.account-preference-form-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.account-preference-form-submit-button {
+    padding: 12px 20px;
+    font-size: 1em;
+    font-weight: bold;
+    color: #fff;
+    background-color: #2ecc71;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.account-preference-form-submit-button:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+}
+
+.account-preference-form-submit-button:hover:not(:disabled) {
+    background-color: #27ae60;
 }

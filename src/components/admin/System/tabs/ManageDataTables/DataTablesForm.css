@@ -1,17 +1,342 @@
-.data-table-form {
-    background-color: #0f2b40;
+.data-table-form-container {
+    width: 90%;
+    max-width: 900px;
+    margin: 20px auto;
     padding: 20px;
-    border-radius: 10px;
+    font-family: 'Arial', sans-serif;
+    color: #333;
+}
+
+.data-table-form-columns-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 20px 0;
+}
+
+
+.data-table-form-columns-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #555;
+    display: inline-block;
+    margin: 20px 0 10px;
+}
+
+.data-table-form-add-column-button {
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.data-table-form-submit-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 30px;
+}
+
+.data-table-form-submit-button {
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+    background-color: #28a745;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s;
     text-align: center;
-    color: #ffffff;
 }
 
-.data-table-form h3 {
-    font-size: 1.5rem;
+.data-table-form-submit-button:hover {
+    background-color: #218838;
+}
+
+.data-table-form-submit-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+.data-table-form-add-column-button:hover {
+    background-color: #0056b3;
+}
+
+.data-table-form-section {
+    margin-bottom: 20px;
+}
+
+.data-table-form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.data-table-form-field {
+    flex: 1;
+    min-width: 200px;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+.data-table-form-field label {
+    font-size: 16px;
+    font-weight: bold;
     margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    color: #555;
 }
 
-.data-table-form p {
-    font-size: 1rem;
-    color: #b2b8c3;
+.data-table-form-datatable-name,
+.data-table-form-entity-type,
+.data-table-form-subtype,
+.data-table-form-multirow {
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #fff;
+    color: #333;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.data-table-form-datatable-name:focus,
+.data-table-form-entity-type:focus,
+.data-table-form-subtype:focus,
+.data-table-form-multirow:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.data-table-form-multirow {
+    margin-right: 10px;
+}
+
+.data-table-form-field label input[type="checkbox"] {
+    transform: scale(1.2);
+    margin-right: 10px;
+}
+
+.data-table-form-columns-table-container {
+    margin-top: 20px;
+    overflow-x: auto;
+    border-radius: 12px;
+    background-color: #f9f9f9;
+    padding: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.data-table-form-columns-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background-color: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.data-table-form-columns-table th {
+    padding: 15px;
+    text-align: left;
+    font-weight: bold;
+    color: #555;
+    background-color: #f1f1f1;
+    border-bottom: 2px solid #ddd;
+}
+
+.data-table-form-columns-table td {
+    padding: 12px;
+    color: #333;
+    border-bottom: 1px solid #eee;
+}
+
+.data-table-form-columns-table tr:hover {
+    background-color: #f7faff;
+    cursor: pointer;
+}
+
+.data-table-form-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.data-table-form-action-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    font-size: 18px;
+    color: #555;
+    transition: color 0.3s, transform 0.3s;
+}
+
+.data-table-form-action-button:hover {
+    color: #007bff;
+    transform: scale(1.1);
+}
+
+.data-table-form-indicator {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+    margin-right: 8px;
+}
+
+.indicator-yes {
+    background-color: #28a745;
+}
+
+.indicator-no {
+    background-color: #dc3545;
+}
+
+.data-table-form-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.data-table-form-modal {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 400px;
+    max-width: 90%;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.data-table-form-modal h5 {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
+    text-align: center;
+}
+
+.data-table-form-modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.data-table-form-modal-column-name,
+.data-table-form-modal-column-type,
+.data-table-form-modal-column-code,
+.data-table-form-modal-column-length {
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #fff;
+    color: #333;
+}
+
+.data-table-form-modal-column-name:focus,
+.data-table-form-modal-column-type:focus,
+.data-table-form-modal-column-code:focus,
+.data-table-form-modal-column-length:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.data-table-form-modal-checkboxes {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.data-table-form-modal-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 16px;
+    color: #555;
+    cursor: pointer;
+}
+
+.data-table-form-modal-checkbox input[type="checkbox"] {
+    transform: scale(1.2);
+    cursor: pointer;
+}
+
+.data-table-form-modal-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.data-table-form-modal-save-button,
+.data-table-form-modal-cancel-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.data-table-form-modal-save-button {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.data-table-form-modal-save-button:hover {
+    background-color: #0056b3;
+}
+
+.data-table-form-modal-cancel-button {
+    background-color: #6c757d;
+    color: #fff;
+}
+
+.data-table-form-modal-cancel-button:hover {
+    background-color: #5a6268;
+}
+
+.data-table-form-container input,
+.data-table-form-container select,
+.data-table-form-modal input,
+.data-table-form-modal select {
+    font-size: 16px;
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background: #fff;
+    color: #333;
+}
+
+.data-table-form-container input:focus,
+.data-table-form-container select:focus,
+.data-table-form-modal input:focus,
+.data-table-form-modal select:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+
+.data-table-form-container input::placeholder,
+.data-table-form-modal input::placeholder {
+    color: #888;
+    font-size: 16px;
 }

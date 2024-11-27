@@ -1,18 +1,327 @@
-import React from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { AuthContext } from '../../../../../context/AuthContext';
+import { useLoading } from '../../../../../context/LoadingContext';
+import { API_CONFIG } from '../../../../../config';
+import { FaTrash } from 'react-icons/fa';
 import './HookForm.css';
 
 const HookForm = () => {
+    const { user } = useContext(AuthContext);
+    const { startLoading, stopLoading } = useLoading();
+
+    const [hookTemplates, setHookTemplates] = useState([]);
+    const [groupings, setGroupings] = useState([]);
+    const [formData, setFormData] = useState({
+        hookTemplate: '',
+        displayName: '',
+        isActive: false,
+        contentType: '',
+        payloadUrl: '',
+        events: [],
+    });
+    const [showEventModal, setShowEventModal] = useState(false);
+    const [eventData, setEventData] = useState({
+        grouping: '',
+        entity: '',
+        action: '',
+    });
+    const [filteredEntities, setFilteredEntities] = useState([]);
+    const [filteredActions, setFilteredActions] = useState([]);
+
+    useEffect(() => {
+        fetchHookTemplate();
+    }, []);
+
+    const fetchHookTemplate = async () => {
+        startLoading();
+        try {
+            const response = await fetch(`${API_CONFIG.baseURL}/hooks/template`, {
+                method: 'GET',
+                headers: {
+                    Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                    'Fineract-Platform-TenantId': 'default',
+                    'Content-Type': 'application/json',
+                },
+            });
+            const data = await response.json();
+            setHookTemplates(data.templates);
+            setGroupings(data.groupings);
+        } catch (error) {
+            console.error('Error fetching hook templates:', error);
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const handleFieldChange = (field, value) => {
+        setFormData((prev) => ({ ...prev, [field]: value }));
+    };
+
+    const handleEventChange = (field, value) => {
+        setEventData((prev) => ({ ...prev, [field]: value }));
+
+        if (field === 'grouping') {
+            const selectedGrouping = groupings.find((group) => group.name === value);
+            setFilteredEntities(selectedGrouping ? selectedGrouping.entities : []);
+            setEventData((prev) => ({ ...prev, entity: '', action: '' }));
+            setFilteredActions([]);
+        } else if (field === 'entity') {
+            const selectedEntity = filteredEntities.find((entity) => entity.name === value);
+            setFilteredActions(selectedEntity ? selectedEntity.actions : []);
+            setEventData((prev) => ({ ...prev, action: '' }));
+        }
+    };
+
+    const addEvent = () => {
+        setFormData((prev) => ({
+            ...prev,
+            events: [...prev.events, { entity: eventData.entity, action: eventData.action }],
+        }));
+        setShowEventModal(false);
+        setEventData({ grouping: '', entity: '', action: '' });
+    };
+
+    const deleteEvent = (index) => {
+        const updatedEvents = [...formData.events];
+        updatedEvents.splice(index, 1);
+        setFormData((prev) => ({ ...prev, events: updatedEvents }));
+    };
+
+    const handleSubmit = async () => {
+        startLoading();
+        try {
+            const payload = { ...formData };
+            const response = await fetch(`${API_CONFIG.baseURL}/hooks`, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                    'Fineract-Platform-TenantId': 'default',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (response.ok) {
+                alert('Hook created successfully!');
+                setFormData({
+                    hookTemplate: '',
+                    displayName: '',
+                    isActive: false,
+                    contentType: '',
+                    payloadUrl: '',
+                    events: [],
+                });
+            } else {
+                const error = await response.json();
+                console.error('Error creating hook:', error);
+            }
+        } catch (error) {
+            console.error('Error submitting hook form:', error);
+        } finally {
+            stopLoading();
+        }
+    };
+
     return (
         <div className="hook-form-container">
-            <h3 className="form-title">Create a New Hook</h3>
-            <div className="coming-soon-placeholder">
-                <p>
-                    <strong>Form functionality coming soon!</strong>
-                </p>
-                <p>
-                    This feature will allow you to create and configure new hooks. Stay tuned for updates!
-                </p>
-            </div>
+            <form>
+                <div className="hook-form-fields">
+                    <div className="hook-row">
+                        <div className="hook-field">
+                            <label>
+                                Hook Template <span>*</span>
+                            </label>
+                            <select
+                                value={formData.hookTemplate}
+                                onChange={(e) => handleFieldChange('hookTemplate', e.target.value)}
+                                required
+                            >
+                                <option value="">Select Template</option>
+                                {hookTemplates.map((template) => (
+                                    <option key={template.id} value={template.name}>
+                                        {template.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="hook-field">
+                            <label>
+                                Display Name <span>*</span>
+                            </label>
+                            <input
+                                type="text"
+                                value={formData.displayName}
+                                onChange={(e) => handleFieldChange('displayName', e.target.value)}
+                                placeholder="Enter display name"
+                                required
+                            />
+                        </div>
+                    </div>
+                    <div className="hook-row">
+                        <div className="hook-field">
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    checked={formData.isActive}
+                                    onChange={(e) => handleFieldChange('isActive', e.target.checked)}
+                                />   Is Active
+                            </label>
+                        </div>
+                    </div>
+                    <div className="hook-row">
+                        <div className="hook-field">
+                            <label>
+                                Content Type <span>*</span>
+                            </label>
+                            <select
+                                value={formData.contentType}
+                                onChange={(e) => handleFieldChange('contentType', e.target.value)}
+                                required
+                            >
+                                <option value="">Select Content Type</option>
+                                <option value="json">JSON</option>
+                                <option value="form">Form</option>
+                            </select>
+                        </div>
+                        <div className="hook-field">
+                            <label>
+                                Payload URL <span>*</span>
+                            </label>
+                            <input
+                                type="url"
+                                value={formData.payloadUrl}
+                                onChange={(e) => handleFieldChange('payloadUrl', e.target.value)}
+                                placeholder="Enter Payload URL"
+                                required
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <div className="hook-events-section">
+                    <div className="hook-events-header">
+                        <h4>Events</h4>
+                        <button
+                            type="button"
+                            className="hook-add-event-button"
+                            onClick={() => setShowEventModal(true)}
+                        >
+                            Add Event
+                        </button>
+                    </div>
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Entity Name</th>
+                            <th>Action Name</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {formData.events.map((event, index) => (
+                            <tr key={index}>
+                                <td>{event.entity}</td>
+                                <td>{event.action}</td>
+                                <td>
+                                    <button
+                                        type="button"
+                                        onClick={() => deleteEvent(index)}
+                                        className="delete-event-button"
+                                    >
+                                        <FaTrash/>
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div className="hook-submit-container">
+                    <button
+                        type="button"
+                        className="hook-submit-button"
+                        onClick={handleSubmit}
+                        disabled={
+                            !formData.hookTemplate ||
+                            !formData.displayName ||
+                            !formData.contentType ||
+                            !formData.payloadUrl
+                        }
+                    >
+                        Submit Hook
+                    </button>
+                </div>
+            </form>
+
+            {showEventModal && (
+                <div className="hook-modal-backdrop" onClick={() => setShowEventModal(false)}>
+                    <div className="hook-modal" onClick={(e) => e.stopPropagation()}>
+                        <h4>Add Event</h4>
+                        <div className="hook-modal-field">
+                            <label>
+                                Select Grouping <span>*</span>
+                            </label>
+                            <select
+                                value={eventData.grouping}
+                                onChange={(e) => handleEventChange('grouping', e.target.value)}
+                                required
+                            >
+                                <option value="">Select Grouping</option>
+                                {groupings.map((group) => (
+                                    <option key={group.name} value={group.name}>
+                                        {group.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="hook-modal-field">
+                            <label>
+                                Select Entity <span>*</span>
+                            </label>
+                            <select
+                                value={eventData.entity}
+                                onChange={(e) => handleEventChange('entity', e.target.value)}
+                                required
+                                disabled={!filteredEntities.length}
+                            >
+                                <option value="">Select Entity</option>
+                                {filteredEntities.map((entity) => (
+                                    <option key={entity.name} value={entity.name}>
+                                        {entity.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="hook-modal-field">
+                            <label>
+                                Select Action <span>*</span>
+                            </label>
+                            <select
+                                value={eventData.action}
+                                onChange={(e) => handleEventChange('action', e.target.value)}
+                                required
+                                disabled={!filteredActions.length}
+                            >
+                                <option value="">Select Action</option>
+                                {filteredActions.map((action, index) => (
+                                    <option key={index} value={action}>
+                                        {action}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="hook-modal-actions">
+                            <button type="button" onClick={() => setShowEventModal(false)}>
+                                Cancel
+                            </button>
+                            <button type="button" onClick={addEvent}>
+                                Add Event
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

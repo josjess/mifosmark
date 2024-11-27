@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useState} from 'react';
-import { useNavigate } from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 import './AddGroup.css';
 import { useLoading } from '../../context/LoadingContext';
 import axios from 'axios';
@@ -85,8 +85,9 @@ const AddGroupForm = () => {
 
     return (
         <div className="form-container-client add-group-form">
-            <h2>Add Group</h2>
-
+            <h2 className="page-heading">
+                <Link to="/groups" className="breadcrumb-link">Groups</Link> . Add Group
+            </h2>
             <div className="with-indicator">
                 <form className="client-form">
                     <div className="form-row">
@@ -166,15 +167,15 @@ const AddGroupForm = () => {
                         </div>
                     </div>
 
-                    <div className="form-group">
+                    <div className="">
                         <div className="checkbox">
-                            <input
+                            <label><input
                                 type="checkbox"
                                 checked={isActive}
                                 onChange={(e) => setIsActive(e.target.checked)}
                                 className="checkbox-input"
                             />
-                            <label>Activate</label>
+                                Activate</label>
                         </div>
                     </div>
 

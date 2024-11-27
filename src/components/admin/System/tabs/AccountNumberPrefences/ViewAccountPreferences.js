@@ -41,8 +41,9 @@ const ViewAccountNumberPreferencesTable = () => {
     };
 
     const filteredPreferences = () =>
-        preferences.filter((preference) =>
-            preference.name.toLowerCase().includes(filter.toLowerCase())
+        preferences.filter(
+            (preference) =>
+                preference.accountType?.value?.toLowerCase().includes(filter.toLowerCase())
         );
 
     const paginatedData = filteredPreferences().slice(
@@ -88,7 +89,7 @@ const ViewAccountNumberPreferencesTable = () => {
                 {paginatedData.length > 0 ? (
                     paginatedData.map((preference) => (
                         <tr key={preference.id}>
-                            <td>{preference.name}</td>
+                            <td>{preference.accountType?.value || 'N/A'}</td>
                         </tr>
                     ))
                 ) : (

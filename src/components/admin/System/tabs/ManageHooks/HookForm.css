@@ -2,34 +2,235 @@
     padding: 20px;
     background-color: #f9f9fb;
     border-radius: 8px;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    max-width: 600px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
     margin: 50px auto;
+    font-family: 'Arial', sans-serif;
 }
 
-.form-title {
-    font-size: 1.8em;
+.hook-form-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.hook-row {
+    display: flex;
+    gap: 20px;
+}
+
+.hook-field {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.hook-field label {
+    font-size: 16px;
     font-weight: bold;
-    color: #2c3e50;
+    margin-bottom: 8px;
+    color: #34495e;
+}
+
+.hook-field input,
+.hook-field select {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #dcdcdc;
+    border-radius: 5px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.hook-field input:focus,
+.hook-field select:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 4px rgba(0, 123, 255, 0.3);
+}
+
+.hook-field input::placeholder {
+    color: #999;
+}
+
+.hook-events-section {
+    margin-top: 30px;
+}
+
+.hook-events-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.hook-events-header h4 {
+    font-size: 20px;
+    color: #34495e;
+}
+
+.hook-add-event-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.hook-add-event-button:hover {
+    background-color: #0056b3;
+}
+
+.hook-events-section table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.hook-events-section th,
+.hook-events-section td {
+    text-align: left;
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+.hook-events-section th {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+}
+
+.hook-events-section tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.delete-event-button {
+    padding: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #e74c3c;
+    font-size: 16px;
+}
+
+.delete-event-button:hover {
+    color: #c0392b;
+}
+
+.hook-submit-container {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.hook-submit-button {
+    padding: 12px 20px;
+    font-size: 16px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.hook-submit-button:hover {
+    background-color: #218838;
+}
+
+.hook-submit-button:disabled {
+    background-color: #d4d4d4;
+    cursor: not-allowed;
+}
+
+.hook-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.hook-modal {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.hook-modal h4 {
+    font-size: 20px;
+    margin-bottom: 20px;
+    color: #34495e;
+    text-align: center;
+}
+
+.hook-modal-field {
     margin-bottom: 20px;
 }
 
-.coming-soon-placeholder {
-    padding: 20px;
-    border: 2px dashed #3498db;
-    border-radius: 8px;
-    background-color: #f7f9fc;
-    color: #2c3e50;
-}
-
-.coming-soon-placeholder p {
-    margin: 0;
-    font-size: 1.1em;
-    line-height: 1.5;
-}
-
-.coming-soon-placeholder strong {
+.hook-modal-field label {
+    display: block;
+    font-size: 16px;
     font-weight: bold;
-    color: #007bff;
+    margin-bottom: 8px;
+    color: #34495e;
+}
+
+.hook-modal-field select {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #dcdcdc;
+    border-radius: 5px;
+}
+
+.hook-modal-field select:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 4px rgba(0, 123, 255, 0.3);
+}
+
+.hook-modal-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.hook-modal-actions button {
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.hook-modal-actions button:first-child {
+    background-color: #6c757d;
+    color: white;
+}
+
+.hook-modal-actions button:first-child:hover {
+    background-color: #5a6268;
+}
+
+.hook-modal-actions button:last-child {
+    background-color: #007bff;
+    color: white;
+}
+
+.hook-modal-actions button:last-child:hover {
+    background-color: #0056b3;
 }
