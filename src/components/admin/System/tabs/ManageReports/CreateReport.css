@@ -1,22 +1,256 @@
 .report-form-container {
     padding: 20px;
-    background-color: #ffffff;
+    background-color: #f9f9fb;
     border-radius: 8px;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    margin: 50px auto;
     font-family: 'Arial', sans-serif;
-    text-align: center;
 }
 
-.form-title {
-    font-size: 1.5em;
-    color: #2c3e50;
+.report-fields-section {
+    margin-bottom: 30px;
+}
+
+.report-row {
+    display: flex;
+    gap: 20px;
     margin-bottom: 20px;
+}
+
+.report-field {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.report-field label {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #34495e;
+}
+
+.report-field input,
+.report-field select,
+.report-field textarea {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #dcdcdc;
+    border-radius: 5px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.report-field textarea {
+    resize: none;
+    height: 100px;
+    margin-bottom: 30px;
+}
+
+.report-field input:focus,
+.report-field select:focus,
+.report-field textarea:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 4px rgba(0, 123, 255, 0.3);
+}
+
+.report-field-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 16px;
+}
+
+.report-field-checkbox input[type="checkbox"] {
+    transform: scale(1.2);
+    cursor: pointer;
+}
+
+.report-parameters-section {
+    margin-top: 30px;
+}
+
+.parameters-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.parameters-header h4 {
+    font-size: 20px;
+    color: #34495e;
+}
+
+.add-parameter-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.add-parameter-button:hover {
+    background-color: #0056b3;
+}
+
+.report-form-container table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.report-form-container th, td {
+    text-align: left;
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+.report-form-container th {
+    background-color: #007bff;
+    color: white;
     font-weight: bold;
 }
 
-.placeholder-text {
-    font-size: 1em;
-    color: #7f8c8d;
-    margin: 20px 0;
-    font-style: italic;
+.report-form-container tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.edit-parameter-button,
+.delete-parameter-button {
+    padding: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.edit-parameter-button {
+    color: #007bff;
+}
+
+.delete-parameter-button {
+    color: #e74c3c;
+}
+
+.edit-parameter-button:hover {
+    color: #0056b3;
+}
+
+.delete-parameter-button:hover {
+    color: #c0392b;
+}
+
+.submit-container {
+    margin-top: 30px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.submit-button {
+    padding: 12px 20px;
+    font-size: 16px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.submit-button:hover {
+    background-color: #218838;
+}
+
+.submit-button:disabled {
+    background-color: #d4d4d4;
+    cursor: not-allowed;
+}
+
+.parameter-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.parameter-modal {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.parameter-modal h4 {
+    font-size: 20px;
+    margin-bottom: 20px;
+    color: #34495e;
+    text-align: center;
+}
+
+.parameter-modal-field {
+    margin-bottom: 20px;
+}
+
+.parameter-modal-field label {
+    display: block;
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #34495e;
+}
+
+.parameter-modal-field select,
+.parameter-modal-field input {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #dcdcdc;
+    border-radius: 5px;
+}
+
+.parameter-modal-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.parameter-modal-actions button {
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.parameter-modal-actions button:first-child {
+    background-color: #6c757d;
+    color: white;
+}
+
+.parameter-modal-actions button:first-child:hover {
+    background-color: #5a6268;
+}
+
+.parameter-modal-actions button:last-child {
+    background-color: #007bff;
+    color: white;
+}
+
+.parameter-modal-actions button:last-child:hover {
+    background-color: #0056b3;
 }

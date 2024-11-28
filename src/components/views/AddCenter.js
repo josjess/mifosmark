@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useState} from 'react';
-import { useNavigate } from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 import './AddCenter.css';
 import { useLoading } from '../../context/LoadingContext';
 import axios from 'axios';
@@ -81,7 +81,9 @@ const AddCenterForm = () => {
 
     return (
         <div className="form-container-client add-center-form">
-            <h2>Add Center</h2>
+            <h2 className="page-heading">
+                <Link to="/centers" className="breadcrumb-link">Centers</Link> . Add Center
+            </h2>
             <div className="with-indicator">
                 <form className="client-form" onSubmit={handleSubmit}>
                     <div className="form-row">

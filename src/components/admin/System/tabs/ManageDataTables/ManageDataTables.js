@@ -6,6 +6,14 @@ import {Link} from "react-router-dom";
 
 const ManageDataTables = () => {
     const [activeTab, setActiveTab] = useState('viewTables');
+    const [newTableIdentifier, setNewTableIdentifier] = useState(null);
+
+    const handleTabChange = (tab, data = {}) => {
+        setActiveTab(tab);
+        if (tab === 'viewTables' && data.resourceIdentifier) {
+            setNewTableIdentifier(data.resourceIdentifier);
+        }
+    };
 
     return (
         <div className="manage-data-tables-page">
@@ -15,19 +23,23 @@ const ManageDataTables = () => {
             <div className="tabs-container">
                 <button
                     className={`tab-button ${activeTab === 'viewTables' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('viewTables')}
+                    onClick={() => handleTabChange('viewTables')}
                 >
                     View Data Tables
                 </button>
                 <button
                     className={`tab-button ${activeTab === 'addTable' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('addTable')}
+                    onClick={() => handleTabChange('addTable')}
                 >
                     Create Data Table
                 </button>
             </div>
             <div className="tab-content">
-                {activeTab === 'viewTables' ? <DataTableView /> : <DataTableForm />}
+                {activeTab === 'viewTables' ? (
+                    <DataTableView newTableIdentifier={newTableIdentifier} />
+                ) : (
+                    <DataTableForm setActiveTab={handleTabChange} />
+                )}
             </div>
         </div>
     );

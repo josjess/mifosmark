@@ -44,6 +44,10 @@ const Centers = () => {
         navigate('/addcenter');
     };
 
+    const handleImportCentersClick = () => {
+        navigate('/bulk-imports/centers');
+    };
+
     const handlePreviousPage = () => {
         if (currentPage > 1) setCurrentPage(currentPage - 1);
     };
@@ -66,7 +70,7 @@ const Centers = () => {
             <div className="view-header">
                 <h2 className={'view-title'}>Centers</h2>
                 <div className="action-buttons">
-                    <button className="import-button">Import Centers</button>
+                    <button className="import-button" onClick={handleImportCentersClick}>Import Centers</button>
                     <button className="add-button" onClick={handleAddCenterClick}>
                         Add Center
                     </button>

@@ -1,17 +1,206 @@
-.workflow-jobs-tab {
+.workflow-jobs-container {
     padding: 20px;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-family: 'Arial', sans-serif;
 }
 
-.workflow-jobs-tab h3 {
+.workflow-jobs-container h3 {
     font-size: 1.5rem;
     color: #333;
     margin-bottom: 10px;
 }
 
-.workflow-jobs-tab p {
+.styled-select {
+    width: 100%;
+    padding: 10px;
     font-size: 1rem;
-    color: #666;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    transition: border-color 0.3s, box-shadow 0.3s;
 }
+
+.styled-select:focus,
+.styled-select:hover {
+    border-color: #007bff;
+    box-shadow: 0 0 4px rgba(0, 123, 255, 0.3);
+    outline: none;
+}
+.job-name-section {
+    display: flex;
+    flex-direction: column;
+}
+.job-name-section label {
+    font-weight: bold;
+    font-size: 1rem;
+    margin-right: 10px;
+    margin-bottom: 15px;
+}
+
+.job-name-section select {
+    padding: 10px;
+    font-size: 1rem;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    max-width: 400px;
+}
+
+.link-step-button,
+.apply-changes-button {
+    margin: 15px 0;
+    padding: 10px 20px;
+    border-radius: 20px;
+    border: none;
+    color: #fff;
+    background-color: #007bff;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.link-step-button:hover,
+.apply-changes-button:hover {
+    background-color: #0056b3;
+}
+
+.linked-steps-table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+    background-color: #fff;
+}
+
+.linked-steps-table th,
+.linked-steps-table td {
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #ddd;
+}
+
+.linked-steps-table th {
+    background-color: #007bff;
+    color: white;
+}
+.workflow-jobs-container button {
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+.delete-step-button {
+    background: none;
+    border: none;
+    color: #e74c3c;
+    cursor: pointer;
+}
+
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 12px;
+    width: 450px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.modal-header h4 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #333;
+    margin: 0;
+}
+
+.modal-body {
+    margin-top: 15px;
+}
+
+.modal-label {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #555;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.styled-select {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background: #f9f9f9;
+    color: #333;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.styled-select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 6px rgba(0, 123, 255, 0.3);
+    outline: none;
+}
+
+.styled-select:hover {
+    border-color: #555;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.modal-cancel-button {
+    background-color: #6c757d;
+    color: white;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.modal-cancel-button:hover {
+    background-color: #5a6268;
+}
+
+.modal-submit-button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.modal-submit-button:hover {
+    background-color: #0056b3;
+}
+
+.modal-submit-button:disabled {
+    background-color: #918b8b;
+    color: #332d2d;
+    cursor: not-allowed;
+}
+

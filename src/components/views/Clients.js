@@ -45,6 +45,10 @@ const Clients = () => {
         navigate('/addclient');
     };
 
+    const handleImportClientClick = () => {
+        navigate('/bulk-imports/clients');
+    };
+
     const handlePreviousPage = () => {
         if (currentPage > 1) setCurrentPage(currentPage - 1);
     };
@@ -67,7 +71,7 @@ const Clients = () => {
             <div className="view-header">
                 <h2 className={'view-title'}>Clients</h2>
                 <div className="action-buttons">
-                    <button className="import-button">Import Clients</button>
+                    <button className="import-button" onClick={handleImportClientClick}>Import Clients</button>
                     <button className="add-button" onClick={handleAddClientClick}>
                         Add New Client
                     </button>
