@@ -29,50 +29,11 @@ const CreateLoanProducts = () => {
         type: "",
         data: null,
     });
-
     const [loanCycleData, setLoanCycleData] = useState({
         principal: [],
         repayments: [],
         interest: [],
     });
-
-    const openModal = (type, data = null) => {
-        setModalState({ isOpen: true, type, data });
-    };
-
-    const closeModal = () => {
-        setModalState({ isOpen: false, type: "", data: null });
-    };
-
-    const handleSubmitModalData = (newData) => {
-        setLoanCycleData((prevData) => {
-            if (!modalState.type) {
-                console.warn("modalState.type is not defined");
-                return prevData;
-            }
-
-            const updatedData = Array.isArray(prevData[modalState.type])
-                ? [...prevData[modalState.type]]
-                : [];
-
-            if (modalState.data?.id) {
-                const index = updatedData.findIndex((item) => item.id === modalState.data.id);
-                if (index > -1) {
-                    updatedData[index] = { ...newData, id: modalState.data.id };
-                } else {
-                    console.warn("No matching item found for editing");
-                }
-            } else {
-                const newItem = { ...newData, id: Date.now() };
-                updatedData.push(newItem);
-            }
-
-            return { ...prevData, [modalState.type]: updatedData };
-        });
-
-        closeModal();
-    };
-
 
     useEffect(() => {
         if (modalState.isOpen) {
@@ -86,36 +47,6 @@ const CreateLoanProducts = () => {
             setIsSubmitDisabled(!hasRequiredFields);
         }
     }, [modalState.isOpen, modalState.data]);
-
-    const handleEditCycle = (type, index) => {
-        const itemToEdit = loanCycleData[type][index];
-        if (!itemToEdit) {
-            console.warn(`No item found at index ${index} for type ${type}`);
-            return;
-        }
-        openModal(type, itemToEdit);
-    };
-
-    const handleDeleteCycle = (type, id) => {
-        const keyMap = {
-            principal: "principal",
-            repayments: "repayments",
-            interest: "interest",
-        };
-        const dataKey = keyMap[type];
-
-        if (!dataKey) {
-            console.warn(`Unknown type: ${type}`);
-            return;
-        }
-
-        if (window.confirm("Are you sure you want to delete this item?")) {
-            setLoanCycleData((prevData) => ({
-                ...prevData,
-                [dataKey]: prevData[dataKey].filter((item) => item.id !== id),
-            }));
-        }
-    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -159,9 +90,35 @@ const CreateLoanProducts = () => {
         fetchData();
     }, []);
 
-    useEffect(() => {
-        validateStage();
-    }, [currentStage, formData]);
+    const handleEditCycle = (type, index) => {
+        const itemToEdit = loanCycleData[type][index];
+        if (!itemToEdit) {
+            console.warn(`No item found at index ${index} for type ${type}`);
+            return;
+        }
+        openModal(type, itemToEdit);
+    };
+
+    const handleDeleteCycle = (type, id) => {
+        const keyMap = {
+            principal: "principal",
+            repayments: "repayments",
+            interest: "interest",
+        };
+        const dataKey = keyMap[type];
+
+        if (!dataKey) {
+            console.warn(`Unknown type: ${type}`);
+            return;
+        }
+
+        if (window.confirm("Are you sure you want to delete this item?")) {
+            setLoanCycleData((prevData) => ({
+                ...prevData,
+                [dataKey]: prevData[dataKey].filter((item) => item.id !== id),
+            }));
+        }
+    };
 
     const handleFieldChange = (stage, field, value) => {
         setFormData((prev) => ({
@@ -196,30 +153,9 @@ const CreateLoanProducts = () => {
         }));
     };
 
-    const validateStage = () => {
-        const fields = formData[stages[currentStage]] || {};
-        const currentErrors = {};
-
-        for (const [key, value] of Object.entries(fields)) {
-            const isFieldRequired = document.querySelector(`[name="${key}"]`)?.required;
-            if (isFieldRequired && (!value || value.trim() === "")) {
-                currentErrors[key] = true;
-            }
-        }
-
-        setErrors((prev) => ({
-            ...prev,
-            [stages[currentStage]]: currentErrors,
-        }));
-        setIsNextDisabled(Object.keys(currentErrors).length > 0);
-    };
-
-
     const handleNext = () => {
-        if (!isNextDisabled) {
-            setCompletedStages((prev) => new Set([...prev, stages[currentStage]]));
-            setCurrentStage((prev) => prev + 1);
-        }
+        setCompletedStages((prev) => new Set([...prev, stages[currentStage]]));
+        setCurrentStage((prev) => prev + 1);
     };
 
     const handlePrevious = () => {
@@ -228,6 +164,43 @@ const CreateLoanProducts = () => {
 
     const handlePreview = () => {
         console.log("Preview Data:", formData);
+    };
+
+    const openModal = (type, data = null) => {
+        setModalState({ isOpen: true, type, data });
+    };
+
+    const closeModal = () => {
+        setModalState({ isOpen: false, type: "", data: null });
+    };
+
+    const handleSubmitModalData = (newData) => {
+        setLoanCycleData((prevData) => {
+            if (!modalState.type) {
+                console.warn("modalState.type is not defined");
+                return prevData;
+            }
+
+            const updatedData = Array.isArray(prevData[modalState.type])
+                ? [...prevData[modalState.type]]
+                : [];
+
+            if (modalState.data?.id) {
+                const index = updatedData.findIndex((item) => item.id === modalState.data.id);
+                if (index > -1) {
+                    updatedData[index] = { ...newData, id: modalState.data.id };
+                } else {
+                    console.warn("No matching item found for editing");
+                }
+            } else {
+                const newItem = { ...newData, id: Date.now() };
+                updatedData.push(newItem);
+            }
+
+            return { ...prevData, [modalState.type]: updatedData };
+        });
+
+        closeModal();
     };
 
     const allStagesComplete = stages.every((stage) => completedStages.has(stage));
@@ -3087,12 +3060,11 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Fund Source</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
-                                                    <option key={option.id} value={option.id}>
-                                                        {option.value}
-                                                    </option>
-                                                ))}
+                                            {formData.loanProductTemplate?.fundOptions?.map((option) => (
+                                                <option key={option.id} value={option.id}>
+                                                    {option.name}
+                                                </option>
+                                            ))}
 
                                         </select>
                                     </div>
@@ -3617,6 +3589,11 @@ const CreateLoanProducts = () => {
                                         ? "staged-form-completed"
                                         : "staged-form-unvisited"
                             }`}
+                            onClick={() => {
+                                if (completedStages.has(stage)) {
+                                    setCurrentStage(index);
+                                }
+                            }}
                         >
                             <span className="staged-form-stage-circle">{index + 1}</span>
                             <span className="staged-form-stage-label">{stage}</span>
@@ -3639,10 +3616,18 @@ const CreateLoanProducts = () => {
 
         return (
             <div className="staged-form-preview-section">
-                <h3>Preview</h3>
-                {stageData.map(({ title, data }) => (
+                <h2 className="preview-header">Form Preview</h2>
+                {stageData.map(({ title, data }, index) => (
                     <div key={title} className="staged-form-preview-block">
-                        <h4>{title}</h4>
+                        <div className="staged-form-preview-header">
+                            <h4 className="preview-stage-title">{title}</h4>
+                            <button
+                                className="staged-form-edit-button"
+                                onClick={() => setCurrentStage(index)}
+                            >
+                                Edit
+                            </button>
+                        </div>
                         {data && Object.keys(data).length > 0 ? (
                             <table className="staged-form-preview-table">
                                 <thead>
@@ -3657,11 +3642,13 @@ const CreateLoanProducts = () => {
                                         <td>{key}</td>
                                         <td>
                                             {Array.isArray(value)
-                                                ? value.map((item) =>
-                                                    typeof item === "object"
-                                                        ? JSON.stringify(item)
-                                                        : item
-                                                ).join(", ")
+                                                ? value
+                                                    .map((item) =>
+                                                        typeof item === "object"
+                                                            ? JSON.stringify(item)
+                                                            : item
+                                                    )
+                                                    .join(", ")
                                                 : value || "N/A"}
                                         </td>
                                     </tr>
@@ -3669,14 +3656,13 @@ const CreateLoanProducts = () => {
                                 </tbody>
                             </table>
                         ) : (
-                            <p>No data available for this section.</p>
+                            <p className="no-data-message">No data available for this section.</p>
                         )}
                     </div>
                 ))}
             </div>
         );
     };
-
 
     return (
         <div className="staged-form-create-loan-product">
@@ -3689,16 +3675,16 @@ const CreateLoanProducts = () => {
                 )}
             </div>
             <div className="staged-form-stage-buttons">
-                {currentStage > 0 && (
-                    <button onClick={handlePrevious} className="staged-form-button-previous">
-                        Previous
-                    </button>
-                )}
+                <button onClick={handlePrevious}
+                        disabled={currentStage === 0}
+                        className="staged-form-button-previous">
+                    Previous
+                </button>
                 {currentStage < stages.length && (
                     <button
                         onClick={handleNext}
                         className="staged-form-button-next"
-                        disabled={isNextDisabled}
+                        disabled={!isNextDisabled}
                     >
                         Next
                     </button>

@@ -17,8 +17,13 @@ const HookForm = () => {
         isActive: false,
         contentType: '',
         payloadUrl: '',
+        phoneNumber: '',
+        smsProvider: '',
+        smsProviderAccountId: '',
+        smsProviderToken: '',
         events: [],
     });
+
     const [showEventModal, setShowEventModal] = useState(false);
     const [eventData, setEventData] = useState({
         grouping: '',
@@ -54,7 +59,18 @@ const HookForm = () => {
     };
 
     const handleFieldChange = (field, value) => {
-        setFormData((prev) => ({ ...prev, [field]: value }));
+        setFormData((prev) => ({
+            ...prev,
+            [field]: value,
+            ...(field === 'hookTemplate' && {
+                contentType: '',
+                payloadUrl: '',
+                phoneNumber: '',
+                smsProvider: '',
+                smsProviderAccountId: '',
+                smsProviderToken: '',
+            }),
+        }));
     };
 
     const handleEventChange = (field, value) => {
@@ -90,7 +106,40 @@ const HookForm = () => {
     const handleSubmit = async () => {
         startLoading();
         try {
-            const payload = { ...formData };
+            let payload = {
+                hookTemplate: formData.hookTemplate,
+                displayName: formData.displayName,
+                isActive: formData.isActive,
+                events: formData.events,
+            };
+
+            if (formData.hookTemplate === 'Web') {
+                payload = {
+                    ...payload,
+                    contentType: formData.contentType,
+                    payloadUrl: formData.payloadUrl,
+                };
+            } else if (formData.hookTemplate === 'SMS Bridge') {
+                payload = {
+                    ...payload,
+                    payloadUrl: formData.payloadUrl,
+                    phoneNumber: formData.phoneNumber,
+                    smsProvider: formData.smsProvider,
+                    smsProviderAccountId: formData.smsProviderAccountId,
+                    smsProviderToken: formData.smsProviderToken,
+                };
+            } else if (formData.hookTemplate === 'Message Gateway') {
+                payload = {
+                    ...payload,
+                    payloadUrl: formData.payloadUrl,
+                };
+            } else if (formData.hookTemplate === 'Elastic Search') {
+                payload = {
+                    ...payload,
+                    payloadUrl: formData.payloadUrl,
+                };
+            }
+
             const response = await fetch(`${API_CONFIG.baseURL}/hooks`, {
                 method: 'POST',
                 headers: {
@@ -102,21 +151,27 @@ const HookForm = () => {
             });
 
             if (response.ok) {
-                alert('Hook created successfully!');
+                // alert('Hook created successfully!');
                 setFormData({
                     hookTemplate: '',
                     displayName: '',
                     isActive: false,
                     contentType: '',
                     payloadUrl: '',
+                    phoneNumber: '',
+                    smsProvider: '',
+                    smsProviderAccountId: '',
+                    smsProviderToken: '',
                     events: [],
                 });
             } else {
                 const error = await response.json();
                 console.error('Error creating hook:', error);
+                alert('Failed to create hook. Please check your input.');
             }
         } catch (error) {
             console.error('Error submitting hook form:', error);
+            alert('An unexpected error occurred. Please try again.');
         } finally {
             stopLoading();
         }
@@ -164,38 +219,150 @@ const HookForm = () => {
                                     type="checkbox"
                                     checked={formData.isActive}
                                     onChange={(e) => handleFieldChange('isActive', e.target.checked)}
-                                />   Is Active
+                                /> Is Active
                             </label>
                         </div>
                     </div>
-                    <div className="hook-row">
-                        <div className="hook-field">
-                            <label>
-                                Content Type <span>*</span>
-                            </label>
-                            <select
-                                value={formData.contentType}
-                                onChange={(e) => handleFieldChange('contentType', e.target.value)}
-                                required
-                            >
-                                <option value="">Select Content Type</option>
-                                <option value="json">JSON</option>
-                                <option value="form">Form</option>
-                            </select>
+                    {formData.hookTemplate === 'Web' && (
+                        <div className="hook-row">
+                            <div className="hook-field">
+                                <label>
+                                    Content Type <span>*</span>
+                                </label>
+                                <select
+                                    value={formData.contentType}
+                                    onChange={(e) => handleFieldChange('contentType', e.target.value)}
+                                    required
+                                >
+                                    <option value="">Select Content Type</option>
+                                    <option value="json">JSON</option>
+                                    <option value="form">Form</option>
+                                </select>
+                            </div>
+                            <div className="hook-field">
+                                <label>
+                                    Payload URL <span>*</span>
+                                </label>
+                                <input
+                                    type="url"
+                                    value={formData.payloadUrl}
+                                    onChange={(e) => handleFieldChange('payloadUrl', e.target.value)}
+                                    placeholder="Enter Payload URL"
+                                    required
+                                />
+                            </div>
                         </div>
-                        <div className="hook-field">
-                            <label>
-                                Payload URL <span>*</span>
-                            </label>
-                            <input
-                                type="url"
-                                value={formData.payloadUrl}
-                                onChange={(e) => handleFieldChange('payloadUrl', e.target.value)}
-                                placeholder="Enter Payload URL"
-                                required
-                            />
+                    )}
+
+                    {formData.hookTemplate === 'SMS Bridge' && (
+                        <>
+                            <div className="hook-row">
+                                <div className="hook-field">
+                                    <label>
+                                        Phone Number <span>*</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        maxLength={10}
+                                        value={formData.phoneNumber}
+                                        onChange={(e) => handleFieldChange('phoneNumber', e.target.value)}
+                                        placeholder="Enter phone number"
+                                        required
+                                    />
+                                </div>
+                                <div className="hook-field">
+                                    <label>
+                                        Payload URL <span>*</span>
+                                    </label>
+                                    <input
+                                        type="url"
+                                        value={formData.payloadUrl}
+                                        onChange={(e) => handleFieldChange('payloadUrl', e.target.value)}
+                                        placeholder="Enter Payload URL"
+                                        required
+                                    />
+                                </div>
+                            </div>
+                            <div className="hook-row">
+                                <div className="hook-field">
+                                    <label>
+                                        SMS Provider <span>*</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={formData.smsProvider}
+                                        onChange={(e) => handleFieldChange('smsProvider', e.target.value)}
+                                        placeholder="Enter SMS provider"
+                                        required
+                                    />
+                                </div>
+                                <div className="hook-field">
+                                    <label>
+                                        SMS Provider Account ID <span>*</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={formData.smsProviderAccountId}
+                                        onChange={(e) =>
+                                            handleFieldChange('smsProviderAccountId', e.target.value)
+                                        }
+                                        placeholder="Enter account ID"
+                                        required
+                                    />
+                                </div>
+                            </div>
+                            <div className="hook-row">
+                                <div className="hook-field">
+                                    <label>
+                                        SMS Provider Token <span>*</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={formData.smsProviderToken}
+                                        onChange={(e) =>
+                                            handleFieldChange('smsProviderToken', e.target.value)
+                                        }
+                                        placeholder="Enter provider token"
+                                        required
+                                    />
+                                </div>
+                            </div>
+                        </>
+                    )}
+
+                    {formData.hookTemplate === 'Message Gateway' && (
+                        <div className="hook-row">
+                            <div className="hook-field">
+                                <label>
+                                    Payload URL <span>*</span>
+                                </label>
+                                <input
+                                    type="url"
+                                    value={formData.payloadUrl}
+                                    onChange={(e) => handleFieldChange('payloadUrl', e.target.value)}
+                                    placeholder="Enter Payload URL"
+                                    required
+                                />
+                            </div>
                         </div>
-                    </div>
+                    )}
+
+                    {formData.hookTemplate === 'Elastic Search' && (
+                        <div className="hook-row">
+                            <div className="hook-field">
+                                <label>
+                                    Payload URL <span>*</span>
+                                </label>
+                                <input
+                                    type="url"
+                                    value={formData.payloadUrl}
+                                    onChange={(e) => handleFieldChange('payloadUrl', e.target.value)}
+                                    placeholder="Enter Payload URL"
+                                    required
+                                />
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <div className="hook-events-section">
@@ -245,8 +412,16 @@ const HookForm = () => {
                         disabled={
                             !formData.hookTemplate ||
                             !formData.displayName ||
-                            !formData.contentType ||
-                            !formData.payloadUrl
+                            (formData.hookTemplate === 'Web' &&
+                                (!formData.contentType || !formData.payloadUrl)) ||
+                            (formData.hookTemplate === 'SMS Bridge' &&
+                                (!formData.phoneNumber ||
+                                    !formData.payloadUrl ||
+                                    !formData.smsProvider ||
+                                    !formData.smsProviderAccountId ||
+                                    !formData.smsProviderToken)) ||
+                            (formData.hookTemplate === 'Message Gateway' && !formData.payloadUrl) ||
+                            (formData.hookTemplate === 'Elastic Search' && !formData.payloadUrl)
                         }
                     >
                         Submit Hook
@@ -267,7 +442,7 @@ const HookForm = () => {
                                 onChange={(e) => handleEventChange('grouping', e.target.value)}
                                 required
                             >
-                                <option value="">Select Grouping</option>
+                            <option value="">Select Grouping</option>
                                 {groupings.map((group) => (
                                     <option key={group.name} value={group.name}>
                                         {group.name}

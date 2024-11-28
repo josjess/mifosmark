@@ -103,13 +103,13 @@ const ViewLoanProducts = () => {
                             <td>{product.name}</td>
                             <td>{product.shortName}</td>
                             <td>
-                                    <span
-                                        className={`status-badge ${
-                                            product.active ? 'status-active' : 'status-inactive'
-                                        }`}
-                                    >
-                                        {product.active ? 'Active' : 'Inactive'}
-                                    </span>
+                                <span
+                                    className={`status-badge ${
+                                        product.status === "loanProduct.active" ? "status-active" : "status-inactive"
+                                    }`}
+                                >
+                                    {product.status === "loanProduct.active" ? "Active" : "Inactive"}
+                                </span>
                             </td>
                             <td>
                                 {product.expiryDate
