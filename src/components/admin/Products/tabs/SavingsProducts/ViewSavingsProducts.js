@@ -5,7 +5,7 @@ import { useLoading} from "../../../../../context/LoadingContext";
 import { API_CONFIG } from '../../../../../config';
 import './ViewSavingsProducts.css';
 
-const ViewSavingsProducts = () => {
+const ViewSavingsProducts = ({ onRowClick }) => {
     const { user } = useContext(AuthContext);
     const { startLoading, stopLoading } = useLoading();
     const [savingsProducts, setSavingsProducts] = useState([]);
@@ -55,10 +55,6 @@ const ViewSavingsProducts = () => {
         currentPage * pageSize
     );
 
-    const handleRowClick = (product) => {
-        console.log('Selected Savings Product:', product);
-    };
-
     return (
         <div className="view-savings-products">
             <div className="table-controls">
@@ -97,7 +93,7 @@ const ViewSavingsProducts = () => {
                     paginatedData.map((product) => (
                         <tr
                             key={product.id}
-                            onClick={() => handleRowClick(product)}
+                            onClick={() => onRowClick(product)}
                             className="clickable-row"
                         >
                             <td>{product.name}</td>

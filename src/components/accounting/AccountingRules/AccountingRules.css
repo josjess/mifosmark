@@ -1,5 +1,6 @@
 .accounting-rules-screen {
-    padding: 20px;
+    padding: 60px 20px;
+    min-height: 95vh;
     background-color: #f5f7fa;
     margin-left: 250px;
     font-family: Arial, sans-serif;

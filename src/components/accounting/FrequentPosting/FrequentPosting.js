@@ -58,7 +58,7 @@ const FrequentPostingForm = () => {
     };
 
     return (
-        <div className="form-container-client">
+        <div className="form-container-client posting">
             <h2>
                 <Link to="/accounting" className="breadcrumb-link">Accounting</Link> . Frequent Posting
             </h2>

@@ -1,18 +1,17 @@
 import React, {useEffect} from 'react';
 import {BrowserRouter as Router, Routes, Route, useLocation} from 'react-router-dom';
 import { loadConfig } from './config';
-// import Home from './components/Home';
 import Login from './components/auth/Login';
 import Dashboard from './components/Dashboard';
-import Clients from './components/views/Clients';
-import Groups from './components/views/Groups';
-import Centers from './components/views/Centers';
+
 import Accounting from './components/accounting/Accounting';
 import Reports from './components/Reports/Reports';
 import Admin from './components/admin/Admin';
-import AddClient from "./components/views/AddClient";
-import AddGroup from "./components/views/AddGroup";
-import AddCenter from "./components/views/AddCenter";
+
+import ClientsPage from "./components/views/Clients/ClientsPage";
+import GroupsPage from "./components/views/Groups/GroupsPage";
+import CentersPage from "./components/views/Centers/CentersPage";
+
 import { AuthProvider } from './context/AuthContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { LoadingProvider } from './context/LoadingContext';
@@ -25,8 +24,6 @@ import ProtectedLayout from './ProtectedLayout';
 
 /* Accounting */
 import FrequentPosting from "./components/accounting/FrequentPosting/FrequentPosting";
-// import AddJournalEntries from "./components/accounting/AddJournalEntries";
-// import SearchJournalEntries from "./components/accounting/JournalEntries/SearchJournalEntries";
 import FinancialActivityMappings from "./components/accounting/FinancialActivityMapping/FinancialActivityMappings";
 import JournalEntries from "./components/accounting/JournalEntries/JournalEntries"
 import ClosingEntries from "./components/accounting/AccountClosure/ClosingEntries";
@@ -116,6 +113,8 @@ import BulkImport from "./components/admin/Organization/tabs/BulkImports/BulkImp
 /* Reports */
 import ReportsPage from "./components/Reports/filteredReports/ReportsPage";
 import ReportFormPage from "./components/Reports/ViewReports";
+import XBRLPage from "./components/Reports/XBRL/XBRLPage";
+import ScrollToTop from "./components/utilities/ScrollToTop";
 
 const App = () => {
     useEffect(() => {
@@ -132,6 +131,7 @@ const App = () => {
                 <NotificationProvider>
                     <LoadingOverlay />
                     <Notification />
+                    {/*<Navbar />*/}
                     {!isLoginPage && <Navbar />}
                     {!isLoginPage && <Sidebar className="sidebar" />}
                     <Routes>
@@ -140,15 +140,15 @@ const App = () => {
                         <Route element={<ProtectedLayout />}>
                             <Route path="/" element={<Dashboard />} />
                             <Route path="/dashboard" element={<Dashboard />} />
-                            <Route path="/clients" element={<Clients />} />
-                            <Route path="/groups" element={<Groups />} />
-                            <Route path="/centers" element={<Centers />} />
+                            <Route path="/clients" element={<ClientsPage />} />
+                            <Route path="/groups" element={<GroupsPage />} />
+                            <Route path="/centers" element={<CentersPage />} />
                             <Route path="/accounting" element={<Accounting />} />
                             <Route path="/reports" element={<Reports />} />
                             <Route path="/admin" element={<Admin />} />
-                            <Route path="/addclient" element={<AddClient />} />
-                            <Route path="/addgroup" element={<AddGroup />} />
-                            <Route path="/addcenter" element={<AddCenter />} />
+                            {/*<Route path="/addclient" element={<AddClient />} />*/}
+                            {/*<Route path="/addgroup" element={<AddGroup />} />*/}
+                            {/*<Route path="/addcenter" element={<AddCenter />} />*/}
 
                             {/* Accounting */}
                             <Route path="/frequent-postings" element={<FrequentPosting />} />
@@ -239,6 +239,7 @@ const App = () => {
                             <Route path="/bulk-imports/:entityType" element={<BulkImport />} />
 
                             {/* Reports */}
+                            <Route path="/report/XBRL" element={<XBRLPage />} />
                             <Route path="/reports/:reportType" element={<ReportsPage />} />
                             <Route path="/reports/view/:reportId" element={<ReportFormPage />} />
 
@@ -253,6 +254,7 @@ const App = () => {
 const AppWrapper = () => {
     return (
         <Router>
+            <ScrollToTop/>
             <App />
         </Router>
     );

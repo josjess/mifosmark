@@ -13,6 +13,8 @@ const ViewDelinquencyRanges = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [classificationFilter, setClassificationFilter] = useState('');
     const [totalPages, setTotalPages] = useState(1);
+    const [selectedRange, setSelectedRange] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
         fetchDelinquencyRanges();
@@ -50,13 +52,168 @@ const ViewDelinquencyRanges = () => {
         currentPage * pageSize
     );
 
-    const handleRowClick = (range) => {
-        console.log('Selected Delinquency Range:', {
-            id: range.id,
-            classification: range.classification,
-            daysFrom: range.minimumAgeDays,
-            daysTill: range.maximumAgeDays,
-        });
+    const handleRowClick = async (range) => {
+        startLoading();
+        try {
+            const response = await axios.get(
+                `${API_CONFIG.baseURL}/delinquency/ranges/${range.id}`,
+                {
+                    headers: {
+                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                        'Fineract-Platform-TenantId': 'default',
+                        'Content-Type': 'application/json',
+                    },
+                }
+            );
+            setSelectedRange(response.data);
+            setIsModalOpen(true);
+        } catch (error) {
+            console.error('Error fetching delinquency range details:', error);
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const handleModalSubmit = async (updatedRange) => {
+        startLoading();
+        try {
+            const response = await axios.put(
+                `${API_CONFIG.baseURL}/delinquency/ranges/${selectedRange.id}`,
+                updatedRange,
+                {
+                    headers: {
+                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                        'Fineract-Platform-TenantId': 'default',
+                        'Content-Type': 'application/json',
+                    },
+                }
+            );
+            // console.log('Delinquency range updated successfully:', response.data);
+            setIsModalOpen(false);
+            fetchDelinquencyRanges();
+        } catch (error) {
+            console.error('Error updating delinquency range:', error);
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const handleDelete = async () => {
+        if (window.confirm("Are you sure you want to delete this delinquency range?")) {
+            startLoading();
+            try {
+                await axios.delete(
+                    `${API_CONFIG.baseURL}/delinquency/ranges/${selectedRange.id}`,
+                    {
+                        headers: {
+                            Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                            'Fineract-Platform-TenantId': 'default',
+                            'Content-Type': 'application/json',
+                        },
+                    }
+                );
+                // console.log('Delinquency range deleted successfully.');
+                setIsModalOpen(false);
+                fetchDelinquencyRanges();
+            } catch (error) {
+                console.error('Error deleting delinquency range:', error);
+            } finally {
+                stopLoading();
+            }
+        }
+    };
+
+    const DelinquencyModal = ({ isOpen, onClose, range, onSubmit, onDelete }) => {
+        const [formData, setFormData] = useState({});
+        const [isChanged, setIsChanged] = useState(false);
+
+        useEffect(() => {
+            if (range) {
+                const initialData = {
+                    classification: range.classification || '',
+                    minimumAgeDays: range.minimumAgeDays || '',
+                    maximumAgeDays: range.maximumAgeDays || '',
+                };
+                setFormData(initialData);
+                setIsChanged(false);
+            }
+        }, [range]);
+
+        const handleFieldChange = (field, value) => {
+            setFormData((prev) => {
+                const updatedData = { ...prev, [field]: value };
+                setIsChanged(JSON.stringify(updatedData) !== JSON.stringify(range));
+                return updatedData;
+            });
+        };
+
+        const handleSubmit = () => {
+            const payload = {
+                ...formData,
+                locale: 'en',
+            };
+            onSubmit(payload);
+        };
+
+        if (!isOpen) return null;
+
+        return (
+            <div className="edit-modal-overlay">
+                <div className="edit-modal-content">
+                    <h3 className={"staged-form-title"}>Edit Delinquency Range</h3>
+                    <div className="staged-form-field">
+                        <label>
+                            Classification <span className="required">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            value={formData.classification}
+                            onChange={(e) => handleFieldChange('classification', e.target.value)}
+                            className="staged-form-input"
+                        />
+                    </div>
+                    <div className="staged-form-field">
+                        <label>
+                            Days From <span className="required">*</span>
+                        </label>
+                        <input
+                            type="number"
+                            value={formData.minimumAgeDays}
+                            onChange={(e) => handleFieldChange('minimumAgeDays', e.target.value)}
+                            className="staged-form-input"
+                        />
+                    </div>
+                    <div className="staged-form-field">
+                        <label>Days Till</label>
+                        <input
+                            type="number"
+                            value={formData.maximumAgeDays}
+                            onChange={(e) => handleFieldChange('maximumAgeDays', e.target.value)}
+                            className="staged-form-input"
+                        />
+                    </div>
+                    <div className="modal-actions">
+                        <button className="modal-cancel-button" onClick={onClose}>
+                            Cancel
+                        </button>
+                        <button className="modal-delete-button" onClick={onDelete}>
+                            Delete
+                        </button>
+                        <button
+                            className="modal-submit-button"
+                            onClick={handleSubmit}
+                            disabled={
+                                !isChanged ||
+                                !formData.classification ||
+                                !formData.minimumAgeDays
+                            }
+                        >
+                            Submit
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
     };
 
     return (
@@ -140,6 +297,14 @@ const ViewDelinquencyRanges = () => {
                     </button>
                 </div>
             )}
+
+            <DelinquencyModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                range={selectedRange}
+                onSubmit={handleModalSubmit}
+                onDelete={handleDelete}
+            />
         </div>
     );
 };

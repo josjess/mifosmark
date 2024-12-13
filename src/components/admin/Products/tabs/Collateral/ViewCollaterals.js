@@ -5,7 +5,7 @@ import { useLoading } from '../../../../../context/LoadingContext';
 import { API_CONFIG } from '../../../../../config';
 import './ViewCollaterals.css';
 
-const ViewCollaterals = () => {
+const ViewCollaterals = ({onRowClick}) => {
     const { user } = useContext(AuthContext);
     const { startLoading, stopLoading } = useLoading();
     const [collaterals, setCollaterals] = useState([]);
@@ -49,10 +49,6 @@ const ViewCollaterals = () => {
         (currentPage - 1) * pageSize,
         currentPage * pageSize
     );
-
-    const handleRowClick = (collateral) => {
-        console.log('Selected Collateral:', collateral);
-    };
 
     const formatCurrency = (amount, currency) => {
         if (!amount || !currency) return '';
@@ -107,7 +103,7 @@ const ViewCollaterals = () => {
                     paginatedData.map((collateral) => (
                         <tr
                             key={collateral.id}
-                            onClick={() => handleRowClick(collateral)}
+                            onClick={() => onRowClick(collateral)}
                             className="clickable-row"
                         >
                             <td>{collateral.name || ''}</td>

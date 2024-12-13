@@ -13,7 +13,7 @@ const Reports = () => {
         { label: 'Savings', description: 'Savings data reports', icon: FaPiggyBank, path: '/reports/savings', color: '#4a90e2' },
         { label: 'Funds', description: 'Fund allocations', icon: FaChartPie, path: '/reports/funds', color: '#fbb03b' },
         { label: 'Accounting', description: 'Financial accounts', icon: FaCogs, path: '/reports/accounting', color: '#1abc9c' },
-        { label: 'XBRL', description: 'Financial statements', icon: FaBalanceScale, path: '/reports/xbrl', color: '#3498db' }
+        { label: 'XBRL', description: 'Financial statements', icon: FaBalanceScale, path: '/report/XBRL', color: '#3498db' }
     ];
 
     const columns = [

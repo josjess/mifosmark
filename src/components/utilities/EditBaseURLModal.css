@@ -1,0 +1,141 @@
+.Edit-URL-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100000;
+}
+
+.Edit-URL-modal-content {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    width: 400px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.Edit-URL-modal-title {
+    font-size: 24px;
+    text-align: center;
+    font-weight: 800;
+    color: #f16666;
+    margin-bottom: 25px;
+}
+
+.Edit-URL-warning-section {
+    background: #fff5f5;
+    border: 1px solid #f5c6cb;
+    border-radius: 8px;
+    padding: 10px 15px;
+    margin-bottom: 20px;
+}
+
+.Edit-URL-warning-text {
+    color: #721c24;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.Edit-URL-confirmation-checkbox {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.Edit-URL-confirmation-checkbox input {
+    margin-right: 10px;
+    cursor: pointer;
+    transform: scale(1.2);
+}
+
+.Edit-URL-label {
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.Edit-URL-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    font-size: 16px;
+}
+.Edit-URL-input:focus {
+    outline: none;
+    border: 1px solid #007bff;
+}
+
+.Edit-URL-modal-actions {
+    display: flex;
+    justify-content: space-between;
+}
+
+.Edit-URL-cancel-button,
+.Edit-URL-proceed-button,
+.Edit-URL-confirm-button {
+    padding: 8px 15px;
+    font-size: 16px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.Edit-URL-cancel-button {
+    background: #b61919;
+    color: #f8f8f8;
+}
+
+.Edit-URL-proceed-button {
+    background: #007bff;
+    color: #fff;
+}
+
+.Edit-URL-confirm-button {
+    background: #28a745;
+    color: #fff;
+}
+
+.Edit-URL-cancel-button:hover {
+    background: #871d1d;
+}
+
+.Edit-URL-proceed-button:hover {
+    background: #0056b3;
+}
+
+.Edit-URL-confirm-button:hover {
+    background: #218838;
+}
+
+.Edit-URL-confirm-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000000;
+}
+
+.Edit-URL-confirm-modal-content {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    width: 350px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.Edit-URL-confirm-text {
+    margin: 15px 0;
+    font-size: 14px;
+    color: #333;
+}

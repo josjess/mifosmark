@@ -15,6 +15,11 @@ const ViewPaymentTypes = () => {
     const [pageSize, setPageSize] = useState(10);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [editPaymentType, setEditPaymentType] = useState(null);
+    const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
+    const [originalPaymentType, setOriginalPaymentType] = useState(null);
+
 
     useEffect(() => {
         fetchPaymentTypes();
@@ -54,12 +59,101 @@ const ViewPaymentTypes = () => {
         currentPage * pageSize
     );
 
-    const handleEdit = (paymentType) => {
-        console.log('Edit:', paymentType);
+    const handleEdit = async (paymentType) => {
+        startLoading();
+        try {
+            const response = await axios.get(
+                `${API_CONFIG.baseURL}/paymenttypes/${paymentType.id}`,
+                {
+                    headers: {
+                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                        'Fineract-Platform-TenantId': 'default',
+                        'Content-Type': 'application/json',
+                    },
+                }
+            );
+            setEditPaymentType(response.data);
+            setOriginalPaymentType(response.data);
+            setShowEditModal(true);
+        } catch (error) {
+            console.error('Error fetching payment type details:', error);
+        } finally {
+            stopLoading();
+        }
     };
 
-    const handleDelete = (paymentType) => {
-        console.log('Delete:', paymentType);
+    const handleFieldChange = (field, value) => {
+        setEditPaymentType((prev) => {
+            const updated = { ...prev, [field]: value };
+            setIsSubmitDisabled(JSON.stringify(updated) === JSON.stringify(originalPaymentType)); // Compare with original data
+            return updated;
+        });
+    };
+
+    const handleCancel = () => {
+        setShowEditModal(false);
+        setEditPaymentType(null);
+        setIsSubmitDisabled(true);
+    };
+
+    const handleSubmit = async () => {
+        if (!editPaymentType.name || !editPaymentType.position) {
+            alert("Payment Type and Position are required!");
+            return;
+        }
+
+        startLoading();
+        try {
+            await axios.put(
+                `${API_CONFIG.baseURL}/paymenttypes/${editPaymentType.id}`,
+                editPaymentType,
+                {
+                    headers: {
+                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                        'Fineract-Platform-TenantId': 'default',
+                        'Content-Type': 'application/json',
+                    },
+                }
+            );
+            alert("Payment Type updated successfully!");
+            setShowEditModal(false);
+            setEditPaymentType(null);
+            fetchPaymentTypes();
+        } catch (error) {
+            console.error("Error updating payment type:", error);
+            alert("Failed to update Payment Type. Please try again.");
+        } finally {
+            stopLoading();
+        }
+    };
+
+
+    const handleDelete = async (paymentType) => {
+        const confirmed = window.confirm(`Are you sure you want to delete "${paymentType.name}"?`);
+        if (!confirmed) {
+            return;
+        }
+
+        startLoading();
+        try {
+            const response = await axios.delete(
+                `${API_CONFIG.baseURL}/paymenttypes/${paymentType.id}`,
+                {
+                    headers: {
+                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                        'Fineract-Platform-TenantId': 'default',
+                        'Content-Type': 'application/json',
+                    },
+                }
+            );
+
+            setPaymentTypes((prev) => prev.filter((type) => type.id !== paymentType.id));
+        } catch (error) {
+            console.error('Error deleting payment type:', error);
+            alert('Failed to delete the payment type. Please try again.');
+        } finally {
+            stopLoading();
+        }
     };
 
     return (
@@ -168,6 +262,62 @@ const ViewPaymentTypes = () => {
                     </button>
                 </div>
             )}
+            {showEditModal && editPaymentType && (
+                <div className="edit-modal-overlay">
+                    <div className="edit-modal-content">
+                        <h3 className="staged-form-title">Edit Payment Type</h3>
+                        <div className="staged-form-field">
+                            <label>Payment Type <span className="required">*</span></label>
+                            <input
+                                type="text"
+                                className="staged-form-input"
+                                value={editPaymentType.name}
+                                onChange={(e) => handleFieldChange('name', e.target.value)}
+                                required
+                            />
+                        </div>
+                        <div className="staged-form-field">
+                            <label>Description</label>
+                            <input
+                                type="text"
+                                className="staged-form-input"
+                                value={editPaymentType.description}
+                                onChange={(e) => handleFieldChange('description', e.target.value)}
+                            />
+                        </div>
+                        <div className="form-checkbox-field staged-form-field">
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    checked={editPaymentType.isCashPayment}
+                                    onChange={(e) => handleFieldChange('isCashPayment', e.target.checked)}
+                                />
+                                Is Cash Payment
+                            </label>
+                        </div>
+                        <div className="staged-form-field">
+                            <label>Position <span className="required">*</span></label>
+                            <input
+                                type="number"
+                                value={editPaymentType.position}
+                                onChange={(e) => handleFieldChange('position', e.target.value)}
+                                required
+                            />
+                        </div>
+                        <div className="modal-actions">
+                            <button className="modal-cancel-button" onClick={handleCancel}>Cancel</button>
+                            <button
+                                className={"modal-submit-button"}
+                                onClick={handleSubmit}
+                                disabled={isSubmitDisabled}
+                            >
+                                Submit
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
         </div>
     );
 };

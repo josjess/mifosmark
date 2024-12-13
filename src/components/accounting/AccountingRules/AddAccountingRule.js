@@ -68,9 +68,8 @@ const AddAccountingRule = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log("Submitting Accounting Rule Data:", accountingRuleData);
+        // console.log("Submitting Accounting Rule Data:", accountingRuleData);
 
-        // Reset form fields and go back to the first step
         setAccountingRuleData({
             name: '',
             office: '',
@@ -165,7 +164,7 @@ const AddAccountingRule = () => {
                             <div className="account-form-group">
                                 <label>Debit Rule Type</label>
                                 <div className="radio-group">
-                                    <input
+                                    <label><input
                                         type="radio"
                                         name="debitRuleType"
                                         value="fixedAccount"
@@ -177,8 +176,8 @@ const AddAccountingRule = () => {
                                             allowMultipleDebits: false,
                                         })}
                                     />
-                                    <label>Fixed Account</label>
-                                    <input
+                                        Fixed Account</label>
+                                    <label><input
                                         type="radio"
                                         name="debitRuleType"
                                         value="listOfProducts"
@@ -189,7 +188,7 @@ const AddAccountingRule = () => {
                                             debitAccount: '',
                                         })}
                                     />
-                                    <label>List of Products</label>
+                                        List of Products</label>
                                 </div>
                             </div>
 

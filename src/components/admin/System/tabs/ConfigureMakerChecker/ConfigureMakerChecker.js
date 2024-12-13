@@ -86,7 +86,7 @@ const ConfigureMakerChecker = () => {
                 makerCheckerEnabled: enabled,
             }));
 
-            await axios.post(`${API_CONFIG.baseURL}/permissions`, updatedPermissions, {
+            await axios.put(`${API_CONFIG.baseURL}/permissions`, updatedPermissions, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
                     'Fineract-Platform-TenantId': 'default',

@@ -68,7 +68,7 @@ const ViewHooksTable = () => {
         <div className="hooks-table-container">
             <div className="table-controls">
                 <div className="filter-container">
-                    <div className="filter-input">
+                    <div className="filter-item">
                         <label htmlFor="nameFilter">Filter by Name:</label>
                         <input
                             type="text"
@@ -80,7 +80,7 @@ const ViewHooksTable = () => {
                             placeholder="Enter hook name..."
                         />
                     </div>
-                    <div className="filter-input">
+                    <div className="filter-item">
                         <label htmlFor="statusFilter">Filter by Status:</label>
                         <select
                             id="statusFilter"
@@ -90,8 +90,8 @@ const ViewHooksTable = () => {
                             }
                         >
                             <option value="">All</option>
-                            <option value="enabled">Enabled</option>
-                            <option value="disabled">Disabled</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
                         </select>
                     </div>
                 </div>

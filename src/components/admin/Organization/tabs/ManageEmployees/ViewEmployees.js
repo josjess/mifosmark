@@ -15,6 +15,8 @@ const ViewEmployees = () => {
     const [pageSize, setPageSize] = useState(10);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [selectedEmployee, setSelectedEmployee] = useState(null);
+    const [isEmployeeModalOpen, setIsEmployeeModalOpen] = useState(false);
 
     useEffect(() => {
         fetchOffices();
@@ -80,8 +82,202 @@ const ViewEmployees = () => {
         currentPage * pageSize
     );
 
-    const handleRowClick = (employee) => {
-        console.log('Selected Employee:', employee);
+    const handleRowClick = async (employee) => {
+        startLoading();
+        try {
+            const response = await axios.get(
+                `${API_CONFIG.baseURL}/staff/${employee.id}?template=true`,
+                {
+                    headers: {
+                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                        'Fineract-Platform-TenantId': 'default',
+                        'Content-Type': 'application/json',
+                    },
+                }
+            );
+            setSelectedEmployee(response.data);
+            setIsEmployeeModalOpen(true);
+        } catch (error) {
+            console.error('Error fetching employee details:', error);
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const handleEmployeeModalSubmit = async (updatedEmployee) => {
+        startLoading();
+        try {
+            const response = await axios.put(
+                `${API_CONFIG.baseURL}/staff/${selectedEmployee.id}`,
+                updatedEmployee,
+                {
+                    headers: {
+                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                        'Fineract-Platform-TenantId': 'default',
+                        'Content-Type': 'application/json',
+                    },
+                }
+            );
+            // console.log('Employee updated successfully:', response.data);
+            setIsEmployeeModalOpen(false);
+            fetchEmployees();
+        } catch (error) {
+            console.error('Error updating employee:', error);
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const EmployeeModal = ({ isOpen, onClose, employee, onSubmit, offices }) => {
+        const [formData, setFormData] = useState({});
+        const [isChanged, setIsChanged] = useState(false);
+
+        useEffect(() => {
+            if (employee) {
+                const initialData = {
+                    officeId: employee.officeId || '',
+                    firstname: employee.firstname || '',
+                    lastname: employee.lastname || '',
+                    isLoanOfficer: employee.isLoanOfficer || false,
+                    mobileNo: employee.mobileNo || '',
+                    isActive: employee.isActive || false,
+                    joiningDate: employee.joiningDate
+                        ? new Date(employee.joiningDate[0], employee.joiningDate[1] - 1, employee.joiningDate[2])
+                            .toISOString()
+                            .split('T')[0]
+                        : '',
+                };
+                setFormData(initialData);
+                setIsChanged(false);
+            }
+        }, [employee]);
+
+        const handleFieldChange = (field, value) => {
+            setFormData((prev) => {
+                const updatedData = { ...prev, [field]: value };
+                setIsChanged(JSON.stringify(updatedData) !== JSON.stringify(employee));
+                return updatedData;
+            });
+        };
+
+        const handleSubmit = () => {
+            const payload = {
+                ...formData,
+                dateFormat: 'dd MMMM yyyy',
+                locale: 'en',
+                joiningDate: new Date(formData.joiningDate).toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: 'long',
+                    year: 'numeric',
+                }),
+            };
+            onSubmit(payload);
+        };
+
+        if (!isOpen) return null;
+
+        return (
+            <div className="edit-modal-overlay">
+                <div className="edit-modal-content">
+                    <h3>Edit Employee Details</h3>
+                    <div className="staged-form-field">
+                        <label>
+                            Office <span className="required">*</span>
+                        </label>
+                        <select
+                            value={formData.officeId}
+                            onChange={(e) => handleFieldChange('officeId', e.target.value)}
+                            className="staged-form-select"
+                        >
+                            <option value="">Select Office</option>
+                            {offices.map((o) => (
+                                <option key={o.id} value={o.id}>
+                                    {o.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="staged-form-row">
+                        <div className="staged-form-field">
+                            <label>
+                                First Name <span className="required">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                value={formData.firstname}
+                                onChange={(e) => handleFieldChange('firstname', e.target.value)}
+                                className="staged-form-input"
+                            />
+                        </div>
+                        <div className="staged-form-field">
+                            <label>
+                                Last Name <span className="required">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                value={formData.lastname}
+                                onChange={(e) => handleFieldChange('lastname', e.target.value)}
+                                className="staged-form-input"
+                            />
+                        </div>
+                    </div>
+                    <div className="staged-form-field">
+                        <label>
+                        <input
+                            type="checkbox"
+                            checked={formData.isLoanOfficer}
+                            onChange={(e) => handleFieldChange('isLoanOfficer', e.target.checked)}
+                        />Is Loan Officer</label>
+                    </div>
+                    <div className="staged-form-field">
+                        <label>Mobile Number</label>
+                        <input
+                            type="text"
+                            value={formData.mobileNo}
+                            onChange={(e) => handleFieldChange('mobileNo', e.target.value)}
+                            className="staged-form-input"
+                        />
+                    </div>
+                    <div className="staged-form-field">
+                        <label>
+                        <input
+                            type="checkbox"
+                            checked={formData.isActive}
+                            onChange={(e) => handleFieldChange('isActive', e.target.checked)}
+                        />Active</label>
+                    </div>
+                    <div className="staged-form-field">
+                        <label>
+                            Joining Date <span className="required">*</span>
+                        </label>
+                        <input
+                            type="date"
+                            value={formData.joiningDate}
+                            onChange={(e) => handleFieldChange('joiningDate', e.target.value)}
+                            className="staged-form-input"
+                        />
+                    </div>
+                    <div className="modal-actions">
+                        <button className="modal-cancel-button" onClick={onClose}>
+                            Cancel
+                        </button>
+                        <button
+                            className="modal-submit-button"
+                            onClick={handleSubmit}
+                            disabled={
+                                !isChanged ||
+                                !formData.officeId ||
+                                !formData.firstname ||
+                                !formData.lastname ||
+                                !formData.joiningDate
+                            }
+                        >
+                            Submit
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
     };
 
     return (
@@ -194,6 +390,14 @@ const ViewEmployees = () => {
                     </button>
                 </div>
             )}
+
+            <EmployeeModal
+                isOpen={isEmployeeModalOpen}
+                onClose={() => setIsEmployeeModalOpen(false)}
+                employee={selectedEmployee}
+                onSubmit={handleEmployeeModalSubmit}
+                offices={offices}
+            />
         </div>
     );
 };

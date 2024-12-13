@@ -3,7 +3,7 @@ import axios from 'axios';
 import { AuthContext } from '../../../../../context/AuthContext';
 import { useLoading } from '../../../../../context/LoadingContext';
 import { API_CONFIG } from '../../../../../config';
-import './ViewOffices.css'
+import './ViewOffices.css';
 
 const ViewOffices = () => {
     const { user } = useContext(AuthContext);
@@ -13,6 +13,9 @@ const ViewOffices = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [nameFilter, setNameFilter] = useState('');
     const [totalPages, setTotalPages] = useState(1);
+
+    const [selectedOffice, setSelectedOffice] = useState(null);
+    const [isOfficeModalOpen, setIsOfficeModalOpen] = useState(false);
 
     useEffect(() => {
         fetchOffices();
@@ -50,9 +53,162 @@ const ViewOffices = () => {
         currentPage * pageSize
     );
 
-    const handleRowClick = (office) => {
-        console.log('Selected Office:', office);
+    const handleRowClick = async (office) => {
+        startLoading();
+        try {
+            const response = await axios.get(
+                `${API_CONFIG.baseURL}/offices/${office.id}?template=false`,
+                {
+                    headers: {
+                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                        "Fineract-Platform-TenantId": "default",
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+            setSelectedOffice(response.data);
+            setIsOfficeModalOpen(true);
+        } catch (error) {
+            console.error("Error fetching office details:", error);
+        } finally {
+            stopLoading();
+        }
     };
+
+    const handleOfficeModalSubmit = async (updatedOffice) => {
+        startLoading();
+        try {
+            const response = await axios.put(
+                `${API_CONFIG.baseURL}/offices/${selectedOffice.id}`,
+                updatedOffice,
+                {
+                    headers: {
+                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                        "Fineract-Platform-TenantId": "default",
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+            console.log("Office updated successfully:", response.data);
+            setIsOfficeModalOpen(false);
+            fetchOffices();
+        } catch (error) {
+            console.error("Error updating office:", error);
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const OfficeModal = ({ isOpen, onClose, office, onSubmit, offices }) => {
+        const [formData, setFormData] = useState({
+            name: office?.name || "",
+            parentId: office?.parentId || "",
+            openingDate: office?.openingDate || "",
+            externalId: office?.externalId || "",
+        });
+
+        useEffect(() => {
+            if (office) {
+                setFormData({
+                    name: office?.name || "",
+                    parentId: office?.parentId || "",
+                    openingDate: office?.openingDate || "",
+                    externalId: office?.externalId || "",
+                });
+            }
+        }, [office]);
+
+        const handleFieldChange = (field, value) => {
+            setFormData((prev) => ({ ...prev, [field]: value }));
+        };
+
+        const handleSubmit = () => {
+            const transformedData = {
+                ...formData,
+                dateFormat: "dd MMMM yyyy",
+                locale: "en",
+                openingDate: new Date(formData.openingDate).toLocaleDateString("en-GB", {
+                    day: "2-digit",
+                    month: "long",
+                    year: "numeric",
+                }),
+            };
+            onSubmit(transformedData);
+        };
+
+        if (!isOpen) return null;
+
+        return (
+            <div className="edit-modal-overlay">
+                <div className="edit-modal-content">
+                    <h3 className="staged-form-title">Edit Office Details</h3>
+                    <div className="staged-form-field">
+                        <label>Office Name</label>
+                        <input
+                            type="text"
+                            value={formData.name}
+                            onChange={(e) => handleFieldChange("name", e.target.value)}
+                            className="staged-form-input"
+                        />
+                    </div>
+                    <div className="staged-form-field">
+                        <label>Parent Office</label>
+                        <select
+                            value={formData.parentId}
+                            onChange={(e) => handleFieldChange("parentId", e.target.value)}
+                            className="staged-form-select"
+                        >
+                            <option value="">Select Parent Office</option>
+                            {offices.map((o) => (
+                                <option key={o.id} value={o.id}>
+                                    {o.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="staged-form-field">
+                        <label>Opened On</label>
+                        <input
+                            type="date"
+                            value={
+                                Array.isArray(formData.openingDate)
+                                    ? new Date(formData.openingDate[0], formData.openingDate[1] - 1, formData.openingDate[2] + 1)
+                                        .toISOString()
+                                        .split("T")[0]
+                                    : formData.openingDate?.split("T")[0] || ""
+                            }
+                            onChange={(e) => handleFieldChange("openingDate", e.target.value)}
+                            className="staged-form-input"
+                        />
+                    </div>
+                    <div className="staged-form-field">
+                        <label>External ID</label>
+                        <input
+                            type="text"
+                            value={formData.externalId}
+                            onChange={(e) => handleFieldChange("externalId", e.target.value)}
+                            className="staged-form-input"
+                        />
+                    </div>
+                    <div className="modal-actions">
+                        <button className="modal-cancel-button" onClick={onClose}>
+                            Cancel
+                        </button>
+                        <button
+                            className="modal-submit-button"
+                            onClick={handleSubmit}
+                            disabled={
+                                !formData.name || !formData.parentId || !formData.openingDate
+                            }
+                        >
+                            Submit
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
 
     const formatDate = (dateArray) => {
         if (!dateArray || dateArray.length !== 3) return ' ';
@@ -147,6 +303,14 @@ const ViewOffices = () => {
                     </button>
                 </div>
             )}
+
+            <OfficeModal
+                isOpen={isOfficeModalOpen}
+                onClose={() => setIsOfficeModalOpen(false)}
+                office={selectedOffice}
+                onSubmit={handleOfficeModalSubmit}
+                offices={offices}
+            />
         </div>
     );
 };

@@ -6,7 +6,7 @@
 
 .body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    /*background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);*/
     display: flex;
     align-items: center;
     justify-content: center;
@@ -17,16 +17,41 @@
     left: 0;
     right: 0;
     bottom: 0;
+    overflow: hidden;
+}
+.body::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(5px);
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 0;
 }
 
 .login-container {
-    background-color: #ffffff;
+    position: relative;
+    background-color: rgba(255, 255, 255, 0.9);
     border-radius: 12px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
     padding: 40px;
     max-width: 400px;
     width: 100%;
-    transition: transform 0.3s ease;
+    z-index: 1;
+    animation: floatEffect 0.5s ease-in-out;
+}
+
+@keyframes floatEffect {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 .login-header {
@@ -103,26 +128,126 @@
     cursor: not-allowed;
 }
 
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
+.remember-me {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+    margin-top: 10px;
+    cursor: pointer;
+}
+.remember-me label {
+    cursor: pointer;
+}
+.remember-me input {
+    margin-right: 8px;
+}
+
+.forgot-password-link {
+    color: #4a90e2;
+    font-size: 14px;
+    text-align: right;
+    margin-top: 15px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.forgot-password-link:hover {
+    color: #357abd;
+}
+
+.forgot-password-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.forgot-password-modal-content {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 30px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 450px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    animation: fadeIn 0.3s ease-in-out;
+    text-align: center;
+}
+
+.forgot-password-title {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.forgot-password-instructions {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.forgot-password-input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+.forgot-password-input:focus {
+    outline: none;
+    border: 1px solid #357ABD;
+}
+
+.forgot-password-actions {
+    display: flex;
+    justify-content: space-between;
+}
+
+.forgot-password-submit {
+    background-color: #18880d;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    font-size: 16px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.forgot-password-submit:hover {
+    background-color: #357abd;
+}
+
+.forgot-password-cancel {
+    background-color: #e13a3a;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    font-size: 16px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.forgot-password-cancel:hover {
+    background-color: #b02a2a;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
     }
-    100% {
-        transform: rotate(360deg);
+    to {
+        opacity: 1;
+        transform: scale(1);
     }
 }
 
-@media (max-width: 600px) {
-    .login-container {
-        padding: 30px;
-    }
-
-    .login-header h1 {
-        font-size: 24px;
-    }
-
-    .login-btn {
-        padding: 12px;
-        font-size: 14px;
-    }
-}

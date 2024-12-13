@@ -1,7 +1,6 @@
 .standing-instructions-history-container {
     padding: 50px 20px;
     margin-left: 250px;
-    font-family: 'Poppins', sans-serif;
     background-color: #f8f9fa;
     min-height: 90vh;
 }
@@ -11,7 +10,6 @@
     justify-content: center;
     align-items: center;
     padding: 50px 20px;
-    font-family: 'Poppins', sans-serif;
     background-color: #f8f9fa;
     min-height: 90vh;
 }

@@ -3,13 +3,13 @@
     margin-left: 250px;
     font-family: Arial, sans-serif;
     background-color: #f8f9fa;
+    min-height: 95vh;
 }
 .form-container-journal {
     max-width: 100%;
     background: #f5f7fa;
     color: white;
     border-radius: 10px;
-    font-family: 'Poppins', sans-serif;
     overflow-y: auto;
     height: 100vh;
     padding: 20px 30px;

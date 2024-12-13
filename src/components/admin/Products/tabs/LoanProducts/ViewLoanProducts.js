@@ -5,7 +5,7 @@ import { useLoading} from "../../../../../context/LoadingContext";
 import { API_CONFIG } from '../../../../../config';
 import './ViewLoanProducts.css';
 
-const ViewLoanProducts = () => {
+const ViewLoanProducts = ({ onRowClick }) => {
     const { user } = useContext(AuthContext);
     const { startLoading, stopLoading } = useLoading();
     const [loanProducts, setLoanProducts] = useState([]);
@@ -55,10 +55,6 @@ const ViewLoanProducts = () => {
         currentPage * pageSize
     );
 
-    const handleRowClick = (product) => {
-        console.log('Selected Loan Product:', product);
-    };
-
     return (
         <div className="view-loan-products">
             <div className="table-controls">
@@ -97,7 +93,7 @@ const ViewLoanProducts = () => {
                     paginatedData.map((product) => (
                         <tr
                             key={product.id}
-                            onClick={() => handleRowClick(product)}
+                            onClick={() => onRowClick(product)}
                             className="clickable-row"
                         >
                             <td>{product.name}</td>

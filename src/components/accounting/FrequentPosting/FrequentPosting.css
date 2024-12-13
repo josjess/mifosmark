@@ -1,10 +1,9 @@
-.form-container-client {
+.posting {
     max-width: 100%;
     margin-left: 250px;
     background: #f5f7fa;
     color: white;
     border-radius: 10px;
-    font-family: 'Poppins', sans-serif;
     overflow-y: auto;
     height: 100vh;
     padding: 20px 30px;
@@ -110,7 +109,6 @@
     padding: 25px 30px;
     max-width: 750px;
     margin: 20px auto;
-    font-family: 'Poppins', sans-serif;
     border: none;
     border-radius: 30px;
 }

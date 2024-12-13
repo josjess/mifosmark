@@ -36,7 +36,7 @@
 .filter-input, .filter-select {
     padding: 10px;
     font-size: 1rem;
-    /*border: 1px solid #ddd;*/
+    border: 1px solid #ddd;
     border-radius: 5px;
 }
 
@@ -78,43 +78,6 @@
 }
 .jobs-table th {
     background-color: #f4f4f4;
-}
-
-.jobs-table th input[type="checkbox"],
-.jobs-table td input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
-    padding-bottom: 4px;
-    cursor: pointer;
-    appearance: none;
-    border: 2px solid #ccc;
-    border-radius: 4px;
-    outline: none;
-    transition: all 0.2s ease-in-out;
-}
-
-.jobs-table th input[type="checkbox"]:checked,
-.jobs-table td input[type="checkbox"]:checked {
-    background-color: #28a745;
-    border-color: #28a745;
-    color: #fff;
-}
-
-.jobs-table th input[type="checkbox"]:checked::before,
-.jobs-table td input[type="checkbox"]:checked::before {
-    content: '✔';
-    padding-bottom: 2px;
-    display: block;
-    font-size: 14px;
-    color: white;
-    text-align: center;
-    line-height: 18px;
-}
-
-.jobs-table th input[type="checkbox"]:hover,
-.jobs-table td input[type="checkbox"]:hover {
-    border-color: #28a745;
-    /*background-color: #eaf7ea;*/
 }
 
 .custom-modal-overlay {
@@ -255,4 +218,28 @@
     visibility: visible;
     opacity: 1;
 }
+.scrollable-job-list {
+    max-height: 600px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
 
+.scrollable-job-list::-webkit-scrollbar {
+    width: 0px;
+}
+
+.scrollable-job-list::-webkit-scrollbar-thumb {
+    background-color: transparent;
+}
+
+.scrollable-job-list::-webkit-scrollbar-track {
+    background-color: transparent;
+}
+
+.scrollable-job-list {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.remove-parameter-icon {
+    cursor: pointer;
+}

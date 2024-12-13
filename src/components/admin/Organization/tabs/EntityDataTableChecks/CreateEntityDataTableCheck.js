@@ -104,7 +104,10 @@ const CreateEntityDataTableCheck = () => {
                     "Content-Type": "application/json",
                 },
             });
-            alert("Entity Data Table Check created successfully!");
+            // alert("Entity Data Table Check created successfully!");
+            setSelectedEntity("");
+            setSelectedStatus("");
+            setSelectedDatatable("");
         } catch (error) {
             console.error("Error creating Entity Data Table Check:", error);
         } finally {
@@ -115,7 +118,6 @@ const CreateEntityDataTableCheck = () => {
     return (
         <div className="create-entity-datatable-check-container">
             <form className="create-entity-datatable-check-form" onSubmit={handleSubmit}>
-                <h3 className="create-entity-datatable-check-title">Create Entity Data Table Check</h3>
                 <div className="create-holiday-row">
                     <div className="create-entity-datatable-check-group">
                         <label htmlFor="entity" className="create-entity-datatable-check-label">
@@ -156,37 +158,38 @@ const CreateEntityDataTableCheck = () => {
                         </select>
                     </div>
                 </div>
-                    <div className="create-entity-datatable-check-group">
-                        <label htmlFor="datatable" className="create-entity-datatable-check-label">
-                            Data Table <span className="create-entity-datatable-check-required">*</span>
-                        </label>
-                        <select
-                            id="datatable"
-                            value={selectedDatatable}
-                            onChange={(e) => setSelectedDatatable(e.target.value)}
-                            className="create-entity-datatable-check-select"
-                            required
-                        >
-                            <option value="">Select Data Table</option>
-                            {datatables.map((datatable, index) => (
-                                <option key={index} value={datatable}>
-                                    {datatable.charAt(0).toUpperCase() + datatable.slice(1).replaceAll("_", " ")}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    <div className="create-entity-datatable-check-actions">
-                        <button
-                            type="submit"
-                            className="create-entity-datatable-check-submit"
-                            disabled={!selectedEntity || !selectedStatus || !selectedDatatable}
-                        >
-                            Create
-                        </button>
-                    </div>
+                <div className="create-entity-datatable-check-group">
+                    <label htmlFor="datatable" className="create-entity-datatable-check-label">
+                        Data Table <span className="create-entity-datatable-check-required">*</span>
+                    </label>
+                    <select
+                        id="datatable"
+                        value={selectedDatatable}
+                        onChange={(e) => setSelectedDatatable(e.target.value)}
+                        className="create-entity-datatable-check-select"
+                        required
+                    >
+                        <option value="">Select Data Table</option>
+                        {datatables.map((datatable, index) => (
+                            <option key={index} value={datatable.dataTableName}>
+                                {datatable.dataTableName.charAt(0).toUpperCase() +
+                                    datatable.dataTableName.slice(1).replaceAll("_", " ")}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+                <div className="create-entity-datatable-check-actions">
+                    <button
+                        type="submit"
+                        className="create-entity-datatable-check-submit"
+                        disabled={!selectedEntity || !selectedStatus || !selectedDatatable}
+                    >
+                        Create
+                    </button>
+                </div>
             </form>
         </div>
-);
+    );
 };
 
 export default CreateEntityDataTableCheck;

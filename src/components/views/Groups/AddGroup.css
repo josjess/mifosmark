@@ -1,13 +1,12 @@
-.form-container.add-center-form {
+.form-container {
     max-width: 900px;
     margin-left: 250px;
     background: #fff;
     border-radius: 8px;
     padding: 20px;
-    font-family: 'Poppins', sans-serif;
 }
 
-.form-container.add-center-form h2 {
+.form-container h2 {
     font-size: 36px;
     color: #2C3E50;
     margin-bottom: 25px;
@@ -19,14 +18,12 @@
     margin-bottom: 15px;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    justify-content: flex-start;
 }
 
 .form-group label {
     font-size: 16px;
     font-weight: 600;
-    color: #fff;
+    color: #333;
     margin-bottom: 5px;
 }
 
@@ -48,8 +45,18 @@
 .checkbox-group {
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     flex-direction: row;
     gap: 10px;
+    margin-bottom: 40px;
+}
+
+.checkbox-input {
+    width: auto;
+    height: auto;
+    margin-left: 10px;
+    margin-right: 10px;
+    cursor: pointer;
 }
 
 .client-search-group {
@@ -68,6 +75,7 @@
     border-radius: 4px;
     font-size: 14px;
     flex: 1;
+    margin-right: 10px;
 }
 
 .add-client-button {
@@ -126,7 +134,7 @@
     padding: 12px 20px;
     font-size: 16px;
     font-weight: 600;
-    border-radius: 6px;
+    border-radius: 50px;
     cursor: pointer;
 }
 
@@ -139,11 +147,21 @@
     background-color: #23913c;
 }
 
-.cancel-button {
+.form-buttons .cancel-button {
     background-color: #dc3545;
     color: white;
+    border-radius: 50px;
 }
 
-.cancel-button:hover {
+.form-buttons .cancel-button:hover {
     background-color: #c82333;
+}
+.submit-button:disabled {
+    background-color: #cccccc;
+    color: #666666;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+.submit-button:disabled:hover {
+    background-color: #cccccc;
 }

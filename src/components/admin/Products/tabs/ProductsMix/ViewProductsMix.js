@@ -9,6 +9,12 @@ const ViewProductsMix = () => {
     const { user } = useContext(AuthContext);
     const { startLoading, stopLoading } = useLoading();
     const [productsMix, setProductsMix] = useState([]);
+    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [restrictedProducts, setRestrictedProducts] = useState([]);
+    const [allProducts, setAllProducts] = useState([]);
+    const [allowedProducts, setAllowedProducts] = useState([]);
+    const [originalRestrictedProducts, setOriginalRestrictedProducts] = useState([]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const [pageSize, setPageSize] = useState(10);
     const [currentPage, setCurrentPage] = useState(1);
     const [filter, setFilter] = useState('');
@@ -40,9 +46,103 @@ const ViewProductsMix = () => {
         }
     };
 
+    const handleRowClick = async (product) => {
+        startLoading();
+        try {
+            const response = await axios.get(
+                `${API_CONFIG.baseURL}/loanproducts/${product.productId}/productmix`,
+                {
+                    headers: {
+                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                        'Fineract-Platform-TenantId': 'default',
+                        'Content-Type': 'application/json',
+                    },
+                }
+            );
+            setSelectedProduct(response.data);
+            setRestrictedProducts(response.data.restrictedProducts.map((p) => p.id));
+            setOriginalRestrictedProducts(response.data.restrictedProducts.map((p) => p.id));
+            setAllowedProducts(response.data.allowedProducts || []);
+            setAllProducts([
+                ...response.data.allowedProducts,
+                ...response.data.restrictedProducts,
+            ]);
+            setIsModalOpen(true);
+        } catch (error) {
+            console.error('Error fetching product mix details:', error);
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const handleRestrictedProductsChange = (productId) => {
+        setRestrictedProducts((prev) =>
+            prev.includes(productId)
+                ? prev.filter((id) => id !== productId)
+                : [...prev, productId]
+        );
+    };
+
+    const handleModalSubmit = async () => {
+        startLoading();
+        try {
+            const payload = {
+                restrictedProducts,
+            };
+            await axios.put(
+                `${API_CONFIG.baseURL}/loanproducts/${selectedProduct.productId}/productmix`,
+                payload,
+                {
+                    headers: {
+                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                        'Fineract-Platform-TenantId': 'default',
+                        'Content-Type': 'application/json',
+                    },
+                }
+            );
+            // console.log('Product mix updated successfully.');
+            setIsModalOpen(false);
+            fetchProductsMix();
+        } catch (error) {
+            console.error('Error updating product mix:', error);
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!window.confirm('Are you sure you want to delete this product mix?')) return;
+
+        startLoading();
+        try {
+            const payload = {
+                changes: { removedProductsForMix: restrictedProducts },
+                productId: selectedProduct.productId,
+            };
+            await axios.delete(
+                `${API_CONFIG.baseURL}/loanproducts/${selectedProduct.productId}/productmix`,
+                {
+                    data: payload,
+                    headers: {
+                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                        'Fineract-Platform-TenantId': 'default',
+                        'Content-Type': 'application/json',
+                    },
+                }
+            );
+            // console.log('Product mix deleted successfully.');
+            setIsModalOpen(false);
+            fetchProductsMix();
+        } catch (error) {
+            console.error('Error deleting product mix:', error);
+        } finally {
+            stopLoading();
+        }
+    };
+
     const filteredProductsMix = () =>
         productsMix.filter((product) =>
-            product.productName && product.productName.toLowerCase().includes(filter.toLowerCase())
+            product.productName?.toLowerCase().includes(filter.toLowerCase())
         );
 
     const paginatedData = filteredProductsMix().slice(
@@ -50,8 +150,72 @@ const ViewProductsMix = () => {
         currentPage * pageSize
     );
 
-    const handleRowClick = (product) => {
-        console.log('Selected Product:', product);
+    const ProductMixModal = ({isOpen, product, restrictedProducts, allProducts, allowedProducts, onRestrictedChange, onSubmit, onDelete, onClose,}) => {
+        const isChanged =
+            JSON.stringify(restrictedProducts) !== JSON.stringify(originalRestrictedProducts);
+
+        if (!isOpen) return null;
+
+        return (
+            <div className="edit-modal-overlay">
+                <div className="edit-modal-content">
+                    <h3 className={"staged-form-title"}>Edit Product Mix</h3>
+                    <div className="staged-form-field">
+                        <label>Product</label>
+                        <input
+                            type="text"
+                            value={product.productName}
+                            readOnly
+                            className="staged-form-input"
+                        />
+                    </div>
+                    <div className="staged-form-field">
+                        <label>Restricted Products</label>
+                        <div className="checkbox-group">
+                            {allProducts.map((p) => (
+                                <label key={p.id} className="checkbox-item">
+                                    <input
+                                        type="checkbox"
+                                        checked={restrictedProducts.includes(p.id)}
+                                        onChange={() => onRestrictedChange(p.id)}
+                                    />
+                                    {p.name}
+                                </label>
+                            ))}
+                        </div>
+                    </div>
+                    <h4>Allowed Products</h4>
+                    <div className="staged-form-field">
+                        <div className="checkbox-group">
+                            {allowedProducts.map((p) => (
+                                <label key={p.id} className="checkbox-item">
+                                    <input
+                                        type="checkbox"
+                                        disabled
+                                    />
+                                    {p.name}
+                                </label>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="modal-actions">
+                        <button className="modal-cancel-button" onClick={onClose}>
+                            Cancel
+                        </button>
+                        <button className="modal-delete-button" onClick={onDelete}>
+                            Delete
+                        </button>
+                        <button
+                            className="modal-submit-button"
+                            onClick={onSubmit}
+                            disabled={!isChanged}
+                        >
+                            Submit
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
     };
 
     return (
@@ -96,7 +260,9 @@ const ViewProductsMix = () => {
                     ))
                 ) : (
                     <tr>
-                        <td colSpan="1" className="no-data">No products mix available.</td>
+                        <td colSpan="1" className="no-data">
+                            No products mix available.
+                        </td>
                     </tr>
                 )}
                 </tbody>
@@ -129,6 +295,18 @@ const ViewProductsMix = () => {
                     </button>
                 </div>
             )}
+
+            <ProductMixModal
+                isOpen={isModalOpen}
+                product={selectedProduct}
+                restrictedProducts={restrictedProducts}
+                allowedProducts={allowedProducts}
+                allProducts={allProducts}
+                onRestrictedChange={handleRestrictedProductsChange}
+                onSubmit={handleModalSubmit}
+                onDelete={handleDelete}
+                onClose={() => setIsModalOpen(false)}
+            />
         </div>
     );
 };

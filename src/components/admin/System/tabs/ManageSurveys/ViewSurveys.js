@@ -70,7 +70,7 @@ const ViewSurveysTable = () => {
         <div className="surveys-table-container">
             <div className="table-controls">
                 <div className="filter-container">
-                    <div className="filter-input">
+                    <div className="filter-item">
                         <label htmlFor="nameFilter">Filter by Name:</label>
                         <input
                             type="text"
@@ -82,7 +82,7 @@ const ViewSurveysTable = () => {
                             placeholder="Enter survey name..."
                         />
                     </div>
-                    <div className="filter-input">
+                    <div className="filter-item">
                         <label htmlFor="statusFilter">Filter by Status:</label>
                         <select
                             id="statusFilter"

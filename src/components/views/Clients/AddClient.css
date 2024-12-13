@@ -1,10 +1,9 @@
 .form-container-client {
     max-width: 100%;
-    margin-left: 250px;
+    /*margin-left: 250px;*/
     background: #f5f7fa;
     color: white;
     border-radius: 10px;
-    font-family: 'Poppins', sans-serif;
     overflow-y: auto;
     height: 100vh;
     padding: 20px 30px;
@@ -33,7 +32,6 @@
     position: relative;
     display: inline-block;
     padding: 8px 0;
-    border-bottom: 2px solid #1ABC9C;
 }
 
 .with-indicator {
@@ -53,7 +51,6 @@
     background: none;
     height: 100%;
     padding: 20px;
-    /*border-radius: 50px;*/
 }
 
 .stage {
@@ -238,7 +235,7 @@ textarea {
 
 .family-members h3, .addresses h3 {
     font-size: 20px;
-    color: #2c3e50;
+    color: #ffffff;
     margin-bottom: 10px;
 }
 
@@ -312,7 +309,6 @@ textarea {
 .form-container-client .form-group {
     display: flex;
     flex-direction: column;
-    /*margin-bottom: 30px;*/
     align-items: flex-start;
 }
 .form-container-client .form-group .checkbox{
@@ -388,11 +384,9 @@ textarea {
     background-color: #a0bedc;
     color: #333;
 }
-
-.family-members-table tr:hover {
-    background-color: #56696e;
+.client-form .staged-form-field {
+    margin-bottom: 10px;
 }
-
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -404,23 +398,6 @@ textarea {
     align-items: center;
     justify-content: center;
     z-index: 1000;
-}
-
-.modal-content {
-    background-color: #122b40;
-    padding: 30px;
-    width: 400px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    position: relative;
-    z-index: 1001;
-}
-
-.modal-content h3 {
-    font-size: 20px;
-    color: #ffffff;
-    margin-bottom: 20px;
-    text-align: center;
 }
 
 .modal-buttons {
@@ -463,10 +440,6 @@ textarea {
 .address-table th {
     background-color: #a0bedc;
     color: #333;
-}
-
-.address-table tr:hover {
-    background-color: #56696e;
 }
 
 .modal-content {
@@ -564,9 +537,8 @@ table select:disabled {
     display: flex;
     flex-wrap: wrap;
     padding: 20px;
-    border: 1px solid #e0e0e0;
     border-radius: 8px;
-    background-color: #f9f9f9;
+    background-color: #423d3d;
     height: 400px;
     overflow-y: auto;
     gap: 20px;

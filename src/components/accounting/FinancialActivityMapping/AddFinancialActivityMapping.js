@@ -64,7 +64,7 @@ const AddFinancialActivityMappingForm = () => {
                 },
             });
 
-            console.log('New Mapping Created:', response.data);
+            // console.log('New Mapping Created:', response.data);
             setFinancialActivity('');
             setAccount('');
         } catch (error) {
@@ -76,8 +76,8 @@ const AddFinancialActivityMappingForm = () => {
 
     return (
         <div className="form-container-mapping">
-            <h2 className="mapping-form-title">Add Financial Activity Mapping</h2>
             <form onSubmit={handleSubmit} className="mapping-form">
+                <div className="data-table-form-row">
                 <div className="mapping-form-group">
                     <label>Financial Activity <span className="required-asterisk">*</span></label>
                     <select
@@ -108,7 +108,10 @@ const AddFinancialActivityMappingForm = () => {
                         ))}
                     </select>
                 </div>
+                </div>
+                <div className="mapping-form-button">
                 <button type="submit" className="submit-button-mapping">Create Mapping</button>
+                </div>
             </form>
         </div>
     );

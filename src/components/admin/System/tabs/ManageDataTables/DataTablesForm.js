@@ -56,11 +56,11 @@ const DataTableForm = ({ setActiveTab }) => {
                     setCodeOptions(response.data);
                 } else {
                     console.error("Unexpected response format:", response.data);
-                    setCodeOptions([]); // Fallback to an empty array
+                    setCodeOptions([]);
                 }
             } catch (error) {
                 console.error("Error fetching code options:", error);
-                setCodeOptions([]); // Fallback to an empty array
+                setCodeOptions([]);
             } finally {
                 stopLoading();
             }
@@ -127,8 +127,6 @@ const DataTableForm = ({ setActiveTab }) => {
             }),
         };
 
-        // console.log("Payload being submitted:", payload);
-
         startLoading();
         try {
             const response = await axios.post(`${API_CONFIG.baseURL}/datatables`, payload, {
@@ -140,8 +138,6 @@ const DataTableForm = ({ setActiveTab }) => {
             });
 
             if (response.status === 200) {
-                console.log("Data table created successfully!");
-
                 setFormData({
                     datatableName: '',
                     apptableName: '',
@@ -278,8 +274,8 @@ const DataTableForm = ({ setActiveTab }) => {
                                 <tr key={col.id}>
                                     <td>{col.columnName}</td>
                                     <td>{col.columnType}</td>
-                                    <td>{col.columnLength || "-"}</td>
-                                    <td>{col.columnCode || "-"}</td>
+                                    <td>{col.columnLength || ""}</td>
+                                    <td>{col.columnCode || ""}</td>
                                     <td>
                                         <span
                                             className={`data-table-form-indicator ${

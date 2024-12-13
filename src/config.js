@@ -1,11 +1,10 @@
 let API_CONFIG = {
-    baseURL: 'https://test.meysa.co.ke/fineract-provider/api/v1',
+    baseURL: null,
 };
 
 export const loadConfig = async () => {
     try {
         const cacheBuster = `?t=${new Date().getTime()}`;
-
         const response = await fetch(`${process.env.PUBLIC_URL}/config.json${cacheBuster}`, {
             cache: 'no-store',
         });
@@ -13,9 +12,9 @@ export const loadConfig = async () => {
         if (response.ok) {
             const config = await response.json();
 
-            API_CONFIG.baseURL = config.baseURL || API_CONFIG.baseURL;
-
-            console.log('API Base URL Loaded:', API_CONFIG.baseURL);
+            const customBaseURL = localStorage.getItem('customBaseURL');
+            API_CONFIG.baseURL = customBaseURL || config.baseURL || API_CONFIG.baseURL;
+            // console.log('Base URL Loaded:', API_CONFIG.baseURL);
         } else {
             console.error('Failed to load configuration file:', response.statusText);
         }

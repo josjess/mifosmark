@@ -4,8 +4,9 @@ import { API_CONFIG } from '../../../../../config';
 import { AuthContext } from '../../../../../context/AuthContext';
 import { useLoading } from '../../../../../context/LoadingContext';
 import './SchedulerJobs.css';
+import {FaTrash} from "react-icons/fa";
 
-const SchedulerJobs = () => {
+const SchedulerJobs = ({ onRowClick }) => {
     const { user } = useContext(AuthContext);
     const { startLoading, stopLoading } = useLoading();
     const [schedulerStatus, setSchedulerStatus] = useState(null);
@@ -18,6 +19,8 @@ const SchedulerJobs = () => {
     const [rowsPerPage, setRowsPerPage] = useState(20);
     const [modalVisible, setModalVisible] = useState(false);
     const [errorDetails, setErrorDetails] = useState('');
+    const [isAddParamsModalVisible, setIsAddParamsModalVisible] = useState(false);
+    const [jobParameters, setJobParameters] = useState({});
 
     useEffect(() => {
         fetchSchedulerStatus();
@@ -116,8 +119,69 @@ const SchedulerJobs = () => {
         return matchesName && matchesStatus;
     });
 
+    const handleAddParameterModalOpen = () => {
+        const parameters = selectedJobs.reduce((acc, jobId) => {
+            acc[jobId] = [{ parameterName: "", parameterValue: "" }];
+            return acc;
+        }, {});
+        setJobParameters(parameters);
+        setIsAddParamsModalVisible(true);
+    };
+
+    const handleAddParameter = (jobId) => {
+        setJobParameters((prev) => ({
+            ...prev,
+            [jobId]: [...prev[jobId], { parameterName: '', parameterValue: '' }],
+        }));
+    };
+
+    const handleRemoveParameter = (jobId, index) => {
+        setJobParameters((prev) => ({
+            ...prev,
+            [jobId]: prev[jobId].filter((_, i) => i !== index),
+        }));
+    };
+
+    const handleParameterChange = (jobId, index, field, value) => {
+        setJobParameters((prev) => ({
+            ...prev,
+            [jobId]: prev[jobId].map((param, i) =>
+                i === index ? { ...param, [field]: value } : param
+            ),
+        }));
+    };
+
+    const handleRunJobsWithParameters = async () => {
+        startLoading();
+        try {
+            for (const jobId of selectedJobs) {
+                const parameters = jobParameters[jobId].filter(
+                    (param) => param.parameterName && param.parameterValue
+                );
+
+                await axios.post(
+                    `${API_CONFIG.baseURL}/jobs/${jobId}?command=executeJob`,
+                    { jobParameters: parameters },
+                    {
+                        headers: {
+                            Authorization: `Basic ${user?.base64EncodedAuthenticationKey}`,
+                            'Fineract-Platform-TenantId': 'default',
+                            'Content-Type': 'application/json',
+                        },
+                    }
+                );
+            }
+            setIsAddParamsModalVisible(false);
+            fetchJobs();
+        } catch (error) {
+            console.error('Error executing jobs:', error.message);
+        } finally {
+            stopLoading();
+        }
+    };
+
     const handleRowClick = (job) => {
-        console.log('Clicked Job:', job);
+        onRowClick(job);
     };
 
     const handleJobSelection = (jobId) => {
@@ -140,8 +204,38 @@ const SchedulerJobs = () => {
         setIsAllSelected(!isAllSelected);
     };
 
-    const handleRunSelectedJobs = () => {
-        console.log('Running selected jobs:', selectedJobs);
+    const handleRunSelectedJobs = async () => {
+        if (selectedJobs.length === 0) return;
+
+        startLoading();
+        try {
+            const token = user?.base64EncodedAuthenticationKey;
+            if (!token) throw new Error("Authorization token not found");
+
+            for (const jobId of selectedJobs) {
+                const response = await axios.post(
+                    `${API_CONFIG.baseURL}/jobs/${jobId}?command=executeJob`,
+                    {},
+                    {
+                        headers: {
+                            Authorization: `Basic ${token}`,
+                            "Fineract-Platform-TenantId": "default",
+                            "Content-Type": "application/json",
+                        },
+                    }
+                );
+
+                if (response.status !== 202) {
+                    console.error(`Failed to execute job ${jobId}:`, response.statusText);
+                    throw new Error(`Job ${jobId} execution failed.`);
+                }
+            }
+            fetchJobs();
+        } catch (error) {
+            console.error("Error running selected jobs:", error.message);
+        } finally {
+            stopLoading();
+        }
     };
 
     const paginatedJobs = filteredJobs.slice(
@@ -218,19 +312,20 @@ const SchedulerJobs = () => {
                 <button
                     className="scheduler-action-button"
                     disabled={selectedJobs.length === 0}
-                    >
+                    onClick={handleAddParameterModalOpen}
+                >
                     Add Custom Parameters
                 </button>
                 <button className="scheduler-action-button" onClick={fetchJobs} disabled={isRefreshing}>
                     {isRefreshing ? 'Refreshing...' : 'Refresh'}
                 </button>
-        </div>
-    <div className="rows-per-page-selector">
-        <label htmlFor="rows-per-page">Rows per page:</label>
-        <select
-            id="rows-per-page"
-                    value={rowsPerPage}
-                    onChange={handleRowsPerPageChange}
+            </div>
+            <div className="rows-per-page-selector">
+                <label htmlFor="rows-per-page">Rows per page:</label>
+                <select
+                    id="rows-per-page"
+                            value={rowsPerPage}
+                            onChange={handleRowsPerPageChange}
                 >
                     <option value={5}>5</option>
                     <option value={10}>10</option>
@@ -317,7 +412,7 @@ const SchedulerJobs = () => {
                                         })}
                                     </>
                                 ) : (
-                                    '-'
+                                    ' '
                                 )}
                                 {job.lastRunHistory?.status && (
                                     <span className="status-tooltip">
@@ -353,7 +448,7 @@ const SchedulerJobs = () => {
                                     })}
                                 </>
                             ) : (
-                                '-'
+                                ' '
                             )}
                         </td>
                         <td
@@ -368,7 +463,7 @@ const SchedulerJobs = () => {
                             {job.lastRunHistory?.jobRunErrorLog ? (
                                 <button className="custom-error-log-button">View</button>
                             ) : (
-                                '-'
+                                ' '
                             )}
                         </td>
                     </tr>
@@ -423,6 +518,82 @@ const SchedulerJobs = () => {
                     Last
                 </button>
             </div>
+
+            {isAddParamsModalVisible && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">Edit Job Custom Parameters</h4>
+                        <div className="scrollable-job-list">
+                            {selectedJobs.map((jobId) => (
+                                <div key={jobId} className="job-parameter-section">
+                                    <h5 className="create-modal-title">
+                                        Job: {jobs.find((job) => job.jobId === jobId)?.displayName || "Unknown"}
+                                    </h5>
+                                    {jobParameters[jobId].map((param, index) => (
+                                        <div key={index} className="staged-form-row">
+                                            <input
+                                                type="text"
+                                                placeholder="Parameter Name"
+                                                value={param.parameterName}
+                                                onChange={(e) =>
+                                                    handleParameterChange(
+                                                        jobId,
+                                                        index,
+                                                        'parameterName',
+                                                        e.target.value
+                                                    )
+                                                }
+                                                className="staged-form-input"
+                                            />
+                                            <input
+                                                type="text"
+                                                placeholder="Parameter Value"
+                                                value={param.parameterValue}
+                                                onChange={(e) =>
+                                                    handleParameterChange(
+                                                        jobId,
+                                                        index,
+                                                        'parameterValue',
+                                                        e.target.value
+                                                    )
+                                                }
+                                                className="staged-form-input"
+                                            />
+                                            <FaTrash color={"#f00"}
+                                                     className="remove-parameter-icon"
+                                                     onClick={() => handleRemoveParameter(jobId, index)}
+                                            />
+                                        </div>
+                                    ))}
+                                    <button
+                                        className="add-parameter-button"
+                                        onClick={() => handleAddParameter(jobId)}
+                                    >
+                                        Add Parameter
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button
+                                className="create-provisioning-criteria-cancel"
+                                onClick={() => setIsAddParamsModalVisible(false)}
+                            >
+                                Close
+                            </button>
+                            <button
+                                className="create-provisioning-criteria-confirm"
+                                onClick={handleRunJobsWithParameters}
+                                disabled={selectedJobs.every(
+                                    (jobId) => jobParameters[jobId].length === 0
+                                )}
+                            >
+                                Run Selected Jobs
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

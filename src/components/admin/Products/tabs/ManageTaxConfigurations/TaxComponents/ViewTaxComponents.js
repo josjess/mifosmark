@@ -9,6 +9,8 @@ const ViewTaxComponents = () => {
     const { user } = useContext(AuthContext);
     const { startLoading, stopLoading } = useLoading();
     const [taxComponents, setTaxComponents] = useState([]);
+    const [selectedComponent, setSelectedComponent] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const [pageSize, setPageSize] = useState(10);
     const [currentPage, setCurrentPage] = useState(1);
     const [nameFilter, setNameFilter] = useState('');
@@ -40,6 +42,63 @@ const ViewTaxComponents = () => {
         }
     };
 
+    const handleRowClick = async (component) => {
+        startLoading();
+        try {
+            const response = await axios.get(
+                `${API_CONFIG.baseURL}/taxes/component/${component.id}`,
+                {
+                    headers: {
+                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                        'Fineract-Platform-TenantId': 'default',
+                        'Content-Type': 'application/json',
+                    },
+                }
+            );
+            setSelectedComponent(response.data);
+            setIsModalOpen(true);
+        } catch (error) {
+            console.error('Error fetching tax component details:', error);
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const handleModalSubmit = async (updatedComponent) => {
+        startLoading();
+        try {
+            const payload = {
+                name: updatedComponent.name,
+                percentage: updatedComponent.percentage,
+                startDate: new Date(updatedComponent.startDate).toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: 'long',
+                    year: 'numeric',
+                }),
+                dateFormat: 'dd MMMM yyyy',
+                locale: 'en',
+            };
+            await axios.put(
+                `${API_CONFIG.baseURL}/taxes/component/${selectedComponent.id}`,
+                payload,
+                {
+                    headers: {
+                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                        'Fineract-Platform-TenantId': 'default',
+                        'Content-Type': 'application/json',
+                    },
+                }
+            );
+            // console.log('Tax component updated successfully.');
+            setIsModalOpen(false);
+            fetchTaxComponents();
+        } catch (error) {
+            console.error('Error updating tax component:', error);
+        } finally {
+            stopLoading();
+        }
+    };
+
     const filteredComponents = () =>
         taxComponents.filter((component) =>
             component.name?.toLowerCase().includes(nameFilter.toLowerCase())
@@ -50,17 +109,102 @@ const ViewTaxComponents = () => {
         currentPage * pageSize
     );
 
-    const handleRowClick = (component) => {
-        console.log('Selected Tax Component:', component);
+    const formatDate = (dateArray) => {
+        if (!dateArray || dateArray.length !== 3) return '';
+        const [year, month, day] = dateArray;
+        const date = new Date(year, month - 1, day);
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+        });
     };
 
-    const formatDate = (dateString) => {
-        if (!dateString) return '';
-        const date = new Date(dateString);
-        const options = { day: '2-digit', month: 'long', year: 'numeric' };
-        return date.toLocaleDateString('en-US', options);
-    };
+    const TaxComponentModal = ({ isOpen, component, onSubmit, onClose }) => {
+        const [formData, setFormData] = useState({});
+        const [isChanged, setIsChanged] = useState(false);
 
+        useEffect(() => {
+            if (component) {
+                const initialData = {
+                    name: component.name || '',
+                    percentage: component.percentage || 0,
+                    startDate: component.startDate
+                        ? new Date(
+                            component.startDate[0],
+                            component.startDate[1] - 1,
+                            component.startDate[2]
+                        )
+                            .toISOString()
+                            .split('T')[0]
+                        : '',
+                };
+                setFormData(initialData);
+                setIsChanged(false);
+            }
+        }, [component]);
+
+        const handleFieldChange = (field, value) => {
+            setFormData((prev) => {
+                const updatedData = { ...prev, [field]: value };
+                setIsChanged(JSON.stringify(updatedData) !== JSON.stringify(component));
+                return updatedData;
+            });
+        };
+
+        const handleSubmit = () => {
+            onSubmit(formData);
+        };
+
+        if (!isOpen) return null;
+
+        return (
+            <div className="edit-modal-overlay">
+                <div className="edit-modal-content">
+                    <h3 className={"staged-form-title"}>Edit Tax Component</h3>
+                    <div className="staged-form-field">
+                        <label>Name</label>
+                        <input
+                            type="text"
+                            value={formData.name}
+                            onChange={(e) => handleFieldChange('name', e.target.value)}
+                            className="staged-form-input"
+                        />
+                    </div>
+                    <div className="staged-form-field">
+                        <label>Percentage</label>
+                        <input
+                            type="number"
+                            value={formData.percentage}
+                            onChange={(e) => handleFieldChange('percentage', e.target.value)}
+                            className="staged-form-input"
+                        />
+                    </div>
+                    <div className="staged-form-field">
+                        <label>Start Date</label>
+                        <input
+                            type="date"
+                            value={formData.startDate}
+                            onChange={(e) => handleFieldChange('startDate', e.target.value)}
+                            className="staged-form-input"
+                        />
+                    </div>
+                    <div className="modal-actions">
+                        <button className="modal-cancel-button" onClick={onClose}>
+                            Cancel
+                        </button>
+                        <button
+                            className="modal-submit-button"
+                            onClick={handleSubmit}
+                            disabled={!isChanged}
+                        >
+                            Submit
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    };
 
     return (
         <div className="view-tax-components">
@@ -93,7 +237,6 @@ const ViewTaxComponents = () => {
                     <th>Name</th>
                     <th>Percentage %</th>
                     <th>Start Date</th>
-                    <th>Account</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -107,12 +250,11 @@ const ViewTaxComponents = () => {
                             <td>{component.name}</td>
                             <td>{component.percentage || '0'}%</td>
                             <td>{formatDate(component.startDate)}</td>
-                            <td>{component.account?.name || ''}</td>
                         </tr>
                     ))
                 ) : (
                     <tr>
-                        <td colSpan="4" className="no-data">
+                        <td colSpan="3" className="no-data">
                             No tax components available.
                         </td>
                     </tr>
@@ -147,6 +289,13 @@ const ViewTaxComponents = () => {
                     </button>
                 </div>
             )}
+
+            <TaxComponentModal
+                isOpen={isModalOpen}
+                component={selectedComponent}
+                onSubmit={handleModalSubmit}
+                onClose={() => setIsModalOpen(false)}
+            />
         </div>
     );
 };

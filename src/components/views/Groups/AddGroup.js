@@ -1,19 +1,20 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {Link, useNavigate} from 'react-router-dom';
-import './AddCenter.css';
-import { useLoading } from '../../context/LoadingContext';
+import './AddGroup.css';
+import { useLoading } from '../../../context/LoadingContext';
 import axios from 'axios';
-import { API_CONFIG } from '../../config';
-import {AuthContext} from "../../context/AuthContext";
+import { API_CONFIG } from '../../../config';
+import {AuthContext} from "../../../context/AuthContext";
 
 
-const AddCenterForm = () => {
+const AddGroupForm = () => {
     const [name, setName] = useState('');
     const [isActive, setIsActive] = useState(false);
+    // const [clients, setClients] = useState([]);
+    const [clientSearch, setClientSearch] = useState('');
+    const [addedClients, setAddedClients] = useState([]);
     const [externalId, setExternalId] = useState('');
     const [submittedOn, setSubmittedOn] = useState(new Date().toISOString().split('T')[0]);
-    const [groupSearch, setGroupSearch] = useState('');
-    const [addedGroups, setAddedGroups] = useState([]);
     const [offices, setOffices] = useState([]);
     const [staffs, setStaffs] = useState([]);
     const [office, setOffice] = useState('');
@@ -26,6 +27,7 @@ const AddCenterForm = () => {
     useEffect(() => {
         const fetchData = async () => {
             startLoading();
+
             try {
                 const headers = {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
@@ -50,54 +52,42 @@ const AddCenterForm = () => {
         // eslint-disable-next-line
     }, []);
 
-    const handleAddGroup = () => {
-        if (groupSearch && !addedGroups.includes(groupSearch)) {
-            setAddedGroups([...addedGroups, groupSearch]);
-            setGroupSearch('');
-        }
-    };
-
-    const handleRemoveGroup = (group) => {
-        setAddedGroups(addedGroups.filter((g) => g !== group));
-    };
+    const isFormComplete = office && name && staff;
 
     const handleSubmit = (e) => {
         e.preventDefault();
         console.log({
-            name,
             office,
+            name,
             staff,
             isActive,
+            clients: addedClients,
             externalId,
             submittedOn,
-            addedGroups,
         });
-        navigate('/centers');
+        navigate('/groups');
     };
 
     const handleCancel = () => {
-        navigate('/centers');
+        navigate('/groups');
+    };
+
+    const handleAddClient = () => {
+        if (clientSearch && !addedClients.includes(clientSearch)) {
+            setAddedClients([...addedClients, clientSearch]);
+            setClientSearch('');
+        }
+    };
+
+    const handleRemoveClient = (index) => {
+        setAddedClients(addedClients.filter((_, i) => i !== index));
     };
 
     return (
-        <div className="form-container-client add-center-form">
-            <h2 className="page-heading">
-                <Link to="/centers" className="breadcrumb-link">Centers</Link> . Add Center
-            </h2>
+        <div className="form-container-client add-group-form">
             <div className="with-indicator">
-                <form className="client-form" onSubmit={handleSubmit}>
+                <form className="client-form">
                     <div className="form-row">
-                        <div className="form-group">
-                            <label>Name <span>*</span></label>
-                            <input
-                                type="text"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                placeholder="Enter Center Name"
-                                required
-                            />
-                        </div>
-
                         <div className="form-group">
                             <label>Office <span>*</span></label>
                             <select value={office} onChange={(e) => setOffice(e.target.value)} required>
@@ -109,58 +99,30 @@ const AddCenterForm = () => {
                                 ))}
                             </select>
                         </div>
-                    </div>
-                    <div className="form-row">
                         <div className="form-group">
                             <label>Staff <span>*</span></label>
                             <select value={staff} onChange={(e) => setStaff(e.target.value)} required>
                                 <option value="">-- Select Staff --</option>
-                                {staffs.map((staff) => (
+                                {staffs && staffs.map((staff) => (
                                     <option key={staff.id} value={staff.id}>
                                         {staff.displayName}
                                     </option>
                                 ))}
                             </select>
                         </div>
-                        <div className="form-group client-search-group">
-                            <label>Groups</label>
-                            <div className="client-search-container">
-                                <input
-                                    type="text"
-                                    value={groupSearch}
-                                    onChange={(e) => setGroupSearch(e.target.value)}
-                                    placeholder="Search Groups by Name or ID"
-                                    className="client-search-input"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={handleAddGroup}
-                                    className="add-client-button"
-                                >
-                                    Add Group
-                                </button>
-                            </div>
-
-                            <div className="added-clients">
-                                <ul>
-                                    {addedGroups.map((group, index) => (
-                                        <li key={index}>
-                                            {group}
-                                            <button
-                                                type="button"
-                                                onClick={() => handleRemoveGroup(group)}
-                                                className="remove-client-button"
-                                            >
-                                                Remove
-                                            </button>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        </div>
                     </div>
 
                     <div className="form-row">
+                        <div className="form-group">
+                            <label>Name <span>*</span></label>
+                            <input
+                                type="text"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                placeholder="Enter Group Name"
+                                required
+                            />
+                        </div>
                         <div className="form-group">
                             <label>External ID</label>
                             <input
@@ -170,7 +132,28 @@ const AddCenterForm = () => {
                                 placeholder="Enter External ID"
                             />
                         </div>
+                    </div>
 
+                    <div className="form-row">
+                        <div className="form-group client-search-group">
+                            <label>Clients</label>
+                            <div className="client-search-container">
+                                <input
+                                    type="text"
+                                    value={clientSearch}
+                                    onChange={(e) => setClientSearch(e.target.value)}
+                                    placeholder="Search clients by Name or ID"
+                                    className="client-search-input"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={handleAddClient}
+                                    className="add-client-button"
+                                >
+                                    Add Client
+                                </button>
+                            </div>
+                        </div>
                         <div className="form-group">
                             <label>Submitted On</label>
                             <input
@@ -180,20 +163,49 @@ const AddCenterForm = () => {
                             />
                         </div>
                     </div>
-                    <div className="form-group checkbox-group">
+
+                    <div className="">
                         <div className="checkbox">
-                            <input
+                            <label><input
                                 type="checkbox"
                                 checked={isActive}
                                 onChange={(e) => setIsActive(e.target.checked)}
+                                className="checkbox-input"
                             />
-                            <label>Active</label>
+                                Activate</label>
                         </div>
                     </div>
 
+                    {addedClients.length > 0 && (
+                        <div className="added-clients">
+                            <h4>Added Clients</h4>
+                            <ul>
+                                {addedClients.map((client, index) => (
+                                    <li key={index}>
+                                        {client}
+                                        <button
+                                            type="button"
+                                            onClick={() => handleRemoveClient(index)}
+                                            className="remove-client-button"
+                                        >
+                                            Remove
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+
                     <div className="navigation-buttons">
-                        <button type="button" onClick={handleCancel} className="back-button">Cancel</button>
-                        <button type="submit" className="next-button">Submit</button>
+                        <button
+                            type="submit"
+                            className="submit-button"
+                            onClick={handleSubmit}
+                            disabled={!isFormComplete}
+                        >
+                            Submit
+                        </button>
+                        <button type="button" className="cancel-button" onClick={handleCancel}>Cancel</button>
                     </div>
                 </form>
             </div>
@@ -201,4 +213,4 @@ const AddCenterForm = () => {
     );
 };
 
-export default AddCenterForm;
+export default AddGroupForm;

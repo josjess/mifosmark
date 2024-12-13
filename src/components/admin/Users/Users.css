@@ -3,6 +3,7 @@
     margin-left: 250px;
     font-family: Arial, sans-serif;
     background-color: #f8f9fa;
+    min-height: 95vh;
 }
 
 .users-page-head {
@@ -63,6 +64,7 @@
 
 .users-tab-content {
     margin-top: 20px;
+    min-height: 100vh;
     padding: 20px;
     background-color: #ffffff;
     border-radius: 5px;

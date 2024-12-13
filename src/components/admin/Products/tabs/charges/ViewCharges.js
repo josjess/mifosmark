@@ -5,7 +5,7 @@ import { useLoading } from '../../../../../context/LoadingContext';
 import { API_CONFIG } from '../../../../../config';
 import './ViewCharges.css';
 
-const ViewCharges = () => {
+const ViewCharges = ({ onRowClick }) => {
     const { user } = useContext(AuthContext);
     const { startLoading, stopLoading } = useLoading();
     const [charges, setCharges] = useState([]);
@@ -52,10 +52,6 @@ const ViewCharges = () => {
         (currentPage - 1) * pageSize,
         currentPage * pageSize
     );
-
-    const handleRowClick = (charge) => {
-        console.log('Selected Charge:', charge);
-    };
 
     const formatCurrency = (amount, currencySymbol) => {
         if (!amount || !currencySymbol) return '-';
@@ -121,7 +117,7 @@ const ViewCharges = () => {
                     paginatedData.map((charge) => (
                         <tr
                             key={charge.id}
-                            onClick={() => handleRowClick(charge)}
+                            onClick={() => onRowClick(charge)}
                             className="clickable-row"
                         >
                             <td>{charge.name || ''}</td>

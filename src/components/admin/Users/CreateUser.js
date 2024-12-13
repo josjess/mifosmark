@@ -153,9 +153,9 @@ const CreateUserForm = () => {
                             <div className="navigation-buttons">
                                 <button
                                     className="cancel-button"
-                                    onClick={() => window.location.href = '/admin'}
+                                    disabled
                                 >
-                                    Cancel
+                                    back
                                 </button>
                                 <button
                                     onClick={goNext}
@@ -229,7 +229,7 @@ const CreateUserForm = () => {
                                                 )
                                             }
                                         />
-                                        <span>{role.name}</span>
+                                        <p>{role.name}</p>
                                     </div>
                                 ))}
                             </div>

@@ -81,7 +81,7 @@ const CreateProductsMix = () => {
                     "Content-Type": "application/json",
                 },
             });
-            alert("Products Mix created successfully!");
+            // alert("Products Mix created successfully!");
             setSelectedProduct("");
             setSelectedRestrictedProducts([]);
             setAllowedProducts([]);
@@ -108,8 +108,8 @@ const CreateProductsMix = () => {
                 >
                     <option value="">Select a Product</option>
                     {products.map((product) => (
-                        <option key={product.productId} value={product.productId}>
-                            {product.productName}
+                        <option key={product.id} value={product.id}>
+                            {product.name}
                         </option>
                     ))}
                 </select>
@@ -123,6 +123,7 @@ const CreateProductsMix = () => {
                     <div id="restricted-products" className="products-mix-checkbox-group">
                         {allowedProducts.map((product) => (
                             <div key={product.id} className="products-mix-checkbox-item">
+                                <label htmlFor={`product-${product.id}`} className="products-mix-label">
                                 <input
                                     type="checkbox"
                                     id={`product-${product.id}`}
@@ -138,7 +139,7 @@ const CreateProductsMix = () => {
                                     }}
                                     className="products-mix-checkbox-input"
                                 />
-                                <label htmlFor={`product-${product.id}`} className="products-mix-checkbox-label">
+
                                     {product.name}
                                 </label>
                             </div>

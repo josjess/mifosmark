@@ -3,6 +3,7 @@
     margin-left: 250px;
     font-family: Arial, sans-serif;
     background-color: #f8f9fa;
+    min-height: 95vh;
 }
 
 .closing-entries-head {

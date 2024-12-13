@@ -80,7 +80,7 @@ const Sidebar = () => {
                             <li onClick={() => navigate('/reports/savings')}>Savings</li>
                             <li onClick={() => navigate('/reports/funds')}>Funds</li>
                             <li onClick={() => navigate('/reports/accounting')}>Accounting</li>
-                            <li onClick={() => navigate('/reports/xbrl')}>XBRL</li>
+                            <li onClick={() => navigate('/report/XBRL')}>XBRL</li>
                         </ul>
                     )}
                 </li>

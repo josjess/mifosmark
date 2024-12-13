@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { useNavigate } from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import { AuthContext } from '../context/AuthContext';
 import { NotificationContext } from '../context/NotificationContext';
 import { useLoading } from '../context/LoadingContext';
@@ -168,10 +168,10 @@ const Dashboard = () => {
                             <p>Key metrics and insights</p>
                         </div>
                         <div className="top-right-buttons">
-                            <button className="action-button">
+                            <button className="action-button" onClick={() => navigate('/manage-roles-permissions')}>
                                 <FaUsers className="button-icon"/> Manage Users & Roles
                             </button>
-                            <button className="action-button" onClick={() => navigate('/addclient')}>
+                            <button className="action-button" onClick={() => navigate('/clients')}>
                                 <FaUserPlus className="button-icon"/> Onboard a New Client
                             </button>
                         </div>
@@ -188,7 +188,7 @@ const Dashboard = () => {
                         </div>
                         <p>{totalClients}</p>
                     </div>
-                    <div className="card">
+                    <div className="card" onClick={() => navigate('/clients')}>
                         <div className="card-header">
                             <div className="icon-container">
                                 <FaUser className="card-icon"/>
@@ -197,7 +197,7 @@ const Dashboard = () => {
                         </div>
                         <p>{activeClients}</p>
                     </div>
-                    <div className="card">
+                    <div className="card" onClick={() => navigate('/clients')}>
                         <div className="card-header">
                             <div className="icon-container">
                                 <FaUser className="card-icon"/>
@@ -206,7 +206,7 @@ const Dashboard = () => {
                         </div>
                         <p>{inactiveClients}</p>
                     </div>
-                    <div className="card">
+                    <div className="card" onClick={() => navigate('/clients')}>
                         <div className="card-header">
                             <div className="icon-container">
                                 <FaUser className="card-icon"/>
@@ -215,7 +215,7 @@ const Dashboard = () => {
                         </div>
                         <p>{newClients}</p>
                     </div>
-                    <div className="card">
+                    <div className="card" >
                         <div className="card-header">
                             <div className="icon-container">
                                 <FaMoneyCheckAlt className="card-icon"/>

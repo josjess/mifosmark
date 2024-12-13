@@ -13,6 +13,10 @@ const ViewReportsTable = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [filter, setFilter] = useState({ type: '', name: '', category: '' });
     const [totalPages, setTotalPages] = useState(1);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modalData, setModalData] = useState(null);
+    const [userReportValue, setUserReportValue] = useState(null);
+    const [initialUserReportValue, setInitialUserReportValue] = useState(null);
 
     useEffect(() => {
         fetchReports();
@@ -64,15 +68,58 @@ const ViewReportsTable = () => {
         setCurrentPage(1);
     };
 
-    const handleRowClick = (report) => {
-        console.log('Row Data:', report);
+    const handleRowClick = async (report) => {
+        startLoading();
+        try {
+            const response = await axios.get(
+                `${API_CONFIG.baseURL}/reports/${report.id}?template=true`,
+                {
+                    headers: {
+                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                        "Fineract-Platform-TenantId": "default",
+                    },
+                }
+            );
+            const data = response.data;
+            setModalData(data);
+            setUserReportValue(data.useReport);
+            setInitialUserReportValue(data.useReport);
+            setIsModalOpen(true);
+        } catch (error) {
+            console.error("Error fetching report details:", error);
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const handleSubmit = async () => {
+        startLoading();
+        try {
+            await axios.put(
+                `${API_CONFIG.baseURL}/reports/${modalData.id}`,
+                { useReport: userReportValue },
+                {
+                    headers: {
+                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                        "Fineract-Platform-TenantId": "default",
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+            setIsModalOpen(false);
+            fetchReports();
+        } catch (error) {
+            console.error("Error updating report:", error);
+        } finally {
+            stopLoading();
+        }
     };
 
     return (
         <div className="reports-table-container">
             <div className="table-controls">
                 <div className="filter-container">
-                    <div className="filter-input">
+                    <div className="filter-item">
                         <label htmlFor="typeFilter">Filter by Report Type:</label>
                         <input
                             type="text"
@@ -84,7 +131,7 @@ const ViewReportsTable = () => {
                             placeholder="Enter report type..."
                         />
                     </div>
-                    <div className="filter-input">
+                    <div className="filter-item">
                         <label htmlFor="nameFilter">Filter by Report Name:</label>
                         <input
                             type="text"
@@ -96,7 +143,7 @@ const ViewReportsTable = () => {
                             placeholder="Enter report name..."
                         />
                     </div>
-                    <div className="filter-input">
+                    <div className="filter-item">
                         <label htmlFor="categoryFilter">Filter by Report Category:</label>
                         <input
                             type="text"
@@ -201,6 +248,65 @@ const ViewReportsTable = () => {
                     >
                         End
                     </button>
+                </div>
+            )}
+
+            {isModalOpen && modalData && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">{modalData.reportName}</h4>
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">Report Type</label>
+                            <input
+                                type="text"
+                                value={modalData.reportType}
+                                disabled
+                                className="create-provisioning-criteria-input"
+                            />
+                        </div>
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">Report Category</label>
+                            <input
+                                type="text"
+                                value={modalData.reportCategory}
+                                disabled
+                                className="create-provisioning-criteria-input"
+                            />
+                        </div>
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">
+                            <input
+                                type="checkbox"
+                                checked={modalData.coreReport}
+                                disabled
+                                className=""
+                            />  Core Report</label>
+                        </div>
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">
+                            <input
+                                type="checkbox"
+                                checked={userReportValue}
+                                onChange={(e) => setUserReportValue(e.target.checked)}
+                                className=""
+                            /> User Report (UI)</label>
+                        </div>
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button
+                                onClick={() => setIsModalOpen(false)}
+                                className="create-provisioning-criteria-cancel"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleSubmit}
+                                className="create-provisioning-criteria-confirm"
+                                disabled={userReportValue === initialUserReportValue}
+                            >
+                                Submit
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

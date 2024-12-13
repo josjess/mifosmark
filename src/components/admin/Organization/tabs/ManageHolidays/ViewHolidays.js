@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../../../../../context/AuthContext';
 import { useLoading } from '../../../../../context/LoadingContext';
@@ -15,6 +16,8 @@ const ViewHolidays = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [nameFilter, setNameFilter] = useState('');
     const [totalPages, setTotalPages] = useState(1);
+    const navigate = useNavigate();
+
 
     useEffect(() => {
         fetchOffices();
@@ -97,6 +100,10 @@ const ViewHolidays = () => {
         });
     };
 
+    const handleRowClick = (holiday) => {
+        navigate(`/holidays/view/${holiday.id}`);
+    };
+
     return (
         <div className="view-holidays">
             <div className="table-controls">
@@ -153,7 +160,11 @@ const ViewHolidays = () => {
                 <tbody>
                 {paginatedData.length > 0 ? (
                     paginatedData.map((holiday) => (
-                        <tr key={holiday.id}>
+                        <tr
+                            key={holiday.id}
+                            onClick={() => holiday.status.value !== "Deleted" && handleRowClick(holiday)}
+                            className={`clickable-row ${holiday.status.value === "Deleted" ? "non-clickable-row" : ""}`}
+                        >
                             <td>{holiday.name || ''}</td>
                             <td>{holiday.description || ''}</td>
                             <td>{formatDate(holiday.fromDate)}</td>

@@ -119,7 +119,7 @@ const ManageExternalEvents = () => {
             </div>
             <div className="events-controls">
                 <div className="filter-container">
-                    <div className="filter-input">
+                    <div className="filter-item">
                         <label htmlFor="eventTypeFilter">Filter by Event Type:</label>
                         <input
                             type="text"
@@ -131,7 +131,7 @@ const ManageExternalEvents = () => {
                             placeholder="Enter event type..."
                         />
                     </div>
-                    <div className="filter-input">
+                    <div className="filter-item">
                         <label htmlFor="statusFilter">Filter by Status:</label>
                         <select
                             id="statusFilter"

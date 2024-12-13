@@ -33,7 +33,7 @@ const AddAccountForm = () => {
                         'Content-Type': 'application/json',
                     },
                 });
-                console.log('Template Data:', response.data);
+                // console.log('Template Data:', response.data);
 
                 setAccountTypes(response.data.accountTypeOptions || []);
                 setParents(response.data.assetHeaderAccountOptions.concat(
@@ -76,7 +76,7 @@ const AddAccountForm = () => {
                 },
             });
 
-            console.log('New Account Created:', response.data);
+            // console.log('New Account Created:', response.data);
 
             setAccountType('');
             setParent('');
@@ -95,7 +95,6 @@ const AddAccountForm = () => {
 
     return (
         <div className="form-container-account">
-            <h2 className="account-form-title">Add New Account</h2>
             <form onSubmit={handleSubmit} className="account-form">
                 <div className="account-form-row">
                     <div className="account-form-group">
@@ -151,13 +150,13 @@ const AddAccountForm = () => {
                 </div>
                 <div className="account-form-checkbox">
                     <div className="checkbox-group">
-                        <input
+                        <label className="manual-entries-label"><input
                             type="checkbox"
                             checked={manualEntriesAllowed}
                             onChange={(e) => setManualEntriesAllowed(e.target.checked)}
                             className="manual-entries-checkbox"
                         />
-                        <label className="manual-entries-label">Manual Entries Allowed</label>
+                            Manual Entries Allowed</label>
                     </div>
                 </div>
                 <div className="account-form-group full-width">

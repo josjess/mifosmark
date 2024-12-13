@@ -15,6 +15,11 @@ const ConfigurationPage = () => {
     const [pageSize, setPageSize] = useState(10);
     const [currentPage, setCurrentPage] = useState(1);
 
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [editConfig, setEditConfig] = useState(null);
+    const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
+
+
     useEffect(() => {
         fetchConfigurations();
     }, []);
@@ -63,7 +68,7 @@ const ConfigurationPage = () => {
                     'Content-Type': 'application/json',
                 },
             });
-            console.log(`Status for configuration ID ${id} updated successfully.`);
+            // console.log(`Status for configuration ID ${id} updated successfully.`);
         } catch (error) {
             console.error(`Failed to update status for configuration ID ${id}:`, error);
 
@@ -104,10 +109,79 @@ const ConfigurationPage = () => {
         setCurrentPage(1);
     };
 
-    const handleEdit = (config) => {
-        console.log('Editing configuration:', config);
+    const handleEdit = async (config) => {
+        setShowEditModal(true);
+        startLoading();
+
+        try {
+            const response = await axios.get(
+                `${API_CONFIG.baseURL}/configurations/${config.id}`,
+                {
+                    headers: {
+                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                        "Fineract-Platform-TenantId": "default",
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
+            setEditConfig(response.data);
+            setIsSubmitDisabled(true);
+        } catch (error) {
+            console.error("Error fetching configuration details:", error);
+            // alert("Failed to fetch configuration details. Please try again.");
+        } finally {
+            stopLoading();
+        }
     };
 
+    const handleFieldChange = (field, value) => {
+        setEditConfig((prev) => {
+            const updated = { ...prev, [field]: value };
+            setIsSubmitDisabled(
+                JSON.stringify(updated) === JSON.stringify(prev)
+            );
+            return updated;
+        });
+    };
+
+    const handleSubmit = async () => {
+        if (!editConfig) return;
+
+        startLoading();
+
+        try {
+            const payload = {
+                value: editConfig.value,
+            };
+
+            await axios.put(
+                `${API_CONFIG.baseURL}/configurations/${editConfig.id}`,
+                payload,
+                {
+                    headers: {
+                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                        "Fineract-Platform-TenantId": "default",
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
+            // alert("Configuration updated successfully!");
+            setShowEditModal(false);
+            fetchConfigurations();
+        } catch (error) {
+            console.error("Error updating configuration:", error);
+            // alert("Failed to update configuration. Please try again.");
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const handleCancel = () => {
+        setShowEditModal(false);
+        setEditConfig(null);
+    };
 
     return (
         <div className="configuration-page">
@@ -116,7 +190,7 @@ const ConfigurationPage = () => {
             </h2>
             <div className="config-controls">
                 <div className="filter-container">
-                    <div className="filter-input">
+                    <div className="filter-item">
                         <label htmlFor="nameFilter">Filter by Name:</label>
                         <input
                             type="text"
@@ -128,7 +202,7 @@ const ConfigurationPage = () => {
                             placeholder="Enter configuration name..."
                         />
                     </div>
-                    <div className="filter-input">
+                    <div className="filter-item">
                         <label htmlFor="statusFilter">Filter by Status:</label>
                         <select
                             id="statusFilter"
@@ -235,6 +309,66 @@ const ConfigurationPage = () => {
                     </button>
                 </div>
             )}
+
+            {showEditModal && editConfig && (
+                <div className="edit-modal-overlay">
+                    <div className="edit-modal-content">
+                        <h3 className="staged-form-title">Edit Configuration</h3>
+                        <div className="staged-form-field">
+                            <label>Configuration Name (Read Only)</label>
+                            <input
+                                type="text"
+                                className="staged-form-input"
+                                value={editConfig.name}
+                                readOnly
+                                disabled
+                            />
+                        </div>
+                        <div className="staged-form-field">
+                            <label>Description (Read Only)</label>
+                            <input
+                                type="text"
+                                className="staged-form-input"
+                                value={editConfig.description || ""}
+                                readOnly
+                                disabled
+                            />
+                        </div>
+                        <div className="staged-form-field">
+                            <label>Number Value</label>
+                            <input
+                                type="number"
+                                className="staged-form-input"
+                                value={editConfig.value || ""}
+                                onChange={(e) => handleFieldChange("value", e.target.value)}
+                            />
+                        </div>
+                        <div className="staged-form-field">
+                            <label>Date Value</label>
+                            <input
+                                type="date"
+                                className="staged-form-input"
+                                value={editConfig.dateValue || ""}
+                                max={new Date().toISOString().split("T")[0]}
+                                onChange={(e) => handleFieldChange("dateValue", e.target.value)}
+                            />
+                        </div>
+                        <div className="modal-actions">
+                            <button className="modal-cancel-button" onClick={handleCancel}>
+                                Cancel
+                            </button>
+                            <button
+                                className="modal-submit-button"
+                                onClick={handleSubmit}
+                                disabled={isSubmitDisabled}
+                            >
+                                Submit
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
         </div>
     );
 };

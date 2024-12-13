@@ -2,10 +2,10 @@ import React, {useContext, useEffect, useState} from 'react';
 import { FaPlus } from 'react-icons/fa';
 import './AddClient.css';
 import {Link, useNavigate} from "react-router-dom";
-import { API_CONFIG } from '../../config';
+import { API_CONFIG } from '../../../config';
 import axios from 'axios';
-import { useLoading } from '../../context/LoadingContext';
-import {AuthContext} from "../../context/AuthContext";
+import { useLoading } from '../../../context/LoadingContext';
+import {AuthContext} from "../../../context/AuthContext";
 
 const AddClientForm = () => {
     const [legalForm, setLegalForm] = useState('PERSON');
@@ -171,10 +171,6 @@ const AddClientForm = () => {
 
     return (
         <div className="form-container-client">
-            <h2 className="page-heading">
-                <Link to="/clients" className="breadcrumb-link">Clients</Link> . Onboard New Client
-            </h2>
-
             <div className="with-indicator">
                 <div className="stage-indicator">
                     <div className={`stage ${step === 1 ? 'current' : step > 1 ? 'completed' : ''}`}
@@ -505,7 +501,7 @@ const AddClientForm = () => {
                     )}
 
                     {step === 3 && (
-                        <div>
+                        <>
                             <div className="t-head">
                                 <h3>Family Members</h3>
                                 <span className="add-family-member" onClick={() => setShowModal(true)}>
@@ -550,14 +546,15 @@ const AddClientForm = () => {
                             </table>
 
                             {showModal && (
-                                <div className="modal-overlay" onClick={() => setShowModal(false)}>
-                                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                                        <h3>Add Family Member</h3>
-                                        <div className="form-row">
-                                            <div className="form-group">
+                                <div className="edit-modal-overlay" onClick={() => setShowModal(false)}>
+                                    <div className="edit-modal-content" onClick={(e) => e.stopPropagation()}>
+                                        <h4 className={"staged-form-title"}>Add Family Member</h4>
+                                        <div className="staged-form-row">
+                                            <div className="staged-form-field">
                                                 <input
                                                     type="text"
                                                     placeholder="First Name"
+                                                    className="staged-form-input"
                                                     value={newFamilyMember.firstName}
                                                     onChange={(e) =>
                                                         setNewFamilyMember({
@@ -567,9 +564,10 @@ const AddClientForm = () => {
                                                     }
                                                 />
                                             </div>
-                                            <div className="form-group">
+                                            <div className="staged-form-field">
                                                 <input
                                                     type="text"
+                                                    className="staged-form-input"
                                                     placeholder="Middle Name"
                                                     value={newFamilyMember.middleName}
                                                     onChange={(e) =>
@@ -580,9 +578,10 @@ const AddClientForm = () => {
                                                     }
                                                 />
                                             </div>
-                                            <div className="form-group">
+                                            <div className="staged-form-field">
                                                 <input
                                                     type="text"
+                                                    className="staged-form-input"
                                                     placeholder="Last Name"
                                                     value={newFamilyMember.lastName}
                                                     onChange={(e) =>
@@ -594,10 +593,11 @@ const AddClientForm = () => {
                                                 />
                                             </div>
                                         </div>
-                                        <div className="form-row">
-                                            <div className="form-group">
+                                        <div className="staged-form-row">
+                                            <div className="staged-form-field">
                                                 <input
                                                     type="text"
+                                                    className="staged-form-input"
                                                     placeholder="Mobile Number"
                                                     value={newFamilyMember.mobileNumber}
                                                     onChange={(e) =>
@@ -608,9 +608,10 @@ const AddClientForm = () => {
                                                     }
                                                 />
                                             </div>
-                                            <div className="form-group">
+                                            <div className="staged-form-field">
                                                 <input
                                                     type="number"
+                                                    className="staged-form-input"
                                                     placeholder="Age"
                                                     value={newFamilyMember.age}
                                                     onChange={(e) =>
@@ -620,8 +621,8 @@ const AddClientForm = () => {
                                             </div>
                                         </div>
 
-                                        <div className="form-row">
-                                            <div className="form-group">
+                                        <div className="staged-form-row">
+                                            <div className="staged-form-field">
                                                 <select
                                                     value={newFamilyMember.gender}
                                                     onChange={(e) =>
@@ -630,13 +631,14 @@ const AddClientForm = () => {
                                                             gender: e.target.value
                                                         })
                                                     }
+                                                    className="staged-form-select"
                                                 >
                                                     <option value="">-- Select Gender --</option>
                                                     <option value="Male">Male</option>
                                                     <option value="Female">Female</option>
                                                 </select>
                                             </div>
-                                            <div className="form-group">
+                                            <div className="staged-form-field">
                                                 <select
                                                     value={newFamilyMember.profession}
                                                     onChange={(e) =>
@@ -645,6 +647,7 @@ const AddClientForm = () => {
                                                             profession: e.target.value
                                                         })
                                                     }
+                                                    className="staged-form-select"
                                                 >
                                                     <option value="">-- Select Profession --</option>
                                                     <option value="Business">Business Person</option>
@@ -653,8 +656,8 @@ const AddClientForm = () => {
                                                 </select>
                                             </div>
                                         </div>
-                                        <div className="form-row">
-                                            <div className="form-group">
+                                        <div className="staged-form-row">
+                                            <div className="staged-form-field">
                                                 <select
                                                     value={newFamilyMember.maritalStatus}
                                                     onChange={(e) =>
@@ -663,6 +666,7 @@ const AddClientForm = () => {
                                                             maritalStatus: e.target.value
                                                         })
                                                     }
+                                                    className="staged-form-select"
                                                 >
                                                     <option value="">-- Select Marital Status --</option>
                                                     <option value="Single">Single</option>
@@ -670,24 +674,25 @@ const AddClientForm = () => {
                                                     <option value="Divorced">Divorced</option>
                                                 </select>
                                             </div>
-                                        </div>
-                                        <div className="form-group">
-                                            <label>Date of Birth</label>
-                                            <input
-                                                type="date"
-                                                placeholder="Date of Birth"
-                                                value={newFamilyMember.dateOfBirth}
-                                                onChange={(e) =>
-                                                    setNewFamilyMember({
-                                                        ...newFamilyMember,
-                                                        dateOfBirth: e.target.value
-                                                    })
-                                                }
-                                            />
-                                        </div>
-                                        <div className="form-group">
-                                            <div className="checkbox">
+                                            <div className="staged-form-field">
+                                                <label>Date of Birth</label>
                                                 <input
+                                                    type="date"
+                                                    className="staged-form-input"
+                                                    placeholder="Date of Birth"
+                                                    value={newFamilyMember.dateOfBirth}
+                                                    onChange={(e) =>
+                                                        setNewFamilyMember({
+                                                            ...newFamilyMember,
+                                                            dateOfBirth: e.target.value
+                                                        })
+                                                    }
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="staged-form-field">
+                                            <div className="checkbox">
+                                                <label><input
                                                     type="checkbox"
                                                     checked={newFamilyMember.isDependent}
                                                     onChange={(e) =>
@@ -697,14 +702,15 @@ const AddClientForm = () => {
                                                         })
                                                     }
                                                 />
-                                                <label>Dependent</label>
+                                                    Dependent</label>
                                             </div>
                                         </div>
-                                        <div className="modal-buttons">
-                                            <button onClick={addFamilyMember} className="submit-button">Save</button>
+
+                                        <div className="modal-actions">
                                             <button onClick={() => setShowModal(false)}
-                                                    className="cancel-button">Cancel
+                                                    className="modal-cancel-button">Cancel
                                             </button>
+                                            <button onClick={addFamilyMember} className="modal-submit-button">Save</button>
                                         </div>
                                     </div>
                                 </div>
@@ -713,11 +719,11 @@ const AddClientForm = () => {
                                 <button onClick={goBack} className="back-button">Back</button>
                                 <button onClick={goNext} className="next-button">Next</button>
                             </div>
-                        </div>
+                        </>
                     )}
 
                     {step === 4 && (
-                        <div>
+                        <>
                             <div className="t-head">
                                 <h3>Addresses</h3>
                                 <span className="add-address" onClick={() => setShowAddressModal(true)}>
@@ -764,25 +770,27 @@ const AddClientForm = () => {
                             </table>
 
                             {showAddressModal && (
-                                <div className="modal-overlay" onClick={() => setShowAddressModal(false)}>
-                                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                                <div className="edit-modal-overlay" onClick={() => setShowAddressModal(false)}>
+                                    <div className="edit-modal-content" onClick={(e) => e.stopPropagation()}>
                                         <h3>Add Address</h3>
-                                        <div className="form-group">
+                                        <div className="staged-form-field">
                                             <select
                                                 value={newAddress.addressType}
                                                 onChange={(e) =>
                                                     setNewAddress({...newAddress, addressType: e.target.value})
                                                 }
+                                                className="staged-form-select"
                                             >
                                                 <option value="">-- Select Address Type --</option>
                                                 <option value="Permanent">Permanent</option>
                                                 <option value="Present">Present</option>
                                             </select>
                                         </div>
-                                        <div className="form-row">
-                                            <div className="form-group">
+                                        <div className="staged-form-row">
+                                            <div className="staged-form-field">
                                                 <input
                                                     type="text"
+                                                    className="staged-form-input"
                                                     placeholder="Address Line 1"
                                                     value={newAddress.addressLine1}
                                                     onChange={(e) =>
@@ -790,9 +798,10 @@ const AddClientForm = () => {
                                                     }
                                                 />
                                             </div>
-                                            <div className="form-group">
+                                            <div className="staged-form-field">
                                                 <input
                                                     type="text"
+                                                    className="staged-form-input"
                                                     placeholder="Address Line 2"
                                                     value={newAddress.addressLine2}
                                                     onChange={(e) =>
@@ -801,10 +810,11 @@ const AddClientForm = () => {
                                                 />
                                             </div>
                                         </div>
-                                        <div className="form-row">
-                                            <div className="form-group">
+                                        <div className="staged-form-row">
+                                            <div className="staged-form-field">
                                                 <input
                                                     type="text"
+                                                    className="staged-form-input"
                                                     placeholder="Country"
                                                     value={newAddress.country}
                                                     onChange={(e) =>
@@ -812,9 +822,10 @@ const AddClientForm = () => {
                                                     }
                                                 />
                                             </div>
-                                            <div className="form-group">
+                                            <div className="staged-form-field">
                                                 <input
                                                     type="text"
+                                                    className="staged-form-input"
                                                     placeholder="Province/State"
                                                     value={newAddress.province}
                                                     onChange={(e) =>
@@ -822,9 +833,10 @@ const AddClientForm = () => {
                                                     }
                                                 />
                                             </div>
-                                            <div className="form-group">
+                                            <div className="staged-form-field">
                                                 <input
                                                     type="text"
+                                                    className="staged-form-input"
                                                     placeholder="City"
                                                     value={newAddress.city}
                                                     onChange={(e) =>
@@ -833,10 +845,11 @@ const AddClientForm = () => {
                                                 />
                                             </div>
                                         </div>
-                                        <div className="form-row">
-                                            <div className="form-group">
+                                        <div className="staged-form-row">
+                                            <div className="staged-form-field">
                                                 <input
                                                     type="text"
+                                                    className="staged-form-input"
                                                     placeholder="Postal Code"
                                                     value={newAddress.postalCode}
                                                     onChange={(e) =>
@@ -845,24 +858,24 @@ const AddClientForm = () => {
                                                 />
                                             </div>
                                         </div>
-                                        <div className="form-group checkbox">
+                                        <div className="staged-form-field">
                                             <div className="checkbox">
-                                                <input
+                                                <label><input
                                                     type="checkbox"
                                                     checked={newAddress.isActive}
                                                     onChange={(e) =>
                                                         setNewAddress({...newAddress, isActive: e.target.checked})
                                                     }
                                                 />
-                                                <label>Is Active?</label>
+                                                    Is Active?</label>
                                             </div>
                                         </div>
 
-                                        <div className="modal-buttons">
-                                            <button onClick={addAddress} className="submit-button">Save</button>
+                                        <div className="modal-actions">
                                             <button onClick={() => setShowAddressModal(false)}
-                                                    className="cancel-button">Cancel
+                                                    className="modal-cancel-button">Cancel
                                             </button>
+                                            <button onClick={addAddress} className="modal-submit-button">Save</button>
                                         </div>
                                     </div>
                                 </div>
@@ -871,7 +884,7 @@ const AddClientForm = () => {
                                 <button onClick={goBack} className="back-button">Back</button>
                                 <button onClick={goNext} className="next-button">Next</button>
                             </div>
-                        </div>
+                        </>
                     )}
 
                     {step === 5 && (

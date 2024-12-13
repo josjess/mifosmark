@@ -10,7 +10,7 @@ const FinancialActivityMappings = () => {
     return (
         <div className="financial-mappings-container">
             <h2 className="financial-mappings-head">
-                <Link to="/accounting" className="breadcrumb-link">Accounting .</Link> <span> Financial Activity Mappings</span>
+                <Link to="/accounting" className="breadcrumb-link">Accounting .</Link> Financial Activity Mappings
             </h2>
             <div className="financial-tab-container">
                 <button

@@ -4,6 +4,7 @@ import { AuthContext } from '../../../../../context/AuthContext';
 import { useLoading } from '../../../../../context/LoadingContext';
 import { API_CONFIG } from '../../../../../config';
 import './ViewEntityDataTableChecks.css';
+import {FaEdit} from "react-icons/fa";
 
 const ViewEntityDataTableChecks = () => {
     const { user } = useContext(AuthContext);
@@ -33,8 +34,8 @@ const ViewEntityDataTableChecks = () => {
                     'Content-Type': 'application/json',
                 },
             });
-            if (response.data && Array.isArray(response.data)) {
-                setDataTableChecks(response.data);
+            if (response.data && Array.isArray(response.data.pageItems)) {
+                setDataTableChecks(response.data.pageItems);
             } else {
                 setDataTableChecks([]);
             }
@@ -47,10 +48,15 @@ const ViewEntityDataTableChecks = () => {
     };
 
     const filteredDataTableChecks = () =>
-        dataTableChecks.filter((check) =>
-            check.entity.toLowerCase().includes(entityFilter.toLowerCase()) &&
-            check.productName.toLowerCase().includes(productFilter.toLowerCase())
-        );
+        dataTableChecks.filter((check) => {
+            const entity = check.entity || "";
+            const productName = check.productName || "";
+
+            return (
+                entity.toLowerCase().includes(entityFilter.toLowerCase()) &&
+                productName.toLowerCase().includes(productFilter.toLowerCase())
+            );
+        });
 
     const paginatedData = filteredDataTableChecks().slice(
         (currentPage - 1) * pageSize,
@@ -115,13 +121,13 @@ const ViewEntityDataTableChecks = () => {
                             className="clickable-row"
                             onClick={() => handleRowClick(check)}
                         >
-                            <td>{check.entity || '-'}</td>
-                            <td>{check.productName || '-'}</td>
-                            <td>{check.dataTable || '-'}</td>
+                            <td>{check.entity || ''}</td>
+                            <td>{check.productName || ''}</td>
+                            <td>{check.dataTable || ''}</td>
                             <td>{check.status ? 'Active' : 'Inactive'}</td>
                             <td>{check.systemDefined ? 'Yes' : 'No'}</td>
                             <td>
-                                <button className="action-button">Edit</button>
+                                <FaEdit color="green" size={24} />
                             </td>
                         </tr>
                     ))

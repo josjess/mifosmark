@@ -141,16 +141,7 @@ const CreateLoanProducts = () => {
     };
 
     const handleAddAdvancedRule = (type) => {
-        setFormData((prevData) => ({
-            ...prevData,
-            Accounting: {
-                ...prevData.Accounting,
-                advancedAccountingRules: [
-                    ...(prevData.Accounting?.advancedAccountingRules || []),
-                    { id: Date.now(), type },
-                ],
-            },
-        }));
+        console.log('Add Advanced Rule')
     };
 
     const handleNext = () => {

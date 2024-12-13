@@ -9,34 +9,32 @@ import { useLoading } from '../../context/LoadingContext';
 const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [rememberMe, setRememberMe] = useState(false);
+    const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] = useState(false);
     const { showNotification } = useContext(NotificationContext);
     const { login } = useContext(AuthContext);
     const { startLoading, stopLoading } = useLoading();
     const navigate = useNavigate();
 
-    const apiAccessUsername = 'mifos';
-    const apiAccessPassword = 'password';
-
     const handleLogin = async (e) => {
         e.preventDefault();
         startLoading();
         const loginData = { username, password };
-        const apiCredentials = btoa(`${apiAccessUsername}:${apiAccessPassword}`);
 
         try {
             const response = await fetch(`${API_CONFIG.baseURL}/authentication`, {
-                method: 'POST',
+                method: "POST",
                 headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Fineract-Platform-TenantId': 'default',
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+                    "Fineract-Platform-TenantId": "default",
                 },
                 body: JSON.stringify(loginData),
             });
 
             const data = await response.json();
             if (response.ok) {
-                showNotification('Login successful!', 'success');
+                showNotification("Login successful!", "success");
 
                 const userData = {
                     username: data.username,
@@ -49,21 +47,28 @@ const Login = () => {
                     permissions: data.permissions,
                 };
 
-                login(userData);
-
-                navigate('/');
+                login(userData, rememberMe);
+                navigate("/");
             } else {
-                showNotification(data.message || 'Login failed', 'error');
+                showNotification(data.message || "Login failed", "error");
             }
         } catch (err) {
-            showNotification('Error connecting to API', 'error');
+            showNotification("Error connecting to API", "error");
         } finally {
             stopLoading();
         }
     };
 
+    const toggleForgotPasswordModal = () => {
+        setIsForgotPasswordModalOpen(!isForgotPasswordModalOpen);
+    };
+
     return (
-        <div className="body">
+        <div className="body"
+             style={{
+                 background: `url(${process.env.PUBLIC_URL}/Images/microfinance.jpg) no-repeat center center/cover`,
+             }}
+        >
             <div className="login-container">
                 <header className="login-header">
                     <h1>Welcome Back!</h1>
@@ -95,13 +100,52 @@ const Login = () => {
                                 required
                             />
                         </div>
+                        <div className="form-group-login remember-me">
+                            <label htmlFor="rememberMe">
+                                <input
+                                    type="checkbox"
+                                    id="rememberMe"
+                                    checked={rememberMe}
+                                    onChange={(e) => setRememberMe(e.target.checked)}
+                                />
+                                Remember Me
+                            </label>
+                        </div>
 
                         <button type="submit" className="login-btn">
                             Login
                         </button>
                     </form>
+
+                    <p className="forgot-password-link" onClick={toggleForgotPasswordModal}>
+                        Forgot Password?
+                    </p>
                 </section>
             </div>
+            {isForgotPasswordModalOpen && (
+                <div className="forgot-password-modal">
+                    <div className="forgot-password-modal-content">
+                        <h2 className="forgot-password-title">Reset Password(Coming Soon!)</h2>
+                        {/*<p className="forgot-password-instructions">*/}
+                        {/*    Enter your email address below, and we will send you a link to reset your password.*/}
+                        {/*</p>*/}
+                        {/*<input*/}
+                        {/*    type="email"*/}
+                        {/*    className="forgot-password-input"*/}
+                        {/*    placeholder="Enter your email address"*/}
+                        {/*/>*/}
+                        <div className="forgot-password-actions">
+                            <button
+                                className="forgot-password-cancel"
+                                onClick={toggleForgotPasswordModal}
+                            >
+                                Cancel
+                            </button>
+                            {/*<button className="forgot-password-submit">Submit</button>*/}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

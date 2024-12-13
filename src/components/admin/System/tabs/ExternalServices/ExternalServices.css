@@ -4,14 +4,12 @@
     min-height: 90vh;
     padding: 40px;
     color: #ffffff;
-    font-family: 'Poppins', sans-serif;
 }
 
 .external-services-heading {
     font-size: 30px;
     color: #ffffff;
     margin-bottom: 40px;
-    font-family: 'Poppins', sans-serif;
     display: flex;
     align-items: flex-start;
     justify-content: flex-start;

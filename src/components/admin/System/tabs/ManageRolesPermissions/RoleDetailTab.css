@@ -1,0 +1,138 @@
+.role-detail-tab {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+    color: #333;
+}
+
+.role-detail-tab .role-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    padding: 15px 20px;
+    margin-top: 40px;
+    margin-bottom: 20px;
+    font-family: Arial, sans-serif;
+    color: #333;
+}
+
+.role-header-item {
+    flex: 1;
+    min-width: 200px;
+    margin: 10px 0;
+}
+
+.role-header-label {
+    font-weight: bold;
+    margin-right: 10px;
+    color: #555;
+}
+
+.role-header-value {
+    color: #333;
+    font-size: 18px;
+    font-weight: normal;
+}
+
+.role-detail-tab .permissions-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.role-detail-tab .permissions-table thead {
+    background-color: #f1f1f1;
+}
+.roles-top-right-button {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 30px;
+}
+.role-detail-tab .permissions-table th,
+.role-detail-tab .permissions-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.role-detail-tab .permissions-table th {
+    font-weight: bold;
+    font-size: 14px;
+    color: #555;
+}
+
+.role-detail-tab .permissions-table tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+.role-detail-tab .permissions-table tbody td {
+    font-size: 14px;
+    color: #333;
+}
+.role-edit-button {
+    padding: 10px 12px;
+    font-size: 17px;
+    background-color: #1b9a1c;
+    cursor: pointer;
+    color: white;
+    border: none;
+    border-radius: 8px;
+}
+.group-actions .group-action-button {
+    padding: 8px 12px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin-right: 8px;
+}
+.group-actions .enable-role {
+    color: #fff;
+    background-color: #007bff;
+}
+.group-actions .disable-role {
+    color: #fff;
+    background-color: #f40000;
+}
+.group-actions .group-action-button:last-child {
+    margin-right: 0;
+}
+.permission-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 5px 0;
+}
+
+.permission-cell {
+    flex: 1;
+    padding: 5px;
+    text-align: left;
+}
+
+.permission-cell label {
+    display: block;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.permission-cell input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+
+

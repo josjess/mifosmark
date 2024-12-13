@@ -72,8 +72,6 @@ const AccountClosure = () => {
 
     return (
         <div className="account-closure-container">
-            <h3 className="account-closure-title">Account Closures</h3>
-
             <div className="account-closure-controls">
                 <div className="account-closure-filter">
                     <label className="filter-label">Filter by Office</label>

@@ -1,0 +1,509 @@
+.client-details-container {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.client-details-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    background-color: #d6d7dc;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.client-image-section {
+    flex: 1;
+    text-align: center;
+}
+
+.client-image {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+    border: 2px solid #ccc;
+}
+
+.client-image-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.client-details-container .icon-button {
+    background: #f4f4f4;
+    border: 1px solid #ccc;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.client-details-container .icon-button:hover {
+    background: #eaeaea;
+}
+
+.view-signature-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #007bff;
+    color: #fff;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.view-signature-button:hover {
+    background: #0056b3;
+}
+
+.client-info-section {
+    flex: 2;
+}
+
+.client-name {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.client-status-active {
+    color: green;
+}
+
+.client-status-inactive {
+    color: red;
+}
+
+.client-status-default {
+    color: gray;
+}
+
+.client-info-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.client-info-list li {
+    margin-bottom: 8px;
+    font-size: 16px;
+}
+
+.client-actions-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    position: relative;
+    min-width: 170px;
+}
+
+.client-action-button {
+    background: #3b4578;
+    border: none;
+    padding: 10px;
+    border-radius: 25px;
+    width: 100%;
+    cursor: pointer;
+    font-size: 16px;
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+    color: #fff;
+}
+
+.client-action-button:hover {
+    background: #b6b6b6;
+    color: #333;
+}
+
+.client-dropdown {
+    position: relative;
+}
+
+.client-dropdown-content {
+    display: none;
+    position: absolute;
+    top: 30%;
+    right: calc(100% - 5px);
+    background: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 15px;
+    min-width: 150px;
+    z-index: 10;
+    overflow: hidden;
+    padding: 5px 0;
+    transition: all 0.3s ease;
+}
+
+.client-dropdown:hover .client-dropdown-content {
+    display: block;
+}
+
+.client-dropdown-content button {
+    width: 100%;
+    padding: 10px 15px;
+    text-align: left;
+    display: flex;
+    background: #fff;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #555;
+}
+
+.client-dropdown-content button:hover {
+    background: #f4f4f4;
+    color: #333;
+}
+
+.client-dropdown-content {
+    white-space: nowrap;
+}
+
+.client-details-tabs {
+    display: flex;
+    justify-content: space-around;
+    margin: 20px 0;
+    padding-bottom: 10px;
+    width: 100%;
+}
+
+.client-tab-button {
+    flex: 1;
+    text-align: center;
+    background-color: transparent;
+    border: none;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 10px 0;
+    color: #555;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.client-tab-button::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -2px;
+    height: 2px;
+    background-color: #ccc;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+.client-tab-button.active::before {
+    bottom: 0;
+    height: 6px;
+    background-color: #007BFFFF;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.client-tab-button.active {
+    color: #007bff;
+}
+
+.client-tab-button:hover {
+    color: #333;
+}
+
+.client-tab-button:not(.active):hover::before {
+    background-color: #999;
+}
+
+.general-tab {
+    padding: 20px;
+    font-family: 'Arial', sans-serif;
+    border-radius: 10px;
+}
+
+.general-section {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: white;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.general-section::-webkit-scrollbar {
+    width: 8px;
+}
+
+.general-section::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 10px;
+}
+
+.general-section::-webkit-scrollbar-thumb:hover {
+    background: #999;
+}
+
+.general-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.general-section-title {
+    font-size: 18px;
+    color: #333;
+    margin: 0;
+}
+
+.general-toggle-view-button,
+.general-charges-overview-button,
+.general-collateral-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    color: white;
+    background: #1b72d1;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.general-toggle-view-button:hover,
+.general-charges-overview-button:hover,
+.general-collateral-button:hover {
+    background: #0056b3;
+    transform: scale(1.05);
+}
+
+.general-details-columns {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 15px;
+}
+
+.general-details-column {
+    flex: 1;
+    font-size: 16px;
+    line-height: 1.8;
+    color: #555;
+}
+
+.general-details-column p {
+    margin: 0;
+    margin-bottom: 10px;
+}
+
+.general-details-column strong {
+    color: #333;
+}
+
+.general-charges-table,
+.general-accounts-table,
+.general-collateral-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    background-color: white;
+    font-size: 16px;
+    text-align: left;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+}
+
+.general-charges-table th,
+.general-accounts-table th,
+.general-collateral-table th {
+    padding: 15px;
+    border-bottom: 1px solid #a6c2e1;
+    border-right: 1px solid #bdbbbb;
+    text-align: left;
+}
+
+.general-charges-table td,
+.general-accounts-table td,
+.general-collateral-table td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    color: #000000;
+}
+
+.general-charges-table tbody tr:hover,
+.general-accounts-table tbody tr:hover,
+.general-collateral-table tbody tr:hover {
+    background-color: #f1f1f1;
+    transition: background 0.3s ease;
+}
+
+.general-charges-table td:last-child,
+.general-accounts-table td:last-child,
+.general-collateral-table td:last-child {
+    text-align: center;
+}
+
+.general-action-button {
+    padding: 8px 15px;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    background: #28a745;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.general-action-button:hover {
+    background: #1e7e34;
+    transform: scale(1.05);
+}
+
+.general-collateral-table td {
+    text-align: center;
+}
+
+.general-collateral-button:disabled {
+    background: #cccccc;
+    color: #666666;
+    cursor: not-allowed;
+}
+
+.general-section-title {
+    text-align: left;
+    font-size: 20px;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 10px;
+}
+
+.general-table-container {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.general-table-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.general-table-container::-webkit-scrollbar-thumb {
+    background: #bbb;
+    border-radius: 10px;
+}
+
+.general-table-container::-webkit-scrollbar-thumb:hover {
+    background: #888;
+}
+.notes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.note-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #ffffff;
+    padding: 0.75rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.note-icon {
+    font-size: 1.5rem;
+    color: #0067ff;
+    margin-right: 1rem;
+}
+
+.note-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.note-content p {
+    font-size: 1rem;
+    margin: 0;
+    color: #333;
+}
+
+.note-content small {
+    font-size: 0.85rem;
+    color: #777;
+}
+
+.note-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.note-general-action-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 4px;
+    background-color: #e0e0e0;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.note-general-action-button:hover {
+    background-color: #d5d5d5;
+}
+
+.note-general-action-button i {
+    color: #555;
+    font-size: 1rem;
+}
+
+.note-general-action-button:hover i {
+    color: #333;
+}
+
+.image-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 1rem;
+}
+
+.preview-thumbnail {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 50%;
+    margin-bottom: 0.5rem;
+    border: 1px solid #ccc;
+}
+
+.delete-image-button {
+    background: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.delete-image-button:hover {
+    background: #ff0000;
+}

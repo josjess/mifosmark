@@ -3,7 +3,6 @@
     padding: 60px 20px;
     background-color: #f9f9fb;
     min-height: 100vh;
-    font-family: "Poppins", sans-serif;
 }
 .page-header-container {
     display: flex;
@@ -54,7 +53,7 @@
 
 .audit-table th,
 .audit-table td {
-    padding: 15px;
+    padding: 10px;
     border: 1px solid #e0e0e0;
     text-align: left;
 }

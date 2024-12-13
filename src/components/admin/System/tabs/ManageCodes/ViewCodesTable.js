@@ -5,7 +5,7 @@ import { useLoading } from '../../../../../context/LoadingContext';
 import { API_CONFIG } from '../../../../../config';
 import './ViewCodesTable.css';
 
-const CodeTableView = () => {
+const CodeTableView = ({ onRowClick }) => {
     const { user } = useContext(AuthContext);
     const { startLoading, stopLoading } = useLoading();
     const [codes, setCodes] = useState([]);
@@ -60,10 +60,6 @@ const CodeTableView = () => {
         setCurrentPage(1);
     };
 
-    const handleRowClick = (code) => {
-        console.log('Row Data:', code);
-    };
-
     return (
         <div className="code-table-container">
             <div className="table-controls">
@@ -99,7 +95,7 @@ const CodeTableView = () => {
                     paginatedData.map((code) => (
                         <tr
                             key={code.id}
-                            onClick={() => handleRowClick(code)}
+                            onClick={() => onRowClick(code)}
                             className="clickable-row"
                         >
                             <td>{code.name}</td>

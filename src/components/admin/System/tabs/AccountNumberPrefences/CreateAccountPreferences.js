@@ -33,6 +33,7 @@ const AccountNumberPreferenceForm = () => {
                 }
             );
             setAccountTypeOptions(response.data.accountTypeOptions || []);
+            setPrefixTypeOptions(response.data.prefixTypeOptions || {});
         } catch (error) {
             console.error('Error fetching template data:', error);
         } finally {
@@ -41,10 +42,7 @@ const AccountNumberPreferenceForm = () => {
     };
 
     const handleAccountTypeChange = (value) => {
-        const selectedPrefixOptions =
-            accountTypeOptions.find((option) => option.code === value)?.prefixTypeOptions || [];
         setFormData((prev) => ({ ...prev, accountType: value, prefixType: '' }));
-        setPrefixTypeOptions(selectedPrefixOptions);
     };
 
     const handleInputChange = (field, value) => {
@@ -74,7 +72,7 @@ const AccountNumberPreferenceForm = () => {
                 }
             );
             if (response.status === 200) {
-                alert('Account Number Preference created successfully!');
+                // alert('Account Number Preference created successfully!');
                 setFormData({ accountType: '', prefixType: '' });
             }
         } catch (error) {
@@ -113,9 +111,10 @@ const AccountNumberPreferenceForm = () => {
                     className="account-preference-form-select"
                     value={formData.prefixType}
                     onChange={(e) => handleInputChange('prefixType', e.target.value)}
+                    disabled={!formData.accountType}
                 >
                     <option value="">Select Prefix Type</option>
-                    {prefixTypeOptions.map((option) => (
+                    {(Array.isArray(prefixTypeOptions[formData.accountType]) ? prefixTypeOptions[formData.accountType] : []).map((option) => (
                         <option key={option.code} value={option.code}>
                             {option.value}
                         </option>

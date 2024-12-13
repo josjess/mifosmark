@@ -66,12 +66,10 @@ const ChartOfAccountsTable = () => {
 
     const handleRowClick = (id) => {
         console.log("Row ID:", id);
-        // Future functionality for handling row click can be added here
     };
 
     return (
         <div className="view-chart-accounts-container">
-            <h3 className="view-chart-accounts-title">Chart of Accounts</h3>
             <div className="controls-row">
                 <div className="page-size-selector">
                     <label>Rows per page: </label>

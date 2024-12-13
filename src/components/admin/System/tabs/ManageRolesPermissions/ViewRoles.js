@@ -6,7 +6,7 @@ import { API_CONFIG } from '../../../../../config';
 import './ViewRoles.css';
 import {FiEdit} from "react-icons/fi";
 
-const ViewRolesTable = () => {
+const ViewRolesTable = ({ onRowClick}) => {
     const { user } = useContext(AuthContext);
     const { startLoading, stopLoading } = useLoading();
     const [roles, setRoles] = useState([]);
@@ -14,6 +14,10 @@ const ViewRolesTable = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [filter, setFilter] = useState({ name: '', status: '' });
     const [totalPages, setTotalPages] = useState(1);
+
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [editRole, setEditRole] = useState(null);
+    const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
 
     useEffect(() => {
         fetchRoles();
@@ -63,13 +67,77 @@ const ViewRolesTable = () => {
         setCurrentPage(1);
     };
 
-    const handleRowClick = (role) => {
-        console.log('Row Data:', role);
+    const handleEditRole = async (role) => {
+        setShowEditModal(true);
+        startLoading();
+
+        try {
+            const response = await axios.get(
+                `${API_CONFIG.baseURL}/roles/${role.id}/permissions`,
+                {
+                    headers: {
+                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                        "Fineract-Platform-TenantId": "default",
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
+            setEditRole(response.data);
+            setIsSubmitDisabled(true);
+        } catch (error) {
+            console.error("Error fetching role details:", error);
+        } finally {
+            stopLoading();
+        }
     };
 
-    const handleEditRole = (role) => {
-        console.log('Editing role:', role.name);
+    const handleFieldChange = (field, value) => {
+        setEditRole((prev) => {
+            const updated = { ...prev, [field]: value };
+            setIsSubmitDisabled(
+                updated.description.trim() === "" || JSON.stringify(updated) === JSON.stringify(prev)
+            );
+            return updated;
+        });
+    };
 
+    const handleSubmit = async () => {
+        if (!editRole || !editRole.description.trim()) {
+            alert("Description is required.");
+            return;
+        }
+
+        startLoading();
+
+        try {
+            const payload = { description: editRole.description.trim() };
+
+            await axios.put(
+                `${API_CONFIG.baseURL}/roles/${editRole.id}`,
+                payload,
+                {
+                    headers: {
+                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                        "Fineract-Platform-TenantId": "default",
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
+            setShowEditModal(false);
+            fetchRoles();
+        } catch (error) {
+            console.error("Error updating role:", error);
+            alert("Failed to update role. Please try again.");
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const handleCancel = () => {
+        setShowEditModal(false);
+        setEditRole(null);
     };
 
 
@@ -77,7 +145,7 @@ const ViewRolesTable = () => {
         <div className="roles-table-container">
             <div className="table-controls">
                 <div className="filter-container">
-                    <div className="filter-input">
+                    <div className="filter-item">
                         <label htmlFor="nameFilter">Filter by Name:</label>
                         <input
                             type="text"
@@ -89,7 +157,7 @@ const ViewRolesTable = () => {
                             placeholder="Enter role name..."
                         />
                     </div>
-                    <div className="filter-input">
+                    <div className="filter-item">
                         <label htmlFor="statusFilter">Filter by Status:</label>
                         <select
                             id="statusFilter"
@@ -129,11 +197,11 @@ const ViewRolesTable = () => {
                     paginatedData.map((role) => (
                         <tr
                             key={role.id}
-                            onClick={() => handleRowClick(role)}
+                            onClick={() => onRowClick(role)}
                             className="clickable-row"
                         >
                             <td>{role.name}</td>
-                            <td>{role.description || 'N/A'}</td>
+                            <td>{role.description || ''}</td>
                             <td>
                                 <div className="indicator-container">
                                     <div
@@ -193,6 +261,42 @@ const ViewRolesTable = () => {
                     >
                         End
                     </button>
+                </div>
+            )}
+            {showEditModal && editRole && (
+                <div className="edit-modal-overlay">
+                    <div className="edit-modal-content">
+                        <h3 className="staged-form-title">Edit Role</h3>
+                        <div className="staged-form-field">
+                            <label>Role Name (Read Only)</label>
+                            <input
+                                type="text"
+                                className="staged-form-input"
+                                value={editRole.name}
+                                disabled
+                            />
+                        </div>
+                        <div className="staged-form-field">
+                            <label>Role Description <span className="required">*</span></label>
+                            <input
+                                type="text"
+                                className="staged-form-input"
+                                value={editRole.description}
+                                onChange={(e) => handleFieldChange("description", e.target.value)}
+                                required
+                            />
+                        </div>
+                        <div className="modal-actions">
+                            <button className="modal-cancel-button" onClick={handleCancel}>Cancel</button>
+                            <button
+                                className="modal-submit-button"
+                                onClick={handleSubmit}
+                                disabled={isSubmitDisabled}
+                            >
+                                Submit
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

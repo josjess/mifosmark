@@ -34,6 +34,9 @@ const AuditTrails = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
 
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modalData, setModalData] = useState(null);
+
     useEffect(() => {
         fetchTemplateData();
         fetchAuditData();
@@ -108,9 +111,27 @@ const AuditTrails = () => {
         setCurrentPage(1);
     };
 
-    const handleRowClick = (row) => {
-        console.log("Row Data:", row);
+    const handleRowClick = async (row) => {
+        startLoading();
+        try {
+            const response = await axios.get(
+                `${API_CONFIG.baseURL}/audits/${row.id}`,
+                {
+                    headers: {
+                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                        "Fineract-Platform-TenantId": "default",
+                    },
+                }
+            );
+            setModalData(response.data);
+            setIsModalOpen(true);
+        } catch (error) {
+            console.error("Error fetching row data:", error);
+        } finally {
+            stopLoading();
+        }
     };
+
 
     const handleDownloadCSV = async () => {
         try {
@@ -400,6 +421,91 @@ const AuditTrails = () => {
                     End
                 </button>
             </div>
+
+            {isModalOpen && modalData && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <div className="create-holiday-row">
+                            <div className="staged-form-field">
+                                <h4 className="create-modal-title">Audit Details</h4>
+                                <table className="create-provisioning-criteria-table">
+                                    <tbody>
+                                    <tr>
+                                        <td>ID</td>
+                                        <td>{modalData.id}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Status</td>
+                                        <td>{modalData.status}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>User</td>
+                                        <td>{modalData.maker}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Action</td>
+                                        <td>{modalData.actionName}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Entity</td>
+                                        <td>{modalData.entityName}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Resource ID</td>
+                                        <td>{modalData.resourceId}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Date</td>
+                                        <td>
+                                            {modalData.madeOnDate
+                                                ? new Intl.DateTimeFormat("en-US", {
+                                                    day: "2-digit",
+                                                    month: "long",
+                                                    year: "numeric",
+                                                    hour: "2-digit",
+                                                    minute: "2-digit",
+                                                    hour12: true,
+                                                }).format(new Date(modalData.madeOnDate))
+                                                : ""}
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div className="staged-form-field">
+                                <h4 className="create-provisioning-criteria-subtitle">Command Details</h4>
+                                <table className="create-provisioning-criteria-table">
+                                <thead>
+                                <tr>
+                                    <th>Command</th>
+                                    <th>Command Value</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {Object.entries(JSON.parse(modalData.commandAsJson)).map(
+                                    ([key, value]) => (
+                                        <tr key={key}>
+                                            <td>{key}</td>
+                                            <td>{value}</td>
+                                        </tr>
+                                    )
+                                )}
+                                </tbody>
+                            </table>
+                            </div>
+                        </div>
+
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button
+                                onClick={() => setIsModalOpen(false)}
+                                className="create-provisioning-criteria-cancel"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

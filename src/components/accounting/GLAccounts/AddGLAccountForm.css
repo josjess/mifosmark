@@ -1,0 +1,112 @@
+.form-container-account {
+    max-width: 800px;
+    margin: 10px auto;
+    padding: 60px 30px 60px 30px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    background-color: #132639;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.account-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.account-form-row {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.account-form-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.account-form-group label {
+    font-weight: 600;
+    color: #333;
+}
+
+.account-form-group input,
+.account-form-group select,
+.description-textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    background-color: #fff;
+    box-sizing: border-box;
+}
+
+.account-form-group input:focus,
+.account-form-group select:focus,
+.description-textarea:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.description-textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.account-form-checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.manual-entries-checkbox {
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.manual-entries-label {
+    font-size: 14px;
+    color: #333;
+}
+
+.required-asterisk {
+    color: #d9534f;
+    font-weight: bold;
+}
+
+.submit-button-account {
+    max-width: 250px;
+    padding: 15px;
+    border: none;
+    border-radius: 20px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    background-color: #007bff;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    align-self: flex-end;
+}
+
+.submit-button-account:hover {
+    background-color: #0056b3;
+}
+
+@media (max-width: 600px) {
+    .account-form-row {
+        flex-direction: column;
+    }
+}

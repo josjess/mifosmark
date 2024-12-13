@@ -1,0 +1,169 @@
+.code-detail-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    font-size: 16px;
+}
+
+.code-value-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.add-value-button {
+    padding: 10px 12px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.add-value-button:hover {
+    background-color: #0056b3;
+}
+
+.code-values-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.code-value-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    gap: 8px;
+}
+
+.field-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 2;
+}
+
+.field-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+}
+
+.mandatory {
+    color: #dc3545;
+    margin-left: 4px;
+}
+.field {
+    border: 1px solid #ccc;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.field:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+.code-value-row input[type='text'],
+.code-value-row input[type='number'] {
+    flex: 2;
+    padding: 8px;
+    font-size: 16px;
+    border-radius: 10px;
+    max-width: 250px;
+}
+
+.code-value-row input[type='text']:disabled,
+.code-value-row input[type='number']:disabled {
+    background-color: #ffffff;
+    color: black;
+    cursor: not-allowed;
+}
+
+.code-value-row input[type='checkbox'] {
+    flex: 1;
+    width: 18px;
+    height: 18px;
+}
+.code-value-row .buttons {
+    display: flex;
+    gap: 8px;
+    flex: 1;
+    justify-content: space-evenly;
+}
+.code-value-row .add-value-confirm,
+.code-value-row .save-value,
+.code-value-row .cancel-edit,
+.code-value-row .cancel-add-value,
+.code-value-row .edit-value,
+.code-value-row .delete-value {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    font-size: 18px;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+.code-value-row .add-value-confirm {
+    background-color: #1a9f37;
+}
+.code-value-row .save-value {
+    background-color: #1a9f37;
+}
+.code-value-row .cancel-edit {
+    background-color: #ed2121;
+}
+
+.code-value-row .error-message {
+    color: #e74c3c;
+    font-size: 12px;
+    margin-top: 2px;
+    margin-left: 6px;
+    text-align: left;
+    font-weight: 500;
+}
+
+
+.code-value-row .cancel-add-value {
+    background-color: #dc3545;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.code-value-row .cancel-add-value:hover {
+    background-color: #c82333;
+}
+.checkbox-container {
+    font-size: 14px;
+    margin-right: 15px;
+    color: #333;
+}
+
+.add-value-confirm:disabled,
+.save-value:disabled {
+    background-color: #d6d6d6;
+    color: #a1a1a1;
+    cursor: not-allowed;
+    opacity: 0.7;
+    border: 1px solid #ccc;
+}
+
+.add-value-confirm:not(:disabled):hover,
+.save-value:not(:disabled):hover {
+    background-color: #218838;
+    color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}

@@ -21,6 +21,7 @@
 
 .mapping-table {
     width: 100%;
+    max-width: 1200px;
     border-collapse: collapse;
     background-color: #ffffff;
     border-radius: 8px;
@@ -162,10 +163,72 @@
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
+.entity-mapping-form .form-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 15px;
+}
+.entity-mapping-form .add-button {
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    padding: 8px 15px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 10px;
+}
 
+.entity-mapping-form .add-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
 .entity-mapping-submit-button:hover {
     background-color: #0056b3;
 }
 span {
     color: red;
+}
+.mapping-details-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.mapping-details-table table {
+    width: 100%;
+}
+
+.mapping-details-table th,
+.mapping-details-table td {
+    text-align: center;
+    padding: 12px;
+}
+
+.mapping-details-table th {
+    background-color: #3664da;
+}
+
+.mapping-details-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.mapping-details-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+.mapping-details-table button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    margin: 0 3px;
+    font-size: 20px;
+}
+
+.mapping-details-table .no-data {
+    text-align: center;
+    color: #888;
+    padding: 15px;
+    font-style: italic;
 }

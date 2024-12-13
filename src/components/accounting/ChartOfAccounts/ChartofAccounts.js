@@ -10,7 +10,7 @@ const ChartOfAccounts = () => {
     return (
         <div className="chart-accounts-container">
             <h2 className="chart-accounts-head">
-                <Link to="/accounting" className="breadcrumb-link">Accounting. </Link> <span>Chart of Accounts </span>
+                <Link to="/accounting" className="breadcrumb-link">Accounting. </Link> Chart of Accounts
             </h2>
             <div className="chart-tab-container">
                 <button
