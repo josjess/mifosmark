@@ -4,7 +4,7 @@ module.exports = function (app) {
     app.use(
         '/fineract-provider',
         createProxyMiddleware({
-            target: 'https://test.meysa.co.ke',
+            target: 'https://foursmiles.mifosconnect.com',
             changeOrigin: true,
         })
     );

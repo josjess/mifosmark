@@ -1,5 +1,6 @@
 .manage-codes-page {
     padding: 60px 20px 20px;
+    min-height: 90vh;
     background-color: #f5f7fa;
     margin-left: 250px;
     font-family: Arial, sans-serif;

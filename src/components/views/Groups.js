@@ -44,6 +44,10 @@ const Groups = () => {
         navigate('/addgroup');
     };
 
+    const handleImportGroupsClick = () => {
+        navigate('/bulk-imports/groups');
+    };
+
     const handlePreviousPage = () => {
         if (currentPage > 1) setCurrentPage(currentPage - 1);
     };
@@ -66,6 +70,7 @@ const Groups = () => {
             <div className="view-header">
                 <h2 className={'view-title'}>Groups</h2>
                 <div className="action-buttons">
+                    <button className="import-button" onClick={handleImportGroupsClick}>Import Groups</button>
                     <button className="add-button" onClick={handleAddGroupClick}>
                         Add Group
                     </button>

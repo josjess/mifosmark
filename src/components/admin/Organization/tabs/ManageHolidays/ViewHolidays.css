@@ -1,0 +1,60 @@
+.view-holidays {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    background-color: #f9f9fb;
+}
+
+.holidays-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.holidays-table th,
+.holidays-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+.holidays-table th {
+    background-color: #007bff;
+    color: #fff;
+    font-weight: bold;
+}
+
+.holidays-table tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.holidays-table tbody tr:hover {
+    background-color: #eaf4fb;
+    cursor: pointer;
+}
+
+.office-filter-label {
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.office-filter-select {
+    padding: 12px;
+    font-size: 14px;
+    color: #333;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #fff;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.office-filter-select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+.office-filter-select option {
+    font-size: 14px;
+    padding: 8px;
+}

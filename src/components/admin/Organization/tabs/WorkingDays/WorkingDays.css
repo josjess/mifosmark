@@ -1,0 +1,107 @@
+.working-days-container {
+    padding: 50px 20px;
+    margin-left: 250px;
+    font-family: 'Poppins', sans-serif;
+    background-color: #f8f9fa;
+    min-height: 90vh;
+}
+
+.working-days-form {
+    max-width: 800px;
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 20px 30px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.working-days-fieldset {
+    border: 1px solid #ddd;
+    border-radius: 15px;
+    padding: 15px;
+    margin-bottom: 20px;
+    background-color: #f9f9f9;
+    width: 70%;
+}
+
+.working-days-legend {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+}
+
+.working-days-checkboxes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.working-days-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1rem;
+}
+
+.working-days-form-group {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.working-days-label {
+    font-weight: 500;
+    margin-top: 20px;
+    margin-bottom: 5px;
+}
+
+.working-days-select {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 15px;
+    width: 60%;
+}
+
+.working-days-checkbox-group {
+    margin-top: 30px;
+}
+
+.working-days-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.working-days-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.working-days-submit-button,
+.working-days-cancel-button {
+    padding: 12px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.working-days-submit-button {
+    background-color: #6bbf48;
+    color: white;
+}
+
+.working-days-submit-button:disabled {
+    background-color: #cccccc;
+    color: #666666;
+    cursor: not-allowed;
+}
+
+.working-days-cancel-button {
+    background-color: #952828;
+    color: #ffffff;
+}
+
+.working-days-cancel-button:hover {
+    background-color: #652828;
+}

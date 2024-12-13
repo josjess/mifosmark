@@ -2,38 +2,38 @@ import React, {useEffect} from 'react';
 import {BrowserRouter as Router, Routes, Route, useLocation} from 'react-router-dom';
 import { loadConfig } from './config';
 // import Home from './components/Home';
-import Login from './components/Login';
+import Login from './components/auth/Login';
 import Dashboard from './components/Dashboard';
 import Clients from './components/views/Clients';
 import Groups from './components/views/Groups';
 import Centers from './components/views/Centers';
-import Accounting from './components/views/Accounting';
-import Reports from './components/views/Reports';
-import Admin from './components/views/Admin';
+import Accounting from './components/accounting/Accounting';
+import Reports from './components/Reports/Reports';
+import Admin from './components/admin/Admin';
 import AddClient from "./components/views/AddClient";
 import AddGroup from "./components/views/AddGroup";
 import AddCenter from "./components/views/AddCenter";
 import { AuthProvider } from './context/AuthContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { LoadingProvider } from './context/LoadingContext';
-import Notification from './components/Notification';
+import Notification from './components/utilities/Notification';
 import './App.css';
-import Navbar from "./components/Navbar";
-import LoadingOverlay from "./components/LoadingOverlay";
-import Sidebar from "./components/Sidebar";
+import Navbar from "./components/Navigation/Navbar";
+import LoadingOverlay from "./components/utilities/LoadingOverlay";
+import Sidebar from "./components/Navigation/Sidebar";
 import ProtectedLayout from './ProtectedLayout';
 
 /* Accounting */
-import FrequentPosting from "./components/accounting/FrequentPosting";
+import FrequentPosting from "./components/accounting/FrequentPosting/FrequentPosting";
 // import AddJournalEntries from "./components/accounting/AddJournalEntries";
-import SearchJournalEntries from "./components/accounting/SearchJournalEntries";
-import FinancialActivityMappings from "./components/accounting/FinancialActivityMappings";
-import JournalEntries from "./components/accounting/JournalEntries"
-import ClosingEntries from "./components/accounting/ClosingEntries";
-import ChartofAccounts from "./components/accounting/ChartofAccounts";
-import AccountingTabs from "./components/accounting/AccountingRules";
-import Accruals from "./components/accounting/Accruals";
-import ProvisioningEntries from "./components/accounting/ProvisioningEntries";
+// import SearchJournalEntries from "./components/accounting/JournalEntries/SearchJournalEntries";
+import FinancialActivityMappings from "./components/accounting/FinancialActivityMapping/FinancialActivityMappings";
+import JournalEntries from "./components/accounting/JournalEntries/JournalEntries"
+import ClosingEntries from "./components/accounting/AccountClosure/ClosingEntries";
+import ChartofAccounts from "./components/accounting/ChartOfAccounts/ChartofAccounts";
+import AccountingTabs from "./components/accounting/AccountingRules/AccountingRules";
+import Accruals from "./components/accounting/Accruals/Accruals";
+import ProvisioningEntries from "./components/accounting/ProvisioningEntries/ProvisioningEntries";
 
 /* Admin */
 import Users from "./components/admin/Users/Users";
@@ -64,7 +64,7 @@ import AmazonS3Service from "./components/admin/System/tabs/ExternalServices/Ama
 import EmailService from "./components/admin/System/tabs/ExternalServices/EmailService";
 import SmsService from "./components/admin/System/tabs/ExternalServices/SmsService";
 import NotificationService from "./components/admin/System/tabs/ExternalServices/NotificationService";
-import NotFound from "./components/NotFound";
+import NotFound from "./components/utilities/NotFound";
 
 /* Products */
 import LoanProducts from "./components/admin/Products/tabs/LoanProducts/LoanProducts";
@@ -72,6 +72,50 @@ import SavingsProducts from "./components/admin/Products/tabs/SavingsProducts/Sa
 import ShareProducts from "./components/admin/Products/tabs/ShareProducts/ShareProducts";
 import Charges from "./components/admin/Products/tabs/charges/Charges";
 import Collaterals from "./components/admin/Products/tabs/Collateral/Collaterals";
+import ProductsMix from "./components/admin/Products/tabs/ProductsMix/ProductsMix";
+import FixedDepositProducts from "./components/admin/Products/tabs/FixedDepositsProducts/FixedDepositProducts";
+import RecurringDepositProducts from "./components/admin/Products/tabs/RecurringDepositProducts/RecurringDepositProducts";
+import FloatingRates from "./components/admin/Products/tabs/FloatingRates/FloatingRates";
+import ManageDelinquency from "./components/admin/Products/tabs/ManageDelinquency/ManageDelinquency";
+import ManageTaxConfigurations from "./components/admin/Products/tabs/ManageTaxConfigurations/ManageTaxConfigurations";
+
+/* Delinquency Buckets */
+import DelinquencyBuckets from "./components/admin/Products/tabs/ManageDelinquency/DelinquencyBuckets/DelinquencyBuckets";
+import DelinquencyRanges from "./components/admin/Products/tabs/ManageDelinquency/DelinquencyRanges/DelinquencyRanges";
+
+/* Tax Configurations */
+import TaxComponents from "./components/admin/Products/tabs/ManageTaxConfigurations/TaxComponents/TaxComponents";
+import TaxGroups from "./components/admin/Products/tabs/ManageTaxConfigurations/TaxGroups/TaxGroups";
+
+/* Organisation*/
+import ManageOffices from "./components/admin/Organization/tabs/ManageOffices/ManageOffices";
+import ManageHolidays from "./components/admin/Organization/tabs/ManageHolidays/ManageHolidays";
+import ManageEmployees from "./components/admin/Organization/tabs/ManageEmployees/ManageEmployees";
+import LoanProvisioningCriteria from "./components/admin/Organization/tabs/LoanProvisioningCriteria/LoanProvisioningCriteria";
+import EntityDataTableChecks from "./components/admin/Organization/tabs/EntityDataTableChecks/EntityDataTable";
+import CurrencyConfiguration from "./components/admin/Organization/tabs/CurrencyConfiguration/CurrencyConfiguration";
+import ManageFunds from "./components/admin/Organization/tabs/ManageFunds/ManageFunds";
+import TellersCashiers from "./components/admin/Organization/tabs/Tellers-Cashier/TellersCashiers";
+import PaymentTypes from "./components/admin/Organization/tabs/PaymentTypes/PaymentTypes";
+import ManageSMSCampaigns from "./components/admin/Organization/tabs/SMSCampaigns/SmsCampaigns";
+import AdHocQuery from "./components/admin/Organization/tabs/AdHocQuery/AdHocQuery";
+import PasswordPreferences from "./components/admin/Organization/tabs/PasswordPreferences/PasswordPreferences";
+import WorkingDays from "./components/admin/Organization/tabs/WorkingDays/WorkingDays";
+import BulkLoanReassignment from "./components/admin/Organization/tabs/BulkLoanReassignment/BulkLoanReassignment";
+import StandingInstructionsHistory from "./components/admin/Organization/tabs/StandingInstructions/StandingInstructionsHistory";
+import FundMapping from "./components/admin/Organization/tabs/FundMapping/FundMapping";
+import ManageInvestors from "./components/admin/Organization/tabs/ManageInvestors/ManageInvestors";
+import BulkImports from "./components/admin/Organization/tabs/BulkImports/BulkImports";
+
+/* Viewing routes */
+import ViewHoliday from "./components/admin/Organization/tabs/ManageHolidays/ViewHoliday";
+
+/* Bulk Imports */
+import BulkImport from "./components/admin/Organization/tabs/BulkImports/BulkImport";
+
+/* Reports */
+import ReportsPage from "./components/Reports/filteredReports/ReportsPage";
+import ReportFormPage from "./components/Reports/ViewReports";
 
 const App = () => {
     useEffect(() => {
@@ -92,8 +136,8 @@ const App = () => {
                     {!isLoginPage && <Sidebar className="sidebar" />}
                     <Routes>
                         <Route path="/login" element={<Login />} />
+                        <Route path='*' element={<NotFound />} />
                         <Route element={<ProtectedLayout />}>
-                            <Route path='*' element={<NotFound />} />
                             <Route path="/" element={<Dashboard />} />
                             <Route path="/dashboard" element={<Dashboard />} />
                             <Route path="/clients" element={<Clients />} />
@@ -109,7 +153,7 @@ const App = () => {
                             {/* Accounting */}
                             <Route path="/frequent-postings" element={<FrequentPosting />} />
                             <Route path="/journal-entries" element={<JournalEntries />} />
-                            <Route path="/search-journal-entries" element={<SearchJournalEntries />} />
+                            {/*<Route path="/search-journal-entries" element={<SearchJournalEntries />} />*/}
                             <Route path="/financial-activity-mappings" element={<FinancialActivityMappings />} />
                             <Route path="/closing-entries" element={<ClosingEntries />} />
                             <Route path="/chart-of-accounts" element={<ChartofAccounts />} />
@@ -153,6 +197,50 @@ const App = () => {
                             <Route path="/share-products" element={<ShareProducts />} />
                             <Route path="/charges" element={<Charges />} />
                             <Route path="/collateral" element={<Collaterals />} />
+                            <Route path="/products-mix" element={<ProductsMix />} />
+                            <Route path="/fixed-deposit-products" element={<FixedDepositProducts />} />
+                            <Route path="/recurring-deposit-products" element={<RecurringDepositProducts />} />
+                            <Route path="/floating-rates" element={<FloatingRates />} />
+                            <Route path="/manage-delinquency" element={<ManageDelinquency />} />
+                            <Route path="/manage-tax-configurations" element={<ManageTaxConfigurations />} />
+
+                            {/* Manage Delinquency */}
+                            <Route path="/delinquency-buckets" element={<DelinquencyBuckets />} />
+                            <Route path="/delinquency-ranges" element={<DelinquencyRanges />} />
+
+                            {/* Tax Configurations */}
+                            <Route path="/tax-components" element={<TaxComponents />} />
+                            <Route path="/tax-groups" element={<TaxGroups />} />
+
+                            {/* Organisation */}
+                            <Route path="/manage-offices" element={<ManageOffices />} />
+                            <Route path="/manage-holidays" element={<ManageHolidays />} />
+                            <Route path="/manage-employees" element={<ManageEmployees />} />
+                            <Route path="/loan-provisioning-criteria" element={<LoanProvisioningCriteria />} />
+                            <Route path="/entity-data-table-checks" element={<EntityDataTableChecks />} />
+                            <Route path="/currency-configuration" element={<CurrencyConfiguration />} />
+                            <Route path="/manage-funds" element={<ManageFunds />} />
+                            <Route path="/teller-cashier-management" element={<TellersCashiers />} />
+                            <Route path="/payment-types" element={<PaymentTypes />} />
+                            <Route path="/sms-campaigns" element={<ManageSMSCampaigns />} />
+                            <Route path="/ad-hoc-query" element={<AdHocQuery />} />
+                            <Route path="/password-preferences" element={<PasswordPreferences />} />
+                            <Route path="/working-days" element={<WorkingDays />} />
+                            <Route path="/bulk-loan-reassignment" element={<BulkLoanReassignment />} />
+                            <Route path="/standing-instructions-history" element={<StandingInstructionsHistory />} />
+                            <Route path="/fund-mapping" element={<FundMapping />} />
+                            <Route path="/manage-investors" element={<ManageInvestors />} />
+                            <Route path="/bulk-imports" element={<BulkImports />} />
+
+                            {/* viewing routes */}
+                            <Route path="/holidays/view/:id" element={<ViewHoliday />} />
+
+                            {/* bulk imports */}
+                            <Route path="/bulk-imports/:entityType" element={<BulkImport />} />
+
+                            {/* Reports */}
+                            <Route path="/reports/:reportType" element={<ReportsPage />} />
+                            <Route path="/reports/view/:reportId" element={<ReportFormPage />} />
 
                         </Route>
                     </Routes>

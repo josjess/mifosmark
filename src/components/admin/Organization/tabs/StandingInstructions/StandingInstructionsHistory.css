@@ -1,0 +1,145 @@
+.standing-instructions-history-container {
+    padding: 50px 20px;
+    margin-left: 250px;
+    font-family: 'Poppins', sans-serif;
+    background-color: #f8f9fa;
+    min-height: 90vh;
+}
+
+.standing-instructions-history-form-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 50px 20px;
+    font-family: 'Poppins', sans-serif;
+    background-color: #f8f9fa;
+    min-height: 90vh;
+}
+
+.standing-instructions-history-form {
+    width: 100%;
+    max-width: 600px;
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.standing-instructions-history-form-group {
+    margin-bottom: 25px;
+}
+
+.standing-instructions-history-form-label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #333333;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.standing-instructions-history-form-input,
+.standing-instructions-history-form-select {
+    width: 100%;
+    padding: 12px 15px;
+    font-size: 1rem;
+    color: #333333;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.standing-instructions-history-form-input:focus,
+.standing-instructions-history-form-select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+.standing-instructions-history-form-select {
+    background-color: #ffffff;
+    appearance: none;
+}
+
+.standing-instructions-history-form-select::after {
+    content: '▼';
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.standing-instructions-history-form-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+}
+
+.standing-instructions-history-cancel-button,
+.standing-instructions-history-search-button {
+    padding: 12px 20px;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.standing-instructions-history-cancel-button {
+    background-color: #f44336;
+    color: #ffffff;
+}
+
+.standing-instructions-history-cancel-button:hover {
+    background-color: #d32f2f;
+}
+
+.standing-instructions-history-search-button {
+    background-color: #4caf50;
+    color: #ffffff;
+}
+
+.standing-instructions-history-search-button:disabled {
+    background-color: #cccccc;
+    color: #666666;
+    cursor: not-allowed;
+}
+
+.standing-instructions-history-search-button:not(:disabled):hover {
+    background-color: #388e3c;
+}
+
+.standing-instructions-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: white;
+}
+
+.standing-instructions-table th,
+.standing-instructions-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+.standing-instructions-table th {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+}
+
+.show-form-button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+.show-form-button:hover {
+    background-color: #0056b3;
+}

@@ -54,6 +54,21 @@ const ViewCollaterals = () => {
         console.log('Selected Collateral:', collateral);
     };
 
+    const formatCurrency = (amount, currency) => {
+        if (!amount || !currency) return '';
+        const formattedAmount = Number(amount).toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        });
+        return `${currency} ${formattedAmount}`;
+    };
+
+    const formatPercentage = (percentage) => {
+        if (!percentage) return '';
+        return `${percentage}%`;
+    };
+
+
     return (
         <div className="view-collaterals">
             <div className="table-controls">
@@ -95,11 +110,11 @@ const ViewCollaterals = () => {
                             onClick={() => handleRowClick(collateral)}
                             className="clickable-row"
                         >
-                            <td>{collateral.name || '-'}</td>
-                            <td>{collateral.type || '-'}</td>
-                            <td>{collateral.basePrice || '-'}</td>
-                            <td>{collateral.basePercentage || '-'}</td>
-                            <td>{collateral.unitType || '-'}</td>
+                            <td>{collateral.name || ''}</td>
+                            <td>{collateral.quality || ''}</td>
+                            <td>{formatCurrency(collateral.basePrice, collateral.currency)}</td>
+                            <td>{formatPercentage(collateral.pctToBase)}</td>
+                            <td>{collateral.unitType || ''}</td>
                         </tr>
                     ))
                 ) : (
