@@ -1,0 +1,112 @@
+.preferences-table-container {
+    padding: 20px;
+    background-color: #f9f9fb;
+}
+
+.table-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.filter-container {
+    display: flex;
+    gap: 20px;
+    align-items: flex-end;
+    margin-bottom: 15px;
+}
+
+.filter-input {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    border: none;
+}
+
+.filter-input label {
+    font-size: 0.9em;
+    font-weight: 600;
+    color: #4a4a4a;
+}
+
+.filter-input input,
+.filter-input select {
+    padding: 10px;
+    font-size: 1em;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    width: 250px;
+    background-color: #f7f9fc;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.filter-input input:focus,
+.filter-input select:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 6px rgba(52, 152, 219, 0.4);
+    outline: none;
+    background-color: #ffffff;
+}
+
+.preferences-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.preferences-table th,
+.preferences-table td {
+    padding: 15px;
+    text-align: left;
+    font-size: 0.95em;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.preferences-table th {
+    background-color: #0066cc;
+    color: #ffffff;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.9em;
+}
+
+.preferences-table tbody tr:nth-child(even) {
+    background-color: #e2eaf1;
+}
+
+.preferences-table tbody tr:hover {
+    background-color: #eaf4fb;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.preferences-table tbody td {
+    vertical-align: middle;
+}
+
+.preferences-table-container .action-button {
+    padding: 8px 12px;
+    font-size: 0.9em;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.preferences-table-container .action-button:hover {
+    background-color: #0056b3;
+}
+
+.no-data {
+    text-align: center;
+    font-style: italic;
+    color: #888;
+    padding: 20px;
+    font-size: 1em;
+}

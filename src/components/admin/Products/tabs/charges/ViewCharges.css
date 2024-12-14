@@ -1,0 +1,40 @@
+.view-charges {
+    padding: 20px;
+    background-color: #f9f9fb;
+}
+
+.charges-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.charges-table th,
+.charges-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.charges-table th {
+    background-color: #007bff;
+    color: #fff;
+    font-size: 0.9em;
+}
+
+.charges-table tr:hover {
+    background-color: #f1f5ff;
+    cursor: pointer;
+}
+
+.filter-item {
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    margin-top: 10px;
+}
+.filter-item label {
+    margin-bottom: 10px;
+}

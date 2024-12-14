@@ -1,0 +1,30 @@
+.view-collaterals {
+    padding: 20px;
+    background-color: #f9f9fb;
+}
+
+.collaterals-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.collaterals-table th, .collaterals-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+.collaterals-table th {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.collaterals-table tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.collaterals-table tbody tr:hover {
+    background-color: #eaf4fb;
+    cursor: pointer;
+}

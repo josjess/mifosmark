@@ -1,0 +1,77 @@
+.data-table-detail-container {
+    padding: 20px;
+    min-height: 95vh;
+}
+
+.data-table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.data-table-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.edit-button,
+.delete-button {
+    padding: 10px 15px;
+    margin-left: 10px;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.edit-button {
+    background-color: #4caf50;
+    color: white;
+}
+
+.delete-button {
+    background-color: #f44336;
+    color: white;
+}
+
+
+.data-table-columns {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table-columns th,
+.data-table-columns td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+.data-table-columns th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+}
+
+.boolean-indicator {
+    display: inline-block;
+    padding: 5px;
+    padding-bottom: 0;
+    font-weight: bold;
+    border-radius: 50%;
+}
+
+.boolean-indicator.true {
+    background-color: #4caf50;
+    color: white;
+}
+
+.boolean-indicator.false {
+    background-color: #ccc;
+    color: white;
+}
+
+.no-data {
+    text-align: center;
+    font-style: italic;
+}

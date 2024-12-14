@@ -1,0 +1,25 @@
+.view-employees {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.employees-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.employees-table th,
+.employees-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+.employees-table th {
+    background-color: #007bff;
+    color: white;
+}
+
+.employees-table tbody tr:hover {
+    background-color: #f9f9f9;
+}

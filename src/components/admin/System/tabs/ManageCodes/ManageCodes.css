@@ -1,0 +1,16 @@
+.manage-codes-page {
+    padding: 60px 20px 20px;
+    min-height: 90vh;
+    background-color: #f5f7fa;
+    margin-left: 250px;
+    font-family: Arial, sans-serif;
+}
+.close-dynamic-tab {
+    background-color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 5px 10px;
+    font-size: 16px;
+    color: #ff3300 !important;
+    cursor: pointer;
+}

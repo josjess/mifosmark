@@ -1,0 +1,26 @@
+.view-currency-configuration {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.currency-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.currency-table th, .currency-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+.currency-table th {
+    background-color: #007bff;
+    color: white;
+}
+
+.currency-table tbody tr:hover {
+    background-color: #f9f9f9;
+    cursor: pointer;
+}

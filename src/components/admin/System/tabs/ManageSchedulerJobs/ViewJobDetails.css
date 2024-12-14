@@ -1,0 +1,121 @@
+.job-details-container {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    max-width: 800px;
+    margin: auto;
+}
+
+.job-details-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+}
+
+.job-details-actions button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 8px 12px;
+    font-size: 16px;
+    margin-left: 10px;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.job-details-actions button:hover {
+    background-color: #0056b3;
+}
+
+.job-details-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.job-details-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.job-details-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    font-size: 16px;
+    color: #333;
+    text-align: left;
+}
+
+.job-details-table tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.job-details-table tr td:first-child {
+    font-weight: bold;
+    background-color: #f7f7f7;
+    width: 30%;
+}
+
+.job-details-table a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.job-details-table a:hover {
+    color: #685eb5;
+}
+.history-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+    color: #333;
+}
+
+.history-table th {
+    background-color: #f4f4f4;
+    text-align: left;
+    padding: 12px;
+    font-weight: bold;
+    border-bottom: 2px solid #ddd;
+}
+
+.history-table td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    word-break: break-word;
+}
+
+.history-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+.history-table tr:nth-child(odd) {
+    background-color: #63abb1;
+}
+
+.history-table tr:hover {
+    background-color: #5a9ccf;
+    cursor: pointer;
+}
+
+.history-table th,
+.history-table td {
+    text-align: center;
+}
+
+.history-table td:nth-child(4),
+.history-table td:nth-child(5) {
+    text-transform: capitalize;
+}
+
+.history-table-container {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-top: 1rem;
+}

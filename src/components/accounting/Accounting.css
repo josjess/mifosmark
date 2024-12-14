@@ -1,0 +1,89 @@
+.accounting-layout {
+    margin-left: 250px;
+    padding: 20px 40px 100px;
+    background-color: #132639;
+    max-height: 100vh;
+    overflow-y: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+.accounting-layout::-webkit-scrollbar {
+    display: none;
+}
+.accounting-header {
+    padding: 20px;
+    margin-bottom: 30px;
+    text-align: left;
+    color: #ffffff;
+}
+
+.accounting-header h1 {
+    font-size: 2em;
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.accounting-header p {
+    font-size: 1em;
+    color: #b2b8c3;
+    margin-top: 5px;
+}
+
+.accounting-cards {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.accounting-card {
+    background-color: #213f5a;
+    border-radius: 15px;
+    padding: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    min-width: 280px;
+    max-width: 600px;
+}
+
+.accounting-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.accounting-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.icon-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 15px;
+}
+
+.accounting-icon {
+    font-size: 1.5em;
+    color: #ffffff;
+}
+
+.text-content h3 {
+    font-size: 1.2em;
+    margin: 0;
+    color: #ffffff;
+}
+
+.text-content p {
+    font-size: 0.9em;
+    color: #b2b8c3;
+    margin: 5px 0 0;
+}

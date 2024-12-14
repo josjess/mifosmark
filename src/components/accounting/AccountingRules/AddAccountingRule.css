@@ -1,0 +1,161 @@
+.form-row {
+    display: flex;
+    gap: 20px;
+    justify-content: space-between;
+}
+
+.account-form-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.account-form-group label {
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 5px;
+}
+
+.account-form-group input[type="text"],
+.account-form-group select {
+    width: 100%;
+    max-width: 300px;
+    padding: 12px;
+    font-size: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #ffffff;
+    color: #333333;
+    box-sizing: border-box;
+}
+
+.account-form-group input[type="text"]:focus,
+.account-form-group select:focus {
+    outline: none;
+    border-color: #4c84ff;
+    box-shadow: 0 0 5px rgba(76, 132, 255, 0.3);
+}
+
+.full-width .description-textarea {
+    width: 100%;
+    max-width: 400px;
+    padding: 12px;
+    font-size: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #ffffff;
+    color: #333333;
+    line-height: 1.5;
+    resize: vertical;
+    min-height: 120px;
+    box-sizing: border-box;
+}
+
+.account-form-group label {
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.radio-group, .checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+.radio-group input[type="radio"],
+.checkbox-group input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+    accent-color: #4c84ff;
+}
+
+.radio-group label, .checkbox-group label {
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+
+.radio-group {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: row;
+}
+
+.account-form-group .account-form-checkbox {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    padding: 5px 0;
+}
+
+.checkbox-group .checkbox-inline {
+    display: flex;
+    align-items: center;
+}
+
+.account-form-group h4 {
+    font-size: 18px;
+    color: #ffffff;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.account-form-checkbox .checkbox-group {
+    display: flex;
+    gap: 20px;
+    flex-direction: row;
+}
+.account-form-checkbox {
+    display: flex;
+    flex-direction: column;
+    margin-top: 15px;
+}
+
+.account-form-checkbox label {
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 8px;
+}
+
+.checkbox-group-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.checkbox-group-row .checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.checkbox-group-row input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+    accent-color: #4c84ff;
+}
+
+.checkbox-group-row label {
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
