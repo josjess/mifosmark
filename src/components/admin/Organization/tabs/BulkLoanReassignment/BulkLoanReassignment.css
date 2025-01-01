@@ -9,6 +9,7 @@
     max-width: 600px;
     background: #ffffff;
     border-radius: 15px;
+    margin: auto;
     padding: 20px 30px;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
@@ -28,8 +29,13 @@
 .bulk-loan-reassignment-input {
     padding: 10px;
     font-size: 16px;
-    border: 1px solid #ddd;
+    border: 1px solid #aaa7a7;
     border-radius: 5px;
+}
+.bulk-loan-reassignment-select:focus,
+.bulk-loan-reassignment-input:focus {
+    border: 1px solid #2225b1;
+    border-radius: 10px;
 }
 
 .bulk-loan-reassignment-actions {
@@ -65,4 +71,120 @@
 
 .bulk-loan-reassignment-cancel-btn:hover {
     background-color: #c82333;
+}
+.loan-table-container {
+    width: 80%;
+    margin: 20px auto;
+    border: 1px solid #f1eaea;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.loan-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    /*margin: auto;*/
+    text-align: left;
+}
+
+.loan-table th, .loan-table td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+}
+
+.loan-table th {
+    background-color: #f4f4f4;
+    font-weight: 600;
+    color: #333;
+}
+
+.loan-table tbody tr:hover {
+    background-color: #f9f9f9;
+}
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+    padding: 10px 0;
+    border-top: 1px solid #ccc;
+}
+
+.pagination-controls label {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: #333;
+}
+
+.pagination-controls select {
+    margin-left: 5px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff;
+    font-size: 14px;
+}
+
+.pagination-controls button {
+    padding: 10px;
+    margin: 10px;
+    font-size: 14px;
+    border: 1px solid #3b1acf;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    color: #252797;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.pagination-controls button:hover:not(:disabled) {
+    background-color: #e0e0e0;
+}
+
+.pagination-controls button:disabled {
+    cursor: not-allowed;
+    border: 1px solid #bdb8b8;
+    opacity: 0.5;
+    color: #505053;
+}
+
+.pagination-controls span {
+    font-size: 14px;
+    color: #333;
+}
+
+.bulk-loan-reassignment-page .checkbox-group {
+    display: flex;
+    align-items: flex-start;
+    margin-top: 10px;
+}
+
+.bulk-loan-reassignment-page .checkbox-group label {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    margin-bottom: 5px;
+    cursor: pointer;
+}
+
+.bulk-loan-reassignment-page .checkbox-group input[type='checkbox'] {
+    margin-right: 10px;
+}
+
+.bulk-loan-reassignment-field label {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    margin-top: 10px;
+    cursor: pointer;
+    color: #333;
+}
+
+.bulk-loan-reassignment-field input[type='checkbox'] {
+    margin-right: 10px;
 }

@@ -4,6 +4,8 @@ import { AuthContext } from '../../../context/AuthContext';
 import { useLoading } from '../../../context/LoadingContext';
 import { API_CONFIG } from '../../../config';
 import './CreateClosure.css';
+import DatePicker from "react-datepicker";
+import {format} from "date-fns";
 
 const CreateClosure = () => {
     const { user } = useContext(AuthContext);
@@ -13,6 +15,7 @@ const CreateClosure = () => {
     const [comments, setComments] = useState('');
     const [offices, setOffices] = useState([]);
     const [formErrors, setFormErrors] = useState({});
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         fetchOffices();
@@ -36,74 +39,104 @@ const CreateClosure = () => {
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Validate form fields
         const errors = {};
         if (!office) errors.office = 'Office is required';
         if (!closingDate) errors.closingDate = 'Closing Date is required';
-        if (!comments) errors.comments = 'Comments are required';
-
         setFormErrors(errors);
 
         if (Object.keys(errors).length === 0) {
-            console.log("New closure created:", { office, closingDate, comments });
+            const formattedDate = format(new Date(closingDate), "dd MMMM yyyy");
 
-            // Logic for submitting data, e.g., posting to an API
+            const payload = {
+                officeId: parseInt(office, 10),
+                closingDate: formattedDate,
+                comments: comments || "",
+                locale: "en",
+                dateFormat: "dd MMMM yyyy",
+            };
 
-            // Reset form fields after successful submission
-            setOffice('');
-            setClosingDate('');
-            setComments('');
+            // console.log("Payload:", payload);
+
+            try {
+                const response = await axios.post(`${API_CONFIG.baseURL}/glclosures`, payload, {
+                    headers: {
+                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                        "Fineract-Platform-TenantId": "default",
+                        "Content-Type": "application/json",
+                    },
+                });
+
+                // console.log("Response:", response.data);
+
+                setOffice('');
+                setClosingDate('');
+                setComments('');
+            } catch (error) {
+                console.error("Error submitting closure:", error.response?.data || error.message);
+            }
         }
     };
 
     return (
-        <div className="form-container-closure">
-            <h2 className="closure-form-title">Create Account Closure</h2>
-            <form onSubmit={handleSubmit} className="closure-form">
-                <div className="form-row">
-                    <div className="form-group">
-                        <label>Office <span>*</span></label>
+        <div className="form-container-client">
+            <form onSubmit={handleSubmit} className="staged-form-stage-content">
+                <div className="staged-form-row">
+                    <div className="staged-form-field">
+                        <label className={"create-provisioning-criteria-label"}>Office <span className="staged-form-required">*</span></label>
                         <select
                             value={office}
                             onChange={(e) => setOffice(e.target.value)}
+                            className="create-provisioning-criteria-select"
                             required
                         >
-                            <option value="">Select Office</option>
+                            <option value="">-- Select Office --</option>
                             {offices.map((office) => (
-                                <option key={office.id} value={office.name}>
+                                <option key={office.id} value={office.id}>
                                     {office.name}
                                 </option>
                             ))}
                         </select>
                         {formErrors.office && <span className="error-text">{formErrors.office}</span>}
                     </div>
-                    <div className="form-group">
-                        <label>Closing Date <span>*</span></label>
-                        <input
-                            type="date"
-                            value={closingDate}
-                            onChange={(e) => setClosingDate(e.target.value)}
-                            required
+                    <div className="staged-form-field">
+                        <label className={"create-provisioning-criteria-label"}>Closing Date <span className="staged-form-required">*</span></label>
+                        <DatePicker
+                            selected={closingDate ? new Date(closingDate) : null}
+                            onChange={(date) => setClosingDate(date.toISOString().split("T")[0])}
+                            className="staged-form-input"
+                            placeholderText="Select Closing Date"
+                            dateFormat="MMMM d, yyyy"
+                            maxDate={new Date()} // Restricts selection to today or earlier
+                            showPopperArrow={false}
+                            showMonthDropdown
+                            showYearDropdown
+                            dropdownMode="select"
                         />
                         {formErrors.closingDate && <span className="error-text">{formErrors.closingDate}</span>}
                     </div>
+
                 </div>
-                <div className="form-group full-width">
-                    <label>Comments <span>*</span></label>
+                <div className="staged-form-field">
+                    <label className={"create-provisioning-criteria-label"}>Comments</label>
                     <textarea
                         rows="3"
                         value={comments}
                         onChange={(e) => setComments(e.target.value)}
-                        placeholder="Comments"
-                        required
+                        className="staged-form-input"
+                        placeholder="Enter any comments (optional)"
                     ></textarea>
-                    {formErrors.comments && <span className="error-text">{formErrors.comments}</span>}
                 </div>
                 <div className="navigation-buttons">
-                    <button type="submit" className="submit-button">Create Closure</button>
+                    <button
+                        type="submit"
+                        className="submit-button"
+                        disabled={isSubmitting}
+                    >
+                        {isSubmitting ? 'Creating...' : 'Create Closure'}
+                    </button>
                 </div>
             </form>
         </div>

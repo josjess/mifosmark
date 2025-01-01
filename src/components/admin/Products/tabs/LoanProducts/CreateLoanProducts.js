@@ -5,6 +5,7 @@ import { useLoading } from "../../../../../context/LoadingContext";
 import { API_CONFIG } from "../../../../../config";
 import "./CreateLoanProducts.css";
 import {FaEdit, FaTrash} from "react-icons/fa";
+import DatePicker from "react-datepicker";
 
 const stages = [
     "Details",
@@ -153,9 +154,198 @@ const CreateLoanProducts = () => {
         setCurrentStage((prev) => prev - 1);
     };
 
-    const handlePreview = () => {
-        console.log("Preview Data:", formData);
+    const handleSubmit = async () => {
+        try {
+            // Extract and transform formData into the required payload
+            const {
+                Details = {},
+                Currency = {},
+                Settings = {},
+                Terms = {},
+                Charges = [],
+                Accounting = {},
+            } = formData;
+
+            const payload = {
+                // Details Section
+                name: Details.name,
+                shortName: Details.shortName,
+                locale: "en_GB", // Set default locale
+                dateFormat: "dd MMMM yyyy", // Set default date format
+
+                // Currency Section
+                currencyCode: Currency.currencyCode,
+                digitsAfterDecimal: Currency.digitsAfterDecimal,
+                inMultiplesOf: Currency.inMultiplesOf,
+
+                // Settings Section
+                principal: Settings.principal,
+                numberOfRepayments: Settings.numberOfRepayments,
+                repaymentEvery: Settings.repaymentEvery,
+                repaymentFrequencyType: Settings.repaymentFrequencyType,
+                interestRatePerPeriod: Settings.interestRatePerPeriod,
+                interestRateFrequencyType: Settings.interestRateFrequencyType,
+                amortizationType: Settings.amortization,
+                interestType: Settings.interestMethod,
+                interestCalculationPeriodType: Settings.interestCalculationPeriod,
+                isEqualAmortization: Settings.isEqualAmortization || "false",
+                calculateInterestForExactDays: Settings.calculateInterestForExactDays || "false",
+                transactionProcessingStrategyId: Settings.repaymentStrategy,
+                enableMultipleDisbursals: Settings.enableMultipleDisbursals || "false",
+                maxTrancheCount: Settings.enableMultipleDisbursals ? Settings.maxTrancheCount : null,
+                maxOutstandingBalance: Settings.enableMultipleDisbursals ? Settings.maxOutstandingBalance : null,
+                disallowExpectedDisbursements: Settings.enableMultipleDisbursals ? Settings.disallowExpectedDisbursements || "false" : null,
+                enableDownPayment: Settings.enableDownPayment || "false",
+                downPaymentPercentage: Settings.enableDownPayment ? Settings.downPaymentPercentage : null,
+                enableAutoRepaymentForDownPayment: Settings.enableDownPayment ? Settings.enableAutoRepaymentForDownPayment || "false" : null,
+                gracePrincipalPayment: Settings.gracePrincipalPayment || 0,
+                graceInterestPayment: Settings.graceInterestPayment || 0,
+                delinquencyBucket: Settings.delinquencyBucket || null,
+                enableInstallmentLevelDelinquency: Settings.delinquencyBucket ? Settings.enableInstallmentLevelDelinquency || "false" : null,
+                interestFreePeriod: Settings.interestFreePeriod || 0,
+                arrearsTolerance: Settings.arrearsTolerance || 0,
+                daysInMonthType: Settings.daysInMonth || null,
+                daysInYearType: Settings.daysInYear || null,
+                allowFixingInstallmentAmount: Settings.allowFixingInstallmentAmount || "false",
+                onArrearsAging: Settings.onArrearsAging || 0,
+                overdueDaysForNPA: Settings.overdueDays || 0,
+                accountMovesOutOfNPA: Settings.accountMovesOutOfNPA || "false",
+                principalThresholdForLastInstallment: Settings.principalThreshold || null,
+                variableInstallments: Settings.variableInstallments || "false",
+                minGap: Settings.variableInstallments ? Settings.minGap : null,
+                maxGap: Settings.variableInstallments ? Settings.maxGap : null,
+                topUpLoans: Settings.topUpLoans || "false",
+                isInterestRecalculationEnabled: Settings.recalculateInterest || "false",
+                preClosureInterestCalculationStrategy: Settings.recalculateInterest ? Settings.preClosureRule : null,
+                advancePaymentAdjustmentType: Settings.recalculateInterest ? Settings.advancePaymentType : null,
+                compoundingOn: Settings.recalculateInterest ? Settings.compoundingOn : null,
+                recalculationFrequencyType: Settings.recalculateInterest ? Settings.frequency : null,
+                arrearsRecognitionBasedOnOriginalSchedule: Settings.recalculateInterest ? Settings.arrearsRecognitionBasedOnOriginalSchedule || "false" : null,
+                placeGuaranteeFundsOnHold: Settings.placeGuaranteeFundsOnHold || "false",
+                mandatoryGuarantee: Settings.placeGuaranteeFundsOnHold ? Settings.mandatoryGuarantee : null,
+                minOwnFunds: Settings.placeGuaranteeFundsOnHold ? Settings.minOwnFunds : null,
+                minGuarantorFunds: Settings.placeGuaranteeFundsOnHold ? Settings.minGuarantorFunds : null,
+                useGlobalRepaymentEventConfig: Settings.useGlobalRepaymentEventConfig || "false",
+                dueDaysForRepayment: !Settings.useGlobalRepaymentEventConfig ? Settings.dueDaysForRepayment : null,
+                overDueDaysForRepayment: !Settings.useGlobalRepaymentEventConfig ? Settings.overDueDaysForRepayment : null,
+                allowOverridingTerms: Settings.allowOverridingTerms || "false",
+                overrideAmortization: Settings.allowOverridingTerms ? Settings.overrideAmortization || "false" : null,
+                overrideInterestMethod: Settings.allowOverridingTerms ? Settings.overrideInterestMethod || "false" : null,
+                overrideRepaymentStrategy: Settings.allowOverridingTerms ? Settings.overrideRepaymentStrategy || "false" : null,
+                overrideInterestCalculationPeriod: Settings.allowOverridingTerms ? Settings.overrideInterestCalculationPeriod || "false" : null,
+                overrideArrearsTolerance: Settings.allowOverridingTerms ? Settings.overrideArrearsTolerance || "false" : null,
+                overrideRepaidEvery: Settings.allowOverridingTerms ? Settings.overrideRepaidEvery || "false" : null,
+                overrideMoratorium: Settings.allowOverridingTerms ? Settings.overrideMoratorium || "false" : null,
+                overrideOverdueDays: Settings.allowOverridingTerms ? Settings.overrideOverdueDays || "false" : null,
+
+                // Terms Section
+                principalMin: Terms.principalMin,
+                principalDefault: Terms.principalDefault,
+                principalMax: Terms.principalMax,
+                allowApprovalAboveLoanAmount: Terms.allowApprovalAboveLoanAmount || "false",
+                overAmountCalcType: Terms.allowApprovalAboveLoanAmount ? Terms.overAmountCalcType : null,
+                overAmount: Terms.allowApprovalAboveLoanAmount ? Terms.overAmount : null,
+                installmentDayCalcFrom: Terms.installmentDayCalcFrom,
+                repaymentMin: Terms.repaymentMin,
+                repaymentDefault: Terms.repaymentDefault,
+                repaymentMax: Terms.repaymentMax,
+                isZeroInterestRate: Terms.isZeroInterestRate || "false",
+                isLinkedToFloatingRates: Terms.isLinkedToFloatingRates || "false",
+                nominalInterestMin: !Terms.isZeroInterestRate && !Terms.isLinkedToFloatingRates ? Terms.nominalInterestMin : null,
+                nominalInterestDefault: !Terms.isZeroInterestRate && !Terms.isLinkedToFloatingRates ? Terms.nominalInterestDefault : null,
+                nominalInterestMax: !Terms.isZeroInterestRate && !Terms.isLinkedToFloatingRates ? Terms.nominalInterestMax : null,
+                frequency: !Terms.isZeroInterestRate && !Terms.isLinkedToFloatingRates ? Terms.frequency : null,
+                floatingRate: Terms.isLinkedToFloatingRates ? Terms.floatingRate : null,
+                differentialRate: Terms.isLinkedToFloatingRates ? Terms.differentialRate : null,
+                isFloatingCalcAllowed: Terms.isLinkedToFloatingRates ? Terms.isFloatingCalcAllowed : "false",
+                floatingMin: Terms.isLinkedToFloatingRates ? Terms.floatingMin : null,
+                floatingDefault: Terms.isLinkedToFloatingRates ? Terms.floatingDefault : null,
+                floatingMax: Terms.isLinkedToFloatingRates ? Terms.floatingMax : null,
+                termsVaryByLoanCycle: Terms.termsVaryByLoanCycle || "false",
+                principalVariationsForBorrowerCycle: Terms.termsVaryByLoanCycle ? loanCycleData.principal : [],
+                repaymentVariationsForBorrowerCycle: Terms.termsVaryByLoanCycle ? loanCycleData.repayments : [],
+                interestVariationsForBorrowerCycle: Terms.termsVaryByLoanCycle ? loanCycleData.interest : [],
+                frequencyRepaid: Terms.frequencyRepaid,
+                frequencyType: Terms.frequencyType,
+                minDaysDisbursalToRepayment: Terms.minDaysDisbursalToRepayment,
+                principalThresholdForLastInstallmentT: Terms.principalThresholdForLastInstallment,
+                holdGuaranteeFunds: Terms.holdGuaranteeFunds || "false",
+
+                // Charges Section
+                charges: [
+                    ...(loanCycleData.charges?.map((charge) => ({
+                        chargeId: charge.charge,
+                        chargeTimeType: formData.loanProductTemplate?.creditAllocationAllocationTypes?.find(
+                            (option) => option.id === parseInt(charge.charge)
+                        )?.chargeTimeType || null,
+                        chargeCalculationType: formData.loanProductTemplate?.creditAllocationAllocationTypes?.find(
+                            (option) => option.id === parseInt(charge.charge)
+                        )?.chargeCalculationType || null,
+                        amount: formData.loanProductTemplate?.creditAllocationAllocationTypes?.find(
+                            (option) => option.id === parseInt(charge.charge)
+                        )?.amount || null,
+                    })) || []),
+                    ...(loanCycleData.overdueCharges?.map((overdueCharge) => ({
+                        chargeId: overdueCharge.overdueCharge,
+                        chargeTimeType: formData.loanProductTemplate?.advancedPaymentAllocationTypes?.find(
+                            (option) => option.id === parseInt(overdueCharge.overdueCharge)
+                        )?.chargeTimeType || null,
+                        chargeCalculationType: formData.loanProductTemplate?.advancedPaymentAllocationTypes?.find(
+                            (option) => option.id === parseInt(overdueCharge.overdueCharge)
+                        )?.chargeCalculationType || null,
+                        amount: formData.loanProductTemplate?.advancedPaymentAllocationTypes?.find(
+                            (option) => option.id === parseInt(overdueCharge.overdueCharge)
+                        )?.amount || null,
+                    })) || []),
+                ],
+
+                // Accounting Section
+                accountingRule: Accounting.selectedOption,
+                fundSourceAccountId: Accounting.fundSource,
+                loanPortfolioAccountId: Accounting.loanPortfolio,
+                transfersInSuspenseAccountId: Accounting.transferSuspense,
+                interestOnLoanAccountId: Accounting.incomeInterest,
+                incomeFromFeeAccountId: Accounting.incomeFees,
+                incomeFromPenaltyAccountId: Accounting.incomePenalties,
+                writeOffAccountId: Accounting.lossesWrittenOff,
+                overpaymentLiabilityAccountId: Accounting.overpaymentLiability,
+
+                paymentChannelToFundSourceMappings: Accounting.paymentChannelMappings || [],
+                feeToIncomeAccountMappings: Accounting.feeMappings || [],
+                penaltyToIncomeAccountMappings: Accounting.penaltyMappings || [],
+            };
+
+            console.log("Submitting Payload:", payload);
+
+            // Axios POST request
+            const response = await axios.post(
+                `${API_CONFIG.baseURL}/loanproducts`,
+                payload,
+                {
+                    headers: {
+                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                        "Fineract-Platform-TenantId": "default",
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
+            if (response.status === 200 || response.status === 201) {
+                console.log("Loan Product Created Successfully:", response.data);
+                alert("Loan Product Created Successfully!");
+            } else {
+                console.error("Error Creating Loan Product:", response.data);
+                alert("Error Creating Loan Product. Check the console for details.");
+            }
+        } catch (error) {
+            console.error("Error in handleSubmit:", error);
+            alert(
+                error.response?.data?.defaultUserMessage ||
+                "An unexpected error occurred. Check the console for details."
+            );
+        }
     };
+
 
     const openModal = (type, data = null) => {
         setModalState({ isOpen: true, type, data });
@@ -276,26 +466,30 @@ const CreateLoanProducts = () => {
                         <div className="staged-form-row">
                             <div className="staged-form-field">
                                 <label htmlFor="startDate">Start Date</label>
-                                <input
+                                <DatePicker
                                     id="startDate"
-                                    type="date"
-                                    value={formData.Details?.startDate || ""}
-                                    onChange={(e) =>
-                                        handleFieldChange("Details", "startDate", e.target.value)
-                                    }
+                                    selected={formData.Details?.startDate ? new Date(formData.Details.startDate) : null}
+                                    onChange={(date) => handleFieldChange("Details", "startDate", date ? date.toISOString().split('T')[0] : "")}
+                                    dateFormat="yyyy-MM-dd"
                                     className="staged-form-input"
+                                    placeholderText="Select Start Date"
+                                    showMonthDropdown
+                                    showYearDropdown
+                                    dropdownMode="select"
                                 />
                             </div>
                             <div className="staged-form-field">
                                 <label htmlFor="closeDate">Close Date</label>
-                                <input
+                                <DatePicker
                                     id="closeDate"
-                                    type="date"
-                                    value={formData.Details?.closeDate || ""}
-                                    onChange={(e) =>
-                                        handleFieldChange("Details", "closeDate", e.target.value)
-                                    }
+                                    selected={formData.Details?.closeDate ? new Date(formData.Details.closeDate) : null}
+                                    onChange={(date) => handleFieldChange("Details", "closeDate", date ? date.toISOString().split('T')[0] : "")}
+                                    dateFormat="yyyy-MM-dd"
                                     className="staged-form-input"
+                                    placeholderText="Select Close Date"
+                                    showMonthDropdown
+                                    showYearDropdown
+                                    dropdownMode="select"
                                 />
                             </div>
                         </div>
@@ -552,35 +746,132 @@ const CreateLoanProducts = () => {
 
                         {/* Loan Tranche Details Section */}
                         <h4 className="staged-form-section-title">Loan Tranche Details</h4>
-                        <div className="staged-form-row">
-                            <div className="staged-form-field">
-                                <label>
-                                    <input
-                                        type="checkbox"
-                                        checked={formData.Settings?.enableMultipleDisbursals || false}
-                                        onChange={(e) =>
-                                            handleFieldChange("Settings", "enableMultipleDisbursals", e.target.checked)
-                                        }
-                                    />
-                                    Enable Multiple Disbursals
-                                </label>
-                            </div>
+                        {/* Enable Multiple Disbursals */}
+                        <div className="staged-form-field">
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    checked={formData.Settings?.enableMultipleDisbursals || false}
+                                    onChange={(e) =>
+                                        handleFieldChange("Settings", "enableMultipleDisbursals", e.target.checked)
+                                    }
+                                />
+                                Enable Multiple Disbursals
+                            </label>
                         </div>
+                        {formData.Settings?.enableMultipleDisbursals && (
+                            <>
+                                <div className="staged-form-row">
+                                    <div className="staged-form-field">
+                                        <label htmlFor="maxTrancheCount">
+                                            Maximum Tranche Count <span className="staged-form-required">*</span>
+                                        </label>
+                                        <input
+                                            id="maxTrancheCount"
+                                            type="number"
+                                            min={1}
+                                            value={formData.Settings?.maxTrancheCount || ""}
+                                            onChange={(e) =>
+                                                handleFieldChange("Settings", "maxTrancheCount", e.target.value)
+                                            }
+                                            className="staged-form-input"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="staged-form-field">
+                                        <label htmlFor="maxOutstandingBalance">
+                                            Maximum Allowed Outstanding Balance <span className="staged-form-required">*</span>
+                                        </label>
+                                        <input
+                                            id="maxOutstandingBalance"
+                                            type="number"
+                                            min={1}
+                                            value={formData.Settings?.maxOutstandingBalance || ""}
+                                            onChange={(e) =>
+                                                handleFieldChange("Settings", "maxOutstandingBalance", e.target.value)
+                                            }
+                                            className="staged-form-input"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                                <div className="staged-form-field">
+                                    <label>
+                                        <input
+                                            type="checkbox"
+                                            checked={formData.Settings?.disallowExpectedDisbursements || false}
+                                            onChange={(e) =>
+                                                handleFieldChange(
+                                                    "Settings",
+                                                    "disallowExpectedDisbursements",
+                                                    e.target.checked
+                                                )
+                                            }
+                                        />
+                                        Disallow Expected Disbursements
+                                    </label>
+                                </div>
+                            </>
+                        )}
                         <h4 className="staged-form-section-title">Down Payment </h4>
-                        <div className="staged-form-row">
-                            <div className="staged-form-field">
-                                <label>
-                                    <input
-                                        type="checkbox"
-                                        checked={formData.Settings?.enableDownPayment || false}
-                                        onChange={(e) =>
-                                            handleFieldChange("Settings", "enableDownPayment", e.target.checked)
-                                        }
-                                    />
-                                    Enable Down Payment
-                                </label>
-                            </div>
+                        {/* Enable Down Payment */}
+                        <div className="staged-form-field">
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    checked={formData.Settings?.enableDownPayment || false}
+                                    onChange={(e) =>
+                                        handleFieldChange("Settings", "enableDownPayment", e.target.checked)
+                                    }
+                                />
+                                Enable Down Payment
+                            </label>
                         </div>
+                        {formData.Settings?.enableDownPayment && (
+                            <>
+                                <div className="staged-form-row">
+                                    <div className="staged-form-field">
+                                        <label htmlFor="downPaymentPercentage">
+                                            Disbursed Amount Percentage Down Payment (%){" "}
+                                            <span className="staged-form-required">*</span>
+                                        </label>
+                                        <input
+                                            id="downPaymentPercentage"
+                                            type="number"
+                                            min={0}
+                                            value={formData.Settings?.downPaymentPercentage || ""}
+                                            onChange={(e) =>
+                                                handleFieldChange(
+                                                    "Settings",
+                                                    "downPaymentPercentage",
+                                                    e.target.value
+                                                )
+                                            }
+                                            className="staged-form-input"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="staged-form-field">
+                                        <label>
+                                            <input
+                                                type="checkbox"
+                                                checked={
+                                                    formData.Settings?.enableAutoRepaymentForDownPayment || false
+                                                }
+                                                onChange={(e) =>
+                                                    handleFieldChange(
+                                                        "Settings",
+                                                        "enableAutoRepaymentForDownPayment",
+                                                        e.target.checked
+                                                    )
+                                                }
+                                            />
+                                            Enable Auto Repayment for Down Payment
+                                        </label>
+                                    </div>
+                                </div>
+                            </>
+                        )}
 
                         {/* Moratorium Section */}
                         <h4 className="staged-form-section-title">Moratorium</h4>
@@ -833,44 +1124,250 @@ const CreateLoanProducts = () => {
                                 </label>
                             </div>
                         </div>
+                        {formData.Settings?.variableInstallments && (
+                            <div className="staged-form-row">
+                                <div className="staged-form-field">
+                                    <label htmlFor="minGap">
+                                        Minimum Gap Between Installments <span className="staged-form-required">*</span>
+                                    </label>
+                                    <input
+                                        id="minGap"
+                                        type="number"
+                                        min={1}
+                                        value={formData.Settings?.minGap || ""}
+                                        onChange={(e) =>
+                                            handleFieldChange("Settings", "minGap", e.target.value)
+                                        }
+                                        className="staged-form-input"
+                                        required
+                                    />
+                                </div>
+                                <div className="staged-form-field">
+                                    <label htmlFor="maxGap">
+                                        Maximum Gap Between Installments <span className="staged-form-required">*</span>
+                                    </label>
+                                    <input
+                                        id="maxGap"
+                                        type="number"
+                                        min={1}
+                                        value={formData.Settings?.maxGap || ""}
+                                        onChange={(e) =>
+                                            handleFieldChange("Settings", "maxGap", e.target.value)
+                                        }
+                                        className="staged-form-input"
+                                        required
+                                    />
+                                </div>
+                            </div>
+                        )}
 
                         {/* Interest Recalculation */}
                         <h4 className="staged-form-section-title">Interest Recalculation</h4>
-                        <div className="staged-form-row">
-                            <div className="staged-form-field">
-                                <label>
-                                    <input
-                                        type="checkbox"
-                                        checked={formData.Settings?.recalculateInterest || false}
-                                        onChange={(e) =>
-                                            handleFieldChange("Settings", "recalculateInterest", e.target.checked)
-                                        }
-                                    />
-                                    Recalculate Interest
-                                </label>
-                            </div>
+                        {/* Recalculate Interest */}
+                        <div className="staged-form-field">
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    checked={formData.Settings?.recalculateInterest || false}
+                                    onChange={(e) =>
+                                        handleFieldChange("Settings", "recalculateInterest", e.target.checked)
+                                    }
+                                />
+                                Recalculate Interest
+                            </label>
                         </div>
+                        {formData.Settings?.recalculateInterest && (
+                            <>
+                                <div className="staged-form-row">
+                                    <div className="staged-form-field">
+                                        <label htmlFor="preClosureRule">
+                                            Pre-Closure Interest Calculation Rule{" "}
+                                            <span className="staged-form-required">*</span>
+                                        </label>
+                                        <select
+                                            id="preClosureRule"
+                                            value={formData.Settings?.preClosureRule || ""}
+                                            onChange={(e) =>
+                                                handleFieldChange("Settings", "preClosureRule", e.target.value)
+                                            }
+                                            className="staged-form-select"
+                                            required
+                                        >
+                                            {formData.loanProductTemplate?.preClosureInterestCalculationStrategyOptions.map(
+                                                (option) => (
+                                                    <option key={option.id} value={option.id}>
+                                                        {option.value}
+                                                    </option>
+                                                )
+                                            )}
+                                        </select>
+                                    </div>
+                                    <div className="staged-form-field">
+                                        <label htmlFor="advancePaymentType">
+                                            Advance Payment Adjustment Type{" "}
+                                            <span className="staged-form-required">*</span>
+                                        </label>
+                                        <select
+                                            id="advancePaymentType"
+                                            value={formData.Settings?.advancePaymentType || ""}
+                                            onChange={(e) =>
+                                                handleFieldChange("Settings", "advancePaymentType", e.target.value)
+                                            }
+                                            className="staged-form-select"
+                                            required
+                                        >
+                                            {formData.loanProductTemplate?.advancedPaymentAllocationTypes.map(
+                                                (option) => (
+                                                    <option key={option.id} value={option.id}>
+                                                        {option.value}
+                                                    </option>
+                                                )
+                                            )}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="staged-form-row">
+                                    <div className="staged-form-field">
+                                        <label htmlFor="compoundingOn">
+                                            Interest Recalculation Compounding On{" "}
+                                            <span className="staged-form-required">*</span>
+                                        </label>
+                                        <select
+                                            id="compoundingOn"
+                                            value={formData.Settings?.compoundingOn || ""}
+                                            onChange={(e) =>
+                                                handleFieldChange("Settings", "compoundingOn", e.target.value)
+                                            }
+                                            className="staged-form-select"
+                                            required
+                                        >
+                                            {formData.loanProductTemplate?.interestRecalculationCompoundingTypeOptions.map(
+                                                (option) => (
+                                                    <option key={option.id} value={option.id}>
+                                                        {option.value}
+                                                    </option>
+                                                )
+                                            )}
+                                        </select>
+                                    </div>
+                                    <div className="staged-form-field">
+                                        <label htmlFor="frequency">
+                                            Frequency for Recalculating Outstanding Principal{" "}
+                                            <span className="staged-form-required">*</span>
+                                        </label>
+                                        <select
+                                            id="frequency"
+                                            value={formData.Settings?.frequency || ""}
+                                            onChange={(e) =>
+                                                handleFieldChange("Settings", "frequency", e.target.value)
+                                            }
+                                            className="staged-form-select"
+                                            required
+                                        >
+                                            {formData.loanProductTemplate?.interestRecalculationFrequencyTypeOptions.map(
+                                                (option) => (
+                                                    <option key={option.id} value={option.id}>
+                                                        {option.value}
+                                                    </option>
+                                                )
+                                            )}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="staged-form-field">
+                                    <label>
+                                        <input
+                                            type="checkbox"
+                                            checked={
+                                                formData.Settings?.arrearsRecognitionBasedOnOriginalSchedule || false
+                                            }
+                                            onChange={(e) =>
+                                                handleFieldChange(
+                                                    "Settings",
+                                                    "arrearsRecognitionBasedOnOriginalSchedule",
+                                                    e.target.checked
+                                                )
+                                            }
+                                        />
+                                        Is Arrears Recognition Based on Original Schedule?
+                                    </label>
+                                </div>
+                            </>
+                        )}
 
                         {/* Guarantee Requirements */}
                         <h4 className="staged-form-section-title">Guarantee Requirements</h4>
-                        <div className="staged-form-row">
-                            <div className="staged-form-field">
-                                <label>
-                                    <input
-                                        type="checkbox"
-                                        checked={formData.Settings?.placeGuaranteeFundsOnHold || false}
-                                        onChange={(e) =>
-                                            handleFieldChange(
-                                                "Settings",
-                                                "placeGuaranteeFundsOnHold",
-                                                e.target.checked
-                                            )
-                                        }
-                                    />
-                                    Place Guarantee Funds On-Hold
-                                </label>
-                            </div>
+                        {/* Place Guarantee Funds On-Hold */}
+                        <div className="staged-form-field">
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    checked={formData.Settings?.placeGuaranteeFundsOnHold || false}
+                                    onChange={(e) =>
+                                        handleFieldChange(
+                                            "Settings",
+                                            "placeGuaranteeFundsOnHold",
+                                            e.target.checked
+                                        )
+                                    }
+                                />
+                                Place Guarantee Funds On-Hold
+                            </label>
                         </div>
+                        {formData.Settings?.placeGuaranteeFundsOnHold && (
+                            <div className="staged-form-row">
+                                <div className="staged-form-field">
+                                    <label htmlFor="mandatoryGuarantee">
+                                        Mandatory Guarantee (%) <span className="staged-form-required">*</span>
+                                    </label>
+                                    <input
+                                        id="mandatoryGuarantee"
+                                        type="number"
+                                        min={0}
+                                        value={formData.Settings?.mandatoryGuarantee || ""}
+                                        onChange={(e) =>
+                                            handleFieldChange("Settings", "mandatoryGuarantee", e.target.value)
+                                        }
+                                        className="staged-form-input"
+                                        required
+                                    />
+                                </div>
+                                <div className="staged-form-field">
+                                    <label htmlFor="minOwnFunds">
+                                        Minimum Guarantee from Own Funds (%){" "}
+                                        <span className="staged-form-required">*</span>
+                                    </label>
+                                    <input
+                                        id="minOwnFunds"
+                                        type="number"
+                                        min={0}
+                                        value={formData.Settings?.minOwnFunds || ""}
+                                        onChange={(e) =>
+                                            handleFieldChange("Settings", "minOwnFunds", e.target.value)
+                                        }
+                                        className="staged-form-input"
+                                        required
+                                    />
+                                </div>
+                                <div className="staged-form-field">
+                                    <label htmlFor="minGuarantorFunds">
+                                        Minimum Guarantee from Guarantor Funds (%){" "}
+                                        <span className="staged-form-required">*</span>
+                                    </label>
+                                    <input
+                                        id="minGuarantorFunds"
+                                        type="number"
+                                        min={0}
+                                        value={formData.Settings?.minGuarantorFunds || ""}
+                                        onChange={(e) =>
+                                            handleFieldChange("Settings", "minGuarantorFunds", e.target.value)
+                                        }
+                                        className="staged-form-input"
+                                        required
+                                    />
+                                </div>
+                            </div>
+                        )}
 
                         {/* Event Settings */}
                         <h4 className="staged-form-section-title">Event Settings</h4>
@@ -892,36 +1389,38 @@ const CreateLoanProducts = () => {
                                 </label>
                             </div>
                         </div>
-                        <div className="staged-form-row">
-                            <div className="staged-form-field">
-                                <label htmlFor="dueDaysForRepayment">
-                                    Due Days for Repayment Event
-                                </label>
-                                <input
-                                    id="dueDaysForRepayment"
-                                    type="number" min={0}
-                                    value={formData.Settings?.dueDaysForRepayment || ""}
-                                    onChange={(e) =>
-                                        handleFieldChange("Settings", "dueDaysForRepayment", e.target.value)
-                                    }
-                                    className="staged-form-input"
-                                />
+                        {!formData.Settings?.useGlobalRepaymentEventConfig && (
+                            <div className="staged-form-row">
+                                <div className="staged-form-field">
+                                    <label htmlFor="dueDaysForRepayment">
+                                        Due Days for Repayment Event
+                                    </label>
+                                    <input
+                                        id="dueDaysForRepayment"
+                                        type="number" min={0}
+                                        value={formData.Settings?.dueDaysForRepayment || ""}
+                                        onChange={(e) =>
+                                            handleFieldChange("Settings", "dueDaysForRepayment", e.target.value)
+                                        }
+                                        className="staged-form-input"
+                                    />
+                                </div>
+                                <div className="staged-form-field">
+                                    <label htmlFor="overDueDaysForRepayment">
+                                        Overdue Days for Repayment Event
+                                    </label>
+                                    <input
+                                        id="overDueDaysForRepayment"
+                                        type="number" min={0}
+                                        value={formData.Settings?.overDueDaysForRepayment || ""}
+                                        onChange={(e) =>
+                                            handleFieldChange("Settings", "overDueDaysForRepayment", e.target.value)
+                                        }
+                                        className="staged-form-input"
+                                    />
+                                </div>
                             </div>
-                            <div className="staged-form-field">
-                                <label htmlFor="overDueDaysForRepayment">
-                                    Overdue Days for Repayment Event
-                                </label>
-                                <input
-                                    id="overDueDaysForRepayment"
-                                    type="number" min={0}
-                                    value={formData.Settings?.overDueDaysForRepayment || ""}
-                                    onChange={(e) =>
-                                        handleFieldChange("Settings", "overDueDaysForRepayment", e.target.value)
-                                    }
-                                    className="staged-form-input"
-                                />
-                            </div>
-                        </div>
+                        )}
                         {/* Configurable Terms and Settings */}
                         <h4 className="staged-form-section-title">Configurable Terms and Settings</h4>
                         <div className="staged-form-row">
@@ -929,7 +1428,7 @@ const CreateLoanProducts = () => {
                                 <label>
                                     <input
                                         type="checkbox"
-                                        checked={formData.Settings?.allowOverridingTerms ?? true} // Default to checked
+                                        checked={formData.Settings?.allowOverridingTerms}
                                         onChange={(e) =>
                                             handleFieldChange("Settings", "allowOverridingTerms", e.target.checked)
                                         }
@@ -1136,23 +1635,14 @@ const CreateLoanProducts = () => {
                                         id="overAmountCalcType"
                                         value={formData.Terms?.overAmountCalcType || ""}
                                         onChange={(e) =>
-                                            handleFieldChange(
-                                                "Terms",
-                                                "overAmountCalcType",
-                                                e.target.value
-                                            )
+                                            handleFieldChange("Terms", "overAmountCalcType", e.target.value)
                                         }
                                         className="staged-form-select"
                                         required
                                     >
                                         <option value="">Select Calculation Type</option>
-                                        {formData.loanProductTemplate?.overAmountCalcTypeOptions?.map(
-                                            (option) => (
-                                                <option key={option.id} value={option.id}>
-                                                    {option.value}
-                                                </option>
-                                            )
-                                        )}
+                                        <option value="percentage">Percentage</option>
+                                        <option value="fixed">Fixed Amount</option>
                                     </select>
                                 </div>
                                 <div className="staged-form-field">
@@ -1187,17 +1677,13 @@ const CreateLoanProducts = () => {
                                     id="installmentDayCalcFrom"
                                     value={formData.Terms?.installmentDayCalcFrom || ""}
                                     onChange={(e) =>
-                                        handleFieldChange(
-                                            "Terms",
-                                            "installmentDayCalcFrom",
-                                            e.target.value
-                                        )
+                                        handleFieldChange("Terms", "installmentDayCalcFrom", e.target.value)
                                     }
                                     className="staged-form-select"
                                     required
                                 >
                                     <option value="">Select Option</option>
-                                    {formData.loanProductTemplate?.installmentDayCalcFromOptions?.map(
+                                    {formData.loanProductTemplate?.repaymentStartDateTypeOptions?.map(
                                         (option) => (
                                             <option key={option.id} value={option.id}>
                                                 {option.value}
@@ -1772,86 +2258,6 @@ const CreateLoanProducts = () => {
                                 }
                                 className="staged-form-input"
                             />
-                        </div>
-                        {/* Interest Recalculation */}
-                        <h4 className="staged-form-section-title">Interest Recalculation</h4>
-                        <div className="staged-form-field">
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    checked={formData.Terms?.recalculateInterest || false}
-                                    onChange={(e) =>
-                                        handleFieldChange("Terms", "recalculateInterest", e.target.checked)
-                                    }
-                                />
-                                Recalculate Interest
-                            </label>
-                        </div>
-
-                        {/* Guarantee Requirements */}
-                        <h4 className="staged-form-section-title">Guarantee Requirements</h4>
-                        <div className="staged-form-field">
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    checked={formData.Terms?.placeGuaranteeFundsOnHold || false}
-                                    onChange={(e) =>
-                                        handleFieldChange("Terms", "placeGuaranteeFundsOnHold", e.target.checked)
-                                    }
-                                />
-                                Place Guarantee Funds On-Hold
-                            </label>
-                        </div>
-
-                        {/* Event Settings */}
-                        <h4 className="staged-form-section-title">Event Settings</h4>
-                        <div className="staged-form-field">
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    checked={
-                                        formData.Terms?.useGlobalConfigurationsForRepaymentEvent || false
-                                    }
-                                    onChange={(e) =>
-                                        handleFieldChange(
-                                            "Terms",
-                                            "useGlobalConfigurationsForRepaymentEvent",
-                                            e.target.checked
-                                        )
-                                    }
-                                />
-                                Use the Global Configurations Values for the Repayment Event (Notifications)
-                            </label>
-                        </div>
-                        <div className="staged-form-row">
-                            <div className="staged-form-field">
-                                <label htmlFor="dueDaysRepaymentEvent">
-                                    Due Days for Repayment Event
-                                </label>
-                                <input
-                                    id="dueDaysRepaymentEvent"
-                                    type="number"
-                                    value={formData.Terms?.dueDaysRepaymentEvent || ""}
-                                    onChange={(e) =>
-                                        handleFieldChange("Terms", "dueDaysRepaymentEvent", e.target.value)
-                                    }
-                                    className="staged-form-input"
-                                />
-                            </div>
-                            <div className="staged-form-field">
-                                <label htmlFor="overdueDaysRepaymentEvent">
-                                    Overdue Days for Repayment Event
-                                </label>
-                                <input
-                                    id="overdueDaysRepaymentEvent"
-                                    type="number"
-                                    value={formData.Terms?.overdueDaysRepaymentEvent || ""}
-                                    onChange={(e) =>
-                                        handleFieldChange("Terms", "overdueDaysRepaymentEvent", e.target.value)
-                                    }
-                                    className="staged-form-input"
-                                />
-                            </div>
                         </div>
                     </div>
                 );
@@ -3682,7 +4088,7 @@ const CreateLoanProducts = () => {
                 )}
                 {currentStage === stages.length && (
                     <button
-                        onClick={handlePreview}
+                        onClick={handleSubmit}
                         className="staged-form-button-preview"
                         disabled={!allStagesComplete}
                     >

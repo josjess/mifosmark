@@ -221,7 +221,7 @@ const ViewRolesTable = ({ onRowClick}) => {
                                             handleEditRole(role);
                                         }}
                                     >
-                                        <FiEdit className="edit-icon"/>
+                                        <FiEdit style={{fontSize: '20px'}} color={'#156a22'}/>
                                     </button>
 
                                 )}

@@ -4,7 +4,7 @@ import { AuthContext } from '../../../../../context/AuthContext';
 import { useLoading } from '../../../../../context/LoadingContext';
 import { API_CONFIG } from '../../../../../config';
 import './ViewEntityDataTableChecks.css';
-import {FaEdit} from "react-icons/fa";
+import {FaTrash} from "react-icons/fa";
 
 const ViewEntityDataTableChecks = () => {
     const { user } = useContext(AuthContext);
@@ -63,8 +63,26 @@ const ViewEntityDataTableChecks = () => {
         currentPage * pageSize
     );
 
-    const handleRowClick = (check) => {
-        console.log('Selected Check:', check);
+    const handleDelete = async (id) => {
+        if (window.confirm("Are you sure you want to delete this data table check?")) {
+            startLoading();
+            try {
+                await axios.delete(`${API_CONFIG.baseURL}/entityDatatableChecks/${id}`, {
+                    headers: {
+                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                        'Fineract-Platform-TenantId': 'default',
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                fetchDataTableChecks();
+            } catch (error) {
+                console.error("Error deleting data table check:", error);
+                alert("An error occurred while deleting the data table check.");
+            } finally {
+                stopLoading();
+            }
+        }
     };
 
     return (
@@ -118,16 +136,16 @@ const ViewEntityDataTableChecks = () => {
                     paginatedData.map((check) => (
                         <tr
                             key={check.id}
-                            className="clickable-row"
-                            onClick={() => handleRowClick(check)}
                         >
-                            <td>{check.entity || ''}</td>
-                            <td>{check.productName || ''}</td>
-                            <td>{check.dataTable || ''}</td>
-                            <td>{check.status ? 'Active' : 'Inactive'}</td>
+                            <td>{check.entity || 'N/A'}</td>
+                            <td>{check.productName || 'N/A'}</td>
+                            <td>{check.datatableName || 'N/A'}</td>
+                            <td>{check.status.value || 'N/A'}</td>
                             <td>{check.systemDefined ? 'Yes' : 'No'}</td>
-                            <td>
-                                <FaEdit color="green" size={24} />
+                            <td style={{ cursor: "pointer" }}>
+                                <FaTrash color="red"
+                                         onClick={() => handleDelete(check.id)}
+                                         size={20} />
                             </td>
                         </tr>
                     ))

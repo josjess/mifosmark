@@ -7,6 +7,8 @@ import {FaUser, FaExclamationTriangle, FaChartLine, FaBalanceScale, FaHandHoldin
 import './Dashboard.css';
 import {API_CONFIG} from "../config";
 import Sidebar from "./Navigation/Sidebar";
+import axios from "axios";
+import Insights from "../components/Insights";
 
 const Dashboard = () => {
     const { isAuthenticated, user } = useContext(AuthContext);
@@ -19,6 +21,9 @@ const Dashboard = () => {
         principalOverdue: 0, interestOverdue: 0, totalOverdue: 0, nonPerformingAssets: 0,
         loansForApproval: 0, loansForDisapproval: 0,
     });
+    const [selectedOffice, setSelectedOffice] = useState(user?.officeId || null);
+    const [officeOptions, setOfficeOptions] = useState([]);
+    const [activeTab, setActiveTab] = useState('metrics');
 
     useEffect(() => {
         if (!isAuthenticated) {
@@ -26,6 +31,37 @@ const Dashboard = () => {
             navigate('/login');
         }
     }, [isAuthenticated, navigate, showNotification]);
+
+    useEffect(() => {
+        const fetchOffices = async () => {
+            startLoading();
+            try {
+                const API_BASE_URL = API_CONFIG.baseURL;
+                const AUTH_TOKEN = user.base64EncodedAuthenticationKey;
+                const headers = {
+                    'Authorization': `Basic ${AUTH_TOKEN}`,
+                    'Content-Type': 'application/json',
+                    'Fineract-Platform-TenantId': 'default',
+                };
+
+                const response = await axios.get(`${API_BASE_URL}/offices`, { headers });
+                const offices = response.data || [];
+                setOfficeOptions(offices);
+
+                if (user.officeId === 1) {
+                    setSelectedOffice("all");
+                }
+            } catch (error) {
+                console.error("Error fetching offices:", error);
+            } finally {
+                stopLoading();
+            }
+        };
+
+        if (user?.officeId === 1) {
+            fetchOffices();
+        }
+    }, [user]);
 
     const formatCurrency = (value) => {
         return new Intl.NumberFormat('en-US', {
@@ -49,31 +85,45 @@ const Dashboard = () => {
 
             const fetchClientData = async () => {
                 try {
-                    const response = await fetch(`${API_BASE_URL}/clients`, { headers });
-                    const data = await response.json();
+                    const officeFilter = selectedOffice && selectedOffice !== "all" ? `&officeId=${selectedOffice}` : "";
+                    const response = await axios.get(`${API_BASE_URL}/clients?${officeFilter}`, { headers });
+                    const clients = response.data.pageItems;
 
-                    const activeClients = data.pageItems.filter(client => client.active === true).length;
-                    const inactiveClients = data.pageItems.filter(client => client.active === false).length;
-                    const newClients = data.pageItems.filter(client => client.status.value === "Pending").length;
+                    // Filter clients by `officeId` if a specific office is selected
+                    const filteredClients =
+                        selectedOffice && selectedOffice !== "all"
+                            ? clients.filter(client => client.officeId === parseInt(selectedOffice))
+                            : clients;
+
+                    const activeClients = filteredClients.filter(client => client.status.value === "Active").length;
+                    const inactiveClients = filteredClients.filter(client => client.status.value === "Inactive").length;
+                    const newClients = filteredClients.filter(client => client.status.value === "Pending").length;
 
                     return {
-                        totalClients: data.totalFilteredRecords,
+                        totalClients: filteredClients.length,
                         activeClients,
                         inactiveClients,
-                        newClients
+                        newClients,
                     };
                 } catch (error) {
-                    console.log("Error fetching client data:", error);
+                    console.error("Error fetching client data:", error);
                     throw error;
                 }
             };
 
             const fetchLoanData = async () => {
                 try {
-                    const response = await fetch(`${API_BASE_URL}/loans`, { headers });
-                    const data = await response.json();
-                    const loans = data.pageItems;
+                    const officeFilter = selectedOffice && selectedOffice !== "all" ? `&officeId=${selectedOffice}` : "";
+                    const response = await axios.get(`${API_BASE_URL}/loans?${officeFilter}`, { headers });
+                    const loans = response.data.pageItems;
 
+                    // Filter loans by `clientOfficeId` if a specific office is selected
+                    const filteredLoans =
+                        selectedOffice && selectedOffice !== "all"
+                            ? loans.filter(loan => loan.clientOfficeId === parseInt(selectedOffice))
+                            : loans;
+
+                    // Initialize metrics
                     let totalPrincipalOutstanding = 0;
                     let totalInterestOutstanding = 0;
                     let totalPrincipalOverdue = 0;
@@ -84,16 +134,17 @@ const Dashboard = () => {
                     let loansForApproval = 0;
                     let loansForDisapproval = 0;
 
-                    loans.forEach(loan => {
+                    // Iterate through filtered loans
+                    filteredLoans.forEach(loan => {
                         const summary = loan.summary || {};
                         totalPrincipalOutstanding += summary.principalOutstanding || 0;
                         totalInterestOutstanding += summary.interestOutstanding || 0;
                         totalPrincipalOverdue += summary.principalOverdue || 0;
                         totalInterestOverdue += summary.interestOverdue || 0;
                         totalInterestThisMonth += summary.interestCharged || 0;
-                        totalOverdue = totalPrincipalOverdue + totalInterestOverdue;
+                        totalOverdue += summary.principalOverdue || 0 + summary.interestOverdue || 0;
 
-                        if (loan.status.value === "Non-Performing") nonPerformingAssets++;
+                        if (loan.isNPA) nonPerformingAssets++;
                         if (loan.status.pendingApproval) loansForApproval++;
                         if (loan.status.value === "Rejected") loansForDisapproval++;
                     });
@@ -108,10 +159,10 @@ const Dashboard = () => {
                         totalOverdue: formatCurrency(totalOverdue),
                         nonPerformingAssets,
                         loansForApproval,
-                        loansForDisapproval
+                        loansForDisapproval,
                     };
                 } catch (error) {
-                    console.log("Error fetching loan data:", error);
+                    console.error("Error fetching loan data:", error);
                     throw error;
                 }
             };
@@ -128,7 +179,7 @@ const Dashboard = () => {
                         }));
                     }
                 } catch (error) {
-                    console.log("Error fetching data:", error);
+                    console.error("Error fetching data:", error);
                 } finally {
                     if (isMounted) {
                         stopLoading();
@@ -142,8 +193,7 @@ const Dashboard = () => {
                 isMounted = false;
             };
         }
-        // eslint-disable-next-line
-    }, [user]);
+    }, [user, selectedOffice]);
 
 
     const {
@@ -163,9 +213,32 @@ const Dashboard = () => {
             <main className="main-content">
                 <header className="dashboard-header">
                     <div className="header-content">
+                        <h1 className="dashboard-title">Dashboard</h1>
                         <div className="title-section">
-                            <h1>Dashboard</h1>
                             <p>Key metrics and insights</p>
+                            <div className="office-selector-row">
+                                <select
+                                    id="office-dropdown"
+                                    value={selectedOffice}
+                                    onChange={(e) => setSelectedOffice(e.target.value)}
+                                    disabled={user?.officeId !== 1} // Disable if not head office
+                                >
+                                    {user?.officeId === 1 ? (
+                                        <>
+                                            <option value="all">All Offices</option>
+                                            {officeOptions.map((office) => (
+                                                <option key={office.id} value={office.id}>
+                                                    {office.name}
+                                                </option>
+                                            ))}
+                                        </>
+                                    ) : (
+                                        <option value={user?.officeId}>
+                                            {officeOptions.find((office) => office.id === user?.officeId)?.name || "Current Office"}
+                                        </option>
+                                    )}
+                                </select>
+                            </div>
                         </div>
                         <div className="top-right-buttons">
                             <button className="action-button" onClick={() => navigate('/manage-roles-permissions')}>
@@ -177,11 +250,25 @@ const Dashboard = () => {
                         </div>
                     </div>
                 </header>
-
-                <section className="card-grid">
-                    <div className="card">
-                        <div className="card-header">
-                            <div className="icon-container">
+                <div className="dashboard-tabs">
+                    <button
+                        className={`tab-button ${activeTab === 'metrics' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('metrics')}
+                    >
+                        Key Metrics
+                    </button>
+                    <button
+                        className={`tab-button ${activeTab === 'insights' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('insights')}
+                    >
+                        Insights
+                    </button>
+                </div>
+                {activeTab === 'metrics' ? (
+                    <section className="card-grid">
+                        <div className="card" onClick={() => navigate('/clients')}>
+                            <div className="card-header">
+                                <div className="icon-container">
                                 <FaUser className="card-icon"/>
                             </div>
                             <h3>Total Clients</h3>
@@ -215,7 +302,7 @@ const Dashboard = () => {
                         </div>
                         <p>{newClients}</p>
                     </div>
-                    <div className="card" >
+                    <div className="card">
                         <div className="card-header">
                             <div className="icon-container">
                                 <FaMoneyCheckAlt className="card-icon"/>
@@ -306,6 +393,9 @@ const Dashboard = () => {
                         <p>{loansForDisapproval}</p>
                     </div>
                 </section>
+                ) : (
+                        <Insights selectedOffice={selectedOffice} officeOptions={officeOptions} />
+                )}
             </main>
         </div>
     );

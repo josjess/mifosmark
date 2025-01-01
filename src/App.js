@@ -3,15 +3,6 @@ import {BrowserRouter as Router, Routes, Route, useLocation} from 'react-router-
 import { loadConfig } from './config';
 import Login from './components/auth/Login';
 import Dashboard from './components/Dashboard';
-
-import Accounting from './components/accounting/Accounting';
-import Reports from './components/Reports/Reports';
-import Admin from './components/admin/Admin';
-
-import ClientsPage from "./components/views/Clients/ClientsPage";
-import GroupsPage from "./components/views/Groups/GroupsPage";
-import CentersPage from "./components/views/Centers/CentersPage";
-
 import { AuthProvider } from './context/AuthContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { LoadingProvider } from './context/LoadingContext';
@@ -21,6 +12,14 @@ import Navbar from "./components/Navigation/Navbar";
 import LoadingOverlay from "./components/utilities/LoadingOverlay";
 import Sidebar from "./components/Navigation/Sidebar";
 import ProtectedLayout from './ProtectedLayout';
+
+import Accounting from './components/accounting/Accounting';
+import Reports from './components/Reports/Reports';
+import Admin from './components/admin/Admin';
+
+import ClientsPage from "./components/views/Clients/ClientsPage";
+import GroupsPage from "./components/views/Groups/GroupsPage";
+import CentersPage from "./components/views/Centers/CentersPage";
 
 /* Accounting */
 import FrequentPosting from "./components/accounting/FrequentPosting/FrequentPosting";
@@ -115,6 +114,18 @@ import ReportsPage from "./components/Reports/filteredReports/ReportsPage";
 import ReportFormPage from "./components/Reports/ViewReports";
 import XBRLPage from "./components/Reports/XBRL/XBRLPage";
 import ScrollToTop from "./components/utilities/ScrollToTop";
+
+/* Client Edits */
+import EditClientDetails from "./components/views/Clients/EditClientDetails";
+import ClientApplications from "./components/views/Clients/ClientApplications";
+import CreateStandingInstructions from "./components/views/Clients/CreateStandingInstructions";
+import ViewStandingInstructions from "./components/views/Clients/ViewStandingInstructions";
+import GroupApplications from "./components/views/Groups/GroupApplications";
+import CentersApplications from "./components/views/Centers/Applications";
+import LoanDetails from "./components/views/Clients/LoanDetails/LoanDetails";
+import SavingsDetails from "./components/views/Clients/SavingsDetails/SavingsDetails";
+import CollateralDetails from "./components/views/Clients/CollateralDetails/CollateralDetails";
+
 
 const App = () => {
     useEffect(() => {
@@ -242,6 +253,22 @@ const App = () => {
                             <Route path="/report/XBRL" element={<XBRLPage />} />
                             <Route path="/reports/:reportType" element={<ReportsPage />} />
                             <Route path="/reports/view/:reportId" element={<ReportFormPage />} />
+
+                            {/* Edit Client Details */}
+                            <Route path="/clients/edit/:clientId" element={<EditClientDetails />} />
+
+                            {/* Client Application */}
+                            <Route path="/client/:clientId/applications/:applicationType" element={<ClientApplications />} />
+                            <Route path="/group/:groupId/applications/:applicationType" element={<GroupApplications />} />
+                            <Route path="/center/:centerId/applications/:applicationType" element={<CentersApplications />} />
+
+                            {/* Client/View Standing Instructions */}
+                            <Route path="/client/:clientId/create-standing-instructions" element={<CreateStandingInstructions />} />
+                            <Route path="/client/:clientId/view-standing-instructions" element={<ViewStandingInstructions />} />
+
+                            <Route path="/client/:clientId/loan-details/:loanId" element={<LoanDetails />} />
+                            <Route path="/client/:clientId/savings-account/:savingsAccountId" element={<SavingsDetails/>} />
+                            <Route path="/client/:clientId/collaterals/:collateralId" element={<CollateralDetails />} />
 
                         </Route>
                     </Routes>

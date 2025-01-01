@@ -1,61 +1,413 @@
-import React, { useState } from 'react';
-import { FaPlus } from 'react-icons/fa';
-import './FrequentPosting.css';
+import React, {useContext, useEffect, useState} from 'react';
 import {Link} from "react-router-dom";
-// import {useNavigate} from "react-router-dom";
+import {useLoading} from "../../../context/LoadingContext";
+import axios from "axios";
+import {API_CONFIG} from "../../../config";
+import {AuthContext} from "../../../context/AuthContext";
+import DatePicker from "react-datepicker";
 
 const FrequentPostingForm = () => {
-    const [step, setStep] = useState(1);
-    const [showPaymentDetails, setShowPaymentDetails] = useState(false);
+    const { user } = useContext(AuthContext);
 
+    const [currentStage, setCurrentStage] = useState(0);
+    const [completedStages, setCompletedStages] = useState(new Set(["Preview"]));
+    const [allStagesComplete, setAllStagesComplete] = useState(false);
+
+    const [offices, setOffices] = useState([]);
     const [office, setOffice] = useState('');
+    const [routingCode, setRoutingCode] = useState('');
+    const [receiptNumber, setReceiptNumber] = useState('');
+    const [stages] = useState(["Basic Information", "Payment Details", "Preview"]);
+
     const [accountingRule, setAccountingRule] = useState('');
     const [currency, setCurrency] = useState('');
     const [referenceNumber, setReferenceNumber] = useState('');
+
+    const [accountingRules, setAccountingRules] = useState([]);
+    const [currencies, setCurrencies] = useState([]);
+    const [paymentTypes, setPaymentTypes] = useState([]);
+
     const [transactionDate, setTransactionDate] = useState('');
     const [paymentType, setPaymentType] = useState('');
     const [accountNumber, setAccountNumber] = useState('');
     const [chequeNumber, setChequeNumber] = useState('');
-    const [routingCode, setRoutingCode] = useState('');
-    const [receiptNumber, setReceiptNumber] = useState('');
     const [bankNumber, setBankNumber] = useState('');
     const [comments, setComments] = useState('');
-
-    const [debits, setDebits] = useState([{ type: '', amount: '' }]);
-    const [credit, setCredit] = useState({ type: '', amount: '' });
+    const { startLoading, stopLoading } = useLoading();
 
     const isStep1Complete = office && accountingRule && currency && transactionDate;
-    const isStep2Complete = accountingRule === 'test rule' || debits[0].type || credit.type;
-    // const isStep2Complete = showPaymentDetails ? paymentType : true;
+    const isStep2Complete =  paymentType;
 
-    const goNext = () => {
-        if ((step === 1 && isStep1Complete) || (step === 2 && isStep2Complete)) {
-            setStep(step + 1);
+    useEffect(() => {
+        const fetchData = async () => {
+            startLoading();
+            try {
+                const headers = {
+                    Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                    "Fineract-Platform-TenantId": "default",
+                    "Content-Type": "application/json",
+                };
+
+                const [officesResponse, accountingRulesResponse, currenciesResponse, paymentTypesResponse] = await Promise.all([
+                    axios.get(`${API_CONFIG.baseURL}/offices`, { headers }),
+                    axios.get(`${API_CONFIG.baseURL}/accountingrules?associations=all`, { headers }),
+                    axios.get(`${API_CONFIG.baseURL}/currencies`, { headers }),
+                    axios.get(`${API_CONFIG.baseURL}/paymenttypes`, { headers }),
+                ]);
+
+                setOffices(officesResponse.data);
+                setAccountingRules(accountingRulesResponse.data);
+                setCurrencies(currenciesResponse.data.selectedCurrencyOptions);
+                setPaymentTypes(paymentTypesResponse.data);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            } finally {
+                stopLoading();
+            }
+        };
+
+        fetchData();
+    }, [user]);
+
+    useEffect(() => {
+        setAllStagesComplete(completedStages.size === stages.length - 1);
+    }, [completedStages, stages.length]);
+
+    const handleNextStage = () => {
+        if (currentStage < stages.length - 1) {
+            setCompletedStages((prev) => {
+                const updatedStages = new Set(prev);
+                updatedStages.add(stages[currentStage]);
+                updatedStages.add("Preview");
+                return updatedStages;
+            });
+            setCurrentStage((prev) => prev + 1);
         }
     };
-    const goBack = () => setStep(step - 1);
 
     const handleSubmit = () => {
-        console.log("Form submitted with data:", {
-            office, accountingRule, currency, referenceNumber, transactionDate,
-            paymentType, accountNumber, chequeNumber, routingCode, receiptNumber,
-            bankNumber, comments, debits, credit
+        console.log("Form Submitted!");
+        console.log({
+            office,
+            accountingRule,
+            currency,
+            referenceNumber,
+            transactionDate,
+            paymentType,
+            accountNumber,
+            chequeNumber,
+            routingCode,
+            receiptNumber,
+            bankNumber,
+            comments,
         });
     };
 
-    const handleAddDebit = () => {
-        setDebits([...debits, { type: '', amount: '' }]);
+    const renderStageTracker = () => {
+        const trackerStages = stages;
+
+        return (
+            <div className="staged-form-stage-tracker">
+                {trackerStages.map((stage, index) => (
+                    <div
+                        key={stage}
+                        className={`staged-form-stage ${
+                            index === currentStage
+                                ? "staged-form-active"
+                                : completedStages.has(stage)
+                                    ? "staged-form-completed"
+                                    : "staged-form-unvisited"
+                        }`}
+                        onClick={() => {
+                            if (completedStages.has(stage)) {
+                                setCurrentStage(index);
+                            }
+                        }}
+                    >
+                        <span className="staged-form-stage-circle">{index + 1}</span>
+                        <span className="staged-form-stage-label">{stage}</span>
+                    </div>
+                ))}
+            </div>
+        );
     };
 
-    const handleRemoveDebit = (index) => {
-        setDebits(debits.filter((_, i) => i !== index));
+    const renderStageContent = () => {
+        switch (stages[currentStage]) {
+            case "Basic Information":
+                return (
+                    <div className="staged-form-basic-info">
+                        <div className="staged-form-row">
+                            <div className="staged-form-field">
+                                <label htmlFor="office">
+                                    Office <span className="staged-form-required">*</span>
+                                </label>
+                                <select
+                                    id="office"
+                                    value={office}
+                                    onChange={(e) => setOffice(e.target.value)}
+                                    className="staged-form-select"
+                                    required
+                                >
+                                    <option value="">-- Select Office --</option>
+                                    {offices.map((o) => (
+                                        <option key={o.id} value={o.id}>
+                                            {o.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="staged-form-field">
+                                <label htmlFor="accountingRule">
+                                    Accounting Rules <span>*</span>
+                                </label>
+                                <select
+                                    id="accountingRule"
+                                    value={accountingRule}
+                                    onChange={(e) => setAccountingRule(e.target.value)}
+                                    className="staged-form-select"
+                                    required
+                                >
+                                    <option value="">-- Select Rule --</option>
+                                    {accountingRules.map((rule) => (
+                                        <option key={rule.id} value={rule.id}>
+                                            {rule.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                        <div className="staged-form-row">
+                            <div className="staged-form-field">
+                                <label htmlFor="currency">
+                                    Currency <span>*</span>
+                                </label>
+                                <select
+                                    id="currency"
+                                    value={currency}
+                                    onChange={(e) => setCurrency(e.target.value)}
+                                    className="staged-form-select"
+                                    required
+                                >
+                                    <option value="">-- Select Currency --</option>
+                                    {currencies.map((currency) => (
+                                        <option key={currency.code} value={currency.code}>
+                                            {currency.name} ({currency.displaySymbol})
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="staged-form-field">
+                                <label htmlFor="referenceNumber">Reference Number</label>
+                                <input
+                                    id="referenceNumber"
+                                    type="text"
+                                    value={referenceNumber}
+                                    onChange={(e) => setReferenceNumber(e.target.value)}
+                                    className="staged-form-input"
+                                    placeholder="Enter Reference Number"
+                                />
+                            </div>
+                        </div>
+                        <div className="staged-form-field">
+                            <label htmlFor="transactionDate">
+                                Transaction Date <span>*</span>
+                            </label>
+                            <DatePicker
+                                id="transactionDate"
+                                selected={transactionDate ? new Date(transactionDate) : null}
+                                onChange={(date) => setTransactionDate(date.toISOString().split("T")[0])}
+                                className="staged-form-input"
+                                placeholderText="Select Transaction Date"
+                                dateFormat="MMMM d, yyyy"
+                                showPopperArrow={false}
+                                showMonthDropdown
+                                showYearDropdown
+                                dropdownMode="select"
+                            />
+                        </div>
+                    </div>
+                );
+
+            case "Payment Details":
+                return (
+                    <div className="staged-form-payment-details">
+                        <div className="staged-form-row">
+                            <div className="staged-form-field">
+                                <label htmlFor="paymentType">Payment Type</label>
+                                <select
+                                    id="paymentType"
+                                    value={paymentType}
+                                    onChange={(e) => setPaymentType(e.target.value)}
+                                    className="staged-form-select"
+                                >
+                                    <option value="">-- Select Payment Type --</option>
+                                    {paymentTypes.map((type) => (
+                                        <option key={type.id} value={type.name}>
+                                            {type.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="staged-form-field">
+                                <label>Bank Number</label>
+                                <input
+                                    type="text"
+                                    value={bankNumber}
+                                    onChange={(e) => setBankNumber(e.target.value)}
+                                    className="staged-form-input"
+                                />
+                            </div>
+                        </div>
+                        <div className="staged-form-row">
+                            <div className="staged-form-field">
+                                <label>Account Number</label>
+                                <input
+                                    type="text"
+                                    value={accountNumber}
+                                    onChange={(e) => setAccountNumber(e.target.value)}
+                                    className="staged-form-input"
+                                />
+                            </div>
+                            <div className="staged-form-field">
+                                <label>Cheque Number</label>
+                                <input
+                                    type="text"
+                                    value={chequeNumber}
+                                    onChange={(e) => setChequeNumber(e.target.value)}
+                                    className="staged-form-input"
+                                />
+                            </div>
+                        </div>
+                        <div className="staged-form-row">
+                            <div className="staged-form-field">
+                                <label>Routing Code</label>
+                                <input
+                                    type="text"
+                                    value={routingCode}
+                                    onChange={(e) => setRoutingCode(e.target.value)}
+                                    className="staged-form-input"
+                                />
+                            </div>
+                            <div className="staged-form-field">
+                                <label>Receipt Number</label>
+                                <input
+                                    type="text"
+                                    value={receiptNumber}
+                                    onChange={(e) => setReceiptNumber(e.target.value)}
+                                    className="staged-form-input"
+                                />
+                            </div>
+                        </div>
+                        <div className="staged-form-field">
+                            <label>Comments</label>
+                            <textarea
+                                rows="3"
+                                value={comments}
+                                onChange={(e) => setComments(e.target.value)}
+                                className="staged-form-textarea"
+                            ></textarea>
+                        </div>
+                    </div>
+                );
+
+            default:
+                return null;
+        }
     };
 
-    const handleDebitChange = (index, field, value) => {
-        const updatedDebits = [...debits];
-        updatedDebits[index][field] = value;
-        setDebits(updatedDebits);
+    const renderPreviewSection = () => {
+        const getOfficeName = () => {
+            const officeObj = offices.find((o) => o.id === parseInt(office));
+            return officeObj ? officeObj.name : "N/A";
+        };
+
+        const stageData = [
+            {
+                title: "Basic Information",
+                data: {
+                    Office: getOfficeName(),
+                    "Accounting Rule": accountingRule || "N/A",
+                    Currency: currency || "N/A",
+                    "Reference Number": referenceNumber || "N/A",
+                    "Transaction Date": transactionDate || "N/A",
+                },
+            },
+            {
+                title: "Payment Details",
+                data: {
+                    "Payment Type": paymentType || "N/A",
+                    "Account Number": accountNumber || "N/A",
+                    "Cheque Number": chequeNumber || "N/A",
+                    "Routing Code": routingCode || "N/A",
+                    "Receipt Number": receiptNumber || "N/A",
+                    "Bank Number": bankNumber || "N/A",
+                    Comments: comments || "N/A",
+                },
+            },
+        ];
+
+        return (
+            <div className="staged-form-preview-section">
+                <h2 className="preview-header">Form Preview</h2>
+                {stageData.map(({ title, data }, index) => (
+                    <div key={title} className="staged-form-preview-block">
+                        <div className="staged-form-preview-header">
+                            <h4 className="preview-stage-title">{title}</h4>
+                            <button
+                                className="staged-form-edit-button"
+                                onClick={() => setCurrentStage(index)}
+                            >
+                                Edit
+                            </button>
+                        </div>
+                        {data && typeof data === "object" && !Array.isArray(data) ? (
+                            <div className="staged-form-preview-table-wrapper">
+                                <table style={{color: '#333'}} className="staged-form-preview-table">
+                                    <thead>
+                                    <tr>
+                                        <th>Field</th>
+                                        <th>Value</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {Object.entries(data).map(([key, value]) => (
+                                        <tr key={key}>
+                                            <td>{key}</td>
+                                            <td>{value || "N/A"}</td>
+                                        </tr>
+                                    ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ) : Array.isArray(data) && data.length > 0 ? (
+                            <table style={{color: '#333'}}  className="staged-form-preview-table">
+                                <thead>
+                                <tr>
+                                    {Object.keys(data[0]).map((key) => (
+                                        <th key={key}>{key}</th>
+                                    ))}
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {data.map((item, idx) => (
+                                    <tr key={idx}>
+                                        {Object.values(item).map((value, i) => (
+                                            <td key={i}>{value || "N/A"}</td>
+                                        ))}
+                                    </tr>
+                                ))}
+                                </tbody>
+                            </table>
+                        ) : (
+                            <p className="no-data-message">No data available for this section.</p>
+                        )}
+                    </div>
+                ))}
+            </div>
+        );
     };
+
 
     return (
         <div className="form-container-client posting">
@@ -63,321 +415,48 @@ const FrequentPostingForm = () => {
                 <Link to="/accounting" className="breadcrumb-link">Accounting</Link> . Frequent Posting
             </h2>
 
-            <div className="with-indicator">
-                <div className="stage-indicator">
-                    <div className={`stage ${step === 1 ? 'current' : step > 1 ? 'completed' : ''}`}
-                         onClick={() => setStep(1)}>
-                        <div className="circle"></div>
-                        <span>Basic Information</span>
-                    </div>
-                    {accountingRule && (
-                        <div className={`stage ${step === 2 ? 'current' : step > 2 ? 'completed' : ''}`}
-                             onClick={() => setStep(2)}>
-                            <div className="circle"></div>
-                            <span>Affected GL Entries</span>
-                        </div>
+            <div className="staged-form-add-client">
+                {renderStageTracker()}
+                <div className="staged-form-stage-content">
+                    {currentStage === stages.length - 1 ? (
+                        renderPreviewSection()
+                    ) : (
+                        renderStageContent()
                     )}
-                    <div className={`stage ${step === 3 ? 'current' : step > 3 ? 'completed' : ''}`}
-                         onClick={() => setStep(3)}>
-                        <div className="circle"></div>
-                        <span>Payment Details</span>
-                    </div>
-                    <div className={`stage ${step === 4 ? 'current' : ''}`} onClick={() => setStep(4)}>
-                        <div className="circle"></div>
-                        <span>Review & Submit</span>
+
+                    <div className="staged-form-stage-buttons">
+                        <button
+                            onClick={() => setCurrentStage((prev) => Math.max(prev - 1, 0))}
+                            disabled={currentStage === 0}
+                            className="staged-form-button-previous"
+                        >
+                            Previous
+                        </button>
+                        {currentStage < stages.length - 1 && (
+                            <button
+                                onClick={handleNextStage}
+                                className="staged-form-button-next"
+                                disabled={
+                                    (currentStage === 0 && !isStep1Complete) ||
+                                    (currentStage === 1 && !isStep2Complete)
+                                }
+                            >
+                                Next
+                            </button>
+                        )}
+                        {currentStage === stages.length - 1 && (
+                            <button
+                                onClick={handleSubmit}
+                                className="staged-form-button-next"
+                                disabled={!allStagesComplete}
+                            >
+                                Submit
+                            </button>
+                        )}
                     </div>
                 </div>
-
-                <form className="client-form">
-                    {step === 1 && (
-                        <>
-                            <div className="form-row">
-                                <div className="form-group">
-                                    <label>Office <span>*</span></label>
-                                    <select value={office} onChange={(e) => setOffice(e.target.value)} required>
-                                        <option value="">Select Office</option>
-                                    </select>
-                                </div>
-                                <div className="form-group">
-                                    <label>Accounting Rules <span>*</span></label>
-                                    <select value={accountingRule} onChange={(e) => setAccountingRule(e.target.value)}
-                                            required>
-                                        <option value="">Select Rule</option>
-                                        <option value="test rule">Test Rule</option>
-                                        <option value="interest income">Interest Income</option>
-                                        <option value="amount paid">Amount Paid</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div className="form-row">
-                                <div className="form-group">
-                                    <label>Currency <span>*</span></label>
-                                    <select value={currency} onChange={(e) => setCurrency(e.target.value)} required>
-                                        <option value="">Select Currency</option>
-                                    </select>
-                                </div>
-                                <div className="form-group">
-                                    <label>Reference Number</label>
-                                    <input type="text" value={referenceNumber}
-                                           onChange={(e) => setReferenceNumber(e.target.value)}/>
-                                </div>
-                            </div>
-                            <div className="form-group">
-                                <label>Transaction Date <span>*</span></label>
-                                <input type="date" value={transactionDate}
-                                       onChange={(e) => setTransactionDate(e.target.value)} required/>
-                            </div>
-                            <div className="navigation-buttons">
-                                <button type="button" className="back-button">Cancel</button>
-                                <button type="button" className="next-button" onClick={goNext}
-                                        disabled={!isStep1Complete}>Next
-                                </button>
-                            </div>
-                        </>
-                    )}
-                    {step === 2 && (
-                        <>
-                            <div className="form-row">
-                                <h3>Affected GL Entries</h3>
-                                {accountingRule === 'amount paid' && debits.length < 3 && (
-                                    <button
-                                        type="button"
-                                        className="add-debit-button"
-                                        onClick={handleAddDebit}
-                                    >
-                                        <FaPlus style={{marginRight: '5px'}}/>
-                                        Add Debit
-                                    </button>
-                                )}
-                            </div>
-                            <div className="form-row">
-                                {debits.map((debit, index) => (
-                                    <div key={index} className="form-row debit-entry">
-                                        <div className="form-group">
-                                            <label>Debit</label>
-                                            <select
-                                                value={debit.type}
-                                                onChange={(e) => handleDebitChange(index, 'type', e.target.value)}
-                                            >
-                                                <option value="">Select Type</option>
-                                                {accountingRule === 'interest income' ? (
-                                                    <option value="interest income - PY">Interest Income - PY</option>
-                                                ) : accountingRule === 'amount paid' ? (
-                                                    <>
-                                                        <option value="income from penalty">Income from Penalty</option>
-                                                        <option value="monthly deductions">Monthly Deductions</option>
-                                                        <option value="soda income">Soda Income</option>
-                                                    </>
-                                                ) : (
-                                                    <option value="savings">Savings</option>
-                                                )}
-                                            </select>
-                                        </div>
-                                        <div className="form-group">
-                                            <label>Amount</label>
-                                            <input
-                                                type="text"
-                                                value={debit.amount}
-                                                onChange={(e) => handleDebitChange(index, 'amount', e.target.value)}
-                                            />
-                                        </div>
-                                        {index > 0 && (
-                                            <button
-                                                type="button"
-                                                className="remove-icon"
-                                                onClick={() => handleRemoveDebit(index)}
-                                            >
-                                                ×
-                                            </button>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-
-                            <div className="form-row">
-                                <div className="form-group">
-                                    <label>Credit</label>
-                                    <select
-                                        value={credit.type}
-                                        onChange={(e) => setCredit({...credit, type: e.target.value})}
-                                    >
-                                        <option value="">Select Type</option>
-                                        <option value="UK residents">UK Residents</option>
-                                        <option value="foreign savings">Foreign Savings</option>
-                                    </select>
-                                </div>
-                                <div className="form-group">
-                                    <label>Amount</label>
-                                    <input
-                                        type="text"
-                                        value={credit.amount}
-                                        onChange={(e) => setCredit({...credit, amount: e.target.value})}
-                                    />
-                                </div>
-                            </div>
-                            <div className="navigation-buttons">
-                                <button type="button" className="back-button" onClick={goBack}>Back</button>
-                                <button type="button" className="next-button" onClick={goNext}
-                                        disabled={!isStep2Complete}>Next
-                                </button>
-                            </div>
-                        </>
-                    )}
-                    {step === 3 && (
-                        <>
-                            <span
-                                type="button"
-                                onClick={() => setShowPaymentDetails(!showPaymentDetails)}
-                                className="toggle-payment-details">
-                                {showPaymentDetails ? 'Hide' : 'Show'} Payment Details
-                            </span>
-
-                            {showPaymentDetails && (
-                                <div className="payment-details">
-                                    <div className="form-row">
-                                        <div className="form-group">
-                                            <label>Payment Type</label>
-                                            <select
-                                                value={paymentType}
-                                                onChange={(e) => setPaymentType(e.target.value)}>
-                                                <option value="">Select Payment Type</option>
-                                                <option value="money-transfer">Money Transfer</option>
-                                                <option value="account-to-account">Account to Account</option>
-                                                <option value="funds-transfer">Funds Transfer</option>
-                                            </select>
-                                        </div>
-                                        <div className="form-group">
-                                            <label>Account Number</label>
-                                            <input
-                                                type="text"
-                                                value={accountNumber}
-                                                onChange={(e) => setAccountNumber(e.target.value)}/>
-                                        </div>
-                                    </div>
-                                    <div className="form-row">
-                                        <div className="form-group">
-                                            <label>Cheque Number</label>
-                                            <input
-                                                type="text"
-                                                value={chequeNumber}
-                                                onChange={(e) => setChequeNumber(e.target.value)}/>
-                                        </div>
-                                        <div className="form-group">
-                                            <label>Routing Code</label>
-                                            <input
-                                                type="text"
-                                                value={routingCode}
-                                                onChange={(e) => setRoutingCode(e.target.value)}/>
-                                        </div>
-                                    </div>
-                                    <div className="form-row">
-                                        <div className="form-group">
-                                            <label>Receipt Number</label>
-                                            <input
-                                                type="text"
-                                                value={receiptNumber}
-                                                onChange={(e) => setReceiptNumber(e.target.value)}/>
-                                        </div>
-                                        <div className="form-group">
-                                            <label>Bank Number</label>
-                                            <input
-                                                type="text"
-                                                value={bankNumber}
-                                                onChange={(e) => setBankNumber(e.target.value)}/>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            <div className="form-group">
-                                <label>Comments</label>
-                                <textarea
-                                    rows="3"
-                                    value={comments}
-                                    onChange={(e) => setComments(e.target.value)}/>
-                            </div>
-                            <div className="navigation-buttons">
-                                <button
-                                    type="button"
-                                    className="back-button"
-                                    onClick={goBack}>
-                                    Back
-                                </button>
-                                <button
-                                    type="button"
-                                    className="next-button"
-                                    onClick={goNext}>
-                                    Next
-                                </button>
-                            </div>
-                        </>
-                    )}
-
-                    {step === 4 && (
-                        <>
-                            <div className="review-section">
-                                <h3 className="review-title">Review & Submit</h3>
-                                <div className="review-details">
-
-                                    <div className="review-row">
-                                        <p><strong>Office:</strong> {office}</p>
-                                        <p><strong>Accounting Rule:</strong> {accountingRule}</p>
-                                    </div>
-                                    <div className="review-row">
-                                        <p><strong>Currency:</strong> {currency}</p>
-                                        <p><strong>Reference Number:</strong> {referenceNumber}</p>
-                                    </div>
-                                    <div className="review-row">
-                                        <p><strong>Transaction Date:</strong> {transactionDate}</p>
-                                    </div>
-
-                                    {debits.length > 0 && (
-                                        <>
-                                            <h4 className="section-title">GL Entries</h4>
-                                            {debits.map((debit, index) => (
-                                                <div key={index} className="review-row">
-                                                    <p><strong>Debit Type:</strong> {debit.type}</p>
-                                                    <p><strong>Debit Amount:</strong> {debit.amount}</p>
-                                                </div>
-                                            ))}
-                                            <div className="review-row">
-                                                <p><strong>Credit Type:</strong> {credit.type}</p>
-                                                <p><strong>Credit Amount:</strong> {credit.amount}</p>
-                                            </div>
-                                        </>
-                                    )}
-
-                                    {showPaymentDetails && (
-                                        <>
-                                            <h4 className="section-title">Payment Details</h4>
-                                            <div className="review-row">
-                                                <p><strong>Payment Type:</strong> {paymentType}</p>
-                                                <p><strong>Account Number:</strong> {accountNumber}</p>
-                                            </div>
-                                            <div className="review-row">
-                                                <p><strong>Cheque Number:</strong> {chequeNumber}</p>
-                                                <p><strong>Routing Code:</strong> {routingCode}</p>
-                                            </div>
-                                            <div className="review-row">
-                                                <p><strong>Receipt Number:</strong> {receiptNumber}</p>
-                                                <p><strong>Bank Number:</strong> {bankNumber}</p>
-                                            </div>
-                                        </>
-                                    )}
-
-                                    <div className="review-row">
-                                        <p><strong>Comments:</strong> {comments}</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="navigation-buttons">
-                                <button type="button" onClick={goBack} className="back-button">Back</button>
-                                <button type="button" onClick={handleSubmit} className="submit-button">Submit</button>
-                            </div>
-                        </>
-                    )}
-                </form>
             </div>
+
         </div>
     );
 };

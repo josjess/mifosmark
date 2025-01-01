@@ -235,6 +235,72 @@
     margin-left: 10px;
     display: block;
 }
+.password-field-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-input {
+    padding-right: 40px;
+    width: 100%;
+}
+
+.toggle-visibility-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #aaa;
+    font-size: 1.2em;
+}
+
+.toggle-visibility-icon:hover {
+    color: #333;
+}
+.staged-form-field {
+    position: relative;
+}
+
+.password-field-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-input {
+    padding-right: 40px;
+}
+
+.toggle-visibility-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #aaa;
+    font-size: 1.2em;
+}
+
+.toggle-visibility-icon:hover {
+    color: #333;
+}
+
+.error-message {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    color: #ff4d4d;
+    font-size: 0.9em;
+    margin-top: 4px;
+}
+.staged-form-input.error {
+    border-color: #ff4d4d;
+}
+.staged-form-stage-buttons {
+    margin-top: 60px;
+}
 @media (min-width: 768px) {
     .form-container-user .roles-container {
         grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));

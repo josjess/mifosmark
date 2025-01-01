@@ -21,11 +21,17 @@ const CreateTemplateForm = () => {
         mapper: [{ key: '', value: '' }],
         content: ''
     });
-    const [formIsValid, setFormIsValid] = useState(false);
+    const [currentStage, setCurrentStage] = useState(0);
+    const [completedStages, setCompletedStages] = useState(new Set());
+    const [isStep1Valid, setIsStep1Valid] = useState(false);
+    const [isStep2Valid, setIsStep2Valid] = useState(false);
 
-    useEffect(() => {
-        fetchTemplateOptions();
-    }, []);
+    const [stages] = useState([
+        "Basic Information",
+        "Advanced Options",
+        "Template Content",
+        "Preview"
+    ]);
 
     const fetchTemplateOptions = async () => {
         startLoading();
@@ -47,17 +53,26 @@ const CreateTemplateForm = () => {
         }
     };
 
-    const validateForm = () => {
+    const validateStep1 = () => {
         const { entity, type, name } = templateForm;
-        setFormIsValid(entity && type && name);
+        setIsStep1Valid(entity && type && name.trim() !== "");
+    };
+
+    const validateStep2 = () => {
+        setIsStep2Valid(templateForm.mapper.length > 0);
     };
 
     useEffect(() => {
-        validateForm();
-    }, [templateForm]);
+        validateStep1();
+    }, [templateForm.entity, templateForm.type, templateForm.name]);
 
-    const goNext = () => setStep((prev) => prev + 1);
-    const goBack = () => setStep((prev) => prev - 1);
+    useEffect(() => {
+        validateStep2();
+    }, [templateForm.mapper]);
+
+    useEffect(() => {
+        fetchTemplateOptions();
+    }, []);
 
     const handleFormChange = (e) => {
         const { name, value } = e.target;
@@ -87,161 +102,359 @@ const CreateTemplateForm = () => {
         setTemplateForm({ ...templateForm, mapper: newMapper });
     };
 
-    const handleSubmitTemplate = () => {
-        console.log('Submitting template:', templateForm);
-        // Implement actual submission logic here
+    const handleNextStage = () => {
+        if (currentStage < stages.length - 1) {
+            if (
+                (currentStage === 0 && isStep1Valid) ||
+                (currentStage === 1) ||
+                (currentStage === 2)
+            ) {
+                setCompletedStages((prev) => {
+                    const updatedStages = new Set(prev);
+                    updatedStages.add(stages[currentStage]);
+                    return updatedStages;
+                });
+                setCurrentStage((prev) => prev + 1);
+            }
+        }
     };
 
-    return (
-        <div className="template-form-container">
-            <div className="template-with-indicator">
-                <div className="template-stage-indicator">
-                    <div className={`template-stage ${step === 1 ? 'current' : step > 1 ? 'completed' : ''}`} onClick={() => setStep(1)}>
-                        <div className="template-circle"></div>
-                        <span>Basic Info</span>
-                    </div>
-                    <div className={`template-stage ${step === 2 ? 'current' : step > 2 ? 'completed' : ''}`} onClick={() => setStep(2)}>
-                        <div className="template-circle"></div>
-                        <span>Advanced Options</span>
-                    </div>
-                    <div className={`template-stage ${step === 3 ? 'current' : step > 3 ? 'completed' : ''}`} onClick={() => setStep(3)}>
-                        <div className="template-circle"></div>
-                        <span>Content</span>
-                    </div>
-                    <div className={`template-stage ${step === 4 ? 'current' : ''}`} onClick={() => setStep(4)}>
-                        <div className="template-circle"></div>
-                        <span>Review & Submit</span>
-                    </div>
-                </div>
+    const handleSubmitTemplate = async () => {
+        try {
+            const payload = { ...templateForm };
+            const response = await axios.post(`${API_CONFIG.baseURL}/templates`, payload, {
+                headers: {
+                    Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                    "Fineract-Platform-TenantId": "default",
+                    "Content-Type": "application/json",
+                },
+            });
 
-                <form className="template-form">
-                    {step === 1 && (
-                        <div className="template-form-section">
-                            <label>Entity <span className="asterisk">*</span></label>
-                            <select name="entity" value={templateForm.entity} onChange={handleFormChange} required>
-                                <option value="">Select Entity</option>
-                                {entityOptions.map((entity) => (
-                                    <option key={entity.id} value={entity.id}>{entity.name}</option>
-                                ))}
-                            </select>
+            if (response.status === 200) {
+                alert("Template successfully created!");
+                setCurrentStage(0);
+                setCompletedStages(new Set());
+                setTemplateForm({
+                    entity: "",
+                    type: "",
+                    name: "",
+                    mapper: [{ key: "", value: "" }],
+                    content: "",
+                });
+            }
+        } catch (error) {
+            console.error("Error submitting template:", error);
+            alert("An error occurred. Please try again.");
+        }
+    };
 
-                            <label>Type <span className="asterisk">*</span></label>
-                            <select name="type" value={templateForm.type} onChange={handleFormChange} required>
-                                <option value="">Select Type</option>
-                                {typeOptions.map((type) => (
-                                    <option key={type.id} value={type.id}>{type.name}</option>
-                                ))}
-                            </select>
 
-                            <label>Template Name <span className="asterisk">*</span></label>
-                            <input type="text" name="name" value={templateForm.name} onChange={handleFormChange} required />
+    const renderStageTracker = () => (
+        <div className="staged-form-stage-tracker">
+            {stages.map((stage, index) => {
+                const isCompleted =
+                    (index === 0 && isStep1Valid) ||
+                    (index === 1 && isStep2Valid) ||
+                    (index < currentStage && completedStages.has(stage));
 
-                            <div className="template-navigation-buttons">
-                                <button
-                                    type="button"
-                                    className="template-cancel-button"
-                                    onClick={() => window.location.href = '/admin'}
+                return (
+                    <div
+                        key={stage}
+                        className={`staged-form-stage ${
+                            index === currentStage
+                                ? "staged-form-active"
+                                : isCompleted
+                                    ? "staged-form-completed"
+                                    : "staged-form-unvisited"
+                        }`}
+                        onClick={() => {
+                            if (isCompleted || index === currentStage) {
+                                setCurrentStage(index);
+                            }
+                        }}
+                    >
+                        <span className="staged-form-stage-circle">{index + 1}</span>
+                        <span className="staged-form-stage-label">{stage}</span>
+                    </div>
+                );
+            })}
+        </div>
+    );
+
+    const renderStageContent = () => {
+        if (stages[currentStage] === "Preview") {
+            return renderPreviewSection();
+        }
+
+        switch (stages[currentStage]) {
+            case "Basic Information":
+                return (
+                    <div className="staged-form-basic-info">
+                        <div className="staged-form-row">
+                            <div className="staged-form-field">
+                                <label>
+                                    Entity <span className="staged-form-required">*</span>
+                                </label>
+                                <select
+                                    name="entity"
+                                    value={templateForm.entity}
+                                    onChange={handleFormChange}
+                                    required
+                                    className="staged-form-select"
                                 >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="button"
-                                    className="template-next-button"
-                                    onClick={goNext}
-                                    disabled={!formIsValid}
+                                    <option value="">Select Entity</option>
+                                    {entityOptions.map((entity) => (
+                                        <option key={entity.id} value={entity.id}>
+                                            {entity.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="staged-form-field">
+                                <label>
+                                    Type <span className="staged-form-required">*</span>
+                                </label>
+                                <select
+                                    name="type"
+                                    value={templateForm.type}
+                                    onChange={handleFormChange}
+                                    required
+                                    className="staged-form-select"
                                 >
-                                    Next
-                                </button>
+                                    <option value="">Select Type</option>
+                                    {typeOptions.map((type) => (
+                                        <option key={type.id} value={type.id}>
+                                            {type.name}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
                         </div>
-                    )}
-                    {step === 2 && (
-                        <div className="template-form-section">
-                            <h3>Advanced Options( Add mappers )</h3>
-                            {templateForm.mapper.map((mapper, index) => (
-                                <div key={index} className="template-mapper-row">
+
+                        <div className="staged-form-row">
+                            <div className="staged-form-field">
+                                <label>
+                                    Template Name <span className="staged-form-required">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value={templateForm.name}
+                                    onChange={handleFormChange}
+                                    required
+                                    className="staged-form-input"
+                                    placeholder="Enter template name"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                );
+            case "Advanced Options":
+                return (
+                    <div className="staged-form-advanced-options">
+                        <h3 className="staged-form-section-title">Advanced Options (Add Mappers)</h3>
+                        {templateForm.mapper.map((mapper, index) => (
+                            <div key={index} className="staged-form-row">
+                                {/* Mapper Key Field */}
+                                <div className="staged-form-field">
+                                    <label>
+                                        Mapper Key
+                                    </label>
                                     <input
                                         type="text"
-                                        placeholder="Mapper Key"
+                                        placeholder="Enter Mapper Key"
                                         value={mapper.key}
-                                        onChange={(e) => handleMapperChange(index, 'key', e.target.value)}
+                                        onChange={(e) =>
+                                            handleMapperChange(index, "key", e.target.value)
+                                        }
+                                        className="staged-form-input"
+                                        required
                                     />
+                                </div>
+                                {/* Mapper Value Field */}
+                                <div className="staged-form-field">
+                                    <label>
+                                        Mapper Value
+                                    </label>
                                     <input
                                         type="text"
-                                        placeholder="Mapper Value"
+                                        placeholder="Enter Mapper Value"
                                         value={mapper.value}
-                                        onChange={(e) => handleMapperChange(index, 'value', e.target.value)}
+                                        onChange={(e) =>
+                                            handleMapperChange(index, "value", e.target.value)
+                                        }
+                                        className="staged-form-input"
+                                        required
                                     />
+                                </div>
+                                {/* Add/Remove Mapper Actions */}
+                                <div className="staged-form-field mapper-actions">
                                     {index === 0 && templateForm.mapper.length < 5 && (
                                         <FaPlus
-                                            className="template-add-icon"
+                                            style={{cursor: 'pointer'}}
+                                            className="mapper-add-icon"
                                             onClick={addMapperRow}
                                         />
                                     )}
                                     {index > 0 && (
                                         <FaMinus
-                                            className="template-remove-icon"
+                                            style={{cursor: 'pointer'}}
+                                            className="mapper-remove-icon"
                                             onClick={() => removeMapperRow(index)}
                                         />
                                     )}
                                 </div>
-                            ))}
-
-                            <div className="template-navigation-buttons">
-                                <button type="button" className="template-back-button" onClick={goBack}>Back</button>
-                                <button type="button" className="template-next-button" onClick={goNext}>Next</button>
+                            </div>
+                        ))}
+                    </div>
+                );
+            case "Template Content":
+                return (
+                    <div className="staged-form-template-content">
+                        <h3 className="staged-form-section-title">Template Content</h3>
+                        <div className="staged-form-row">
+                            <div className="staged-form-field full-width">
+                                <label>
+                                    Content <span className="staged-form-required">*</span>
+                                </label>
+                                <ReactQuill
+                                    value={templateForm.content}
+                                    onChange={(content) =>
+                                        setTemplateForm({ ...templateForm, content })
+                                    }
+                                    theme="snow"
+                                    className="staged-form-quill-editor"
+                                />
+                                {templateForm.content.trim() === "" && (
+                                    <p className="error-message">Content cannot be empty</p>
+                                )}
                             </div>
                         </div>
-                    )}
-                    {step === 3 && (
-                        <div className="template-form-section">
-                            <h3>Template Content</h3>
-                            <ReactQuill
-                                value={templateForm.content}
-                                onChange={(content) => setTemplateForm({ ...templateForm, content })}
-                                theme="snow"
-                                className="template-quill-editor"
-                            />
+                    </div>
+                );
 
-                            <div className="template-navigation-buttons">
-                                <button type="button" className="template-back-button" onClick={goBack}>Back</button>
-                                <button type="button" className="template-next-button" onClick={goNext}>Next</button>
-                            </div>
+            default:
+                return null;
+        }
+    };
+
+    const renderPreviewSection = () => {
+        const getEntityName = () => {
+            const entityObj = entityOptions.find((entity) => entity.id === parseInt(templateForm.entity));
+            return entityObj ? entityObj.name : "N/A";
+        };
+
+        const getTypeName = () => {
+            const typeObj = typeOptions.find((type) => type.id === parseInt(templateForm.type));
+            return typeObj ? typeObj.name : "N/A";
+        };
+
+        const stageData = [
+            {
+                title: "Basic Information",
+                data: {
+                    Entity: getEntityName(),
+                    Type: getTypeName(),
+                    "Template Name": templateForm.name || "N/A",
+                },
+            },
+            {
+                title: "Advanced Options",
+                data: {
+                    Mapper: templateForm.mapper.length
+                        ? templateForm.mapper
+                            .map((mapper) => `${mapper.key || "N/A"}: ${mapper.value || "N/A"}`)
+                            .join(", ")
+                        : "N/A",
+                },
+            },
+            {
+                title: "Template Content",
+                data: {
+                    Content: templateForm.content || "N/A",
+                },
+            },
+        ];
+
+        return (
+            <div className="staged-form-preview-section">
+                <h2 className="preview-header">Form Preview</h2>
+                {stageData.map(({ title, data }) => (
+                    <div key={title} className="staged-form-preview-block">
+                        <div className="staged-form-preview-header">
+                            <h4 className="preview-stage-title">{title}</h4>
+                            <button
+                                className="staged-form-edit-button"
+                                onClick={() => setCurrentStage(stages.indexOf(title))}
+                            >
+                                Edit
+                            </button>
                         </div>
-                    )}
-
-                    {step === 4 && (
-                        <div className="template-form-section template-review-section">
-                            <h3>Review & Submit</h3>
-                            <div className="review-content">
-                                <div className="review-column">
-                                    <p><strong>Entity:</strong> {templateForm.entity}</p>
-                                    <p><strong>Type:</strong> {templateForm.type}</p>
-                                    <p><strong>Name:</strong> {templateForm.name}</p>
-                                </div>
-                                <div className="review-column">
-                                    <p><strong>Content:</strong></p>
-                                    <div className="review-content-box">
-                                        {templateForm.content}
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="review-mapper-section">
-                                <p><strong>Mapper:</strong></p>
-                                <ul className="mapper-list">
-                                    {templateForm.mapper.map((mapper, index) => (
-                                        <li key={index}><strong>{mapper.key}</strong>: {mapper.value}</li>
-                                    ))}
-                                </ul>
-                            </div>
-
-                            <div className="template-navigation-buttons">
-                                <button type="button" className="template-back-button" onClick={goBack}>Back</button>
-                                <button type="button" className="template-submit-button" onClick={handleSubmitTemplate} disabled={!formIsValid}>Submit</button>
-                            </div>
+                        <div className="staged-form-preview-table-wrapper">
+                            <table className="staged-form-preview-table">
+                                <thead>
+                                <tr>
+                                    <th>Field</th>
+                                    <th>Value</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {Object.entries(data).map(([key, value]) => (
+                                    <tr key={key}>
+                                        <td>{key}</td>
+                                        <td>{value}</td>
+                                    </tr>
+                                ))}
+                                </tbody>
+                            </table>
                         </div>
-                    )}
-                </form>
+                    </div>
+                ))}
+            </div>
+        );
+    };
+
+    return (
+        <div className="form-container-create-template">
+            <div className="staged-form-create-template">
+                {renderStageTracker()}
+
+                <div className="staged-form-stage-content">
+                    {renderStageContent()}
+
+                    <div className="staged-form-stage-buttons">
+                        <button
+                            onClick={() => setCurrentStage((prev) => Math.max(prev - 1, 0))}
+                            disabled={currentStage === 0}
+                            className="staged-form-button-previous"
+                        >
+                            Previous
+                        </button>
+
+                        {currentStage < stages.length - 1 && (
+                            <button
+                                onClick={handleNextStage}
+                                className="staged-form-button-next"
+                                disabled={
+                                    (currentStage === stages.indexOf("Basic Information") && !isStep1Valid) ||
+                                    (currentStage === stages.indexOf("Advanced Options") && templateForm.mapper.length === 0)
+                                }
+                            >
+                                Next
+                            </button>
+                        )}
+
+                        {stages[currentStage] === "Preview" && (
+                            <button
+                                type="button"
+                                onClick={handleSubmitTemplate}
+                                className="staged-form-button-next"
+                            >
+                                Submit
+                            </button>
+                        )}
+                    </div>
+                </div>
             </div>
         </div>
     );

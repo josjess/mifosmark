@@ -4,10 +4,14 @@ import { API_CONFIG } from '../../../config';
 import {AuthContext} from "../../../context/AuthContext";
 import {useLoading} from "../../../context/LoadingContext";
 import {FaEdit, FaStickyNote, FaTrash} from "react-icons/fa";
+import DatePicker from "react-datepicker";
+import Select from "react-select";
+import {useNavigate} from "react-router-dom";
 
 const GroupDetails = ({ groupId, onClose }) => {
     const { user } = useContext(AuthContext);
     const { startLoading, stopLoading } = useLoading();
+    const navigate = useNavigate();
 
     const [GroupImage, setGroupImage] = useState(null);
     const [groupDetails, setGroupDetails] = useState(null);
@@ -25,6 +29,58 @@ const GroupDetails = ({ groupId, onClose }) => {
     const [selectedRole, setSelectedRole] = useState('');
     const [isCommitteeModalOpen, setIsCommitteeModalOpen] = useState(false);
     const [editingCommitteeMemberId, setEditingCommitteeMemberId] = useState(null);
+
+    const [isActivateModalOpen, setIsActivateModalOpen] = useState(false);
+    const [activationDate, setActivationDate] = useState(null);
+    const [submissionDate, setSubmissionDate] = useState(null);
+
+    const [editGroupData, setEditGroupData] = useState({
+        name: '',
+        staffId: '',
+        submittedOnDate: null,
+        activationDate: null,
+        externalId: '',
+    });
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [submittedDateLimit, setSubmittedDateLimit] = useState(null);
+    const [activationDateLimit, setActivationDateLimit] = useState(null);
+    const [editGroupStaffOptions, setEditGroupStaffOptions] = useState([]);
+
+    const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+    const [clientMembers, setClientMembers] = useState([]);
+    const [selectedClients, setSelectedClients] = useState([]);
+    const [inheritLoanOfficer, setInheritLoanOfficer] = useState(false);
+    const [destinationGroup, setDestinationGroup] = useState('');
+    const [availableGroups, setAvailableGroups] = useState([]);
+
+    const [allClients, setAllClients] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [filteredClients, setFilteredClients] = useState([]);
+    const [selectedClientIds, setSelectedClientIds] = useState([]);
+    const [groupClients, setGroupClients] = useState([]);
+    const [isAddClientsModalOpen, setIsAddClientsModalOpen] = useState(false);
+
+    const [isAssignStaffModalOpen, setIsAssignStaffModalOpen] = useState(false);
+    const [availableStaff, setAvailableStaff] = useState([]);
+    const [selectedStaffId, setSelectedStaffId] = useState('');
+
+    const [isAttachMeetingModalOpen, setIsAttachMeetingModalOpen] = useState(false);
+    const [meetingStartDate, setMeetingStartDate] = useState(null);
+    const [isRepeating, setIsRepeating] = useState(false);
+    const [meetingTypeId, setMeetingTypeId] = useState('');
+    const [calendarTypeOptions, setCalendarTypeOptions] = useState([]);
+
+    const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
+    const [closureReasons, setClosureReasons] = useState([]);
+    const [closedOnDate, setClosedOnDate] = useState(null);
+    const [selectedClosureReason, setSelectedClosureReason] = useState('');
+
+    useEffect(() => {
+        if (groupDetails?.timeline?.submittedOnDate) {
+            const [year, month, day] = groupDetails.timeline.submittedOnDate;
+            setSubmissionDate(new Date(year, month - 1, day));
+        }
+    }, [groupDetails]);
 
     useEffect(() => {
         setGroupImage(process.env.PUBLIC_URL + 'Images/group.png');
@@ -618,6 +674,552 @@ const GroupDetails = ({ groupId, onClose }) => {
         }
     };
 
+    const handleActivateGroupSubmit = async () => {
+        if (!activationDate || activationDate < submissionDate) {
+            alert("Activation date must be on or after the submission date.");
+            return;
+        }
+
+        const payload = {
+            activationDate: activationDate.toLocaleDateString('en-GB', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+            }),
+            dateFormat: 'dd MMMM yyyy',
+            locale: 'en',
+        };
+
+        const headers = {
+            Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+            'Fineract-Platform-TenantId': 'default',
+            'Content-Type': 'application/json',
+        };
+
+        try {
+            startLoading();
+            await axios.post(`${API_CONFIG.baseURL}/groups/${groupId}?command=activate`, payload, { headers });
+            setIsActivateModalOpen(false);
+            const groupResponse = await axios.get(`${API_CONFIG.baseURL}/groups/${groupId}?associations=all`, { headers });
+            setGroupDetails(groupResponse.data);
+        } catch (error) {
+            console.error('Error activating group:', error);
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const handleEditGroup = async () => {
+        setEditGroupData({
+            name: groupDetails?.name || '',
+            officeId: groupDetails?.officeId || '',
+            staffId: groupDetails?.staffId || '',
+            submittedOnDate: groupDetails?.timeline?.submittedOnDate
+                ? new Date(groupDetails.timeline.submittedOnDate[0], groupDetails.timeline.submittedOnDate[1] - 1, groupDetails.timeline.submittedOnDate[2])
+                : null,
+            activationDate: groupDetails?.activationDate
+                ? new Date(groupDetails.activationDate[0], groupDetails.activationDate[1] - 1, groupDetails.activationDate[2])
+                : null,
+            externalId: groupDetails?.externalId || '',
+        });
+
+        if (groupDetails?.officeId) {
+            await fetchStaffForOffice(groupDetails.officeId);
+        }
+
+        setIsEditModalOpen(true);
+    };
+
+    const fetchStaffForOffice = async (selectedOfficeId) => {
+        setEditGroupData((prevData) => ({ ...prevData, officeId: selectedOfficeId, staffId: '' }));
+
+        try {
+            startLoading();
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': 'default',
+                'Content-Type': 'application/json',
+            };
+
+            const staffResponse = await axios.get(
+                `${API_CONFIG.baseURL}/groups/template?officeId=${selectedOfficeId}&staffInSelectedOfficeOnly=true`,
+                { headers }
+            );
+
+            setEditGroupStaffOptions(staffResponse.data.staffOptions || []);
+        } catch (error) {
+            console.error('Error fetching staff for selected office:', error);
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const handleEditGroupSubmit = async () => {
+        const { name, staffId, submittedOnDate, activationDate, externalId } = editGroupData;
+
+        if (!name || !submittedOnDate || !activationDate) {
+            alert('Name, Submitted On Date, and Activation Date are mandatory.');
+            return;
+        }
+
+        const payload = {
+            name,
+            staffId: staffId || undefined,
+            submittedOnDate: submittedOnDate.toLocaleDateString('en-GB', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+            }),
+            activationDate: activationDate.toLocaleDateString('en-GB', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+            }),
+            externalId: externalId || undefined,
+            dateFormat: 'dd MMMM yyyy',
+            locale: 'en',
+        };
+
+        const headers = {
+            Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+            'Fineract-Platform-TenantId': 'default',
+            'Content-Type': 'application/json',
+        };
+
+        try {
+            startLoading();
+            await axios.put(`${API_CONFIG.baseURL}/groups/${groupId}`, payload, { headers });
+            setIsEditModalOpen(false);
+
+            const updatedResponse = await axios.get(`${API_CONFIG.baseURL}/groups/${groupId}?associations=all`, { headers });
+            setGroupDetails(updatedResponse.data);
+        } catch (error) {
+            console.error('Error editing group:', error);
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const fetchGroupAssociations = async () => {
+        try {
+            startLoading();
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': 'default',
+                'Content-Type': 'application/json',
+            };
+
+            const response = await axios.get(`${API_CONFIG.baseURL}/groups/${groupId}?associations=all`, { headers });
+            setClientMembers(
+                response.data.clientMembers.map((client) => ({
+                    value: client.id,
+                    label: client.displayName,
+                }))
+            );
+            setAvailableGroups(
+                response.data.availableGroups.map((group) => ({
+                    value: group.id,
+                    label: group.name,
+                }))
+            );
+        } catch (error) {
+            console.error('Error fetching group associations:', error);
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const handleSubmitTransferClients = async () => {
+        if (!selectedClients.length || !destinationGroup) {
+            alert('Please select clients and a destination group.');
+            return;
+        }
+
+        const payload = {
+            clients: selectedClients.map((client) => ({ id: client.value })),
+            inheritDestinationGroupLoanOfficer: inheritLoanOfficer,
+            destinationGroupId: destinationGroup,
+        };
+
+        const headers = {
+            Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+            'Fineract-Platform-TenantId': 'default',
+            'Content-Type': 'application/json',
+        };
+
+        try {
+            startLoading();
+            await axios.post(`${API_CONFIG.baseURL}/groups/${groupId}?command=transferClients`, payload, { headers });
+            alert('Clients transferred successfully.');
+            setIsTransferModalOpen(false);
+            fetchGroupAssociations(); // Refresh data
+        } catch (error) {
+            console.error('Error transferring clients:', error);
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const openTransferModal = async () => {
+        await fetchGroupAssociations();
+        setIsTransferModalOpen(true);
+    };
+
+    useEffect(() => {
+        if (isAddClientsModalOpen) {
+            const fetchAllClients = async () => {
+                try {
+                    startLoading();
+                    const headers = {
+                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                        'Fineract-Platform-TenantId': 'default',
+                        'Content-Type': 'application/json',
+                    };
+                    const response = await axios.get(
+                        `${API_CONFIG.baseURL}/clients?orphansOnly=true&sortOrder=ASC&orderBy=displayName`,
+                        { headers }
+                    );
+                    setAllClients(response.data.pageItems || []);
+                } catch (error) {
+                    console.error('Error fetching all clients:', error);
+                } finally {
+                    stopLoading();
+                }
+            };
+
+            fetchAllClients();
+        }
+    }, [isAddClientsModalOpen]);
+
+    useEffect(() => {
+        if (searchQuery) {
+            const lowerCaseQuery = searchQuery.toLowerCase();
+            const filtered = allClients.filter(
+                (client) =>
+                    (client.displayName.toLowerCase().includes(lowerCaseQuery) ||
+                        client.accountNo.includes(lowerCaseQuery)) &&
+                    client.officeId === groupDetails?.officeId
+            );
+            setFilteredClients(filtered);
+        } else {
+            setFilteredClients([]);
+        }
+    }, [searchQuery, allClients]);
+
+    const handleAddClientsToGroup = async () => {
+        try {
+            startLoading();
+
+            const invalidClients = selectedClientIds.filter(
+                (id) => {
+                    const client = allClients.find((c) => c.id === id);
+                    return client?.officeId !== groupDetails?.officeId;
+                }
+            );
+
+            if (invalidClients.length > 0) {
+                alert(
+                    `Selected clients (${invalidClients.join(
+                        ", "
+                    )}) belong to a different office than the group.`
+                );
+                return;
+            }
+
+            const payload = { clientMembers: selectedClientIds };
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                "Fineract-Platform-TenantId": "default",
+                "Content-Type": "application/json",
+            };
+
+            await axios.post(
+                `${API_CONFIG.baseURL}/groups/${groupId}?command=associateClients`,
+                payload,
+                { headers }
+            );
+
+            fetchGroupClients();
+            setSelectedClientIds([]);
+            setSearchQuery("");
+        } catch (error) {
+            console.error("Error adding clients:", error);
+            alert("Error adding clients. Please try again.");
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const fetchGroupClients = async () => {
+        try {
+            startLoading();
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': 'default',
+                'Content-Type': 'application/json',
+            };
+
+            const response = await axios.get(`${API_CONFIG.baseURL}/groups/${groupId}?associations=all`, { headers });
+            setGroupClients(response.data.clientMembers || []);
+        } catch (error) {
+            console.error('Error fetching group clients:', error);
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const handleRemoveClientFromGroup = async (clientId) => {
+        const confirmRemoval = window.confirm('Are you sure you want to remove this client from the group?');
+        if (!confirmRemoval) return;
+
+        try {
+            const payload = { clientMembers: [clientId] };
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': 'default',
+                'Content-Type': 'application/json',
+            };
+
+            await axios.post(`${API_CONFIG.baseURL}/groups/${groupId}?command=disassociateClients`, payload, { headers });
+            fetchGroupClients();
+        } catch (error) {
+            console.error('Error removing client:', error);
+        }
+    };
+
+    const handleUnassignStaff = async () => {
+        const confirmUnassign = window.confirm(
+            "Are you sure you want to unassign the staff from this group?"
+        );
+
+        if (!confirmUnassign) return;
+
+        try {
+            startLoading();
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': 'default',
+                'Content-Type': 'application/json',
+            };
+
+            const payload = { staffId: groupDetails?.staffId };
+
+            await axios.post(
+                `${API_CONFIG.baseURL}/groups/${groupId}?command=unassignStaff`,
+                payload,
+                { headers }
+            );
+
+            const response = await axios.get(
+                `${API_CONFIG.baseURL}/groups/${groupId}?associations=all`,
+                { headers }
+            );
+            setGroupDetails(response.data);
+
+        } catch (error) {
+            console.error("Error unassigning staff:", error);
+            alert("Failed to unassign staff. Please try again.");
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const fetchAvailableStaff = async () => {
+        try {
+            startLoading();
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': 'default',
+                'Content-Type': 'application/json',
+            };
+
+            const response = await axios.get(
+                `${API_CONFIG.baseURL}/groups/${groupId}?associations=all&template=true`,
+                { headers }
+            );
+
+            setAvailableStaff(response.data.staffOptions || []);
+            setIsAssignStaffModalOpen(true);
+        } catch (error) {
+            console.error("Error fetching available staff:", error);
+            alert("Failed to fetch staff options. Please try again.");
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const handleAssignStaff = async () => {
+        if (!selectedStaffId) {
+            alert("Please select a staff to assign.");
+            return;
+        }
+
+        try {
+            startLoading();
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': 'default',
+                'Content-Type': 'application/json',
+            };
+
+            const payload = { staffId: selectedStaffId };
+
+            await axios.post(
+                `${API_CONFIG.baseURL}/groups/${groupId}?command=assignStaff`,
+                payload,
+                { headers }
+            );
+
+            const response = await axios.get(
+                `${API_CONFIG.baseURL}/groups/${groupId}?associations=all`,
+                { headers }
+            );
+            setGroupDetails(response.data);
+
+            setIsAssignStaffModalOpen(false);
+            setSelectedStaffId('');
+        } catch (error) {
+            console.error("Error assigning staff:", error);
+            alert("Failed to assign staff. Please try again.");
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const fetchCalendarTypes = async () => {
+        try {
+            startLoading();
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': 'default',
+                'Content-Type': 'application/json',
+            };
+
+            const response = await axios.get(
+                `${API_CONFIG.baseURL}/groups/${groupId}/calendars/template`,
+                { headers }
+            );
+
+            setCalendarTypeOptions(response.data.calendarTypeOptions || []);
+            setIsAttachMeetingModalOpen(true);
+        } catch (error) {
+            console.error('Error fetching calendar types:', error);
+            alert('Failed to fetch calendar options. Please try again.');
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const handleCreateMeeting = async () => {
+        if (!meetingStartDate || !meetingTypeId) {
+            alert("Please provide a valid meeting start date and type.");
+            return;
+        }
+
+        try {
+            startLoading();
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': 'default',
+                'Content-Type': 'application/json',
+            };
+
+            const payload = {
+                startDate: meetingStartDate.toLocaleDateString('en-GB', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                }),
+                repeating: isRepeating,
+                title: `groups_${groupId}_CollectionMeeting`,
+                typeId: meetingTypeId,
+                dateFormat: 'dd MMMM yyyy',
+                locale: 'en',
+            };
+
+            await axios.post(
+                `${API_CONFIG.baseURL}/groups/${groupId}/calendars`,
+                payload,
+                { headers }
+            );
+
+            setIsAttachMeetingModalOpen(false);
+            setMeetingStartDate(null);
+            setIsRepeating(false);
+            setMeetingTypeId('');
+        } catch (error) {
+            console.error("Error creating meeting:", error);
+            alert("Failed to create the meeting. Please try again.");
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const fetchClosureReasons = async () => {
+        try {
+            startLoading();
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': 'default',
+                'Content-Type': 'application/json',
+            };
+
+            const response = await axios.get(
+                `${API_CONFIG.baseURL}/groups/template?command=close`,
+                { headers }
+            );
+
+            setClosureReasons(response.data.closureReasons || []);
+            setIsCloseModalOpen(true);
+        } catch (error) {
+            console.error('Error fetching closure reasons:', error);
+            alert('Failed to fetch closure reasons. Please try again.');
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const handleCloseGroup = async () => {
+        if (!closedOnDate || !selectedClosureReason) {
+            alert('Please provide a valid closure date and reason.');
+            return;
+        }
+
+        try {
+            startLoading();
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': 'default',
+                'Content-Type': 'application/json',
+            };
+
+            const payload = {
+                closedOnDate: closedOnDate.toLocaleDateString('en-GB', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                }),
+                closureReasonId: selectedClosureReason,
+                dateFormat: 'dd MMMM yyyy',
+                locale: 'en',
+            };
+
+            await axios.post(
+                `${API_CONFIG.baseURL}/groups/${groupId}?command=close`,
+                payload,
+                { headers }
+            );
+
+            setIsCloseModalOpen(false);
+            setClosedOnDate(null);
+            setSelectedClosureReason('');
+        } catch (error) {
+            console.error('Error closing group:', error);
+            alert('Failed to close the group. Please try again.');
+        } finally {
+            stopLoading();
+        }
+    };
 
     return (
         <div className="client-details-container">
@@ -663,27 +1265,75 @@ const GroupDetails = ({ groupId, onClose }) => {
 
                 {/* Right Section */}
                 <div className="client-actions-section">
-                    <button className="client-action-button">Edit</button>
-                    <button className="client-action-button">Add Clients</button>
-                    <button className="client-action-button">Transfer Clients</button>
-                    <button className="client-action-button">Manage Members</button>
+                    {groupDetails?.status?.value === 'Pending' && (
+                        <button
+                            className="client-action-button"
+                            onClick={() => setIsActivateModalOpen(true)}
+                        >
+                            Activate
+                        </button>
+                    )}
+                    <button
+                        className="client-action-button"
+                        onClick={handleEditGroup}
+                    >
+                        Edit
+                    </button>
+                    <button
+                        className="client-action-button"
+                        onClick={() => {
+                            setIsAddClientsModalOpen(true);
+                            fetchGroupClients();
+                        }}
+                    >
+                        Add Clients
+                    </button>
+                    <button
+                        className="client-action-button"
+                        onClick={openTransferModal}
+                    >
+                        Transfer Clients
+                    </button>
+                    <button className="client-action-button"
+                            onClick={() => {
+                                setIsAddClientsModalOpen(true);
+                                fetchGroupClients();
+                            }}
+                    >
+                        Manage Members
+                    </button>
 
                     <div className="client-dropdown">
                         <button className="client-action-button">Applications</button>
                         <div className="client-dropdown-content">
-                            <button>Group Saving Application</button>
-                            <button>Group Loan Application</button>
-                            <button>GLIM Loan Application</button>
-                            <button>GSIM Application</button>
+
+                            <button onClick={() => navigate(`/group/${groupId}/applications/savings`)}>Group Saving
+                                Application
+                            </button>
+                            {/*onClick={() => navigate(`/group/${groupId}/applications/loan`)}*/}
+                            <button >Group Loan
+                                Application
+                            </button>
+                            {/*onClick={() => navigate(`/group/${groupId}/applications/glim-loan`)}*/}
+                            <button >GLIM Loan
+                                Application
+                            </button>
+                            {/*onClick={() => navigate(`/group/${groupId}/applications/gsim`)}*/}
+                            <button >GSIM Application
+                            </button>
                         </div>
                     </div>
 
                     <div className="client-dropdown">
                         <button className="client-action-button">More</button>
                         <div className="client-dropdown-content">
-                            <button>Assign Staff</button>
-                            <button>Close</button>
-                            <button>Delete</button>
+                            {groupDetails?.staffId ? (
+                                <button onClick={handleUnassignStaff}>Unassign Staff</button>
+                            ) : (
+                                <button onClick={fetchAvailableStaff}>Assign Staff</button>
+                            )}
+                            <button onClick={fetchCalendarTypes}>Attach Meeting</button>
+                            <button onClick={fetchClosureReasons}>Close</button>
                         </div>
                     </div>
                 </div>
@@ -702,6 +1352,530 @@ const GroupDetails = ({ groupId, onClose }) => {
 
             {/* Tab Content */}
             <div className="client-tab-content">{renderTabContent()}</div>
+
+            {isActivateModalOpen && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">Activate Group</h4>
+                        <div className="create-holiday-row">
+                            <div className="create-provisioning-criteria-group">
+                                <label htmlFor="activationDate" className="create-provisioning-criteria-label">
+                                    Activation Date
+                                </label>
+                                <DatePicker
+                                    id="activationDate"
+                                    selected={activationDate}
+                                    onChange={(date) => setActivationDate(date)}
+                                    className="create-provisioning-criteria-input"
+                                    placeholderText="Select Activation Date"
+                                    dateFormat="dd MMMM yyyy"
+                                    showMonthDropdown
+                                    showYearDropdown
+                                    dropdownMode="select"
+                                    minDate={submissionDate}
+                                />
+                            </div>
+                        </div>
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button
+                                onClick={() => setIsActivateModalOpen(false)}
+                                className="create-provisioning-criteria-cancel"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleActivateGroupSubmit}
+                                className="create-provisioning-criteria-confirm"
+                                disabled={!activationDate}
+                            >
+                                Confirm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isEditModalOpen && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">Edit Group</h4>
+                        <div className="create-holiday-row">
+                            <div className="create-provisioning-criteria-group">
+                                <label htmlFor="groupName" className="create-provisioning-criteria-label">
+                                    Group Name <span>*</span>
+                                </label>
+                                <input
+                                    id="groupName"
+                                    type="text"
+                                    value={editGroupData.name}
+                                    onChange={(e) => setEditGroupData({...editGroupData, name: e.target.value})}
+                                    className="create-provisioning-criteria-input"
+                                    placeholder="Enter Group Name"
+                                />
+                            </div>
+                        </div>
+                        <div className="create-holiday-row">
+                            <div className="create-provisioning-criteria-group">
+                                <label htmlFor="officeName" className="create-provisioning-criteria-label">
+                                    Office
+                                </label>
+                                <input
+                                    id="officeName"
+                                    type="text"
+                                    value={groupDetails?.officeName || ''}
+                                    className="create-provisioning-criteria-input"
+                                    disabled
+                                />
+                            </div>
+
+                            <div className="create-provisioning-criteria-group">
+                                <label htmlFor="staffId" className="create-provisioning-criteria-label">
+                                    Staff
+                                </label>
+                                <select
+                                    id="staffId"
+                                    value={editGroupData.staffId} // Correctly bind the selected staff
+                                    onChange={(e) => setEditGroupData({...editGroupData, staffId: e.target.value})}
+                                    className="create-provisioning-criteria-input"
+                                >
+                                    <option value="">-- Select Staff --</option>
+                                    {editGroupStaffOptions.map((staff) => (
+                                        <option key={staff.id} value={staff.id}>
+                                            {staff.displayName}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="create-holiday-row">
+                            {/* Submitted On */}
+                            <div className="create-provisioning-criteria-group">
+                                <label htmlFor="submittedOnDate" className="create-provisioning-criteria-label">
+                                    Submitted On <span>*</span>
+                                </label>
+                                <DatePicker
+                                    id="submittedOnDate"
+                                    selected={editGroupData.submittedOnDate}
+                                    onChange={(date) => {
+                                        setEditGroupData({...editGroupData, submittedOnDate: date});
+                                        setActivationDateLimit(date);
+                                    }}
+                                    className="create-provisioning-criteria-input"
+                                    dateFormat="dd MMMM yyyy"
+                                    maxDate={activationDateLimit}
+                                    showMonthDropdown
+                                    showYearDropdown
+                                    dropdownMode="select"
+                                />
+                            </div>
+
+                            <div className="create-provisioning-criteria-group">
+                                <label htmlFor="activationDate" className="create-provisioning-criteria-label">
+                                    Activation Date
+                                    <span>*</span>
+                                </label>
+                                <DatePicker
+                                    id="activationDate"
+                                    selected={editGroupData.activationDate}
+                                    onChange={(date) => {
+                                        setEditGroupData({...editGroupData, activationDate: date});
+                                        setSubmittedDateLimit(date);
+                                    }}
+                                    className="create-provisioning-criteria-input"
+                                    dateFormat="dd MMMM yyyy"
+                                    minDate={submittedDateLimit}
+                                    showMonthDropdown
+                                    showYearDropdown
+                                    dropdownMode="select"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="create-holiday-row">
+                            <div className="create-provisioning-criteria-group">
+                                <label htmlFor="externalId" className="create-provisioning-criteria-label">
+                                    External ID
+                                </label>
+                                <input
+                                    id="externalId"
+                                    type="text"
+                                    value={editGroupData.externalId}
+                                    onChange={(e) => setEditGroupData({...editGroupData, externalId: e.target.value})}
+                                    className="create-provisioning-criteria-input"
+                                    placeholder="Enter External ID"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Buttons */}
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button
+                                onClick={() => setIsEditModalOpen(false)}
+                                className="create-provisioning-criteria-cancel"
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                onClick={handleEditGroupSubmit}
+                                className="create-provisioning-criteria-confirm"
+                                disabled={!editGroupData.name || !editGroupData.submittedOnDate || !editGroupData.activationDate}
+                            >
+                                Submit
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isTransferModalOpen && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">Transfer Clients</h4>
+
+                        <div className="create-holiday-row">
+                            <div className="create-provisioning-criteria-group">
+                                <label htmlFor="clientMembers" className="create-provisioning-criteria-label">
+                                    Client Members <span>*</span>
+                                </label>
+                                <Select
+                                    id="clientMembers"
+                                    isMulti
+                                    options={clientMembers}
+                                    value={selectedClients}
+                                    onChange={(selected) => setSelectedClients(selected)}
+                                    placeholder="Select Client Members"
+                                    isClearable
+                                />
+                            </div>
+                        </div>
+
+                        <div className="create-holiday-row">
+                            <div className="create-provisioning-criteria-group">
+                                <label className="create-provisioning-criteria-label">
+                                    <input
+                                        type="checkbox"
+                                        checked={inheritLoanOfficer}
+                                        onChange={(e) => setInheritLoanOfficer(e.target.checked)}
+                                        className="create-provisioning-criteria-input"
+                                    />  Inherit Group Loan Officer?
+                                </label>
+                            </div>
+                        </div>
+
+                        <div className="create-holiday-row">
+                            <div className="create-provisioning-criteria-group">
+                                <label htmlFor="destinationGroup" className="create-provisioning-criteria-label">
+                                    Destination Group <span>*</span>
+                                </label>
+                                <select
+                                    id="destinationGroup"
+                                    value={destinationGroup}
+                                    onChange={(e) => setDestinationGroup(e.target.value)}
+                                    className="create-provisioning-criteria-input"
+                                >
+                                    <option value="">-- Select Destination Group --</option>
+                                    {availableGroups.map((group) => (
+                                        <option key={group.id} value={group.id}>
+                                            {group.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button
+                                onClick={() => setIsTransferModalOpen(false)}
+                                className="create-provisioning-criteria-cancel"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleSubmitTransferClients}
+                                className="create-provisioning-criteria-confirm"
+                                disabled={!selectedClients.length || !destinationGroup}
+                            >
+                                Submit
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isAddClientsModalOpen && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">Add Clients</h4>
+
+                        <div className="create-holiday-row">
+                            <div className="create-holiday-row add-client-input-row">
+                                <input
+                                    id="addClients"
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="create-provisioning-criteria-input add-client-input"
+                                    placeholder="Search clients by name or ID"
+                                    onFocus={() => {
+                                        if (!searchQuery) {
+                                            const defaultClients = allClients
+                                                .filter(client => client.officeId === groupDetails?.officeId)
+                                                .slice(0, 5);
+                                            setFilteredClients(defaultClients);
+                                        }
+                                    }}
+                                />
+                                <button
+                                    type="button"
+                                    className="submit-button"
+                                    onClick={handleAddClientsToGroup}
+                                    disabled={selectedClientIds.length === 0}
+                                >
+                                    Add
+                                </button>
+                            </div>
+
+                            {filteredClients.length > 0 && (
+                                <div className="dropdown-menu dropdown-menu-custom">
+                                    {filteredClients.map((client) => (
+                                        <div
+                                            key={client.id}
+                                            className="dropdown-item dropdown-item-custom"
+                                            onClick={() => {
+                                                setSearchQuery(client.displayName);
+                                                setSelectedClientIds([client.id]);
+                                                setFilteredClients([]);
+                                            }}
+                                        >
+                                            {client.displayName} ({client.accountNo})
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        <h4>Group Members</h4>
+                        <table className="general-charges-table">
+                            <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Office</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {groupClients.length > 0 ? (
+                                groupClients.map((client) => (
+                                    <tr key={client.id}>
+                                        <td>{client.displayName}</td>
+                                        <td>{client.officeName}</td>
+                                        <td>
+                                            <button style={{border: "none", cursor: "pointer"}}
+                                                onClick={() => handleRemoveClientFromGroup(client.id)}
+                                            >
+                                                <FaTrash style={{fontSize: "20px"}} color="red"/>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="3">No clients in this group.</td>
+                                </tr>
+                            )}
+                            </tbody>
+                        </table>
+
+                        {/* Modal Actions */}
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button
+                                onClick={() => setIsAddClientsModalOpen(false)}
+                                className="create-provisioning-criteria-cancel"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isAssignStaffModalOpen && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">Assign Staff</h4>
+                        <div className="create-holiday-row">
+                            <div className="create-provisioning-criteria-group">
+                                <label htmlFor="staffSelect" className="create-provisioning-criteria-label">
+                                    Select Staff <span>*</span>
+                                </label>
+                                <select
+                                    id="staffSelect"
+                                    value={selectedStaffId}
+                                    onChange={(e) => setSelectedStaffId(e.target.value)}
+                                    className="create-provisioning-criteria-input"
+                                >
+                                    <option value="">-- Select Staff --</option>
+                                    {availableStaff.map((staff) => (
+                                        <option key={staff.id} value={staff.id}>
+                                            {staff.displayName}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button
+                                onClick={() => setIsAssignStaffModalOpen(false)}
+                                className="create-provisioning-criteria-cancel"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleAssignStaff}
+                                className="create-provisioning-criteria-confirm"
+                            >
+                                Confirm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isAttachMeetingModalOpen && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">Attach Meeting</h4>
+                            <div className="create-provisioning-criteria-group">
+                                <label htmlFor="meetingStartDate" className="create-provisioning-criteria-label">
+                                    Meeting Start Date <span>*</span>
+                                </label>
+                                <DatePicker
+                                    id="meetingStartDate"
+                                    selected={meetingStartDate}
+                                    onChange={(date) => setMeetingStartDate(date)}
+                                    className="create-provisioning-criteria-input"
+                                    placeholderText="Select Meeting Start Date"
+                                    dateFormat="dd MMMM yyyy"
+                                    minDate={new Date()}
+                                    showMonthDropdown
+                                    showYearDropdown
+                                    dropdownMode="select"
+                                />
+                            </div>
+
+                            {/* Meeting Type */}
+                            <div className="create-provisioning-criteria-group">
+                                <label htmlFor="meetingType" className="create-provisioning-criteria-label">
+                                    Meeting Type <span>*</span>
+                                </label>
+                                <select
+                                    id="meetingType"
+                                    value={meetingTypeId}
+                                    onChange={(e) => setMeetingTypeId(e.target.value)}
+                                    className="create-provisioning-criteria-input"
+                                >
+                                    <option value="">-- Select Meeting Type --</option>
+                                    {calendarTypeOptions.map((type) => (
+                                        <option key={type.id} value={type.id}>
+                                            {type.value}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Repeats Checkbox */}
+                            <div className="create-provisioning-criteria-group">
+                                <label className="create-provisioning-criteria-label">
+                                    <input
+                                        type="checkbox"
+                                        checked={isRepeating}
+                                        onChange={(e) => setIsRepeating(e.target.checked)}
+                                        className="create-provisioning-criteria-input"
+                                    />{' '}
+                                    Repeats?
+                                </label>
+                            </div>
+
+                        {/* Modal Actions */}
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button
+                                onClick={() => setIsAttachMeetingModalOpen(false)}
+                                className="create-provisioning-criteria-cancel"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleCreateMeeting}
+                                className="create-provisioning-criteria-confirm"
+                                disabled={!meetingStartDate || !meetingTypeId}
+                            >
+                                Submit
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isCloseModalOpen && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">Close Group</h4>
+                            {/* Closed On Date */}
+                            <div className="create-provisioning-criteria-group">
+                                <label htmlFor="closedOnDate" className="create-provisioning-criteria-label">
+                                    Closed On Date <span>*</span>
+                                </label>
+                                <DatePicker
+                                    id="closedOnDate"
+                                    selected={closedOnDate}
+                                    onChange={(date) => setClosedOnDate(date)}
+                                    className="create-provisioning-criteria-input"
+                                    placeholderText="Select Closed On Date"
+                                    dateFormat="dd MMMM yyyy"
+                                    maxDate={new Date()}
+                                    showMonthDropdown
+                                    showYearDropdown
+                                    dropdownMode="select"
+                                />
+                            </div>
+
+                            {/* Closure Reason */}
+                            <div className="create-provisioning-criteria-group">
+                                <label htmlFor="closureReason" className="create-provisioning-criteria-label">
+                                    Closure Reason <span>*</span>
+                                </label>
+                                <select
+                                    id="closureReason"
+                                    value={selectedClosureReason}
+                                    onChange={(e) => setSelectedClosureReason(e.target.value)}
+                                    className="create-provisioning-criteria-input"
+                                >
+                                    <option value="">-- Select Closure Reason --</option>
+                                    {closureReasons.map((reason) => (
+                                        <option key={reason.id} value={reason.id}>
+                                            {reason.value}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                        {/* Modal Actions */}
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button
+                                onClick={() => setIsCloseModalOpen(false)}
+                                className="create-provisioning-criteria-cancel"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleCloseGroup}
+                                className="create-provisioning-criteria-confirm"
+                                disabled={!closedOnDate || !selectedClosureReason}
+                            >
+                                Submit
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+
 
         </div>
     );

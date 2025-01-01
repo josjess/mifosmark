@@ -19,6 +19,42 @@ const GroupsPage = () => {
         }
     }, [location]);
 
+    useEffect(() => {
+        const state = location.state;
+
+        if (state?.groupId) {
+            const tabId = `groupDetail-${state.groupId}`;
+            const tabLabel = state.groupName || `Group #${state.groupId}`;
+
+            setDynamicTabs((prevTabs) => {
+                const existingTab = prevTabs.find((tab) => tab.id === tabId);
+                if (existingTab) {
+                    if (existingTab.label !== tabLabel) {
+                        return prevTabs.map((tab) =>
+                            tab.id === tabId ? { ...tab, label: tabLabel } : tab
+                        );
+                    }
+                    return prevTabs;
+                }
+                return [
+                    ...prevTabs,
+                    {
+                        id: tabId,
+                        label: tabLabel,
+                        component: (
+                            <GroupDetails
+                                groupId={state.groupId}
+                                onClose={() => handleCloseTab(tabId)}
+                            />
+                        ),
+                    },
+                ];
+            });
+
+            setActiveTab(tabId);
+        }
+    }, [location.state]);
+
     const handleOpenGroupDetails = (group) => {
         const tabId = `groupDetail-${group.id}`;
         const tabLabel = group.name;

@@ -26,9 +26,12 @@ const AddAccountingRule = () => {
         creditTag: false,
     });
 
+    const [currentStage, setCurrentStage] = useState(0);
+    const [completedStages, setCompletedStages] = useState(new Set());
+    const [allStagesComplete, setAllStagesComplete] = useState(false);
+
     const { user } = useContext(AuthContext);
     const { startLoading, stopLoading } = useLoading();
-    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -61,14 +64,15 @@ const AddAccountingRule = () => {
             [name]: type === 'checkbox' ? checked : value,
         });
     };
-
-    const goNext = () => setStep(step + 1);
-    const goBack = () => setStep(step - 1);
-    const handleCancel = () => navigate('/accounting');
+    const stages = [
+        "Basic Information",
+        "Debit Details",
+        "Credit Details"
+    ];
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // console.log("Submitting Accounting Rule Data:", accountingRuleData);
+        console.log("Submitting Accounting Rule Data:", accountingRuleData);
 
         setAccountingRuleData({
             name: '',
@@ -88,317 +92,496 @@ const AddAccountingRule = () => {
         setStep(1);
     };
 
-    return (
-        <div className=".form-container-accounting-rule">
-            <div className="with-indicator">
-                <div className="stage-indicator">
-                    <div className={`stage ${step === 1 ? 'current' : step > 1 ? 'completed' : ''}`}
-                         onClick={() => setStep(1)}>
-                        <div className="circle"></div>
-                        <span>Basic Info</span>
-                    </div>
-                    <div className={`stage ${step === 2 ? 'current' : step > 2 ? 'completed' : ''}`}
-                         onClick={() => setStep(2)}>
-                        <div className="circle"></div>
-                        <span>Debit Details</span>
-                    </div>
-                    <div className={`stage ${step === 3 ? 'current' : step > 3 ? 'completed' : ''}`}
-                         onClick={() => setStep(3)}>
-                        <div className="circle"></div>
-                        <span>Credit Details</span>
-                    </div>
-                    <div className={`stage ${step === 4 ? 'current' : ''}`}
-                         onClick={() => setStep(4)}>
-                        <div className="circle"></div>
-                        <span>Review & Submit</span>
-                    </div>
-                </div>
-
-                <form className="client-form">
-                    {step === 1 && (
-                        <>
-                            <div className="form-row">
-                                <div className="account-form-group">
-                                    <label>Accounting Rule Name <span className="required-asterisk">*</span></label>
-                                    <input
-                                        type="text"
-                                        name="name"
-                                        value={accountingRuleData.name}
-                                        onChange={handleChange}
-                                        placeholder="Enter Rule Name"
-                                    />
-                                </div>
-                                <div className="account-form-group">
-                                    <label>Office <span className="required-asterisk">*</span></label>
-                                    <select
-                                        name="office"
-                                        value={accountingRuleData.office}
-                                        onChange={handleChange}
-                                    >
-                                        <option value="">-- Select Office --</option>
-                                        {offices.map((office) => (
-                                            <option key={office.id} value={office.id}>{office.name}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
-                            <div className="account-form-group full-width">
-                                <label>Description</label>
-                                <textarea
-                                    name="description"
-                                    value={accountingRuleData.description}
+    const renderStageContent = () => {
+        switch (stages[currentStage]) {
+            case "Basic Information":
+                return (
+                    <div className="staged-form-basic-info">
+                        <div className="staged-form-row">
+                            <div className="staged-form-field">
+                                <label htmlFor="name">
+                                    Accounting Rule Name <span>*</span>
+                                </label>
+                                <input
+                                    id="name"
+                                    name="name"
+                                    value={accountingRuleData.name}
                                     onChange={handleChange}
-                                    className="description-textarea"
-                                    placeholder="Enter Description"
+                                    className="staged-form-input"
+                                    placeholder="Enter Rule Name"
+                                    required
                                 />
                             </div>
-                            <div className="navigation-buttons">
-                                <button onClick={handleCancel} className="back-button">Cancel</button>
-                                <button onClick={goNext} className="next-button">Next</button>
+                            <div className="staged-form-field">
+                                <label htmlFor="office">
+                                    Office <span>*</span>
+                                </label>
+                                <select
+                                    id="office"
+                                    name="office"
+                                    value={accountingRuleData.office}
+                                    onChange={handleChange}
+                                    className="staged-form-select"
+                                    required
+                                >
+                                    <option value="">-- Select Office --</option>
+                                    {offices.map((office) => (
+                                        <option key={office.id} value={office.id}>
+                                            {office.name}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
-                        </>
-                    )}
+                        </div>
+                        <div className="staged-form-field">
+                            <label htmlFor="description">Description</label>
+                            <textarea
+                                id="description"
+                                name="description"
+                                value={accountingRuleData.description}
+                                onChange={handleChange}
+                                className="staged-form-textarea"
+                                placeholder="Enter Description"
+                            ></textarea>
+                        </div>
+                    </div>
+                );
 
-                    {step === 2 && (
-                        <>
-                            <div className="account-form-group">
-                                <label>Debit Rule Type</label>
-                                <div className="radio-group">
-                                    <label><input
+            case "Debit Details":
+                return (
+                    <div className="staged-form-debit-details">
+                        <div className="staged-form-field">
+                            <label>Debit Rule Type</label>
+                            <div className="radio-group">
+                                <label>
+                                    <input
                                         type="radio"
                                         name="debitRuleType"
                                         value="fixedAccount"
-                                        checked={accountingRuleData.debitRuleType === 'fixedAccount'}
-                                        onChange={() => setAccountingRuleData({
-                                            ...accountingRuleData,
-                                            debitRuleType: 'fixedAccount',
-                                            debitAccount: '',
-                                            allowMultipleDebits: false,
-                                        })}
+                                        checked={accountingRuleData.debitRuleType === "fixedAccount"}
+                                        onChange={() =>
+                                            setAccountingRuleData({
+                                                ...accountingRuleData,
+                                                debitRuleType: "fixedAccount",
+                                                debitAccount: "",
+                                                allowMultipleDebits: false,
+                                            })
+                                        }
                                     />
-                                        Fixed Account</label>
-                                    <label><input
+                                    Fixed Account
+                                </label>
+                                <label>
+                                    <input
                                         type="radio"
                                         name="debitRuleType"
                                         value="listOfProducts"
-                                        checked={accountingRuleData.debitRuleType === 'listOfProducts'}
-                                        onChange={() => setAccountingRuleData({
-                                            ...accountingRuleData,
-                                            debitRuleType: 'listOfProducts',
-                                            debitAccount: '',
-                                        })}
+                                        checked={accountingRuleData.debitRuleType === "listOfProducts"}
+                                        onChange={() =>
+                                            setAccountingRuleData({
+                                                ...accountingRuleData,
+                                                debitRuleType: "listOfProducts",
+                                                debitAccount: "",
+                                            })
+                                        }
                                     />
-                                        List of Products</label>
-                                </div>
+                                    List of Products
+                                </label>
                             </div>
-
-                            {accountingRuleData.debitRuleType === 'fixedAccount' && (
-                                <div className="account-form-group">
-                                    <label>Debit Account</label>
-                                    <select
-                                        name="debitAccount"
-                                        value={accountingRuleData.debitAccount}
-                                        onChange={handleChange}
-                                    >
-                                        <option value="">-- Select Debit Account --</option>
-                                        {accounts.map((account) => (
-                                            <option key={account.id} value={account.id}>{account.name}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                            )}
-
-                            {accountingRuleData.debitRuleType === 'listOfProducts' && (
-                                <>
-                                    <div className="account-form-checkbox">
-                                        <label>Debit Tags</label>
-                                        <div className="checkbox-group-row">
-                                            <div className="checkbox-group">
-                                                <input
-                                                    type="checkbox"
-                                                    name="debitCheckbox"
-                                                    checked={accountingRuleData.debitCheckbox}
-                                                    onChange={(e) => setAccountingRuleData({
-                                                        ...accountingRuleData,
-                                                        debitCheckbox: e.target.checked
-                                                    })}
-                                                />
-                                                <label>Debit</label>
-                                            </div>
-                                            <div className="checkbox-group">
-                                                <input
-                                                    type="checkbox"
-                                                    name="creditCheckbox"
-                                                    checked={accountingRuleData.creditCheckbox}
-                                                    onChange={(e) => setAccountingRuleData({
-                                                        ...accountingRuleData,
-                                                        creditCheckbox: e.target.checked
-                                                    })}
-                                                />
-                                                <label>Credit</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="account-form-checkbox">
+                        </div>
+                        {accountingRuleData.debitRuleType === "fixedAccount" && (
+                            <div className="staged-form-field">
+                                <label htmlFor="debitAccount">Debit Account</label>
+                                <select
+                                    id="debitAccount"
+                                    name="debitAccount"
+                                    value={accountingRuleData.debitAccount}
+                                    onChange={handleChange}
+                                    className="staged-form-select"
+                                >
+                                    <option value="">-- Select Debit Account --</option>
+                                    {accounts.map((account) => (
+                                        <option key={account.id} value={account.id}>
+                                            {account.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+                        {accountingRuleData.debitRuleType === "listOfProducts" && (
+                            <>
+                                <div className="staged-form-field">
+                                    <label>Debit Tags</label>
+                                    <div className="checkbox-group-row">
                                         <div className="checkbox-group">
                                             <input
                                                 type="checkbox"
-                                                name="allowMultipleDebits"
-                                                checked={accountingRuleData.allowMultipleDebits}
-                                                onChange={handleChange}
-                                                className="manual-entries-checkbox"
+                                                name="debitCheckbox"
+                                                checked={accountingRuleData.debitCheckbox}
+                                                onChange={(e) =>
+                                                    setAccountingRuleData({
+                                                        ...accountingRuleData,
+                                                        debitCheckbox: e.target.checked,
+                                                    })
+                                                }
                                             />
-                                            <label className="manual-entries-label">Allow Multiple Debits</label>
+                                            <label>Debit</label>
+                                        </div>
+                                        <div className="checkbox-group">
+                                            <input
+                                                type="checkbox"
+                                                name="creditCheckbox"
+                                                checked={accountingRuleData.creditCheckbox}
+                                                onChange={(e) =>
+                                                    setAccountingRuleData({
+                                                        ...accountingRuleData,
+                                                        creditCheckbox: e.target.checked,
+                                                    })
+                                                }
+                                            />
+                                            <label>Credit</label>
                                         </div>
                                     </div>
-                                </>
-                            )}
+                                </div>
+                                <div className="staged-form-field">
+                                    <input
+                                        type="checkbox"
+                                        name="allowMultipleDebits"
+                                        checked={accountingRuleData.allowMultipleDebits}
+                                        onChange={handleChange}
+                                        className="manual-entries-checkbox"
+                                    />
+                                    <label>Allow Multiple Debits</label>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                );
 
-                            <div className="navigation-buttons">
-                                <button onClick={goBack} className="back-button">Back</button>
-                                <button onClick={goNext} className="next-button">Next</button>
-                            </div>
-                        </>
-                    )}
-
-                    {step === 3 && (
-                        <>
-                            <div className="account-form-group">
-                                <label>Credit Rule Type</label>
-                                <div className="radio-group">
+            case "Credit Details":
+                return (
+                    <div className="staged-form-credit-details">
+                        <div className="staged-form-field">
+                            <label>Credit Rule Type</label>
+                            <div className="radio-group">
+                                <label>
                                     <input
                                         type="radio"
                                         name="creditRuleType"
                                         value="fixedAccount"
-                                        checked={accountingRuleData.creditRuleType === 'fixedAccount'}
-                                        onChange={() => setAccountingRuleData({
-                                            ...accountingRuleData,
-                                            creditRuleType: 'fixedAccount',
-                                            creditAccount: '',
-                                            allowMultipleCredits: false,
-                                        })}
+                                        checked={accountingRuleData.creditRuleType === "fixedAccount"}
+                                        onChange={() =>
+                                            setAccountingRuleData({
+                                                ...accountingRuleData,
+                                                creditRuleType: "fixedAccount",
+                                                creditAccount: "",
+                                                allowMultipleCredits: false,
+                                            })
+                                        }
                                     />
-                                    <label>Fixed Account</label>
+                                    Fixed Account
+                                </label>
+                                <label>
                                     <input
                                         type="radio"
                                         name="creditRuleType"
                                         value="listOfAccounts"
-                                        checked={accountingRuleData.creditRuleType === 'listOfAccounts'}
-                                        onChange={() => setAccountingRuleData({
-                                            ...accountingRuleData,
-                                            creditRuleType: 'listOfAccounts',
-                                            creditAccount: '',
-                                        })}
+                                        checked={accountingRuleData.creditRuleType === "listOfAccounts"}
+                                        onChange={() =>
+                                            setAccountingRuleData({
+                                                ...accountingRuleData,
+                                                creditRuleType: "listOfAccounts",
+                                                creditAccount: "",
+                                            })
+                                        }
                                     />
-                                    <label>List of Accounts</label>
-                                </div>
+                                    List of Accounts
+                                </label>
                             </div>
-
-                            {accountingRuleData.creditRuleType === 'fixedAccount' && (
-                                <div className="account-form-group">
-                                    <label>Credit Account</label>
-                                    <select
-                                        name="creditAccount"
-                                        value={accountingRuleData.creditAccount}
-                                        onChange={handleChange}
-                                    >
-                                        <option value="">-- Select Credit Account --</option>
-                                        {accounts.map((account) => (
-                                            <option key={account.id} value={account.id}>{account.name}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                            )}
-
-                            {accountingRuleData.creditRuleType === 'listOfAccounts' && (
-                                <>
-                                    <div className="account-form-checkbox">
-                                        <label>Credit Tags</label>
-                                        <div className="checkbox-group-row">
-                                            <div className="checkbox-group">
-                                                <input
-                                                    type="checkbox"
-                                                    name="debitTag"
-                                                    checked={accountingRuleData.debitTag}
-                                                    onChange={(e) => setAccountingRuleData({
-                                                        ...accountingRuleData,
-                                                        debitTag: e.target.checked
-                                                    })}
-                                                />
-                                                <label>Debit</label>
-                                            </div>
-                                            <div className="checkbox-group">
-                                                <input
-                                                    type="checkbox"
-                                                    name="creditTag"
-                                                    checked={accountingRuleData.creditTag}
-                                                    onChange={(e) => setAccountingRuleData({
-                                                        ...accountingRuleData,
-                                                        creditTag: e.target.checked
-                                                    })}
-                                                />
-                                                <label>Credit</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="account-form-checkbox">
+                        </div>
+                        {accountingRuleData.creditRuleType === "fixedAccount" && (
+                            <div className="staged-form-field">
+                                <label htmlFor="creditAccount">Credit Account</label>
+                                <select
+                                    id="creditAccount"
+                                    name="creditAccount"
+                                    value={accountingRuleData.creditAccount}
+                                    onChange={handleChange}
+                                    className="staged-form-select"
+                                >
+                                    <option value="">-- Select Credit Account --</option>
+                                    {accounts.map((account) => (
+                                        <option key={account.id} value={account.id}>
+                                            {account.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+                        {accountingRuleData.creditRuleType === "listOfAccounts" && (
+                            <>
+                                <div className="staged-form-field">
+                                    <label>Credit Tags</label>
+                                    <div className="checkbox-group-row">
                                         <div className="checkbox-group">
                                             <input
                                                 type="checkbox"
-                                                name="allowMultipleCredits"
-                                                checked={accountingRuleData.allowMultipleCredits}
-                                                onChange={handleChange}
-                                                className="manual-entries-checkbox"
+                                                name="debitTag"
+                                                checked={accountingRuleData.debitTag}
+                                                onChange={(e) =>
+                                                    setAccountingRuleData({
+                                                        ...accountingRuleData,
+                                                        debitTag: e.target.checked,
+                                                    })
+                                                }
                                             />
-                                            <label className="manual-entries-label">Allow Multiple Credits</label>
+                                            <label>Debit</label>
+                                        </div>
+                                        <div className="checkbox-group">
+                                            <input
+                                                type="checkbox"
+                                                name="creditTag"
+                                                checked={accountingRuleData.creditTag}
+                                                onChange={(e) =>
+                                                    setAccountingRuleData({
+                                                        ...accountingRuleData,
+                                                        creditTag: e.target.checked,
+                                                    })
+                                                }
+                                            />
+                                            <label>Credit</label>
                                         </div>
                                     </div>
-                                </>
-                            )}
-
-                            <div className="navigation-buttons">
-                            <button onClick={goBack} className="back-button">Back</button>
-                                <button onClick={goNext} className="next-button">Next</button>
-                            </div>
-                        </>
-                    )}
-
-                    {step === 4 && (
-                        <>
-
-                            <h3 className="review-title">Review & Submit</h3>
-                            <div className="review-section">
-                                <div className="review-row">
-                                    <p><strong>Rule Name:</strong> {accountingRuleData.name}</p>
-                                    <p><strong>Office:</strong> {offices.find(o => o.id === parseInt(accountingRuleData.office))?.name || 'N/A'}</p>
-                                    <p><strong>Description:</strong> {accountingRuleData.description}</p>
                                 </div>
-                                <div className="review-row">
-                                    <p><strong>Debit Rule Type:</strong> {accountingRuleData.debitRuleType}</p>
-                                    <p><strong>Debit Account:</strong> {accounts.find(a => a.id === parseInt(accountingRuleData.debitAccount))?.name || 'N/A'}</p>
-                                    <p><strong>Allow Multiple Debits:</strong> {accountingRuleData.allowMultipleDebits ? 'Yes' : 'No'}</p>
-                                    <p><strong>Debit Checkbox:</strong> {accountingRuleData.debitCheckbox ? 'Yes' : 'No'}</p>
-                                    <p><strong>Credit Checkbox:</strong> {accountingRuleData.creditCheckbox ? 'Yes' : 'No'}</p>
+                                <div className="staged-form-field">
+                                    <input
+                                        type="checkbox"
+                                        name="allowMultipleCredits"
+                                        checked={accountingRuleData.allowMultipleCredits}
+                                        onChange={handleChange}
+                                        className="manual-entries-checkbox"
+                                    />
+                                    <label>Allow Multiple Credits</label>
                                 </div>
-                                <div className="review-row">
-                                    <p><strong>Credit Rule Type:</strong> {accountingRuleData.creditRuleType}</p>
-                                    <p><strong>Credit Account:</strong> {accounts.find(a => a.id === parseInt(accountingRuleData.creditAccount))?.name || 'N/A'}</p>
-                                    <p><strong>Allow Multiple Credits:</strong> {accountingRuleData.allowMultipleCredits ? 'Yes' : 'No'}</p>
-                                    <p><strong>Debit Tag:</strong> {accountingRuleData.debitTag ? 'Yes' : 'No'}</p>
-                                    <p><strong>Credit Tag:</strong> {accountingRuleData.creditTag ? 'Yes' : 'No'}</p>
-                                </div>
-                            </div>
+                            </>
+                        )}
+                    </div>
+                );
 
-                            <div className="navigation-buttons">
-                                <button onClick={goBack} className="back-button">Back</button>
-                                <button type="button" onClick={handleSubmit} className="submit-button">Submit</button>
+            default:
+                return null;
+        }
+    };
+
+    const renderPreviewSection = () => {
+        const getOfficeName = () => {
+            const officeObj = offices.find((o) => o.id === parseInt(accountingRuleData.office));
+            return officeObj ? officeObj.name : "N/A";
+        };
+
+        const getAccountName = (accountId) => {
+            const accountObj = accounts.find((a) => a.id === parseInt(accountId));
+            return accountObj ? accountObj.name : "N/A";
+        };
+
+        const stageData = [
+            {
+                title: "Basic Info",
+                data: {
+                    "Accounting Rule Name": accountingRuleData.name || "N/A",
+                    Office: getOfficeName(),
+                    Description: accountingRuleData.description || "N/A",
+                },
+            },
+            {
+                title: "Debit Details",
+                data:
+                    accountingRuleData.debitRuleType === "fixedAccount"
+                        ? {
+                            "Debit Rule Type": "Fixed Account",
+                            "Debit Account": getAccountName(accountingRuleData.debitAccount),
+                            "Allow Multiple Debits": accountingRuleData.allowMultipleDebits ? "Yes" : "No",
+                        }
+                        : {
+                            "Debit Rule Type": "List of Products",
+                            "Debit Tags - Debit": accountingRuleData.debitCheckbox ? "Yes" : "No",
+                            "Debit Tags - Credit": accountingRuleData.creditCheckbox ? "Yes" : "No",
+                            "Allow Multiple Debits": accountingRuleData.allowMultipleDebits ? "Yes" : "No",
+                        },
+            },
+            {
+                title: "Credit Details",
+                data:
+                    accountingRuleData.creditRuleType === "fixedAccount"
+                        ? {
+                            "Credit Rule Type": "Fixed Account",
+                            "Credit Account": getAccountName(accountingRuleData.creditAccount),
+                            "Allow Multiple Credits": accountingRuleData.allowMultipleCredits ? "Yes" : "No",
+                        }
+                        : {
+                            "Credit Rule Type": "List of Accounts",
+                            "Credit Tags - Debit": accountingRuleData.debitTag ? "Yes" : "No",
+                            "Credit Tags - Credit": accountingRuleData.creditTag ? "Yes" : "No",
+                            "Allow Multiple Credits": accountingRuleData.allowMultipleCredits ? "Yes" : "No",
+                        },
+            },
+        ];
+
+        return (
+            <div className="staged-form-preview-section">
+                <h2 className="preview-header">Form Preview</h2>
+                {stageData.map(({ title, data }) => (
+                    <div key={title} className="staged-form-preview-block">
+                        <div className="staged-form-preview-header">
+                            <h4 className="preview-stage-title">{title}</h4>
+                            <button
+                                className="staged-form-edit-button"
+                                onClick={() => setCurrentStage(stages.indexOf(title))}
+                            >
+                                Edit
+                            </button>
+                        </div>
+                        {data && typeof data === "object" && !Array.isArray(data) ? (
+                            <div className="staged-form-preview-table-wrapper">
+                                <table className="staged-form-preview-table">
+                                    <thead>
+                                    <tr>
+                                        <th>Field</th>
+                                        <th>Value</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {Object.entries(data).map(([key, value]) => (
+                                        <tr key={key}>
+                                            <td>{key}</td>
+                                            <td>{value || "N/A"}</td>
+                                        </tr>
+                                    ))}
+                                    </tbody>
+                                </table>
                             </div>
-                        </>
-                    )}
-                </form>
+                        ) : (
+                            <p className="no-data-message">No data available for this section.</p>
+                        )}
+                    </div>
+                ))}
+            </div>
+        );
+    };
+
+    const renderStageTracker = () => {
+        return (
+            <div className="staged-form-stage-tracker">
+                {stages.map((stage, index) => (
+                    <div
+                        key={stage}
+                        className={`staged-form-stage ${
+                            index === currentStage
+                                ? "staged-form-active"
+                                : completedStages.has(stage)
+                                    ? "staged-form-completed"
+                                    : "staged-form-unvisited"
+                        }`}
+                        onClick={() => {
+                            if (completedStages.has(stage) || index < currentStage) {
+                                setCurrentStage(index);
+                            }
+                        }}
+                    >
+                        <span className="staged-form-stage-circle">{index + 1}</span>
+                        <span className="staged-form-stage-label">{stage}</span>
+                    </div>
+                ))}
+            </div>
+        );
+    };
+
+    const handleNextStage = () => {
+        if (currentStage < stages.length - 1) {
+            setCompletedStages((prev) => {
+                const updatedStages = new Set(prev);
+                updatedStages.add(stages[currentStage]);
+                return updatedStages;
+            });
+            setCurrentStage((prev) => prev + 1);
+        }
+    };
+
+    const isStep1Complete = () => {
+        return (
+            accountingRuleData.name.trim() !== '' &&
+            accountingRuleData.office.trim() !== '' &&
+            accountingRuleData.description.trim() !== ''
+        );
+    };
+
+    const isStep2Complete = () => {
+        if (accountingRuleData.debitRuleType === 'fixedAccount') {
+            return accountingRuleData.debitAccount.trim() !== '';
+        }
+        if (accountingRuleData.debitRuleType === 'listOfProducts') {
+            return (
+                accountingRuleData.debitCheckbox ||
+                accountingRuleData.creditCheckbox
+            );
+        }
+        return false;
+    };
+
+    const isStep3Complete = () => {
+        if (accountingRuleData.creditRuleType === 'fixedAccount') {
+            return accountingRuleData.creditAccount.trim() !== '';
+        }
+        if (accountingRuleData.creditRuleType === 'listOfAccounts') {
+            return (
+                accountingRuleData.debitTag ||
+                accountingRuleData.creditTag
+            );
+        }
+        return false;
+    };
+
+
+    return (
+        <div className="form-container-accounting-rule">
+
+            <div className="staged-form-add-accounting-rule">
+                {renderStageTracker()}
+                <div className="staged-form-stage-content">
+                    {currentStage === stages.length - 1 ? renderPreviewSection() : renderStageContent()}
+
+
+                    <div className="staged-form-stage-buttons">
+                        <button
+                            onClick={() => setCurrentStage((prev) => Math.max(prev - 1, 0))}
+                            disabled={currentStage === 0}
+                            className="staged-form-button-previous"
+                        >
+                            Previous
+                        </button>
+                        {currentStage < stages.length - 1 && (
+                            <button
+                                onClick={handleNextStage}
+                                className="staged-form-button-next"
+                                disabled={
+                                    (currentStage === 0 && !isStep1Complete) ||
+                                    (currentStage === 1 && !isStep2Complete) ||
+                                    (currentStage === 2 && !isStep3Complete)
+                                }
+                            >
+                                Next
+                            </button>
+                        )}
+                        {currentStage === stages.length - 1 && (
+                            <button onClick={handleSubmit} className="staged-form-button-next">
+                                Submit
+                            </button>
+                        )}
+                    </div>
+                </div>
             </div>
         </div>
     );
+
 };
 
 export default AddAccountingRule;

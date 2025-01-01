@@ -9,6 +9,7 @@
 .breadcrumb-link {
     color: #4c84ff;
     text-decoration: none;
+    cursor: pointer;
     font-weight: bold;
     margin-right: 5px;
     transition: color 0.3s ease;

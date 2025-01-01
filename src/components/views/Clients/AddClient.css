@@ -327,6 +327,7 @@ textarea {
     align-items: center;
     justify-content: flex-end;
     margin-top: 10px;
+    padding: 8px;
 }
 
 .add-family-member .react-icon-plus, .add-address .react-icon-plus {
@@ -336,15 +337,30 @@ textarea {
 
 .remove-icon {
     cursor: pointer;
-    font-size: 16px;
+    font-size: 20px;
     display: inline-flex;
     align-items: center;
     background: none;
+    padding: 8px;
     color: #fb0119;
+}
+.edit-icon {
+    cursor: pointer;
+    font-size: 20px;
+    display: inline-flex;
+    border: none;
+    align-items: center;
+    background: none;
+    padding: 8px;
+    margin-right: 10px;
+    color: #34b326;
 }
 
 .remove-icon:hover {
     color: #c82333;
+}
+.remove-icon:hover {
+    color: #157010;
 }
 .navigation-buttons .cancel-button {
     background-color: #dc3545;
@@ -582,3 +598,38 @@ table select:disabled {
     scrollbar-width: none;
 }
 
+.date-picker-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.react-datepicker__header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+}
+
+.react-datepicker__month-dropdown-container,
+.react-datepicker__year-dropdown-container {
+    display: inline-block;
+    margin: 0 5px;
+}
+
+.react-datepicker__month-select,
+.react-datepicker__year-select {
+    padding: 5px 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff;
+    cursor: pointer;
+}
+
+.react-datepicker__month-select:hover,
+.react-datepicker__year-select:hover {
+    border-color: #007bff;
+}

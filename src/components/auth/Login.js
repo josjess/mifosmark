@@ -5,6 +5,7 @@ import { API_CONFIG } from "../../config";
 import { AuthContext } from '../../context/AuthContext';
 import { NotificationContext } from '../../context/NotificationContext';
 import { useLoading } from '../../context/LoadingContext';
+import {FaEye, FaEyeSlash} from "react-icons/fa";
 
 const Login = () => {
     const [username, setUsername] = useState('');
@@ -12,6 +13,7 @@ const Login = () => {
     const [rememberMe, setRememberMe] = useState(false);
     const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] = useState(false);
     const { showNotification } = useContext(NotificationContext);
+    const [showPassword, setShowPassword] = useState(false);
     const { login } = useContext(AuthContext);
     const { startLoading, stopLoading } = useLoading();
     const navigate = useNavigate();
@@ -91,14 +93,27 @@ const Login = () => {
 
                         <div className="form-group-login">
                             <label htmlFor="password">Password</label>
-                            <input
-                                type="password"
-                                id="password"
-                                placeholder="Enter your password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                            />
+                            <div className="password-input-container">
+                                <input
+                                    type={showPassword ? "text" : "password"}
+                                    id="password"
+                                    placeholder="Enter your password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    className="toggle-password-visibility"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                >
+                                    {showPassword ? (
+                                        <FaEyeSlash size={18}/>
+                                    ) : (
+                                        <FaEye size={18}/>
+                                    )}
+                                </button>
+                            </div>
                         </div>
                         <div className="form-group-login remember-me">
                             <label htmlFor="rememberMe">
@@ -126,14 +141,15 @@ const Login = () => {
                 <div className="forgot-password-modal">
                     <div className="forgot-password-modal-content">
                         <h2 className="forgot-password-title">Reset Password(Coming Soon!)</h2>
-                        {/*<p className="forgot-password-instructions">*/}
-                        {/*    Enter your email address below, and we will send you a link to reset your password.*/}
-                        {/*</p>*/}
-                        {/*<input*/}
-                        {/*    type="email"*/}
-                        {/*    className="forgot-password-input"*/}
-                        {/*    placeholder="Enter your email address"*/}
-                        {/*/>*/}
+                        <p className="forgot-password-instructions">
+                            Enter your email address below, and we will send you a link to reset your password.
+                        </p>
+                        <input
+                            type="email"
+                            className="forgot-password-input"
+                            placeholder="Enter your email address"
+                            disabled
+                        />
                         <div className="forgot-password-actions">
                             <button
                                 className="forgot-password-cancel"

@@ -25,7 +25,7 @@ const UsersPage = () => {
         if (activeTab === 'viewUsers') {
             return <ViewUsers onRowClick={handleOpenUserDetails} />;
         } else if (activeTab === 'createUser') {
-            return <CreateUserForm />;
+            return <CreateUserForm onUserCreated={handleOpenUserDetails}/>;
         } else {
             const activeDynamicTab = dynamicTabs.find((tab) => tab.id === activeTab);
             return activeDynamicTab ? activeDynamicTab.component : null;

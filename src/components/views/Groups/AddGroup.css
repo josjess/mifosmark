@@ -165,3 +165,37 @@
 .submit-button:disabled:hover {
     background-color: #cccccc;
 }
+.dropdown-menu-custom {
+    position: absolute;
+    z-index: 1000;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    width: 100%;
+    max-width: 300px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-top: 45px;
+}
+
+.dropdown-item-custom {
+    padding: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.dropdown-item-custom:hover {
+    background-color: #f1f1f1;
+}
+
+.add-client-input-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    position: relative;
+}
+
+.add-client-input {
+    flex: 1;
+}

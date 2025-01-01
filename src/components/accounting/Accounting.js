@@ -12,7 +12,6 @@ const Accounting = () => {
         { label: 'Closing Entries', description: 'End-of-period actions', icon: FaChartLine, path: '/closing-entries', color: '#ff7b42' },
         { label: 'Chart of Accounts', description: 'Manage accounts', icon: FaBook, path: '/chart-of-accounts', color: '#4a90e2' },
         { label: 'Financial Activity Mappings', description: 'Map transactions', icon: FaMapSigns, path: '/financial-activity-mappings', color: '#fbb03b' },
-        // { label: 'Migrate Opening Balances', description: 'Transfer balances', icon: FaExchangeAlt, path: '/accounting#migrate-opening-balances', color: '#9b51e0' },
         { label: 'Accounting Rules', description: 'Set up rules', icon: FaCogs, path: '/accounting-rules', color: '#1abc9c' },
         { label: 'Accruals', description: 'Deferred revenue', icon: FaMoneyCheck, path: '/accruals', color: '#f67280' },
         { label: 'Provisioning Entries', description: 'Allowance records', icon: FaBalanceScale, path: '/provisioning-entries', color: '#3498db' }

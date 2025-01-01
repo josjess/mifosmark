@@ -1,44 +1,79 @@
-import React, { useState, useContext, useEffect } from 'react';
-import axios from 'axios';
-import { AuthContext } from '../../../context/AuthContext';
-import { API_CONFIG } from '../../../config';
-import './CreateUser.css';
+import React, { useState, useContext, useEffect } from "react";
+import axios from "axios";
+import { AuthContext } from "../../../context/AuthContext";
+import { API_CONFIG } from "../../../config";
+import "./CreateUser.css";
+import {FaEye, FaEyeSlash} from "react-icons/fa";
 
-const CreateUserForm = () => {
-    const { user } = useContext(AuthContext);
-    const [username, setUsername] = useState('');
-    const [firstName, setFirstName] = useState('');
-    const [lastName, setLastName] = useState('');
-    const [email, setEmail] = useState('');
-    const [autoGeneratePassword, setAutoGeneratePassword] = useState(false);
-    const [overridePasswordExpiry, setOverridePasswordExpiry] = useState(false);
+const CreateUserForm = ({ onUserCreated }) => {
+    const stages = ["Basic Information", "Settings", "Preview"];
+
+    const [currentStage, setCurrentStage] = useState(0);
+    const [completedStages, setCompletedStages] = useState(new Set());
+
+    const [username, setUsername] = useState("");
+    const [firstName, setFirstName] = useState("");
+    const [lastName, setLastName] = useState("");
+    const [email, setEmail] = useState("");
+    const [sendPasswordToEmail, setSendPasswordToEmail] = useState(true);
+    const [passwordNeverExpires, setPasswordNeverExpires] = useState(false);
+    const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+
+    const [office, setOffice] = useState("");
+    const [staff, setStaff] = useState("");
+    const [staffOptions, setStaffOptions] = useState([]);
     const [offices, setOffices] = useState([]);
-    const [office, setOffice] = useState('');
+
     const [roles, setRoles] = useState([]);
     const [selectedRoles, setSelectedRoles] = useState([]);
-    const [step, setStep] = useState(1);
-    const [formIsValid, setFormIsValid] = useState(false);
 
-    const validateForm = () => {
-        const isValid = username.length >= 5 && firstName && lastName && email && office && selectedRoles.length > 0;
-        setFormIsValid(isValid);
+    const [passwordVisible, setPasswordVisible] = useState(false);
+    const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+
+    const togglePasswordVisibility = () => setPasswordVisible((prev) => !prev);
+    const toggleConfirmPasswordVisibility = () => setConfirmPasswordVisible((prev) => !prev);
+
+    const [isStep1Valid, setIsStep1Valid] = useState(false);
+    const [isStep2Valid, setIsStep2Valid] = useState(false);
+
+    const { user } = useContext(AuthContext);
+
+    const isStep1Complete = () =>
+        username.length >= 5 &&
+        firstName.trim() !== "" &&
+        lastName.trim() !== "" &&
+        (sendPasswordToEmail
+            ? isValidEmail(email) && email.trim() !== ""
+            : isValidPassword(password) && password === confirmPassword);
+
+    const isStep2Complete = () => office.trim() !== "";
+
+    const isValidEmail = (email) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
+    const isValidPassword = (password) => {
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
+        return passwordRegex.test(password);
     };
 
     useEffect(() => {
-        validateForm();
-    }, [username, firstName, lastName, email, office, selectedRoles]);
+        setIsStep1Valid(isStep1Complete());
+    }, [username, firstName, lastName, email, sendPasswordToEmail, password, confirmPassword]);
 
     useEffect(() => {
-        fetchTemplateData();
-    }, []);
+        setIsStep2Valid(isStep2Complete());
+    }, [office, selectedRoles]);
 
     const fetchTemplateData = async () => {
         try {
             const response = await axios.get(`${API_CONFIG.baseURL}/users/template`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
-                    'Content-Type': 'application/json',
+                    "Fineract-Platform-TenantId": "default",
+                    "Content-Type": "application/json",
                 },
             });
             setRoles(response.data.availableRoles);
@@ -46,179 +81,349 @@ const CreateUserForm = () => {
             const officesResponse = await axios.get(`${API_CONFIG.baseURL}/offices`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
-                    'Content-Type': 'application/json',
+                    "Fineract-Platform-TenantId": "default",
+                    "Content-Type": "application/json",
                 },
             });
             setOffices(officesResponse.data || []);
         } catch (error) {
-            console.error('Error fetching template data:', error);
+            console.error("Error fetching template data:", error);
         }
     };
 
-    const goNext = () => setStep((prev) => prev + 1);
-    const goBack = () => setStep((prev) => prev - 1);
-
-    const handleSubmit = () => {
-        const newUser = {
-            username,
-            firstname: firstName,
-            lastname: lastName,
-            email,
-            autoGeneratePassword,
-            overridePasswordExpiryPolicy: overridePasswordExpiry,
-            roles: selectedRoles,
-            officeId: office,
-        };
-        console.log('Submitting new user:', newUser);
+    const fetchStaffData = async (officeId) => {
+        try {
+            const response = await axios.get(`${API_CONFIG.baseURL}/staff?officeId=${officeId}&status=all`, {
+                headers: {
+                    Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                    "Fineract-Platform-TenantId": "default",
+                    "Content-Type": "application/json",
+                },
+            });
+            setStaffOptions(response.data);
+        } catch (error) {
+            console.error("Error fetching staff data:", error);
+        }
     };
 
-    return (
-        <div className="form-container-user">
-            <div className="with-indicator">
-                <div className="stage-indicator">
-                    <div className={`stage ${step === 1 ? 'current' : step > 1 ? 'completed' : ''}`} onClick={() => setStep(1)}>
-                        <div className="circle"></div>
-                        <span>Basic Info</span>
-                    </div>
-                    <div className={`stage ${step === 2 ? 'current' : step > 2 ? 'completed' : ''}`} onClick={() => setStep(2)}>
-                        <div className="circle"></div>
-                        <span>Settings</span>
-                    </div>
-                    <div className={`stage ${step === 3 ? 'current' : step > 3 ? 'completed' : ''}`} onClick={() => setStep(3)}>
-                        <div className="circle"></div>
-                        <span>Roles</span>
-                    </div>
-                    <div className={`stage ${step === 4 ? 'current' : ''}`} onClick={() => setStep(4)}>
-                        <div className="circle"></div>
-                        <span>Review & Submit</span>
-                    </div>
+    useEffect(() => {
+        fetchTemplateData();
+    }, []);
+
+    useEffect(() => {
+        if (office) {
+            fetchStaffData(office);
+        }
+    }, [office]);
+
+    const handleNextStage = () => {
+        if (currentStage < stages.length - 1) {
+            if (
+                (currentStage === 0 && isStep1Complete()) ||
+                (currentStage === 1 && isStep2Complete())
+            ) {
+                setCompletedStages((prev) => {
+                    const updatedStages = new Set(prev);
+                    updatedStages.add(stages[currentStage]);
+                    return updatedStages;
+                });
+                setCurrentStage((prev) => prev + 1);
+            }
+        }
+    };
+
+    const handleSubmit = async () => {
+        const payload = {
+            username,
+            email, // Always include email
+            firstname: firstName,
+            lastname: lastName,
+            officeId: parseInt(office),
+            password: !sendPasswordToEmail ? password : undefined,
+            repeatPassword: !sendPasswordToEmail ? confirmPassword : undefined,
+            passwordNeverExpires,
+            roles: selectedRoles.map((roleId) => parseInt(roleId)),
+            sendPasswordToEmail,
+            staffId: staff ? parseInt(staff) : undefined,
+        };
+
+        try {
+            const response = await axios.post(`${API_CONFIG.baseURL}/users`, payload, {
+                headers: {
+                    Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                    "Fineract-Platform-TenantId": "default",
+                    "Content-Type": "application/json",
+                },
+            });
+
+            if (response.status === 200) {
+                const { resourceId } = response.data;
+                const newUser = {
+                    id: resourceId,
+                    firstname: firstName,
+                    lastname: lastName,
+                };
+
+                // Clear fields
+                setUsername("");
+                setFirstName("");
+                setLastName("");
+                setEmail("");
+                setSendPasswordToEmail(true);
+                setPassword("");
+                setConfirmPassword("");
+                setPasswordNeverExpires(false);
+                setOffice("");
+                setStaff("");
+                setSelectedRoles([]);
+                setCurrentStage(0);
+                setCompletedStages(new Set());
+
+                onUserCreated(newUser);
+
+            }
+        } catch (error) {
+            console.error("Error creating user:", error);
+            alert("An error occurred while creating the user. Please try again.");
+        }
+    };
+
+    const renderStageTracker = () => (
+        <div className="staged-form-stage-tracker">
+            {stages.map((stage, index) => (
+                <div
+                    key={stage}
+                    className={`staged-form-stage ${
+                        index === currentStage
+                            ? "staged-form-active"
+                            : completedStages.has(stage)
+                                ? "staged-form-completed"
+                                : "staged-form-unvisited"
+                    }`}
+                    onClick={() => {
+                        if (completedStages.has(stage)) {
+                            setCurrentStage(index);
+                        }
+                    }}
+                >
+                    <span className="staged-form-stage-circle">{index + 1}</span>
+                    <span className="staged-form-stage-label">{stage}</span>
                 </div>
+            ))}
+        </div>
+    );
 
-                <form className="user-form">
-                    {step === 1 && (
-                        <div className="form-section">
-                            <label>
-                                Username <span className="asterisk">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                placeholder="Enter username (min 5 characters)"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                                minLength="5"
-                                required
-                                className="form-input"
-                            />
-                            {username.length > 0 && username.length < 5 && (
-                                <p className="error-message">Username must be at least 5 characters long</p>
-                            )}
+    const renderStageContent = () => {
+        if (stages[currentStage] === "Preview") {
+            return renderPreviewSection();
+        }
 
-                            <label>
-                                First Name <span className="asterisk">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                placeholder="Enter first name"
-                                value={firstName}
-                                onChange={(e) => setFirstName(e.target.value)}
-                                required
-                                className="form-input"
-                            />
-
-                            <label>
-                                Last Name <span className="asterisk">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                placeholder="Enter last name"
-                                value={lastName}
-                                onChange={(e) => setLastName(e.target.value)}
-                                required
-                                className="form-input"
-                            />
-
-                            <label>
-                                Email <span className="asterisk">*</span>
-                            </label>
-                            <input
-                                type="email"
-                                placeholder="Enter email address"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                                className="form-input"
-                            />
-
-                            <div className="navigation-buttons">
-                                <button
-                                    className="cancel-button"
-                                    disabled
-                                >
-                                    back
-                                </button>
-                                <button
-                                    onClick={goNext}
-                                    className="next-button"
-                                    disabled={username.length < 5}
-                                >
-                                    Next
-                                </button>
+        switch (stages[currentStage]) {
+            case "Basic Information":
+                return (
+                    <div className="staged-form-basic-info">
+                        {/* Username */}
+                        <div className="staged-form-row">
+                            <div className="staged-form-field">
+                                <label>
+                                    Username <span className="staged-form-required">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    placeholder="Enter username (min 5 characters)"
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
+                                    minLength="5"
+                                    required
+                                    className="staged-form-input"
+                                />
+                                {username.length > 0 && username.length < 5 && (
+                                    <p className="error-message">Username must be at least 5 characters long</p>
+                                )}
+                            </div>
+                            <div className="staged-form-field">
+                                <label>
+                                    Email {sendPasswordToEmail && <span className="staged-form-required">*</span>}
+                                </label>
+                                <input
+                                    type="email"
+                                    placeholder="Enter email address"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required={sendPasswordToEmail}
+                                    className="staged-form-input"
+                                />
                             </div>
                         </div>
-                    )}
-                    {step === 2 && (
-                        <div className="form-section">
-                            <label>
-                                Office <span className="asterisk">*</span>
-                            </label>
-                            <select
-                                value={office}
-                                onChange={(e) => setOffice(e.target.value)}
-                                required
-                                className="form-input select-input office-select"
-                            >
-                                <option value="">-- Select Office --</option>
-                                {offices.map((officeOption) => (
-                                    <option key={officeOption.id} value={officeOption.id}>
-                                        {officeOption.name}
-                                    </option>
-                                ))}
-                            </select>
 
-                            <div className="checkbox-group">
+                        {/* First Name and Last Name */}
+                        <div className="staged-form-row">
+                            <div className="staged-form-field">
+                                <label>
+                                    First Name <span className="staged-form-required">*</span>
+                                </label>
                                 <input
-                                    type="checkbox"
-                                    checked={autoGeneratePassword}
-                                    onChange={() => setAutoGeneratePassword(!autoGeneratePassword)}
-                                    className="checkbox-input"
+                                    type="text"
+                                    placeholder="Enter first name"
+                                    value={firstName}
+                                    onChange={(e) => setFirstName(e.target.value)}
+                                    required
+                                    className="staged-form-input"
                                 />
-                                <label>Auto Generate Password</label>
                             </div>
-
-                            <div className="checkbox-group">
+                            <div className="staged-form-field">
+                                <label>
+                                    Last Name <span className="staged-form-required">*</span>
+                                </label>
                                 <input
-                                    type="checkbox"
-                                    checked={overridePasswordExpiry}
-                                    onChange={() => setOverridePasswordExpiry(!overridePasswordExpiry)}
-                                    className="checkbox-input"
+                                    type="text"
+                                    placeholder="Enter last name"
+                                    value={lastName}
+                                    onChange={(e) => setLastName(e.target.value)}
+                                    required
+                                    className="staged-form-input"
                                 />
-                                <label>Override Password Expiry</label>
-                            </div>
-
-                            <div className="navigation-buttons">
-                                <button onClick={goBack} className="cancel-button">Back</button>
-                                <button onClick={goNext} className="next-button">Next</button>
                             </div>
                         </div>
-                    )}
-                    {step === 3 && (
-                        <div className="form-section">
-                            <label className="roles-label">Assign Roles</label>
+
+                        <div className="staged-form-row">
+                            {/* Send Password to Email */}
+                            <div className="staged-form-field">
+                                <label>
+                                    <input
+                                        type="checkbox"
+                                        checked={sendPasswordToEmail}
+                                        onChange={() => {
+                                            setSendPasswordToEmail((prev) => !prev);
+                                            setPassword("");
+                                            setConfirmPassword("");
+                                        }}
+                                        className="checkbox-input"
+                                    />
+                                    Send Password to Email
+                                </label>
+                            </div>
+
+                            {/* Password Never Expires */}
+                            <div className="staged-form-field">
+                                <label>
+                                    <input
+                                        type="checkbox"
+                                        checked={passwordNeverExpires}
+                                        onChange={() => setPasswordNeverExpires((prev) => !prev)}
+                                        className="checkbox-input"
+                                    />
+                                    Password Never Expires
+                                </label>
+                            </div>
+                        </div>
+
+                        {/* Password and Confirm Password */}
+                        {!sendPasswordToEmail && (
+                            <div className="staged-form-row">
+                                {/* Password Field */}
+                                {/* Password Field */}
+                                <div className="staged-form-field">
+                                    <label>
+                                        Password <span className="staged-form-required">*</span>
+                                    </label>
+                                    <div className="password-field-container">
+                                        <input
+                                            type={passwordVisible ? "text" : "password"}
+                                            placeholder="Enter password"
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            required
+                                            className={`staged-form-input password-input ${!isValidPassword(password) && password.trim() !== "" ? "invalid" : ""}`}
+                                        />
+                                        <span
+                                            className="toggle-visibility-icon"
+                                            onClick={togglePasswordVisibility}
+                                        >
+                                            {passwordVisible ? <FaEyeSlash /> : <FaEye />}
+                                        </span>
+                                    </div>
+                                    {!isValidPassword(password) && password.trim() !== "" && (
+                                        <p className="error-message">
+                                            Password must include at least 8 characters, an uppercase letter, a lowercase letter, a number, and a special character.
+                                        </p>
+                                    )}
+                                </div>
+
+
+                                {/* Confirm Password Field */}
+                                <div className="staged-form-field">
+                                    <label>
+                                        Confirm Password <span className="staged-form-required">*</span>
+                                    </label>
+                                    <div className="password-field-container">
+                                        <input
+                                            type={confirmPasswordVisible ? "text" : "password"}
+                                            placeholder="Confirm password"
+                                            value={confirmPassword}
+                                            onChange={(e) => setConfirmPassword(e.target.value)}
+                                            required
+                                            className={`staged-form-input password-input ${password !== confirmPassword && confirmPassword.trim() !== "" ? "invalid" : ""}`}
+                                        />
+                                        <span
+                                            className="toggle-visibility-icon"
+                                            onClick={toggleConfirmPasswordVisibility}
+                                        >
+                                            {confirmPasswordVisible ? <FaEyeSlash/> : <FaEye/>}
+                                        </span>
+                                        {password !== confirmPassword && confirmPassword.trim() !== "" && (
+                                            <p className="error-message">Passwords must match</p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                );
+            case "Settings":
+                return (
+                    <div className="staged-form-settings">
+                        <div className="staged-form-row">
+                            <div className="staged-form-field">
+                                <label>
+                                    Office <span className="staged-form-required">*</span>
+                                </label>
+                                <select
+                                    value={office}
+                                    onChange={(e) => setOffice(e.target.value)}
+                                    required
+                                    className="staged-form-select"
+                                >
+                                    <option value="">-- Select Office --</option>
+                                    {offices.map((officeOption) => (
+                                        <option key={officeOption.id} value={officeOption.id}>
+                                            {officeOption.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="staged-form-field">
+                                <label>Assign Staff</label>
+                                <select
+                                    value={staff}
+                                    onChange={(e) => setStaff(e.target.value)}
+                                    className="staged-form-select"
+                                >
+                                    <option value="">-- Select Staff --</option>
+                                    {staffOptions.map((staffMember) => (
+                                        <option key={staffMember.id} value={staffMember.id}>
+                                            {staffMember.displayName}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                        <div className="staged-form-field">
+                            <label>Assign Roles</label>
                             <div className="roles-container">
                                 {roles.map((role) => (
                                     <div key={role.id} className="checkbox-group role-item">
-                                        <input
+                                        <label> <input
                                             type="checkbox"
                                             checked={selectedRoles.includes(role.id)}
                                             onChange={() =>
@@ -229,49 +434,138 @@ const CreateUserForm = () => {
                                                 )
                                             }
                                         />
-                                        <p>{role.name}</p>
+                                            {role.name}</label>
                                     </div>
                                 ))}
                             </div>
-                            <div className="navigation-buttons">
-                                <button onClick={goBack} className="back-button">Back</button>
-                                <button onClick={goNext} className="next-button">Next</button>
-                            </div>
                         </div>
-                    )}
-                    {step === 4 && (
-                        <>
-                            <h3>Review & Submit</h3>
-                            <div className="form-section review-section">
-                                <p><strong>Username:</strong> {username}</p>
-                                <p><strong>First Name:</strong> {firstName}</p>
-                                <p><strong>Last Name:</strong> {lastName}</p>
-                                <p><strong>Email:</strong> {email}</p>
-                                <p>
-                                    <strong>Office:</strong> {offices.find((o) => o.id === parseInt(office))?.name || "N/A"}
-                                </p>
-                                <p><strong>Auto Generate Password:</strong> {autoGeneratePassword ? "Yes" : "No"}</p>
-                                <p><strong>Override Password Expiry:</strong> {overridePasswordExpiry ? "Yes" : "No"}
-                                </p>
-                                <p>
-                                    <strong>Roles:</strong> {selectedRoles.map(id => roles.find(role => role.id === id)?.name).join(', ') || "N/A"}
-                                </p>
+                    </div>
+                );
 
-                            </div>
-                            <div className="navigation-buttons">
-                                <button onClick={goBack} className="back-button">Back</button>
-                                <button
-                                    type="button"
-                                    onClick={handleSubmit}
-                                    className="submit-button"
-                                    disabled={!formIsValid}
-                                >
-                                    Submit
-                                </button>
-                            </div>
-                        </>
-                    )}
-                </form>
+            default:
+                return null;
+        }
+    };
+
+    const renderPreviewSection = () => {
+        const getOfficeName = () => {
+            const officeObj = offices.find((o) => o.id === parseInt(office));
+            return officeObj ? officeObj.name : "N/A";
+        };
+
+        const getStaffName = () => {
+            const staffObj = staffOptions.find((s) => s.id === parseInt(staff));
+            return staffObj ? staffObj.displayName : "N/A";
+        };
+
+        const getRoleNames = () =>
+            selectedRoles
+                .map((roleId) => roles.find((role) => role.id === roleId)?.name)
+                .filter(Boolean)
+                .join(", ") || "N/A";
+
+        const stageData = [
+            {
+                title: "Basic Information",
+                data: {
+                    Username: username || "N/A",
+                    "First Name": firstName || "N/A",
+                    "Last Name": lastName || "N/A",
+                    Email: email || "N/A",
+                    Password: !sendPasswordToEmail ? "••••••••" : "Hidden (Send Password to Email Enabled)",
+                    "Send Password to Email": sendPasswordToEmail ? "Yes" : "No",
+                    "Password Never Expires": passwordNeverExpires ? "Yes" : "No",
+                },
+            },
+            {
+                title: "Settings",
+                data: {
+                    Office: getOfficeName(),
+                    Staff: getStaffName(),
+                    Roles: getRoleNames(),
+                },
+            },
+        ];
+
+        return (
+            <div className="staged-form-preview-section">
+                <h2 className="preview-header">Form Preview</h2>
+                {stageData.map(({ title, data }) => (
+                    <div key={title} className="staged-form-preview-block">
+                        <div className="staged-form-preview-header">
+                            <h4 className="preview-stage-title">{title}</h4>
+                            <button
+                                className="staged-form-edit-button"
+                                onClick={() => setCurrentStage(stages.indexOf(title))}
+                            >
+                                Edit
+                            </button>
+                        </div>
+                        <div className="staged-form-preview-table-wrapper">
+                            <table className="staged-form-preview-table">
+                                <thead>
+                                <tr>
+                                    <th>Field</th>
+                                    <th>Value</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {Object.entries(data).map(([key, value]) => (
+                                    <tr key={key}>
+                                        <td>{key}</td>
+                                        <td>{value}</td>
+                                    </tr>
+                                ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        );
+    };
+
+    return (
+        <div className="form-container-create-user">
+            <div className="staged-form-create-user">
+                {renderStageTracker()}
+
+                <div className="staged-form-stage-content">
+                    {renderStageContent()}
+
+                    <div className="staged-form-stage-buttons">
+                        <button
+                            onClick={() => setCurrentStage((prev) => Math.max(prev - 1, 0))}
+                            disabled={currentStage === 0}
+                            className="staged-form-button-previous"
+                        >
+                            Previous
+                        </button>
+
+                        {currentStage < stages.length - 1 && (
+                            <button
+                                onClick={handleNextStage}
+                                className="staged-form-button-next"
+                                disabled={
+                                    (currentStage === stages.indexOf("Basic Information") && !isStep1Valid) ||
+                                    (currentStage === stages.indexOf("Settings") && !isStep2Valid)
+                                }
+                            >
+                                Next
+                            </button>
+                        )}
+
+                        {stages[currentStage] === "Preview" && (
+                            <button
+                                type="button"
+                                onClick={handleSubmit}
+                                className="staged-form-button-next"
+                            >
+                                Submit
+                            </button>
+                        )}
+                    </div>
+                </div>
             </div>
         </div>
     );

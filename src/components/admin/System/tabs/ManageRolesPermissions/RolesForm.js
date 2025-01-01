@@ -10,13 +10,11 @@ const RoleForm = ({ setActiveTab, onRolesUpdate }) => {
     const [description, setDescription] = useState('');
     const [error, setError] = useState('');
 
+    const isFormValid = name.trim() !== '' && description.trim() !== '';
+
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        if (!name.trim()) {
-            setError('Role name is required.');
-            return;
-        }
 
         try {
             const response = await axios.post(
@@ -60,22 +58,30 @@ const RoleForm = ({ setActiveTab, onRolesUpdate }) => {
                             setError('');
                         }}
                         placeholder="Enter role name"
+                        required
                     />
                 </div>
                 <div className="form-group">
-                    <label htmlFor="description">Description</label>
+                    <label htmlFor="description">Description <span className="required">*</span></label>
                     <input
                         type="text"
                         id="description"
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         placeholder="Enter role description"
+                        required
                     />
                 </div>
                 {error && <p className="error-message">{error}</p>}
                 <div className="code-form-buttons">
                     <span onClick={handleCancel} className="cancel-button">Cancel</span>
-                    <button type="submit" className="submit-button">Submit</button>
+                    <button
+                        type="submit"
+                        className="submit-button"
+                        disabled={!isFormValid}
+                    >
+                        Submit
+                    </button>
                 </div>
             </form>
         </div>

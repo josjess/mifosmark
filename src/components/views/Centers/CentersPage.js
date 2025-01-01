@@ -1,13 +1,59 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Centers from './Centers';
 import AddCenterForm from './AddCenter';
 import CenterDetails from './CenterDetails';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 const CentersPage = () => {
+    const location = useLocation();
     const [activeTab, setActiveTab] = useState('viewCenters');
     const [dynamicTabs, setDynamicTabs] = useState([]);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (location.state?.openCenterDetails) {
+            const center = location.state.openCenterDetails;
+            handleOpenCenterDetails(center);
+
+            navigate(location.pathname, { replace: true });
+        }
+    }, [location]);
+
+    useEffect(() => {
+        const state = location.state;
+
+        if (state?.centerId) {
+            const tabId = `centerDetail-${state.centerId}`;
+            const tabLabel = state.centerName || `Center #${state.centerId}`;
+
+            setDynamicTabs((prevTabs) => {
+                const existingTab = prevTabs.find((tab) => tab.id === tabId);
+                if (existingTab) {
+                    if (existingTab.label !== tabLabel) {
+                        return prevTabs.map((tab) =>
+                            tab.id === tabId ? { ...tab, label: tabLabel } : tab
+                        );
+                    }
+                    return prevTabs;
+                }
+                return [
+                    ...prevTabs,
+                    {
+                        id: tabId,
+                        label: tabLabel,
+                        component: (
+                            <CenterDetails
+                                centerId={state.centerId}
+                                onClose={() => handleCloseTab(tabId)}
+                            />
+                        ),
+                    },
+                ];
+            });
+
+            setActiveTab(tabId);
+        }
+    }, [location.state]);
 
     const handleOpenCenterDetails = (center) => {
         const tabId = `centerDetail-${center.id}`;
@@ -39,7 +85,7 @@ const CentersPage = () => {
         if (activeTab === 'viewCenters') {
             return <Centers onRowClick={handleOpenCenterDetails} />;
         } else if (activeTab === 'addCenter') {
-            return <AddCenterForm />;
+            return <AddCenterForm onSuccessfulSubmit={() => setActiveTab('viewCenters')} />;
         } else if (activeTab === 'importCenters') {
             navigate('/bulk-imports/centers');
             return null;

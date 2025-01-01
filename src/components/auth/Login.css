@@ -239,6 +239,21 @@
 .forgot-password-cancel:hover {
     background-color: #b02a2a;
 }
+.password-input-container {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.toggle-password-visibility {
+    background: none;
+    border: none;
+    position: absolute;
+    right: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
 
 @keyframes fadeIn {
     from {

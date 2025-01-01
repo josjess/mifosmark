@@ -1,0 +1,149 @@
+.actions-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.actions-dropdown-toggle {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.actions-dropdown-toggle:hover {
+    background-color: #0056b3;
+}
+
+.actions-dropdown-menu {
+    position: absolute;
+    top: 0;
+    right: 100%;
+    background-color: #ffffff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    padding: 10px;
+    z-index: 1000;
+    width: 200px;
+}
+
+.actions-dropdown .dropdown-item {
+    background: none;
+    border: none;
+    color: #333;
+    text-align: left;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+    transition: background-color 0.3s;
+}
+
+.actions-dropdown .dropdown-item:hover {
+    background-color: #f1f1f1;
+}
+
+.actions-dropdown .dropdown-submenu {
+    position: relative;
+}
+
+.submenu-toggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.submenu-icon {
+    font-size: 14px;
+    margin-left: 8px;
+    color: #666;
+}
+.submenu-content {
+    position: absolute;
+    top: 0;
+    right: 100%;
+    background-color: #ffffff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+    min-width: 180px;
+}
+
+.submenu-content .dropdown-item {
+    padding: 8px 12px;
+}
+
+.submenu-content .dropdown-item:hover {
+    background-color: #f1f1f1;
+}
+.loan-tabs-container-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.loan-tabs-container-wrapper .client-details-tabs {
+    display: flex;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    box-shadow: 1px 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+.loan-tabs-container-wrapper .client-details-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.loan-tab-button {
+    white-space: nowrap;
+    padding: 10px 20px;
+    font-size: 16px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.loan-tab-button:hover {
+    background-color: #f1f1f1;
+}
+
+.loan-tab-button.active {
+    font-weight: bold;
+    border-bottom: 2px solid #007bff;
+    color: #007bff;
+}
+
+.loan-tabs-container-wrapper .scroll-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: white;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    z-index: 10;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.loan-tabs-container-wrapper .scroll-button.scroll-left {
+    left: 0;
+}
+
+.loan-tabs-container-wrapper .scroll-button.scroll-right {
+    right: 0;
+}
+
+.loan-tabs-container-wrapper .scroll-button:hover {
+    background-color: #f1f1f1;
+}

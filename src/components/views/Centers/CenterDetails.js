@@ -5,6 +5,8 @@ import {AuthContext} from "../../../context/AuthContext";
 import {useLoading} from "../../../context/LoadingContext";
 import { FaTrash, FaEdit, FaStickyNote} from 'react-icons/fa';
 import {useNavigate} from "react-router-dom";
+import DatePicker from "react-datepicker";
+import {format} from "date-fns";
 
 const CenterDetails = ({ centerId, onClose }) => {
     const { user } = useContext(AuthContext);
@@ -20,6 +22,37 @@ const CenterDetails = ({ centerId, onClose }) => {
     const [newNote, setNewNote] = useState('');
     const [editingNoteId, setEditingNoteId] = useState(null);
 
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editCenterData, setEditCenterData] = useState({
+        name: "",
+        staffId: "",
+        externalId: "",
+    });
+    const [originalCenterData, setOriginalCenterData] = useState(null); // For comparison
+    const [staffOptions, setStaffOptions] = useState([]);
+
+    const [isManageGroupsModalOpen, setIsManageGroupsModalOpen] = useState(false);
+    const [availableGroups, setAvailableGroups] = useState([]);
+    const [selectedGroup, setSelectedGroup] = useState(null);
+    const [currentGroups, setCurrentGroups] = useState([]);
+
+    const [isAssignStaffModalOpen, setIsAssignStaffModalOpen] = useState(false);
+    const [selectedStaff, setSelectedStaff] = useState('');
+
+    const [isAttachMeetingModalOpen, setIsAttachMeetingModalOpen] = useState(false);
+    const [meetingStartDate, setMeetingStartDate] = useState(null);
+    const [isRepeating, setIsRepeating] = useState(false);
+    const [meetingTemplate, setMeetingTemplate] = useState(null);
+
+    const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
+    const [closedOnDate, setClosedOnDate] = useState(null);
+    const [closureReason, setClosureReason] = useState('');
+    const closureReasons = [
+        { id: 1, value: 'Business Completed' },
+        { id: 2, value: 'Merged with Another Center' },
+        { id: 3, value: 'Other' },
+    ]; // Example reasons, update based on your backend data.
+
     useEffect(() => {
         setCenterImage(process.env.PUBLIC_URL + 'Images/centers.png');
     }, []);
@@ -31,51 +64,51 @@ const CenterDetails = ({ centerId, onClose }) => {
     };
     useEffect(() => {
         if (activeTab === 'general') {
-            const fetchGeneralTabData = async () => {
-                startLoading();
-                try {
-                    const headers = {
-                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        'Fineract-Platform-TenantId': 'default',
-                        'Content-Type': 'application/json',
-                    };
-
-                    // Fetch center details
-                    const centerResponse = await axios.get(
-                        `${API_CONFIG.baseURL}/centers/${centerId}?associations=groupMembers,collectionMeetingCalendar`,
-                        { headers }
-                    );
-                    setCentersDetails(centerResponse.data);
-
-                    // Fetch group summary counts
-                    const summaryResponse = await axios.get(
-                        `${API_CONFIG.baseURL}/runreports/GroupSummaryCounts?R_groupId=${centerId}&genericResultSet=false`,
-                        { headers }
-                    );
-                    const summaryData = summaryResponse.data[0] || {};
-                    setCentersDetails((prevDetails) => ({
-                        ...prevDetails,
-                        groupSummaryCounts: summaryData,
-                    }));
-
-                    // Fetch group accounts
-                    const accountsResponse = await axios.get(
-                        `${API_CONFIG.baseURL}/centers/${centerId}/accounts`,
-                        { headers }
-                    );
-                    setCentersDetails((prevDetails) => ({
-                        ...prevDetails,
-                        groupAccounts: accountsResponse.data,
-                    }));
-                } catch (error) {
-                    console.error('Error fetching center details:', error);
-                } finally {
-                    stopLoading();
-                }
-            };
             fetchGeneralTabData();
         }
     }, [activeTab, centerId]);
+    const fetchGeneralTabData = async () => {
+        startLoading();
+        try {
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': 'default',
+                'Content-Type': 'application/json',
+            };
+
+            // Fetch center details
+            const centerResponse = await axios.get(
+                `${API_CONFIG.baseURL}/centers/${centerId}?associations=groupMembers,collectionMeetingCalendar`,
+                { headers }
+            );
+            setCentersDetails(centerResponse.data);
+
+            // Fetch group summary counts
+            const summaryResponse = await axios.get(
+                `${API_CONFIG.baseURL}/runreports/GroupSummaryCounts?R_groupId=${centerId}&genericResultSet=false`,
+                { headers }
+            );
+            const summaryData = summaryResponse.data[0] || {};
+            setCentersDetails((prevDetails) => ({
+                ...prevDetails,
+                groupSummaryCounts: summaryData,
+            }));
+
+            // Fetch group accounts
+            const accountsResponse = await axios.get(
+                `${API_CONFIG.baseURL}/centers/${centerId}/accounts`,
+                { headers }
+            );
+            setCentersDetails((prevDetails) => ({
+                ...prevDetails,
+                groupAccounts: accountsResponse.data,
+            }));
+        } catch (error) {
+            console.error('Error fetching center details:', error);
+        } finally {
+            stopLoading();
+        }
+    };
 
     useEffect(() => {
         if (activeTab === 'notes') {
@@ -185,6 +218,366 @@ const CenterDetails = ({ centerId, onClose }) => {
         setEditingNoteId(note.id);
         setNewNote(note.note);
         setIsNotesModalOpen(true);
+    };
+
+    const fetchCenterData = async () => {
+        try {
+            startLoading();
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': 'default',
+                'Content-Type': 'application/json',
+            };
+
+            const response = await axios.get(
+                `${API_CONFIG.baseURL}/centers/${centerId}?staffInSelectedOfficeOnly=true&template=true`,
+                { headers }
+            );
+
+            const data = response.data;
+            setEditCenterData({
+                name: data.name || "",
+                staffId: data.staffId || "",
+                externalId: data.externalId || "",
+            });
+
+            setOriginalCenterData({
+                name: data.name || "",
+                staffId: data.staffId || "",
+                externalId: data.externalId || "",
+            });
+
+            setStaffOptions(data.staffOptions || []);
+            setIsEditModalOpen(true);
+        } catch (error) {
+            console.error("Error fetching center data for editing:", error);
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const handleEditSubmit = async () => {
+        try {
+            startLoading();
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': 'default',
+                'Content-Type': 'application/json',
+            };
+
+            const payload = {
+                name: editCenterData.name,
+                staffId: parseInt(editCenterData.staffId),
+                externalId: editCenterData.externalId || undefined,
+                dateFormat: "dd MMMM yyyy",
+                locale: "en",
+            };
+
+            await axios.put(`${API_CONFIG.baseURL}/centers/${centerId}`, payload, { headers });
+            setIsEditModalOpen(false);
+            fetchGeneralTabData();
+        } catch (error) {
+            console.error("Error updating center data:", error);
+            alert("Failed to update center details. Please try again.");
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const fetchManageGroupsData = async () => {
+        try {
+            startLoading();
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': 'default',
+                'Content-Type': 'application/json',
+            };
+
+            // Fetch current groups and center details
+            const centerResponse = await axios.get(
+                `${API_CONFIG.baseURL}/centers/${centerId}?associations=groupMembers&template=true`,
+                { headers }
+            );
+
+            setCurrentGroups(centerResponse.data.groupMembers || []);
+
+            // Fetch available groups for dropdown
+            const availableGroupsResponse = await axios.get(
+                `${API_CONFIG.baseURL}/groups?sortOrder=ASC&orderBy=name&officeId=${centerResponse.data.officeId}&orphansOnly=true`,
+                { headers }
+            );
+
+            setAvailableGroups(availableGroupsResponse.data || []);
+            setIsManageGroupsModalOpen(true);
+        } catch (error) {
+            console.error("Error fetching manage groups data:", error);
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const handleAddGroup = async () => {
+        if (!selectedGroup) return;
+
+        try {
+            startLoading();
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': 'default',
+                'Content-Type': 'application/json',
+            };
+
+            const payload = { groupMembers: [selectedGroup] };
+
+            await axios.post(
+                `${API_CONFIG.baseURL}/centers/${centerId}?command=associateGroups`,
+                payload,
+                { headers }
+            );
+
+            fetchManageGroupsData();
+            setSelectedGroup(null);
+        } catch (error) {
+            console.error("Error adding group to center:", error);
+            alert("Failed to add group. Please try again.");
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const handleRemoveGroup = async (groupId) => {
+        const confirmRemove = window.confirm("Are you sure you want to remove this group?");
+        if (!confirmRemove) return;
+
+        try {
+            startLoading();
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': 'default',
+                'Content-Type': 'application/json',
+            };
+
+            const payload = { groupMembers: [groupId] };
+
+            await axios.post(
+                `${API_CONFIG.baseURL}/centers/${centerId}?command=disassociateGroups`,
+                payload,
+                { headers }
+            );
+
+            fetchManageGroupsData();
+        } catch (error) {
+            console.error("Error removing group from center:", error);
+            alert("Failed to remove group. Please try again.");
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const fetchAssignStaffData = async () => {
+        try {
+            startLoading();
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': 'default',
+            };
+
+            const response = await axios.get(
+                `${API_CONFIG.baseURL}/groups/${centerId}?groupOrCenter=centers&staffInSelectedOfficeOnly=true&template=true`,
+                { headers }
+            );
+
+            setStaffOptions(response.data.staffOptions || []);
+        } catch (error) {
+            console.error('Error fetching staff options:', error);
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const fetchMeetingTemplate = async () => {
+        try {
+            startLoading();
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': 'default',
+            };
+            const response = await axios.get(
+                `${API_CONFIG.baseURL}/centers/${centerId}/calendars/template`,
+                { headers }
+            );
+            setMeetingTemplate(response.data);
+        } catch (error) {
+            console.error('Error fetching meeting template:', error);
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const handleAssignStaff = async () => {
+        try {
+            startLoading();
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': 'default',
+                'Content-Type': 'application/json',
+            };
+
+            const payload = { staffId: selectedStaff };
+
+            await axios.post(
+                `${API_CONFIG.baseURL}/groups/${centerId}?command=assignStaff`,
+                payload,
+                { headers }
+            );
+
+            setIsAssignStaffModalOpen(false);
+            fetchGeneralTabData(); // Refresh the center details
+        } catch (error) {
+            console.error('Error assigning staff:', error);
+            alert('Failed to assign staff. Please try again.');
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const handleUnassignStaff = async () => {
+        const confirmUnassign = window.confirm('Are you sure you want to unassign the staff?');
+        if (!confirmUnassign) return;
+
+        try {
+            startLoading();
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': 'default',
+                'Content-Type': 'application/json',
+            };
+
+            const payload = { staffId: centersDetails.staffId };
+
+            await axios.post(
+                `${API_CONFIG.baseURL}/groups/${centerId}?command=unassignStaff`,
+                payload,
+                { headers }
+            );
+
+            fetchGeneralTabData();
+        } catch (error) {
+            console.error('Error unassigning staff:', error);
+            alert('Failed to unassign staff.');
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const handleAttachMeeting = async () => {
+        try {
+            startLoading();
+
+            const formattedDate = format(meetingStartDate, 'dd MMMM yyyy');
+
+            const payload = {
+                startDate: formattedDate,
+                repeating: isRepeating,
+                title: `centers_${centerId}_CollectionMeeting`,
+                typeId: meetingTemplate?.type?.id || '1',
+                dateFormat: 'dd MMMM yyyy',
+                locale: 'en',
+            };
+
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': 'default',
+                'Content-Type': 'application/json',
+            };
+
+            await axios.post(
+                `${API_CONFIG.baseURL}/centers/${centerId}/calendars`,
+                payload,
+                { headers }
+            );
+
+            setIsAttachMeetingModalOpen(false);
+            fetchGeneralTabData();
+        } catch (error) {
+            console.error('Error attaching meeting:', error.response?.data || error);
+            alert('Failed to attach meeting. Please try again.');
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const handleViewStaffAssignmentHistory = () => {
+        // Add navigation or modal logic
+    };
+
+    const handleCloseCenter = async () => {
+        try {
+            startLoading();
+
+            const formattedDate = closedOnDate
+                ? closedOnDate.toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: 'long',
+                    year: 'numeric',
+                })
+                : '';
+
+            const payload = {
+                closedOn: formattedDate,
+                closureReasonId: parseInt(closureReason),
+                dateFormat: 'dd MMMM yyyy',
+                locale: 'en',
+            };
+
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': 'default',
+                'Content-Type': 'application/json',
+            };
+
+            await axios.post(
+                `${API_CONFIG.baseURL}/centers/${centerId}?command=close`,
+                payload,
+                { headers }
+            );
+
+            alert('Center closed successfully.');
+            setIsCloseModalOpen(false);
+            fetchGeneralTabData(); // Refresh center details
+        } catch (error) {
+            console.error('Error closing center:', error.response?.data || error);
+            alert('Failed to close center. Please try again.');
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const handleDeleteCenter = async () => {
+        const confirmDelete = window.confirm(
+            'Are you sure you want to delete this center? This action cannot be undone.'
+        );
+
+        if (!confirmDelete) return;
+
+        try {
+            startLoading();
+
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': 'default',
+            };
+
+            await axios.delete(`${API_CONFIG.baseURL}/centers/${centerId}`, { headers });
+
+            alert('Center deleted successfully.');
+            onClose();
+        } catch (error) {
+            console.error('Error deleting center:', error.response?.data || error);
+            alert('Failed to delete center. Please try again.');
+        } finally {
+            stopLoading();
+        }
     };
 
     const renderTabContent = () => {
@@ -403,19 +796,40 @@ const CenterDetails = ({ centerId, onClose }) => {
 
                 {/* Right Section */}
                 <div className="client-actions-section">
-                    <button className="client-action-button">Edit</button>
-                    <button className="client-action-button">Add Group</button>
-                    <button className="client-action-button">Manage Groups</button>
-                    <button className="client-action-button">Center Saving Application</button>
+                    <button className="client-action-button" onClick={fetchCenterData}>Edit</button>
+                    <button className="client-action-button" onClick={fetchManageGroupsData}>Manage Groups</button>
+                    <button className="client-action-button"
+                            onClick={() => navigate(`/center/${centerId}/applications/savings`)}>Center Saving
+                        Application
+                    </button>
 
                     <div className="client-dropdown">
                         <button className="client-action-button">More</button>
                         <div className="client-dropdown-content">
-                            <button>Unassign Staff</button>
-                            <button>Attach Meeting</button>
-                            <button>Staff Assignment History</button>
-                            <button>Close</button>
-                            <button>Delete</button>
+                            {centersDetails?.staffId ? (
+                                <button onClick={() => handleUnassignStaff()}>Unassign Staff</button>
+                            ) : (
+                                <button onClick={() => {
+                                    setIsAssignStaffModalOpen(true);
+                                    fetchAssignStaffData();
+                                }}>Assign Staff</button>
+                            )}
+                            <button onClick={() => {
+                                setIsAttachMeetingModalOpen(true);
+                                fetchMeetingTemplate();
+                            }}>Attach Meeting</button>
+                            <button onClick={() => handleViewStaffAssignmentHistory()}>
+                                Staff Assignment History
+                            </button>
+                            <button onClick={() => setIsCloseModalOpen(true)}>Close</button>
+                            {centersDetails?.status?.value === 'Pending' && (
+                                <button
+                                    className="client-action-button"
+                                    onClick={() => handleDeleteCenter()}
+                                >
+                                    Delete
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -434,6 +848,321 @@ const CenterDetails = ({ centerId, onClose }) => {
 
             {/* Tab Content */}
             <div className="client-tab-content">{renderTabContent()}</div>
+
+            {isEditModalOpen && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">Edit Center</h4>
+
+                        {/* Name Field */}
+                        <div className="create-provisioning-criteria-group">
+                            <label htmlFor="editName" className="create-provisioning-criteria-label">
+                                Name <span>*</span>
+                            </label>
+                            <input
+                                id="editName"
+                                type="text"
+                                value={editCenterData.name}
+                                onChange={(e) =>
+                                    setEditCenterData({ ...editCenterData, name: e.target.value })
+                                }
+                                className="create-provisioning-criteria-input"
+                                placeholder="Enter Center Name"
+                                required
+                            />
+                        </div>
+
+                        {/* Staff Dropdown */}
+                        <div className="create-provisioning-criteria-group">
+                            <label htmlFor="editStaff" className="create-provisioning-criteria-label">
+                                Staff <span>*</span>
+                            </label>
+                            <select
+                                id="editStaff"
+                                value={editCenterData.staffId}
+                                onChange={(e) =>
+                                    setEditCenterData({ ...editCenterData, staffId: e.target.value })
+                                }
+                                className="create-provisioning-criteria-input"
+                                required
+                            >
+                                <option value="">-- Select Staff --</option>
+                                {staffOptions.map((staff) => (
+                                    <option key={staff.id} value={staff.id}>
+                                        {staff.displayName}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* External ID */}
+                        <div className="create-provisioning-criteria-group">
+                            <label htmlFor="editExternalId" className="create-provisioning-criteria-label">
+                                External ID
+                            </label>
+                            <input
+                                id="editExternalId"
+                                type="text"
+                                value={editCenterData.externalId}
+                                onChange={(e) =>
+                                    setEditCenterData({ ...editCenterData, externalId: e.target.value })
+                                }
+                                className="create-provisioning-criteria-input"
+                                placeholder="Enter External ID"
+                            />
+                        </div>
+
+                        {/* Modal Actions */}
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button
+                                onClick={() => setIsEditModalOpen(false)}
+                                className="create-provisioning-criteria-cancel"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleEditSubmit}
+                                className="create-provisioning-criteria-confirm"
+                                disabled={
+                                    !editCenterData.name.trim() ||
+                                    !editCenterData.staffId ||
+                                    JSON.stringify(editCenterData) === JSON.stringify(originalCenterData)
+                                }
+                            >
+                                Submit
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isManageGroupsModalOpen && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">Manage Groups</h4>
+
+                        {/* Add Group Dropdown */}
+                            <div className="create-provisioning-criteria-group">
+                            <label htmlFor="addGroupDropdown" className="create-provisioning-criteria-label">
+                                Add Group
+                            </label>
+                            <select
+                                id="addGroupDropdown"
+                                value={selectedGroup || ""}
+                                onChange={(e) => setSelectedGroup(e.target.value)}
+                                className="create-provisioning-criteria-input"
+                            >
+                                <option value="">-- Select Group --</option>
+                                {availableGroups.map((group) => (
+                                    <option key={group.id} value={group.id}>
+                                        {group.name} ({group.accountNo})
+                                    </option>
+                                ))}
+                            </select>
+                            <button
+                                onClick={handleAddGroup}
+                                className="create-provisioning-criteria-confirm"
+                                disabled={!selectedGroup}
+                            >
+                                Add Group
+                            </button>
+                        </div>
+
+                        {/* Current Groups Table */}
+                        <div className="general-section general-groups-section">
+                            <h4 className="general-section-title">Current Groups</h4>
+                            <table className="general-charges-table">
+                                <thead>
+                                <tr>
+                                    <th>Account Number</th>
+                                    <th>Group Name</th>
+                                    <th>Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {currentGroups.length > 0 ? (
+                                    currentGroups.map((group) => (
+                                        <tr key={group.id}>
+                                            <td>{group.accountNo}</td>
+                                            <td>{group.name}</td>
+                                            <td>
+                                                <button style={{border: "none", cursor: "pointer"}}
+                                                    onClick={() => handleRemoveGroup(group.id)}
+                                                >
+                                                    <FaTrash color={"#e13a3a"} size={20} />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan="3">No groups available</td>
+                                    </tr>
+                                )}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Modal Actions */}
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button
+                                onClick={() => setIsManageGroupsModalOpen(false)}
+                                className="create-provisioning-criteria-cancel"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isAssignStaffModalOpen && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">Assign Staff</h4>
+                        <div className="create-provisioning-criteria-group">
+                            <label htmlFor="staffSelect" className="create-provisioning-criteria-label">
+                                Select Staff <span>*</span>
+                            </label>
+                            <select
+                                id="staffSelect"
+                                value={selectedStaff}
+                                onChange={(e) => setSelectedStaff(e.target.value)}
+                                className="create-provisioning-criteria-input"
+                            >
+                                <option value="">-- Select Staff --</option>
+                                {staffOptions.map((staff) => (
+                                    <option key={staff.id} value={staff.id}>
+                                        {staff.displayName}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button
+                                onClick={() => setIsAssignStaffModalOpen(false)}
+                                className="create-provisioning-criteria-cancel"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleAssignStaff}
+                                className="create-provisioning-criteria-confirm"
+                                disabled={!selectedStaff}
+                            >
+                                Assign
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isAttachMeetingModalOpen && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">Attach Meeting</h4>
+                        <div className="create-provisioning-criteria-group">
+                            <label htmlFor="meetingStartDate" className="create-provisioning-criteria-label">
+                                Meeting Start Date <span>*</span>
+                            </label>
+                            <DatePicker
+                                id="meetingStartDate"
+                                selected={meetingStartDate}
+                                onChange={(date) => setMeetingStartDate(date)}
+                                className="create-provisioning-criteria-input"
+                                placeholderText="Select Meeting Start Date"
+                                dateFormat="dd MMMM yyyy"
+                                minDate={new Date()}
+                            />
+                        </div>
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label" htmlFor="isRepeating">
+                                Repeats?{'  '}<input
+                                    type="checkbox"
+                                    id="isRepeating"
+                                    checked={isRepeating}
+                                    onChange={(e) => setIsRepeating(e.target.checked)}
+                                />
+
+                            </label>
+                        </div>
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button
+                                onClick={() => setIsAttachMeetingModalOpen(false)}
+                                className="create-provisioning-criteria-cancel"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleAttachMeeting}
+                                className="create-provisioning-criteria-confirm"
+                                disabled={!meetingStartDate}
+                            >
+                                Submit
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isCloseModalOpen && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">Close Center</h4>
+                        {/* Closed On Date */}
+                        <div className="create-provisioning-criteria-group">
+                            <label htmlFor="closedOnDate" className="create-provisioning-criteria-label">
+                                Closed On Date <span>*</span>
+                            </label>
+                            <DatePicker
+                                id="closedOnDate"
+                                selected={closedOnDate}
+                                onChange={(date) => setClosedOnDate(date)}
+                                className="create-provisioning-criteria-input"
+                                placeholderText="Select Closed On Date"
+                                dateFormat="dd MMMM yyyy"
+                                maxDate={new Date()} // Prevent future dates
+                            />
+                        </div>
+
+                        {/* Closure Reason */}
+                        <div className="create-provisioning-criteria-group">
+                            <label htmlFor="closureReason" className="create-provisioning-criteria-label">
+                                Closure Reason <span>*</span>
+                            </label>
+                            <select
+                                id="closureReason"
+                                value={closureReason}
+                                onChange={(e) => setClosureReason(e.target.value)}
+                                className="create-provisioning-criteria-input"
+                            >
+                                <option value="">-- Select Closure Reason --</option>
+                                {closureReasons.map((reason) => (
+                                    <option key={reason.id} value={reason.id}>
+                                        {reason.value}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* Modal Actions */}
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button
+                                onClick={() => setIsCloseModalOpen(false)}
+                                className="create-provisioning-criteria-cancel"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleCloseCenter}
+                                className="create-provisioning-criteria-confirm"
+                                disabled={!closedOnDate || !closureReason}
+                            >
+                                Confirm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+
+
         </div>
     );
 };
