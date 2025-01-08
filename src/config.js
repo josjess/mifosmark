@@ -14,7 +14,6 @@ export const loadConfig = async () => {
 
             const customBaseURL = localStorage.getItem('customBaseURL');
             API_CONFIG.baseURL = customBaseURL || config.baseURL || API_CONFIG.baseURL;
-            // console.log('Base URL Loaded:', API_CONFIG.baseURL);
         } else {
             console.error('Failed to load configuration file:', response.statusText);
         }

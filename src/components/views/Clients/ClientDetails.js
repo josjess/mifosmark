@@ -1097,13 +1097,19 @@ const ClientDetails = ({ clientId, onClose }) => {
                                                             <td>
                                                                 <button
                                                                     className="general-action-button"
-                                                                    onClick={() => handleOpenDepositModal()}
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        handleOpenDepositModal();
+                                                                    }}
                                                                 >
                                                                     Deposit
                                                                 </button>
                                                                 <button
                                                                     className="general-action-button"
-                                                                    onClick={() => handleOpenWithdrawModal()}
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        handleOpenWithdrawModal();
+                                                                    }}
                                                                 >
                                                                     Withdraw
                                                                 </button>
@@ -2350,7 +2356,8 @@ const ClientDetails = ({ clientId, onClose }) => {
     };
 
     const handleSavingsRowClick = (account) => {
-        navigate(`/client/${clientId}/savings-account/${account.savingsAccountId}`, { state: { account } });
+        console.log("Charge clicked:", account);
+        navigate(`/client/${clientId}/savings-account/${account.id}`, { state: { account } });
     };
 
     const handleLoanRowClick = (loan) => {

@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, {useState, useContext, memo} from 'react';
 import './Login.css';
 import { useNavigate } from 'react-router-dom';
 import { API_CONFIG } from "../../config";
@@ -15,8 +15,32 @@ const Login = () => {
     const { showNotification } = useContext(NotificationContext);
     const [showPassword, setShowPassword] = useState(false);
     const { login } = useContext(AuthContext);
+    const { baseURL, isBaseURLChanged, updateBaseURL } = useContext(AuthContext);
     const { startLoading, stopLoading } = useLoading();
     const navigate = useNavigate();
+
+    const handleResetBaseURL = async () => {
+        try {
+            const cacheBuster = `?t=${new Date().getTime()}`;
+            const response = await fetch(`${process.env.PUBLIC_URL}/config.json${cacheBuster}`, {
+                cache: 'no-store',
+            });
+
+            if (response.ok) {
+                const config = await response.json();
+                const defaultBaseURL = config.baseURL;
+
+                updateBaseURL(defaultBaseURL);
+                showNotification("Base URL has been reset to the default.", "success");
+                window.location.reload();
+            } else {
+                showNotification("Failed to reset Base URL: Unable to load config.", "error");
+            }
+        } catch (error) {
+            console.error("Error resetting Base URL:", error);
+            showNotification("Error resetting Base URL.", "error");
+        }
+    };
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -131,6 +155,25 @@ const Login = () => {
                             Login
                         </button>
                     </form>
+                    {isBaseURLChanged && (
+                        <button
+                            onClick={handleResetBaseURL}
+                            style={{
+                                display: 'block',
+                                margin: '20px auto',
+                                padding: '10px 20px',
+                                textAlign: 'center',
+                                fontSize: '16px',
+                                borderRadius: '20px',
+                                border: 'none',
+                                backgroundColor: '#d36565',
+                                color: '#fff',
+                                cursor: 'pointer',
+                            }}
+                        >
+                            Reset Base URL
+                        </button>
+                    )}
 
                     <p className="forgot-password-link" onClick={toggleForgotPasswordModal}>
                         Forgot Password?
@@ -166,4 +209,4 @@ const Login = () => {
     );
 };
 
-export default Login;
+export default memo(Login);

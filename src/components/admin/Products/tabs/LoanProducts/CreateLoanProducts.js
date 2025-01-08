@@ -156,29 +156,21 @@ const CreateLoanProducts = () => {
 
     const handleSubmit = async () => {
         try {
-            // Extract and transform formData into the required payload
             const {
                 Details = {},
                 Currency = {},
                 Settings = {},
                 Terms = {},
                 Charges = [],
-                Accounting = {},
             } = formData;
 
             const payload = {
-                // Details Section
                 name: Details.name,
                 shortName: Details.shortName,
-                locale: "en_GB", // Set default locale
-                dateFormat: "dd MMMM yyyy", // Set default date format
-
-                // Currency Section
+                includeInBorrowerCycle: Settings.includeInBorrowerCycle || false,
                 currencyCode: Currency.currencyCode,
-                digitsAfterDecimal: Currency.digitsAfterDecimal,
-                inMultiplesOf: Currency.inMultiplesOf,
-
-                // Settings Section
+                dateFormat: "dd MMMM yyyy",
+                locale: "en",
                 principal: Settings.principal,
                 numberOfRepayments: Settings.numberOfRepayments,
                 repaymentEvery: Settings.repaymentEvery,
@@ -188,136 +180,37 @@ const CreateLoanProducts = () => {
                 amortizationType: Settings.amortization,
                 interestType: Settings.interestMethod,
                 interestCalculationPeriodType: Settings.interestCalculationPeriod,
-                isEqualAmortization: Settings.isEqualAmortization || "false",
-                calculateInterestForExactDays: Settings.calculateInterestForExactDays || "false",
-                transactionProcessingStrategyId: Settings.repaymentStrategy,
-                enableMultipleDisbursals: Settings.enableMultipleDisbursals || "false",
-                maxTrancheCount: Settings.enableMultipleDisbursals ? Settings.maxTrancheCount : null,
-                maxOutstandingBalance: Settings.enableMultipleDisbursals ? Settings.maxOutstandingBalance : null,
-                disallowExpectedDisbursements: Settings.enableMultipleDisbursals ? Settings.disallowExpectedDisbursements || "false" : null,
-                enableDownPayment: Settings.enableDownPayment || "false",
-                downPaymentPercentage: Settings.enableDownPayment ? Settings.downPaymentPercentage : null,
-                enableAutoRepaymentForDownPayment: Settings.enableDownPayment ? Settings.enableAutoRepaymentForDownPayment || "false" : null,
-                gracePrincipalPayment: Settings.gracePrincipalPayment || 0,
-                graceInterestPayment: Settings.graceInterestPayment || 0,
-                delinquencyBucket: Settings.delinquencyBucket || null,
-                enableInstallmentLevelDelinquency: Settings.delinquencyBucket ? Settings.enableInstallmentLevelDelinquency || "false" : null,
-                interestFreePeriod: Settings.interestFreePeriod || 0,
-                arrearsTolerance: Settings.arrearsTolerance || 0,
-                daysInMonthType: Settings.daysInMonth || null,
-                daysInYearType: Settings.daysInYear || null,
-                allowFixingInstallmentAmount: Settings.allowFixingInstallmentAmount || "false",
-                onArrearsAging: Settings.onArrearsAging || 0,
-                overdueDaysForNPA: Settings.overdueDays || 0,
-                accountMovesOutOfNPA: Settings.accountMovesOutOfNPA || "false",
-                principalThresholdForLastInstallment: Settings.principalThreshold || null,
-                variableInstallments: Settings.variableInstallments || "false",
-                minGap: Settings.variableInstallments ? Settings.minGap : null,
-                maxGap: Settings.variableInstallments ? Settings.maxGap : null,
-                topUpLoans: Settings.topUpLoans || "false",
-                isInterestRecalculationEnabled: Settings.recalculateInterest || "false",
-                preClosureInterestCalculationStrategy: Settings.recalculateInterest ? Settings.preClosureRule : null,
-                advancePaymentAdjustmentType: Settings.recalculateInterest ? Settings.advancePaymentType : null,
-                compoundingOn: Settings.recalculateInterest ? Settings.compoundingOn : null,
-                recalculationFrequencyType: Settings.recalculateInterest ? Settings.frequency : null,
-                arrearsRecognitionBasedOnOriginalSchedule: Settings.recalculateInterest ? Settings.arrearsRecognitionBasedOnOriginalSchedule || "false" : null,
-                placeGuaranteeFundsOnHold: Settings.placeGuaranteeFundsOnHold || "false",
-                mandatoryGuarantee: Settings.placeGuaranteeFundsOnHold ? Settings.mandatoryGuarantee : null,
-                minOwnFunds: Settings.placeGuaranteeFundsOnHold ? Settings.minOwnFunds : null,
-                minGuarantorFunds: Settings.placeGuaranteeFundsOnHold ? Settings.minGuarantorFunds : null,
-                useGlobalRepaymentEventConfig: Settings.useGlobalRepaymentEventConfig || "false",
-                dueDaysForRepayment: !Settings.useGlobalRepaymentEventConfig ? Settings.dueDaysForRepayment : null,
-                overDueDaysForRepayment: !Settings.useGlobalRepaymentEventConfig ? Settings.overDueDaysForRepayment : null,
-                allowOverridingTerms: Settings.allowOverridingTerms || "false",
-                overrideAmortization: Settings.allowOverridingTerms ? Settings.overrideAmortization || "false" : null,
-                overrideInterestMethod: Settings.allowOverridingTerms ? Settings.overrideInterestMethod || "false" : null,
-                overrideRepaymentStrategy: Settings.allowOverridingTerms ? Settings.overrideRepaymentStrategy || "false" : null,
-                overrideInterestCalculationPeriod: Settings.allowOverridingTerms ? Settings.overrideInterestCalculationPeriod || "false" : null,
-                overrideArrearsTolerance: Settings.allowOverridingTerms ? Settings.overrideArrearsTolerance || "false" : null,
-                overrideRepaidEvery: Settings.allowOverridingTerms ? Settings.overrideRepaidEvery || "false" : null,
-                overrideMoratorium: Settings.allowOverridingTerms ? Settings.overrideMoratorium || "false" : null,
-                overrideOverdueDays: Settings.allowOverridingTerms ? Settings.overrideOverdueDays || "false" : null,
-
-                // Terms Section
-                principalMin: Terms.principalMin,
-                principalDefault: Terms.principalDefault,
-                principalMax: Terms.principalMax,
-                allowApprovalAboveLoanAmount: Terms.allowApprovalAboveLoanAmount || "false",
-                overAmountCalcType: Terms.allowApprovalAboveLoanAmount ? Terms.overAmountCalcType : null,
-                overAmount: Terms.allowApprovalAboveLoanAmount ? Terms.overAmount : null,
-                installmentDayCalcFrom: Terms.installmentDayCalcFrom,
-                repaymentMin: Terms.repaymentMin,
-                repaymentDefault: Terms.repaymentDefault,
-                repaymentMax: Terms.repaymentMax,
-                isZeroInterestRate: Terms.isZeroInterestRate || "false",
-                isLinkedToFloatingRates: Terms.isLinkedToFloatingRates || "false",
-                nominalInterestMin: !Terms.isZeroInterestRate && !Terms.isLinkedToFloatingRates ? Terms.nominalInterestMin : null,
-                nominalInterestDefault: !Terms.isZeroInterestRate && !Terms.isLinkedToFloatingRates ? Terms.nominalInterestDefault : null,
-                nominalInterestMax: !Terms.isZeroInterestRate && !Terms.isLinkedToFloatingRates ? Terms.nominalInterestMax : null,
-                frequency: !Terms.isZeroInterestRate && !Terms.isLinkedToFloatingRates ? Terms.frequency : null,
-                floatingRate: Terms.isLinkedToFloatingRates ? Terms.floatingRate : null,
-                differentialRate: Terms.isLinkedToFloatingRates ? Terms.differentialRate : null,
-                isFloatingCalcAllowed: Terms.isLinkedToFloatingRates ? Terms.isFloatingCalcAllowed : "false",
-                floatingMin: Terms.isLinkedToFloatingRates ? Terms.floatingMin : null,
-                floatingDefault: Terms.isLinkedToFloatingRates ? Terms.floatingDefault : null,
-                floatingMax: Terms.isLinkedToFloatingRates ? Terms.floatingMax : null,
-                termsVaryByLoanCycle: Terms.termsVaryByLoanCycle || "false",
-                principalVariationsForBorrowerCycle: Terms.termsVaryByLoanCycle ? loanCycleData.principal : [],
-                repaymentVariationsForBorrowerCycle: Terms.termsVaryByLoanCycle ? loanCycleData.repayments : [],
-                interestVariationsForBorrowerCycle: Terms.termsVaryByLoanCycle ? loanCycleData.interest : [],
-                frequencyRepaid: Terms.frequencyRepaid,
-                frequencyType: Terms.frequencyType,
-                minDaysDisbursalToRepayment: Terms.minDaysDisbursalToRepayment,
-                principalThresholdForLastInstallmentT: Terms.principalThresholdForLastInstallment,
-                holdGuaranteeFunds: Terms.holdGuaranteeFunds || "false",
-
-                // Charges Section
-                charges: [
-                    ...(loanCycleData.charges?.map((charge) => ({
-                        chargeId: charge.charge,
-                        chargeTimeType: formData.loanProductTemplate?.creditAllocationAllocationTypes?.find(
-                            (option) => option.id === parseInt(charge.charge)
-                        )?.chargeTimeType || null,
-                        chargeCalculationType: formData.loanProductTemplate?.creditAllocationAllocationTypes?.find(
-                            (option) => option.id === parseInt(charge.charge)
-                        )?.chargeCalculationType || null,
-                        amount: formData.loanProductTemplate?.creditAllocationAllocationTypes?.find(
-                            (option) => option.id === parseInt(charge.charge)
-                        )?.amount || null,
-                    })) || []),
-                    ...(loanCycleData.overdueCharges?.map((overdueCharge) => ({
-                        chargeId: overdueCharge.overdueCharge,
-                        chargeTimeType: formData.loanProductTemplate?.advancedPaymentAllocationTypes?.find(
-                            (option) => option.id === parseInt(overdueCharge.overdueCharge)
-                        )?.chargeTimeType || null,
-                        chargeCalculationType: formData.loanProductTemplate?.advancedPaymentAllocationTypes?.find(
-                            (option) => option.id === parseInt(overdueCharge.overdueCharge)
-                        )?.chargeCalculationType || null,
-                        amount: formData.loanProductTemplate?.advancedPaymentAllocationTypes?.find(
-                            (option) => option.id === parseInt(overdueCharge.overdueCharge)
-                        )?.amount || null,
-                    })) || []),
-                ],
-
-                // Accounting Section
-                accountingRule: Accounting.selectedOption,
-                fundSourceAccountId: Accounting.fundSource,
-                loanPortfolioAccountId: Accounting.loanPortfolio,
-                transfersInSuspenseAccountId: Accounting.transferSuspense,
-                interestOnLoanAccountId: Accounting.incomeInterest,
-                incomeFromFeeAccountId: Accounting.incomeFees,
-                incomeFromPenaltyAccountId: Accounting.incomePenalties,
-                writeOffAccountId: Accounting.lossesWrittenOff,
-                overpaymentLiabilityAccountId: Accounting.overpaymentLiability,
-
-                paymentChannelToFundSourceMappings: Accounting.paymentChannelMappings || [],
-                feeToIncomeAccountMappings: Accounting.feeMappings || [],
-                penaltyToIncomeAccountMappings: Accounting.penaltyMappings || [],
+                isEqualAmortization: Settings.isEqualAmortization || false,
+                loanScheduleType: Settings.loanScheduleType,
+                daysInMonthType: Settings.daysInMonth,
+                daysInYearType: Settings.daysInYear,
+                transactionProcessingStrategyCode: Settings.repaymentStrategy,
+                useBorrowerCycle: Settings.useBorrowerCycle || false,
+                charges: loanCycleData.charges?.map((charge) => ({
+                    chargeId: parseInt(charge.charge),
+                })) || [],
+                principalVariationsForBorrowerCycle: Terms.termsVaryByLoanCycle
+                    ? loanCycleData.principal
+                    : [],
+                numberOfRepaymentVariationsForBorrowerCycle: Terms.termsVaryByLoanCycle
+                    ? loanCycleData.repayments
+                    : [],
+                interestRateVariationsForBorrowerCycle: Terms.termsVaryByLoanCycle
+                    ? loanCycleData.interest
+                    : [],
+                repaymentStartDateType: Terms.installmentDayCalcFrom,
+                allowApprovedDisbursedAmountsOverApplied: Settings.allowApprovedDisbursedAmountsOverApplied || false,
+                allowVariableInstallments: Settings.allowVariableInstallments || false,
+                canDefineInstallmentAmount: Settings.canDefineInstallmentAmount || false,
+                canUseForTopup: Settings.canUseForTopup || false,
+                delinquencyBucketId: Settings.delinquencyBucket || null,
+                inArrearsTolerance: Settings.inArrearsTolerance || 0,
+                overDueDaysForRepaymentEvent: Settings.overDueDays || 1,
+                dueDaysForRepaymentEvent: Settings.dueDaysForRepayment || 1,
+                isInterestRecalculationEnabled: Settings.isInterestRecalculationEnabled || false,
+                holdGuaranteeFunds: Settings.holdGuaranteeFunds || false,
             };
 
-            console.log("Submitting Payload:", payload);
-
-            // Axios POST request
             const response = await axios.post(
                 `${API_CONFIG.baseURL}/loanproducts`,
                 payload,
@@ -331,21 +224,19 @@ const CreateLoanProducts = () => {
             );
 
             if (response.status === 200 || response.status === 201) {
-                console.log("Loan Product Created Successfully:", response.data);
                 alert("Loan Product Created Successfully!");
             } else {
                 console.error("Error Creating Loan Product:", response.data);
-                alert("Error Creating Loan Product. Check the console for details.");
+                alert("Error Creating Loan Product.");
             }
         } catch (error) {
             console.error("Error in handleSubmit:", error);
             alert(
                 error.response?.data?.defaultUserMessage ||
-                "An unexpected error occurred. Check the console for details."
+                "An unexpected error occurred.."
             );
         }
     };
-
 
     const openModal = (type, data = null) => {
         setModalState({ isOpen: true, type, data });
@@ -1216,7 +1107,7 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                             required
                                         >
-                                            {formData.loanProductTemplate?.advancedPaymentAllocationTypes.map(
+                                            {formData.loanProductTemplate?.rescheduleStrategyTypeOptions.map(
                                                 (option) => (
                                                     <option key={option.id} value={option.id}>
                                                         {option.value}
@@ -2279,7 +2170,7 @@ const CreateLoanProducts = () => {
                                     className="staged-form-select"
                                 >
                                     <option value="">Select Charge</option>
-                                    {formData.loanProductTemplate?.creditAllocationAllocationTypes
+                                    {formData.loanProductTemplate?.chargeOptions
                                         ?.filter(
                                             (option) =>
                                                 !loanCycleData.charges?.some(
@@ -2288,7 +2179,7 @@ const CreateLoanProducts = () => {
                                         )
                                         .map((option) => (
                                             <option key={option.id} value={option.id}>
-                                                {option.value}
+                                                {option.name}
                                             </option>
                                         ))}
                                 </select>
@@ -2305,7 +2196,7 @@ const CreateLoanProducts = () => {
                                                 {id: Date.now(), charge: formData.Charges.selectedCharge},
                                             ],
                                         }));
-                                        handleFieldChange("Charges", "selectedCharge", ""); // Clear selection
+                                        handleFieldChange("Charges", "selectedCharge", "");
                                     }
                                 }}
                                 disabled={!formData.Charges?.selectedCharge}
@@ -2323,9 +2214,9 @@ const CreateLoanProducts = () => {
                                 </thead>
                                 <tbody>
                                 {loanCycleData.charges.map((item, index) => {
-                                    const chargeValue = formData.loanProductTemplate?.creditAllocationAllocationTypes?.find(
+                                    const chargeValue = formData.loanProductTemplate?.chargeOptions?.find(
                                         (option) => option.id === parseInt(item.charge)
-                                    )?.value || item.charge;
+                                    )?.name || item.charge;
 
                                     return (
                                         <tr key={item.id}>
@@ -2363,7 +2254,7 @@ const CreateLoanProducts = () => {
                                     className="staged-form-select"
                                 >
                                     <option value="">Select Overdue Charge</option>
-                                    {formData.loanProductTemplate?.advancedPaymentAllocationTypes
+                                    {formData.loanProductTemplate?.overdueChargeOptions
                                         ?.filter(
                                             (option) =>
                                                 !loanCycleData.overdueCharges?.some(
@@ -2372,7 +2263,7 @@ const CreateLoanProducts = () => {
                                         )
                                         .map((option) => (
                                             <option key={option.id} value={option.id}>
-                                                {option.value}
+                                                {option.name}
                                             </option>
                                         ))}
                                 </select>
@@ -2391,7 +2282,7 @@ const CreateLoanProducts = () => {
                                                 },
                                             ],
                                         }));
-                                        handleFieldChange("Charges", "selectedOverdueCharge", ""); // Clear selection
+                                        handleFieldChange("Charges", "selectedOverdueCharge", "");
                                     }
                                 }}
                                 disabled={!formData.Charges?.selectedOverdueCharge}
@@ -2409,9 +2300,9 @@ const CreateLoanProducts = () => {
                                 </thead>
                                 <tbody>
                                 {loanCycleData.overdueCharges.map((item, index) => {
-                                    const overdueChargeValue = formData.loanProductTemplate?.advancedPaymentAllocationTypes?.find(
+                                    const overdueChargeValue = formData.loanProductTemplate?.overdueChargeOptions?.find(
                                         (option) => option.id === parseInt(item.overdueCharge)
-                                    )?.value || item.overdueCharge; // Fallback to the overdueCharge ID if no match is found
+                                    )?.value || item.overdueCharge;
 
                                     return (
                                         <tr key={item.id}>
@@ -3987,7 +3878,7 @@ const CreateLoanProducts = () => {
                                         : "staged-form-unvisited"
                             }`}
                             onClick={() => {
-                                if (completedStages.has(stage)) {
+                                if (stage === "Preview" || completedStages.has(stage)) {
                                     setCurrentStage(index);
                                 }
                             }}
@@ -4005,9 +3896,171 @@ const CreateLoanProducts = () => {
         const stageData = [
             { title: "Details", data: formData.Details },
             { title: "Currency", data: formData.Currency },
-            { title: "Settings", data: formData.Settings },
-            { title: "Terms", data: formData.Terms },
-            { title: "Charges", data: formData.Charges },
+            {
+                title: "Settings",
+                data: {
+                    Amortization: formData.loanProductTemplate?.amortizationTypeOptions?.find(
+                        (option) => option.id === parseInt(formData.Settings?.amortization)
+                    )?.value || "",
+                    "Interest Method": formData.loanProductTemplate?.interestTypeOptions?.find(
+                        (option) => option.id === parseInt(formData.Settings?.interestMethod)
+                    )?.value || "",
+                    "Interest Calculation Period": formData.loanProductTemplate?.interestCalculationPeriodTypeOptions?.find(
+                        (option) => option.id === parseInt(formData.Settings?.interestCalculationPeriod)
+                    )?.value || "",
+                    "Is Equal Amortization": formData.Settings?.isEqualAmortization ? "Yes" : "No",
+                    "Calculate Interest for Exact Days": formData.Settings?.calculateInterestForExactDays
+                        ? "Yes"
+                        : "No",
+                    "Loan Schedule Type": formData.loanProductTemplate?.loanScheduleTypeOptions?.find(
+                        (option) => option.id === parseInt(formData.Settings?.loanScheduleType)
+                    )?.value || "",
+                    "Repayment Strategy": formData.loanProductTemplate?.transactionProcessingStrategyOptions?.find(
+                        (option) => option.id === parseInt(formData.Settings?.repaymentStrategy)
+                    )?.name || "",
+                    "Enable Multiple Disbursals": formData.Settings?.enableMultipleDisbursals ? "Yes" : "No",
+                    "Maximum Tranche Count": formData.Settings?.maxTrancheCount || "",
+                    "Maximum Outstanding Balance": formData.Settings?.maxOutstandingBalance || "",
+                    "Disallow Expected Disbursements": formData.Settings?.disallowExpectedDisbursements
+                        ? "Yes"
+                        : "No",
+                    "Enable Down Payment": formData.Settings?.enableDownPayment ? "Yes" : "No",
+                    "Down Payment Percentage": formData.Settings?.downPaymentPercentage || "",
+                    "Enable Auto Repayment for Down Payment": formData.Settings?.enableAutoRepaymentForDownPayment
+                        ? "Yes"
+                        : "No",
+                    "Grace on Principal Payment": formData.Settings?.gracePrincipalPayment || "",
+                    "Grace on Interest Payment": formData.Settings?.graceInterestPayment || "",
+                    "Delinquency Bucket": formData.loanProductTemplate?.delinquencyBucketOptions?.find(
+                        (option) => option.id === parseInt(formData.Settings?.delinquencyBucket)
+                    )?.name || "",
+                    "Enable Installment Level Delinquency": formData.Settings?.enableInstallmentLevelDelinquency
+                        ? "Yes"
+                        : "No",
+                    "Interest Free Period": formData.Settings?.interestFreePeriod || "",
+                    "Arrears Tolerance": formData.Settings?.arrearsTolerance || "",
+                    "Days in Year": formData.loanProductTemplate?.daysInYearTypeOptions?.find(
+                        (option) => option.id === parseInt(formData.Settings?.daysInYear)
+                    )?.value || "",
+                    "Days in Month": formData.loanProductTemplate?.daysInMonthTypeOptions?.find(
+                        (option) => option.id === parseInt(formData.Settings?.daysInMonth)
+                    )?.value || "",
+                    "Allow Fixing of Installment Amount": formData.Settings?.allowFixingInstallmentAmount
+                        ? "Yes"
+                        : "No",
+                    "Number of Days a Loan May Be Overdue Before Moving into Arrears":
+                        formData.Settings?.onArrearsAging || "",
+                    "Maximum Days Before Becoming NPA": formData.Settings?.overdueDays || "",
+                    "Account Moves Out of NPA Only After All Arrears Cleared":
+                        formData.Settings?.accountMovesOutOfNPA ? "Yes" : "No",
+                    "Principal Threshold for Last Installment": formData.Settings?.principalThreshold || "",
+                    "Variable Installments Allowed": formData.Settings?.variableInstallments ? "Yes" : "No",
+                    "Allowed for Top Up Loans": formData.Settings?.topUpLoans ? "Yes" : "No",
+                    "Minimum Gap Between Installments": formData.Settings?.minGap || "",
+                    "Maximum Gap Between Installments": formData.Settings?.maxGap || "",
+                    "Recalculate Interest": formData.Settings?.recalculateInterest ? "Yes" : "No",
+                    "Pre-Closure Interest Calculation Rule": formData.loanProductTemplate?.preClosureInterestCalculationStrategyOptions?.find(
+                        (option) => option.id === parseInt(formData.Settings?.preClosureRule)
+                    )?.value || "",
+                    "Advance Payment Adjustment Type": formData.loanProductTemplate?.rescheduleStrategyTypeOptions?.find(
+                        (option) => option.id === parseInt(formData.Settings?.advancePaymentType)
+                    )?.value || "",
+                    "Interest Recalculation Compounding On": formData.loanProductTemplate?.interestRecalculationCompoundingTypeOptions?.find(
+                        (option) => option.id === parseInt(formData.Settings?.compoundingOn)
+                    )?.value || "",
+                    "Frequency for Recalculating Outstanding Principal": formData.loanProductTemplate?.interestRecalculationFrequencyTypeOptions?.find(
+                        (option) => option.id === parseInt(formData.Settings?.frequency)
+                    )?.value || "",
+                    "Arrears Recognition Based on Original Schedule":
+                        formData.Settings?.arrearsRecognitionBasedOnOriginalSchedule ? "Yes" : "No",
+                    "Place Guarantee Funds On-Hold": formData.Settings?.placeGuaranteeFundsOnHold ? "Yes" : "No",
+                    "Mandatory Guarantee (%)": formData.Settings?.mandatoryGuarantee || "",
+                    "Minimum Guarantee from Own Funds (%)": formData.Settings?.minOwnFunds || "",
+                    "Minimum Guarantee from Guarantor Funds (%)": formData.Settings?.minGuarantorFunds || "",
+                    "Use Global Config for Repayment Event Notifications":
+                        formData.Settings?.useGlobalRepaymentEventConfig ? "Yes" : "No",
+                    "Due Days for Repayment Event": formData.Settings?.dueDaysForRepayment || "",
+                    "Overdue Days for Repayment Event": formData.Settings?.overDueDaysForRepayment || "",
+                    "Allow Overriding Terms and Settings": formData.Settings?.allowOverridingTerms ? "Yes" : "No",
+                },
+            },
+            {
+                title: "Terms",
+                data: {
+                    "Minimum Principal": formData.Terms?.principalMin || "",
+                    "Default Principal": formData.Terms?.principalDefault || "",
+                    "Maximum Principal": formData.Terms?.principalMax || "",
+                    "Allow Approval Above Loan Amount": formData.Terms?.allowApprovalAboveLoanAmount ? "Yes" : "No",
+                    ...(formData.Terms?.allowApprovalAboveLoanAmount
+                        ? {
+                            "Over Amount Calculation Type":
+                                formData.Terms?.overAmountCalcType === "percentage"
+                                    ? "Percentage"
+                                    : formData.Terms?.overAmountCalcType === "fixed"
+                                        ? "Fixed Amount"
+                                        : "",
+                            "Over Amount": formData.Terms?.overAmount || "",
+                        }
+                        : {}),
+                    "Installment Day Calculation From":
+                        formData.loanProductTemplate?.repaymentStartDateTypeOptions?.find(
+                            (option) => option.id === parseInt(formData.Terms?.installmentDayCalcFrom)
+                        )?.value || "",
+                    "Minimum Repayments": formData.Terms?.repaymentMin || "",
+                    "Default Repayments": formData.Terms?.repaymentDefault || "",
+                    "Maximum Repayments": formData.Terms?.repaymentMax || "",
+                    "Is Zero Interest Rate": formData.Terms?.isZeroInterestRate ? "Yes" : "No",
+                    "Is Linked to Floating Rates": formData.Terms?.isLinkedToFloatingRates ? "Yes" : "No",
+                    ...(formData.Terms?.isLinkedToFloatingRates
+                        ? {
+                            "Floating Rate":
+                                formData.loanProductTemplate?.floatingRateOptions?.find(
+                                    (option) => option.id === parseInt(formData.Terms?.floatingRate)
+                                )?.value || "",
+                            "Differential Rate": formData.Terms?.differentialRate || "",
+                            "Floating Calculation Allowed": formData.Terms?.isFloatingCalcAllowed ? "Yes" : "No",
+                            "Floating Minimum": formData.Terms?.floatingMin || "",
+                            "Floating Default": formData.Terms?.floatingDefault || "",
+                            "Floating Maximum": formData.Terms?.floatingMax || "",
+                        }
+                        : {}),
+                    ...(formData.Terms?.isZeroInterestRate || formData.Terms?.isLinkedToFloatingRates
+                        ? {}
+                        : {
+                            "Nominal Interest Minimum": formData.Terms?.nominalInterestMin || "",
+                            "Nominal Interest Default": formData.Terms?.nominalInterestDefault || "",
+                            "Nominal Interest Maximum": formData.Terms?.nominalInterestMax || "",
+                            "Frequency":
+                                formData.loanProductTemplate?.interestRateFrequencyTypeOptions?.find(
+                                    (option) => option.id === parseInt(formData.Terms?.frequency)
+                                )?.value || "",
+                        }),
+                    "Repayment Frequency": formData.Terms?.frequencyRepaid || "",
+                    "Repayment Frequency Type":
+                        formData.loanProductTemplate?.repaymentFrequencyTypeOptions?.find(
+                            (option) => option.id === parseInt(formData.Terms?.frequencyType)
+                        )?.value || "",
+                    "Minimum Days Between Disbursal and First Repayment Date":
+                        formData.Terms?.minDaysDisbursalToRepayment || "",
+                },
+            },
+            {
+                title: "Charges",
+                data: {
+                    Charges: loanCycleData.charges?.map((item) => {
+                        const chargeOption = formData.loanProductTemplate?.chargeOptions?.find(
+                            (option) => option.id === parseInt(item.charge)
+                        );
+                        return chargeOption ? chargeOption.name : "";
+                    }) || [],
+                    OverdueCharges: loanCycleData.overdueCharges?.map((item) => {
+                        const overdueChargeOption = formData.loanProductTemplate?.overdueChargeOptions?.find(
+                            (option) => option.id === parseInt(item.overdueCharge)
+                        );
+                        return overdueChargeOption ? overdueChargeOption.name : "";
+                    }) || [],
+                },
+            },
             { title: "Accounting", data: formData.Accounting },
         ];
 
@@ -4046,7 +4099,7 @@ const CreateLoanProducts = () => {
                                                             : item
                                                     )
                                                     .join(", ")
-                                                : value || "N/A"}
+                                                : value || ""}
                                         </td>
                                     </tr>
                                 ))}

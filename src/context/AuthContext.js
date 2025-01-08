@@ -10,6 +10,8 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [baseURL, setBaseURL] = useState(null);
     const [authInitialized, setAuthInitialized] = useState(false);
+    const [isBaseURLChanged, setIsBaseURLChanged] = useState(false);
+    const [redirectToLogin, setRedirectToLogin] = useState(false);
 
     useEffect(() => {
         const initializeAuth = async () => {
@@ -55,11 +57,15 @@ export const AuthProvider = ({ children }) => {
         setTimeout(() => {
             logout(true);
         }, authDuration);
+
+        setRedirectToLogin(false);
+        setIsBaseURLChanged(false);
     };
 
     const logout = (notify = false) => {
         setUser(null);
         setIsAuthenticated(false);
+        setRedirectToLogin(true);
         localStorage.removeItem('user');
         localStorage.removeItem('loginTimestamp');
         if (notify) {
@@ -70,10 +76,11 @@ export const AuthProvider = ({ children }) => {
     const updateBaseURL = (newURL) => {
         setBaseURL(newURL);
         localStorage.setItem('customBaseURL', newURL);
+        setIsBaseURLChanged(true);
     };
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, user, login, logout, baseURL, updateBaseURL, authInitialized }}>
+        <AuthContext.Provider value={{ isAuthenticated, user, login, logout, baseURL, updateBaseURL, isBaseURLChanged, redirectToLogin, authInitialized }}>
             {children}
         </AuthContext.Provider>
     );

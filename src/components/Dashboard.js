@@ -19,7 +19,8 @@ const Dashboard = () => {
         totalClients: 0, activeClients: 0, inactiveClients: 0, newClients: 0,
         principalOutstanding: 0, interestOutstanding: 0, totalOutstanding: 0, interestThisMonth: 0,
         principalOverdue: 0, interestOverdue: 0, totalOverdue: 0, nonPerformingAssets: 0,
-        loansForApproval: 0, loansForDisapproval: 0,
+        loansForApproval: 0, loansForDisapproval: 0, portfolioAtRisk: 0,
+        borrowersPerLoanOfficer: 0, averageLoanDisbursed: 0, clientsPerPersonnel: 0,
     });
     const [selectedOffice, setSelectedOffice] = useState(user?.officeId || null);
     const [officeOptions, setOfficeOptions] = useState([]);
@@ -63,12 +64,12 @@ const Dashboard = () => {
         }
     }, [user]);
 
-    const formatCurrency = (value) => {
+    const formatCurrency = (value, currencyCode, currencySymbol, decimalPlaces) => {
         return new Intl.NumberFormat('en-US', {
             style: 'currency',
-            currency: 'USD',
-            minimumFractionDigits: 2
-        }).format(value);
+            currency: currencyCode,
+            minimumFractionDigits: decimalPlaces
+        }).format(value).replace(currencyCode, currencySymbol);
     };
 
     useEffect(() => {
@@ -89,7 +90,6 @@ const Dashboard = () => {
                     const response = await axios.get(`${API_BASE_URL}/clients?${officeFilter}`, { headers });
                     const clients = response.data.pageItems;
 
-                    // Filter clients by `officeId` if a specific office is selected
                     const filteredClients =
                         selectedOffice && selectedOffice !== "all"
                             ? clients.filter(client => client.officeId === parseInt(selectedOffice))
@@ -99,11 +99,23 @@ const Dashboard = () => {
                     const inactiveClients = filteredClients.filter(client => client.status.value === "Inactive").length;
                     const newClients = filteredClients.filter(client => client.status.value === "Pending").length;
 
+                    const borrowersPerLoanOfficer =
+                        officeOptions.length > 0
+                            ? Math.round(activeClients / officeOptions.length)
+                            : 'N/A';
+
+                    const clientsPerPersonnel =
+                        officeOptions.length > 0
+                            ? Math.round(filteredClients.length / officeOptions.length)
+                            : 'N/A';
+
                     return {
                         totalClients: filteredClients.length,
                         activeClients,
                         inactiveClients,
                         newClients,
+                        borrowersPerLoanOfficer,
+                        clientsPerPersonnel,
                     };
                 } catch (error) {
                     console.error("Error fetching client data:", error);
@@ -117,13 +129,18 @@ const Dashboard = () => {
                     const response = await axios.get(`${API_BASE_URL}/loans?${officeFilter}`, { headers });
                     const loans = response.data.pageItems;
 
-                    // Filter loans by `clientOfficeId` if a specific office is selected
                     const filteredLoans =
                         selectedOffice && selectedOffice !== "all"
                             ? loans.filter(loan => loan.clientOfficeId === parseInt(selectedOffice))
                             : loans;
 
-                    // Initialize metrics
+                    const currency = loans[0].currency || {};
+                    const { code: currencyCode, displaySymbol: currencySymbol, decimalPlaces } = currency;
+
+                    let portfolioAtRiskAmount = 0;
+                    let totalDisbursedAmount = 0;
+                    let disbursedLoansCount = 0;
+
                     let totalPrincipalOutstanding = 0;
                     let totalInterestOutstanding = 0;
                     let totalPrincipalOverdue = 0;
@@ -134,7 +151,6 @@ const Dashboard = () => {
                     let loansForApproval = 0;
                     let loansForDisapproval = 0;
 
-                    // Iterate through filtered loans
                     filteredLoans.forEach(loan => {
                         const summary = loan.summary || {};
                         totalPrincipalOutstanding += summary.principalOutstanding || 0;
@@ -147,19 +163,38 @@ const Dashboard = () => {
                         if (loan.isNPA) nonPerformingAssets++;
                         if (loan.status.pendingApproval) loansForApproval++;
                         if (loan.status.value === "Rejected") loansForDisapproval++;
+
+                        if (loan.isNPA) {
+                            portfolioAtRiskAmount += summary.principalOutstanding || 0;
+                        }
+
+                        totalDisbursedAmount += loan.principal || 0;
+                        disbursedLoansCount++;
                     });
 
+                    const portfolioAtRisk =
+                        totalPrincipalOutstanding > 0
+                            ? ((portfolioAtRiskAmount / totalPrincipalOutstanding) * 100).toFixed(2) + '%'
+                            : '';
+
+                    const averageLoanDisbursed =
+                        disbursedLoansCount > 0
+                            ? formatCurrency(totalDisbursedAmount / disbursedLoansCount, currencyCode, currencySymbol, decimalPlaces)
+                            : formatCurrency(0, currencyCode, currencySymbol, decimalPlaces);
+
                     return {
-                        principalOutstanding: formatCurrency(totalPrincipalOutstanding),
-                        interestOutstanding: formatCurrency(totalInterestOutstanding),
-                        totalOutstanding: formatCurrency(totalPrincipalOutstanding + totalInterestOutstanding),
-                        interestThisMonth: formatCurrency(totalInterestThisMonth),
-                        principalOverdue: formatCurrency(totalPrincipalOverdue),
-                        interestOverdue: formatCurrency(totalInterestOverdue),
-                        totalOverdue: formatCurrency(totalOverdue),
+                        principalOutstanding: formatCurrency(totalPrincipalOutstanding, currencyCode, currencySymbol, decimalPlaces),
+                        interestOutstanding: formatCurrency(totalInterestOutstanding, currencyCode, currencySymbol, decimalPlaces),
+                        totalOutstanding: formatCurrency(totalPrincipalOutstanding + totalInterestOutstanding, currencyCode, currencySymbol, decimalPlaces),
+                        interestThisMonth: formatCurrency(totalInterestThisMonth, currencyCode, currencySymbol, decimalPlaces),
+                        principalOverdue: formatCurrency(totalPrincipalOverdue, currencyCode, currencySymbol, decimalPlaces),
+                        interestOverdue: formatCurrency(totalInterestOverdue, currencyCode, currencySymbol, decimalPlaces),
+                        totalOverdue: formatCurrency(totalOverdue, currencyCode, currencySymbol, decimalPlaces),
                         nonPerformingAssets,
                         loansForApproval,
                         loansForDisapproval,
+                        portfolioAtRisk,
+                        averageLoanDisbursed,
                     };
                 } catch (error) {
                     console.error("Error fetching loan data:", error);
@@ -199,10 +234,9 @@ const Dashboard = () => {
     const {
         totalClients, activeClients, inactiveClients, newClients,
         principalOutstanding, interestOutstanding, totalOutstanding, interestThisMonth,
-        principalOverdue, interestOverdue, totalOverdue, nonPerformingAssets, loansForApproval, loansForDisapproval
+        principalOverdue, interestOverdue, totalOverdue, nonPerformingAssets, loansForApproval, loansForDisapproval,
+        portfolioAtRisk, borrowersPerLoanOfficer, averageLoanDisbursed, clientsPerPersonnel
     } = dashboardData;
-
-
 
     return (
         <div className="dashboard-layout">
@@ -221,7 +255,7 @@ const Dashboard = () => {
                                     id="office-dropdown"
                                     value={selectedOffice}
                                     onChange={(e) => setSelectedOffice(e.target.value)}
-                                    disabled={user?.officeId !== 1} // Disable if not head office
+                                    disabled={user?.officeId !== 1}
                                 >
                                     {user?.officeId === 1 ? (
                                         <>
@@ -266,135 +300,175 @@ const Dashboard = () => {
                 </div>
                 {activeTab === 'metrics' ? (
                     <section className="card-grid">
+                        <div className="card">
+                            <div className="card-header">
+                                <div className="icon-container">
+                                    <FaExclamationTriangle className="card-icon"/>
+                                </div>
+                                <h3>Portfolio at Risk</h3>
+                            </div>
+                            <p>{portfolioAtRisk}</p>
+                        </div>
+
+                        <div className="card">
+                            <div className="card-header">
+                                <div className="icon-container">
+                                    <FaUsers className="card-icon"/>
+                                </div>
+                                <h3>Borrowers Per Loan Officer</h3>
+                            </div>
+                            <p>{borrowersPerLoanOfficer}</p>
+                        </div>
+
+                        <div className="card">
+                            <div className="card-header">
+                                <div className="icon-container">
+                                    <FaHandHoldingUsd className="card-icon"/>
+                                </div>
+                                <h3>Average Loan Disbursed</h3>
+                            </div>
+                            <p>{averageLoanDisbursed}</p>
+                        </div>
+
+                        <div className="card">
+                            <div className="card-header">
+                                <div className="icon-container">
+                                    <FaUser className="card-icon"/>
+                                </div>
+                                <h3>Clients Per Personnel</h3>
+                            </div>
+                            <p>{clientsPerPersonnel}</p>
+                        </div>
+
                         <div className="card" onClick={() => navigate('/clients')}>
                             <div className="card-header">
                                 <div className="icon-container">
-                                <FaUser className="card-icon"/>
+                                    <FaUser className="card-icon"/>
+                                </div>
+                                <h3>Total Clients</h3>
                             </div>
-                            <h3>Total Clients</h3>
+                            <p>{totalClients}</p>
                         </div>
-                        <p>{totalClients}</p>
-                    </div>
-                    <div className="card" onClick={() => navigate('/clients')}>
-                        <div className="card-header">
-                            <div className="icon-container">
-                                <FaUser className="card-icon"/>
+                        <div className="card" onClick={() => navigate('/clients')}>
+                            <div className="card-header">
+                                <div className="icon-container">
+                                    <FaUser className="card-icon"/>
+                                </div>
+                                <h3>Active Clients</h3>
                             </div>
-                            <h3>Active Clients</h3>
+                            <p>{activeClients}</p>
                         </div>
-                        <p>{activeClients}</p>
-                    </div>
-                    <div className="card" onClick={() => navigate('/clients')}>
-                        <div className="card-header">
-                            <div className="icon-container">
-                                <FaUser className="card-icon"/>
+                        <div className="card" onClick={() => navigate('/clients')}>
+                            <div className="card-header">
+                                <div className="icon-container">
+                                    <FaUser className="card-icon"/>
+                                </div>
+                                <h3>Inactive Clients</h3>
                             </div>
-                            <h3>Inactive Clients</h3>
+                            <p>{inactiveClients}</p>
                         </div>
-                        <p>{inactiveClients}</p>
-                    </div>
-                    <div className="card" onClick={() => navigate('/clients')}>
-                        <div className="card-header">
-                            <div className="icon-container">
-                                <FaUser className="card-icon"/>
+                        <div className="card" onClick={() => navigate('/clients')}>
+                            <div className="card-header">
+                                <div className="icon-container">
+                                    <FaUser className="card-icon"/>
+                                </div>
+                                <h3>Pending Clients</h3>
                             </div>
-                            <h3>Pending Clients</h3>
+                            <p>{newClients}</p>
                         </div>
-                        <p>{newClients}</p>
-                    </div>
-                    <div className="card">
-                        <div className="card-header">
-                            <div className="icon-container">
-                                <FaMoneyCheckAlt className="card-icon"/>
+                        <div className="card">
+                            <div className="card-header">
+                                <div className="icon-container">
+                                    <FaMoneyCheckAlt className="card-icon"/>
+                                </div>
+                                <h3>Principal Outstanding</h3>
                             </div>
-                            <h3>Principal Outstanding</h3>
+                            <p>{principalOutstanding}</p>
                         </div>
-                        <p>{principalOutstanding}</p>
-                    </div>
-                    <div className="card">
-                        <div className="card-header">
-                            <div className="icon-container">
-                                <FaHandHoldingUsd className="card-icon"/>
+                        <div className="card">
+                            <div className="card-header">
+                                <div className="icon-container">
+                                    <FaHandHoldingUsd className="card-icon"/>
+                                </div>
+                                <h3>Interest Outstanding</h3>
                             </div>
-                            <h3>Interest Outstanding</h3>
+                            <p>{interestOutstanding}</p>
                         </div>
-                        <p>{interestOutstanding}</p>
-                    </div>
-                    <div className="card">
-                        <div className="card-header">
-                            <div className="icon-container">
-                                <FaBalanceScale className="card-icon"/>
+                        <div className="card">
+                            <div className="card-header">
+                                <div className="icon-container">
+                                    <FaBalanceScale className="card-icon"/>
+                                </div>
+                                <h3>Total Outstanding</h3>
                             </div>
-                            <h3>Total Outstanding</h3>
+                            <p>{totalOutstanding}</p>
                         </div>
-                        <p>{totalOutstanding}</p>
-                    </div>
-                    <div className="card">
-                        <div className="card-header">
-                            <div className="icon-container">
-                                <FaChartLine className="card-icon"/>
+                        <div className="card">
+                            <div className="card-header">
+                                <div className="icon-container">
+                                    <FaChartLine className="card-icon"/>
+                                </div>
+                                <h3>Interest This Month</h3>
                             </div>
-                            <h3>Interest This Month</h3>
+                            <p>{interestThisMonth}</p>
                         </div>
-                        <p>{interestThisMonth}</p>
-                    </div>
-                    <div className="card">
-                        <div className="card-header">
-                            <div className="icon-container">
-                                <FaExclamationTriangle className="card-icon"/>
+                        <div className="card">
+                            <div className="card-header">
+                                <div className="icon-container">
+                                    <FaExclamationTriangle className="card-icon"/>
+                                </div>
+                                <h3>Principal Overdue</h3>
                             </div>
-                            <h3>Principal Overdue</h3>
+                            <p>{principalOverdue}</p>
                         </div>
-                        <p>{principalOverdue}</p>
-                    </div>
-                    <div className="card">
-                        <div className="card-header">
-                            <div className="icon-container">
-                                <FaExclamationTriangle className="card-icon"/>
+                        <div className="card">
+                            <div className="card-header">
+                                <div className="icon-container">
+                                    <FaExclamationTriangle className="card-icon"/>
+                                </div>
+                                <h3>Interest Overdue</h3>
                             </div>
-                            <h3>Interest Overdue</h3>
+                            <p>{interestOverdue}</p>
                         </div>
-                        <p>{interestOverdue}</p>
-                    </div>
-                    <div className="card">
-                        <div className="card-header">
-                            <div className="icon-container">
-                                <FaBalanceScale className="card-icon"/>
+                        <div className="card">
+                            <div className="card-header">
+                                <div className="icon-container">
+                                    <FaBalanceScale className="card-icon"/>
+                                </div>
+                                <h3>Total Overdue</h3>
                             </div>
-                            <h3>Total Overdue</h3>
+                            <p>{totalOverdue}</p>
                         </div>
-                        <p>{totalOverdue}</p>
-                    </div>
-                    <div className="card">
-                        <div className="card-header">
-                            <div className="icon-container">
-                                <FaExclamationTriangle className="card-icon"/>
+                        <div className="card">
+                            <div className="card-header">
+                                <div className="icon-container">
+                                    <FaExclamationTriangle className="card-icon"/>
+                                </div>
+                                <h3>Non-Performing Assets</h3>
                             </div>
-                            <h3>Non-Performing Assets</h3>
+                            <p>{nonPerformingAssets}</p>
                         </div>
-                        <p>{nonPerformingAssets}</p>
-                    </div>
-                    <div className="card">
-                        <div className="card-header">
-                            <div className="icon-container">
-                                <FaBalanceScale className="card-icon"/>
+                        <div className="card">
+                            <div className="card-header">
+                                <div className="icon-container">
+                                    <FaBalanceScale className="card-icon"/>
+                                </div>
+                                <h3>Loans for Approval</h3>
                             </div>
-                            <h3>Loans for Approval</h3>
+                            <p>{loansForApproval}</p>
                         </div>
-                        <p>{loansForApproval}</p>
-                    </div>
-                    <div className="card">
-                        <div className="card-header">
-                            <div className="icon-container">
-                                <FaBalanceScale className="card-icon"/>
+                        <div className="card">
+                            <div className="card-header">
+                                <div className="icon-container">
+                                    <FaBalanceScale className="card-icon"/>
+                                </div>
+                                <h3>Loans for Disapproval</h3>
                             </div>
-                            <h3>Loans for Disapproval</h3>
+                            <p>{loansForDisapproval}</p>
                         </div>
-                        <p>{loansForDisapproval}</p>
-                    </div>
-                </section>
+                    </section>
                 ) : (
-                        <Insights selectedOffice={selectedOffice} officeOptions={officeOptions} />
+                    <Insights selectedOffice={selectedOffice} officeOptions={officeOptions}/>
                 )}
             </main>
         </div>

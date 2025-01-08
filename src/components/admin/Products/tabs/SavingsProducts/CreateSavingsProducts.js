@@ -86,8 +86,64 @@ const CreateSavingsProducts = () => {
         setCurrentStage((prev) => prev - 1);
     };
 
-    const handlePreview = () => {
-        console.log("Preview Data:", formData);
+    const handlePreview = async () => {
+        try {
+            const payload = {
+                name: formData.Details?.productName || "",
+                shortName: formData.Details?.shortName || "",
+                description: formData.Details?.description || "",
+                currencyCode: formData.Currency?.currency || "",
+                digitsAfterDecimal: parseInt(formData.Currency?.decimalPlaces, 10) || 0,
+                inMultiplesOf: formData.Currency?.currencyMultiples || "",
+                nominalAnnualInterestRate: parseFloat(formData.Terms?.nominalAnnualInterest) || 0,
+                interestCompoundingPeriodType: parseInt(formData.Terms?.interestCompoundingPeriod, 10) || 0,
+                interestPostingPeriodType: parseInt(formData.Terms?.interestPostingPeriod, 10) || 0,
+                interestCalculationType: parseInt(formData.Terms?.interestCalculationType, 10) || 0,
+                interestCalculationDaysInYearType: parseInt(formData.Terms?.daysInYear, 10) || 0,
+                enforceMinRequiredBalance: formData.Settings?.enforceMinimumBalance || false,
+                allowOverdraft: formData.Settings?.isOverdraftAllowed || false,
+                withdrawalFeeForTransfers: formData.Settings?.applyWithdrawalFeesForTransfers || false,
+                isDormancyTrackingActive: formData.Settings?.enableDormancyTracking || false,
+                charges: formData.Charges?.selectedCharges?.map((charge) => ({
+                    id: charge.id,
+                })) || [],
+                accountingRule: formData.Accounting?.selectedOption === "None"
+                        ? 1
+                        : formData.Accounting?.selectedOption === "Cash"
+                            ? 2
+                            : formData.Accounting?.selectedOption === "Accrual (periodic)"
+                                ? 3
+                                : null,
+                locale: "en",
+            };
+
+            console.log("Submitting Payload:", payload);
+
+            const response = await axios.post(
+                `${API_CONFIG.baseURL}/savingsproducts`,
+                payload,
+                {
+                    headers: {
+                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                        "Fineract-Platform-TenantId": "default",
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
+            if (response.status === 200 || response.status === 201) {
+                alert("Savings Product Created Successfully!");
+            } else {
+                console.error("Error Creating Savings Product:", response.data);
+                alert("Error Creating Savings Product.");
+            }
+        } catch (error) {
+            console.error("Error in handlePreview:", error.response?.data || error.message);
+            alert(
+                error.response?.data?.defaultUserMessage ||
+                "An unexpected error occurred."
+            );
+        }
     };
 
     const allStagesComplete = stages.every((stage) => completedStages.has(stage));

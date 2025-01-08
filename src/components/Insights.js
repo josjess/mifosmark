@@ -2,12 +2,13 @@ import React, { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { useLoading } from '../context/LoadingContext';
 import axios from 'axios';
-import { Pie, Line } from 'react-chartjs-2';
+import {Pie, Line, Doughnut, Bar} from 'react-chartjs-2';
 import { API_CONFIG } from '../config';
 import {
     Chart as ChartJS,
     CategoryScale,
     LinearScale,
+    BarElement,
     LineElement,
     PointElement,
     ArcElement,
@@ -19,6 +20,7 @@ import {
 ChartJS.register(
     CategoryScale,
     LinearScale,
+    BarElement,
     LineElement,
     PointElement,
     ArcElement,
@@ -36,6 +38,9 @@ const Insights = ({ selectedOffice, officeOptions }) => {
         trendsByDay: { clients: [], loans: [] },
         trendsByWeek: { clients: [], loans: [] },
         trendsByMonth: { clients: [], loans: [] },
+        loanAccounts: { active: 0, inArrears: 0 },
+        weeklyDisbursement: [],
+        repaymentTrend: { actual: [], expected: [] },
     });
 
     const API_BASE_URL = API_CONFIG.baseURL;
@@ -71,7 +76,6 @@ const Insights = ({ selectedOffice, officeOptions }) => {
         startLoading();
 
         try {
-            // Use the user's current office if "all offices" is selected
             const currentOfficeId = selectedOffice === 'all' ? user?.officeId : selectedOffice;
 
             const disbursalData = await fetchOfficeData('Disbursal%20Vs%20Awaitingdisbursal', currentOfficeId);
@@ -82,6 +86,9 @@ const Insights = ({ selectedOffice, officeOptions }) => {
             const loanTrendsDayData = await fetchOfficeData('LoanTrendsByDay', currentOfficeId);
             const loanTrendsWeekData = await fetchOfficeData('LoanTrendsByWeek', currentOfficeId);
             const loanTrendsMonthData = await fetchOfficeData('LoanTrendsByMonth', currentOfficeId);
+            const loanAccountData = await fetchLoanAccountData(currentOfficeId);
+            const weeklyDisbursement = await fetchWeeklyDisbursement(currentOfficeId);
+            const repaymentTrend = await fetchRepaymentTrend(currentOfficeId);
 
             setGraphData({
                 disbursalVsAwaiting: disbursalData[0] || { disbursedAmount: 0, amountToBeDisburse: 0 },
@@ -98,11 +105,62 @@ const Insights = ({ selectedOffice, officeOptions }) => {
                     clients: clientTrendsMonthData,
                     loans: loanTrendsMonthData,
                 },
+                loanAccounts: loanAccountData,
+                weeklyDisbursement,
+                repaymentTrend,
             });
         } catch (error) {
             console.error('Error fetching insights data:', error.message);
         } finally {
             stopLoading();
+        }
+    };
+
+    const fetchLoanAccountData = async (officeId) => {
+        try {
+            const response = await axios.get(`${API_BASE_URL}/loans`, {
+                headers,
+                params: {
+                    officeId: officeId === 'all' ? undefined : officeId,
+                },
+            });
+
+            const loans = response.data.pageItems || [];
+
+            const activeLoans = loans.filter(loan => loan.status.value === 'Active').length;
+            const inArrearsLoans = loans.filter(loan => loan.inArrears === true).length;
+
+            return {
+                active: activeLoans,
+                inArrears: inArrearsLoans,
+            };
+        } catch (error) {
+            console.error('Error fetching loan accounts data:', error);
+            return { active: 0, inArrears: 0 };
+        }
+    };
+
+    const fetchWeeklyDisbursement = async (officeId) => {
+        try {
+            const response = await fetchOfficeData('WeeklyDisbursementHistory', officeId);
+            return response || [];
+        } catch (error) {
+            console.error('Error fetching weekly disbursement data:', error);
+            return [];
+        }
+    };
+
+    const fetchRepaymentTrend = async (officeId) => {
+        try {
+            const response = await fetchOfficeData('RepaymentTrendActualVsExpected', officeId);
+            const actual = response.map(item => item.actual);
+            const expected = response.map(item => item.expected);
+            const labels = response.map(item => item.date);
+
+            return { actual, expected, labels };
+        } catch (error) {
+            console.error('Error fetching repayment trend data:', error);
+            return { actual: [], expected: [], labels: [] };
         }
     };
 
@@ -157,6 +215,116 @@ const Insights = ({ selectedOffice, officeOptions }) => {
                                     (graphData.demandVsCollection.AmountDue || 0) - (graphData.demandVsCollection.AmountPaid || 0),
                                 ],
                                 backgroundColor: ['#3b83f6', '#f6c23e'],
+                            },
+                        ],
+                    }}
+                />
+            </div>
+
+            {/* Loan Accounts: Active vs In Arrears */}
+            <div className="graph-container">
+                <h3>Loan Accounts: Active vs In Arrears</h3>
+                <Doughnut
+                    data={{
+                        labels: ['Active', 'In Arrears'],
+                        datasets: [
+                            {
+                                data: [
+                                    graphData.loanAccounts.active || 0,
+                                    graphData.loanAccounts.inArrears || 0,
+                                ],
+                                backgroundColor: ['#4caf50', '#f44336'],
+                                borderWidth: 0,
+                            },
+                        ],
+                    }}
+                    options={{
+                        cutout: '50%',
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function (tooltipItem) {
+                                        const total = tooltipItem.dataset.data.reduce((sum, value) => sum + value, 0);
+                                        const value = tooltipItem.raw;
+                                        const percentage = ((value / total) * 100).toFixed(2);
+                                        return `${tooltipItem.label}: ${percentage}%`;
+                                    },
+                                },
+                            },
+                            legend: {
+                                labels: {
+                                    generateLabels: function (chart) {
+                                        const data = chart.data.datasets[0].data;
+                                        const total = data.reduce((sum, value) => sum + value, 0);
+                                        return chart.data.labels.map((label, index) => {
+                                            const value = data[index];
+                                            const percentage = ((value / total) * 100).toFixed(2);
+                                            return {
+                                                text: `${label}: ${percentage}%`,
+                                                fillStyle: chart.data.datasets[0].backgroundColor[index],
+                                                hidden: chart.getDatasetMeta(0).data[index].hidden,
+                                            };
+                                        });
+                                    },
+                                },
+                            },
+                        },
+                    }}
+                />
+            </div>
+
+            {/* Weekly Disbursement History */}
+            <div className="graph-container">
+                <h3>Weekly Disbursement History</h3>
+                <Bar
+                    data={{
+                        labels: graphData.weeklyDisbursement.map(item => item.week),
+                        datasets: [
+                            {
+                                label: 'Disbursed Amount',
+                                data: graphData.weeklyDisbursement.map(item => item.amount),
+                                backgroundColor: '#4caf50',
+                                borderColor: '#388e3c',
+                                borderWidth: 1,
+                            },
+                        ],
+                    }}
+                    options={{
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            title: {
+                                display: true,
+                                text: 'Weekly Disbursement History',
+                            },
+                        },
+                    }}
+                    key={`weekly-disbursement-${selectedOffice}`}
+                />
+            </div>
+
+            {/* Repayment Trend: Actual vs Expected */}
+            <div className="graph-container">
+                <h3>Repayment Trend: Actual vs Expected</h3>
+                <Line
+                    data={{
+                        labels: graphData.repaymentTrend.labels,
+                        datasets: [
+                            {
+                                label: 'Actual',
+                                data: graphData.repaymentTrend.actual,
+                                borderColor: '#4caf50',
+                                backgroundColor: 'rgba(76, 175, 80, 0.2)',
+                                fill: true,
+                            },
+                            {
+                                label: 'Expected',
+                                data: graphData.repaymentTrend.expected,
+                                borderColor: '#f44336',
+                                backgroundColor: 'rgba(244, 67, 54, 0.2)',
+                                fill: true,
                             },
                         ],
                     }}

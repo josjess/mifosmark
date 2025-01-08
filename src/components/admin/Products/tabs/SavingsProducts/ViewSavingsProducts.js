@@ -85,7 +85,6 @@ const ViewSavingsProducts = ({ onRowClick }) => {
                     <th>Short Name</th>
                     <th>Currency</th>
                     <th>Nominal Interest Rate</th>
-                    <th>Status</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -100,15 +99,6 @@ const ViewSavingsProducts = ({ onRowClick }) => {
                             <td>{product.shortName}</td>
                             <td>{product.currency?.name || '-'}</td>
                             <td>{product.nominalAnnualInterestRate || '0'}%</td>
-                            <td>
-                        <span
-                            className={`status-badge ${
-                                product.active ? 'status-active' : 'status-inactive'
-                            }`}
-                        >
-                            {product.active ? 'Active' : 'Inactive'}
-                        </span>
-                            </td>
                         </tr>
                     ))
                 ) : (

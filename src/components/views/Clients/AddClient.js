@@ -14,22 +14,18 @@ const stages = [
     "Basic User Info",
     "Additional Details",
     "Family Members",
-    "Addresses",
 ];
 
 const AddClientForm = () => {
-    const [legalForm, setLegalForm] = useState('PERSON');
-    // const [familyMembers, setFamilyMembers] = useState([]);
-    // const [addresses, setAddresses] = useState([]);
+    const [legalForm, setLegalForm] = useState('');
+
     const [isActive, setIsActive] = useState(false);
     const [openSavingsAccount, setOpenSavingsAccount] = useState(false);
-    const [offices, setOffices] = useState([]);
-    const [staffs, setStaffs] = useState([]);
-
     const [office, setOffice] = useState('');
     const [staff, setStaff] = useState('');
+    const [staffs, setStaffs] = useState([]);
+
     const { user } = useContext(AuthContext);
-    const [step, setStep] = useState(1);
     const [firstName, setFirstName] = useState('');
     const [middleName, setMiddleName] = useState('');
     const [lastName, setLastName] = useState('');
@@ -43,6 +39,7 @@ const AddClientForm = () => {
     const [clientClassification, setClientClassification] = useState('');
     const [externalId, setExternalId] = useState('');
     const [submittedOn, setSubmittedOn] = useState(new Date().toISOString().split('T')[0]);
+    const [activationDate, setActivationDate] = useState(new Date().toISOString().split('T')[0]);
     const [incorporationDate, setIncorporationDate] = useState('');
     const [incorporationValidUntil, setIncorporationValidUntil] = useState('');
     const [incorporationNumber, setIncorporationNumber] = useState('');
@@ -50,12 +47,11 @@ const AddClientForm = () => {
     const [constitution, setConstitution] = useState('');
     const [remarks, setRemarks] = useState('');
 
+    const [selectedSavingsProduct, setSelectedSavingsProduct] = useState('');
+    const [savingsCharges, setSavingsCharges] = useState([]);
 
-    const goNext = () => {
-        if (step === 1 && isStep1Complete) setStep(step + 1);
-        if (step === 2 && isStep2Complete) setStep(step + 1);
-    };
-    const goBack = () => setStep(step - 1);
+    const [clientTemplate, setClientTemplate] = useState({});
+    const [isStaff, setIsStaff] = useState(false);
 
     const { startLoading, stopLoading } = useLoading();
     const navigate = useNavigate();
@@ -115,58 +111,66 @@ const AddClientForm = () => {
         isActive: false,
     };
 
-    const [addresses, setAddresses] = useState([]);
-    const [showAddressModal, setShowAddressModal] = useState(false);
-    const [newAddress, setNewAddress] = useState(INITIAL_ADDRESS);
+    const [currentStage, setCurrentStage] = useState(0);
+    const [completedStages, setCompletedStages] = useState(new Set());
+    const [allStagesComplete, setAllStagesComplete] = useState(false);
+    const [currentEditIndex, setCurrentEditIndex] = useState(null);
 
-    const addAddress = () => {
-        if (currentEditAddressIndex !== null) {
-            const updatedAddresses = [...addresses];
-            updatedAddresses[currentEditAddressIndex] = newAddress;
-            setAddresses(updatedAddresses);
-        } else {
-            setAddresses([...addresses, newAddress]);
-        }
-
-        setCurrentEditAddressIndex(null);
-        setNewAddress({
-            addressType: '',
-            addressLine1: '',
-            addressLine2: '',
-            country: '',
-            province: '',
-            city: '',
-            postalCode: '',
-            isActive: false,
-        });
-        setShowAddressModal(false);
-    };
     const isStep1Complete =
-        office.id !== '' &&
-        staff.id !== '' &&
+        office !== '' &&
         legalForm !== '' &&
-        ((legalForm === 'PERSON' && firstName !== '' && lastName !== '') || (legalForm === 'ENTITY' && name !== ''));
+        ((legalForm === clientTemplate.clientLegalFormOptions?.find(option => option.code === "legalFormType.person")?.value &&
+                firstName !== '' &&
+                lastName !== '') ||
+            (legalForm === clientTemplate.clientLegalFormOptions?.find(option => option.code === "legalFormType.entity")?.value &&
+                name !== ''));
 
     const isStep2Complete =
-        (legalForm === 'PERSON' &&
+        (legalForm === clientTemplate.clientLegalFormOptions?.find(option => option.code === "legalFormType.person")?.value &&
             dateOfBirth !== '' &&
             gender !== '' &&
             clientType !== '' &&
             clientClassification !== '') ||
-        (legalForm === 'ENTITY' &&
+        (legalForm === clientTemplate.clientLegalFormOptions?.find(option => option.code === "legalFormType.entity")?.value &&
             incorporationDate !== '' &&
             incorporationValidUntil !== '' &&
             incorporationNumber !== '' &&
             submittedOn !== '');
-    // const isStep3Complete = familyMembers.length > 0;
-    //
-    // const isStep4Complete = addresses.length > 0;
 
-    const isFormComplete = isStep1Complete && isStep2Complete;
+    const fetchStaffOptions = async (officeId) => {
+        try {
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': 'default',
+                'Content-Type': 'application/json',
+            };
 
-    const removeAddress = (index) => {
-        setAddresses(addresses.filter((_, i) => i !== index));
+            const response = await axios.get(
+                `${API_CONFIG.baseURL}/clients/template`,
+                {
+                    headers,
+                    params: {
+                        officeId,
+                        staffInSelectedOfficeOnly: true,
+                    },
+                }
+            );
+
+            setStaffs(response.data.staffOptions || []);
+        } catch (error) {
+            console.error("Error fetching staff options:", error);
+            setStaffs([]);
+        }
     };
+
+    useEffect(() => {
+        if (office) {
+            fetchStaffOptions(office);
+        } else {
+            setStaffs([]);
+        }
+    }, [office]);
+
 
     useEffect(() => {
         const fetchData = async () => {
@@ -179,31 +183,39 @@ const AddClientForm = () => {
                     'Content-Type': 'application/json',
                 };
 
-                const [officesResponse, staffResponse] = await Promise.all([
-                    axios.get(`${API_CONFIG.baseURL}/offices`, { headers }),
-                    axios.get(`${API_CONFIG.baseURL}/staff`, { headers })
-                ]);
+                const response = await axios.get(`${API_CONFIG.baseURL}/clients/template`, { headers });
 
-                setOffices(officesResponse.data);
-                setStaffs(staffResponse.data);
-                // console.log(officesResponse.data, staffResponse.data);
+                setClientTemplate(response.data || {});
             } catch (error) {
-                console.error('Error fetching data:', error);
+                console.error('Error fetching client template:', error);
             } finally {
                 stopLoading();
             }
         };
 
-        fetchData().then();
-        // eslint-disable-next-line
+        fetchData();
     }, []);
 
-    const [currentStage, setCurrentStage] = useState(0);
-    const [completedStages, setCompletedStages] = useState(new Set());
-    const [allStagesComplete, setAllStagesComplete] = useState(false);
-    const [currentEditIndex, setCurrentEditIndex] = useState(null);
-    const [currentEditAddressIndex, setCurrentEditAddressIndex] = useState(null);
+    useEffect(() => {
+        const fetchSavingsCharges = async () => {
+            try {
+                const headers = {
+                    Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                    'Fineract-Platform-TenantId': 'default',
+                    'Content-Type': 'application/json',
+                };
 
+                const response = await axios.get(`${API_CONFIG.baseURL}/charges/template`, { headers });
+
+                const savingsRelatedCharges = response.data.savingsChargeCalculationTypeOptions;
+                setSavingsCharges(savingsRelatedCharges);
+            } catch (error) {
+                console.error('Error fetching charges template:', error);
+            }
+        };
+
+        fetchSavingsCharges();
+    }, []);
 
     useEffect(() => {
         setAllStagesComplete(
@@ -224,12 +236,12 @@ const AddClientForm = () => {
                         className={`staged-form-stage ${
                             index === currentStage
                                 ? "staged-form-active"
-                                : completedStages.has(stage)
+                                : stage === "Preview" || completedStages.has(stage)
                                     ? "staged-form-completed"
                                     : "staged-form-unvisited"
                         }`}
                         onClick={() => {
-                            if (completedStages.has(stage)) {
+                            if (stage === "Preview" || completedStages.has(stage)) {
                                 setCurrentStage(index);
                             }
                         }}
@@ -260,30 +272,35 @@ const AddClientForm = () => {
                                     required
                                 >
                                     <option value="">-- Select Office --</option>
-                                    {offices.map((office) => (
-                                        <option key={office.id} value={office.id}>
-                                            {office.name}
-                                        </option>
-                                    ))}
+                                    {clientTemplate.officeOptions?.length > 0
+                                        ? clientTemplate.officeOptions.map((office) => (
+                                            <option key={office.id} value={office.id}>
+                                                {office.name}
+                                            </option>
+                                        ))
+                                        : <option value="" disabled>No Options Available...</option>}
                                 </select>
                             </div>
+
                             <div className="staged-form-field">
                                 <label htmlFor="staff">
-                                    Staff <span className="staged-form-required">*</span>
+                                    Staff
                                 </label>
                                 <select
                                     id="staff"
                                     value={staff}
                                     onChange={(e) => setStaff(e.target.value)}
                                     className="staged-form-select"
-                                    required
+                                    disabled={!office}
                                 >
                                     <option value="">-- Select Staff --</option>
-                                    {staffs.map((staff) => (
-                                        <option key={staff.id} value={staff.id}>
-                                            {staff.displayName}
-                                        </option>
-                                    ))}
+                                    {staffs.length > 0
+                                        ? staffs.map((staff) => (
+                                            <option key={staff.id} value={staff.id}>
+                                                {staff.displayName}
+                                            </option>
+                                        ))
+                                        : <option value="" disabled>No Options Available...</option>}
                                 </select>
                             </div>
                         </div>
@@ -298,109 +315,138 @@ const AddClientForm = () => {
                                 onChange={(e) => setLegalForm(e.target.value)}
                                 className="staged-form-select"
                             >
-                                <option value="PERSON">Person</option>
-                                <option value="ENTITY">Entity</option>
+                                <option value="">-- Select Legal Form --</option>
+                                {clientTemplate.clientLegalFormOptions?.map((option) => (
+                                    <option key={option.id} value={option.value}>
+                                        {option.value}
+                                    </option>
+                                ))}
                             </select>
                         </div>
 
-                        {legalForm === "PERSON" ? (
-                            <>
-                                <div className="staged-form-row">
-                                    <div className="staged-form-field">
-                                        <label htmlFor="firstName">
-                                            First Name <span className="staged-form-required">*</span>
-                                        </label>
-                                        <input
-                                            id="firstName"
-                                            type="text"
-                                            value={firstName}
-                                            onChange={(e) => setFirstName(e.target.value)}
-                                            className="staged-form-input"
-                                            placeholder="Enter First Name"
-                                            required
-                                        />
+                        {legalForm && (
+                            legalForm === clientTemplate.clientLegalFormOptions?.find(option => option.code === "legalFormType.person")?.value ? (
+                                <>
+                                    <div className="staged-form-row">
+                                        <div className="staged-form-field">
+                                            <label htmlFor="firstName">
+                                                First Name <span className="staged-form-required">*</span>
+                                            </label>
+                                            <input
+                                                id="firstName"
+                                                type="text"
+                                                value={firstName}
+                                                onChange={(e) => setFirstName(e.target.value)}
+                                                className="staged-form-input"
+                                                placeholder="Enter First Name"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="staged-form-field">
+                                            <label htmlFor="middleName">Middle Name</label>
+                                            <input
+                                                id="middleName"
+                                                type="text"
+                                                value={middleName}
+                                                onChange={(e) => setMiddleName(e.target.value)}
+                                                className="staged-form-input"
+                                                placeholder="Enter Middle Name"
+                                            />
+                                        </div>
                                     </div>
-                                    <div className="staged-form-field">
-                                        <label htmlFor="middleName">Middle Name</label>
-                                        <input
-                                            id="middleName"
-                                            type="text"
-                                            value={middleName}
-                                            onChange={(e) => setMiddleName(e.target.value)}
-                                            className="staged-form-input"
-                                            placeholder="Enter Middle Name"
-                                        />
+                                    <div className="staged-form-row">
+                                        <div className="staged-form-field">
+                                            <label htmlFor="lastName">
+                                                Last Name <span className="staged-form-required">*</span>
+                                            </label>
+                                            <input
+                                                id="lastName"
+                                                type="text"
+                                                value={lastName}
+                                                onChange={(e) => setLastName(e.target.value)}
+                                                className="staged-form-input"
+                                                placeholder="Enter Last Name"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="staged-form-field">
+                                            <label htmlFor="mobileNumber">Mobile Number</label>
+                                            <input
+                                                id="mobileNumber"
+                                                type="text"
+                                                value={mobileNumber}
+                                                onChange={(e) => setMobileNumber(e.target.value)}
+                                                className="staged-form-input"
+                                                placeholder="Enter Mobile Number"
+                                            />
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="staged-form-row">
-                                    <div className="staged-form-field">
-                                        <label htmlFor="lastName">
-                                            Last Name <span className="staged-form-required">*</span>
-                                        </label>
-                                        <input
-                                            id="lastName"
-                                            type="text"
-                                            value={lastName}
-                                            onChange={(e) => setLastName(e.target.value)}
-                                            className="staged-form-input"
-                                            placeholder="Enter Last Name"
-                                            required
-                                        />
+                                </>
+                            ) : (
+                                <>
+                                    <div className="staged-form-row">
+                                        <div className="staged-form-field">
+                                            <label htmlFor="name">
+                                                Name <span className="staged-form-required">*</span>
+                                            </label>
+                                            <input
+                                                id="name"
+                                                type="text"
+                                                value={name}
+                                                onChange={(e) => setName(e.target.value)}
+                                                className="staged-form-input"
+                                                placeholder="Enter Name"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="staged-form-field">
+                                            <label htmlFor="mobileNumber">Mobile Number</label>
+                                            <input
+                                                id="mobileNumber"
+                                                type="text"
+                                                value={mobileNumber}
+                                                onChange={(e) => setMobileNumber(e.target.value)}
+                                                className="staged-form-input"
+                                                placeholder="Enter Mobile Number"
+                                            />
+                                        </div>
                                     </div>
-                                    <div className="staged-form-field">
-                                        <label htmlFor="mobileNumber">Mobile Number</label>
-                                        <input
-                                            id="mobileNumber"
-                                            type="text"
-                                            value={mobileNumber}
-                                            onChange={(e) => setMobileNumber(e.target.value)}
-                                            className="staged-form-input"
-                                            placeholder="Enter Mobile Number"
-                                        />
-                                    </div>
-                                </div>
-                            </>
-                        ) : (
-                            <>
-                                <div className="staged-form-row">
-                                    <div className="staged-form-field">
-                                        <label htmlFor="name">
-                                            Name <span className="staged-form-required">*</span>
-                                        </label>
-                                        <input
-                                            id="name"
-                                            type="text"
-                                            value={name}
-                                            onChange={(e) => setName(e.target.value)}
-                                            className="staged-form-input"
-                                            placeholder="Enter Name"
-                                            required
-                                        />
-                                    </div>
-                                    <div className="staged-form-field">
-                                        <label htmlFor="mobileNumber">Mobile Number</label>
-                                        <input
-                                            id="mobileNumber"
-                                            type="text"
-                                            value={mobileNumber}
-                                            onChange={(e) => setMobileNumber(e.target.value)}
-                                            className="staged-form-input"
-                                            placeholder="Enter Mobile Number"
-                                        />
-                                    </div>
-                                </div>
-                            </>
+                                </>
+                            )
                         )}
 
-                        <div className="staged-form-field">
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    checked={isActive}
-                                    onChange={() => setIsActive(!isActive)}
-                                />
-                                Activate Client
-                            </label>
+                        <div className="staged-form-row">
+                            <div className="staged-form-field">
+                                <label>
+                                    <input
+                                        type="checkbox"
+                                        checked={isActive}
+                                        onChange={() => setIsActive(!isActive)}
+                                    />
+                                    Activate Client
+                                </label>
+                            </div>
+
+                            {isActive && (
+                                <div className="staged-form-field">
+                                    <label htmlFor="activationDate">
+                                        Activation Date <span className="staged-form-required">*</span>
+                                    </label>
+                                    <DatePicker
+                                        id="activationDate"
+                                        selected={activationDate ? new Date(activationDate) : null}
+                                        onChange={(date) => setActivationDate(date.toISOString().split('T')[0])}
+                                        className="staged-form-input"
+                                        placeholderText="Select Activation Date"
+                                        dateFormat="MMMM d, yyyy"
+                                        showPopperArrow={false}
+                                        showMonthDropdown
+                                        showYearDropdown
+                                        dropdownMode="select"
+                                        minDate={new Date()}
+                                    />
+                                </div>
+                            )}
                         </div>
                     </div>
                 );
@@ -408,11 +454,12 @@ const AddClientForm = () => {
             case "Additional Details":
                 return (
                     <div className="staged-form-additional-details">
-                        {legalForm === "PERSON" ? (
-                            <>
-                                <div className="staged-form-row">
-                                    <div className="staged-form-field">
-                                        <label htmlFor="dateOfBirth">
+                        {legalForm && (
+                            legalForm === clientTemplate.clientLegalFormOptions?.find(option => option.code === "legalFormType.person")?.value ? (
+                                <>
+                                    <div className="staged-form-row">
+                                        <div className="staged-form-field">
+                                            <label htmlFor="dateOfBirth">
                                             Date of Birth <span className="staged-form-required">*</span>
                                         </label>
                                         <DatePicker
@@ -443,8 +490,11 @@ const AddClientForm = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">-- Select Gender --</option>
-                                            <option value="Male">Male</option>
-                                            <option value="Female">Female</option>
+                                            {clientTemplate.genderOptions?.map((option) => (
+                                                <option key={option.id} value={option.name}>
+                                                    {option.name}
+                                                </option>
+                                            ))}
                                         </select>
                                     </div>
                                 </div>
@@ -460,12 +510,11 @@ const AddClientForm = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">-- Select Client Type --</option>
-                                            <option value="COR">COR</option>
-                                            <option value="IND">IND</option>
-                                            <option value="Borrower">Borrower</option>
-                                            <option value="Counter-party">Counter-party</option>
-                                            <option value="Shareholder">Shareholder</option>
-                                            <option value="Investor">Investor</option>
+                                            {clientTemplate.clientTypeOptions?.map((option) => (
+                                                <option key={option.id} value={option.name}>
+                                                    {option.name}
+                                                </option>
+                                            ))}
                                         </select>
                                     </div>
                                     <div className="staged-form-field">
@@ -479,8 +528,11 @@ const AddClientForm = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">-- Select Classification --</option>
-                                            <option value="Rural">Rural</option>
-                                            <option value="Urban">Urban</option>
+                                            {clientTemplate.clientClassificationOptions?.map((option) => (
+                                                <option key={option.id} value={option.name}>
+                                                    {option.name}
+                                                </option>
+                                            ))}
                                         </select>
                                     </div>
                                 </div>
@@ -554,7 +606,11 @@ const AddClientForm = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">-- Select Business Line --</option>
-                                            <option value="Trading">Trading</option>
+                                            {clientTemplate.clientNonPersonMainBusinessLineOptions?.map((option) => (
+                                                <option key={option.id} value={option.name}>
+                                                    {option.name}
+                                                </option>
+                                            ))}
                                         </select>
                                     </div>
                                 </div>
@@ -567,8 +623,12 @@ const AddClientForm = () => {
                                             onChange={(e) => setConstitution(e.target.value)}
                                             className="staged-form-select"
                                         >
-                                            <option value="PT">PT</option>
-                                            <option value="CV">CV</option>
+                                            <option value="">-- Select Constitution --</option>
+                                            {clientTemplate.clientNonPersonConstitutionOptions?.map((option) => (
+                                                <option key={option.id} value={option.name}>
+                                                    {option.name}
+                                                </option>
+                                            ))}
                                         </select>
                                     </div>
                                     <div className="staged-form-field">
@@ -583,6 +643,7 @@ const AddClientForm = () => {
                                     </div>
                                 </div>
                             </>
+                        )
                         )}
 
                         <div className="staged-form-row">
@@ -607,7 +668,21 @@ const AddClientForm = () => {
                                     maxDate={new Date()}
                                 />
                             </div>
-
+                            {legalForm &&
+                                ( legalForm === clientTemplate.clientLegalFormOptions?.find(option => option.code === "legalFormType.person")?.value && (
+                                <div className="staged-form-field">
+                                    <label>
+                                        <input
+                                            type="checkbox"
+                                            checked={isStaff}
+                                            onChange={() => setIsStaff(!isStaff)}
+                                        />
+                                        Is Staff?
+                                    </label>
+                                </div>
+                                ))}
+                        </div>
+                        <div className="staged-form-row">
                             <div className="staged-form-field">
                                 <label>
                                     <input
@@ -618,6 +693,28 @@ const AddClientForm = () => {
                                     Open Savings Account
                                 </label>
                             </div>
+
+                            {openSavingsAccount && (
+                                <div className="staged-form-field">
+                                    <label htmlFor="savingsProduct">
+                                        Savings Product <span className="staged-form-required">*</span>
+                                    </label>
+                                    <select
+                                        id="savingsProduct"
+                                        value={selectedSavingsProduct}
+                                        onChange={(e) => setSelectedSavingsProduct(e.target.value)}
+                                        className="staged-form-select"
+                                        required
+                                    >
+                                        <option value="">-- Select Savings Product --</option>
+                                        {clientTemplate.savingProductOptions?.map((product) => (
+                                            <option key={product.id} value={product.id}>
+                                                {product.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
                         </div>
                     </div>
                 );
@@ -637,7 +734,7 @@ const AddClientForm = () => {
                         <table className="staged-form-table">
                             <thead>
                             <tr>
-                            <th>First Name</th>
+                                <th>First Name</th>
                                 <th>Middle Name</th>
                                 <th>Last Name</th>
                                 <th>Mobile Number</th>
@@ -671,71 +768,8 @@ const AddClientForm = () => {
                                             </button>
                                             <button
                                                 className="remove-icon"
+                                                style={{border: 'none'}}
                                                 onClick={() => removeFamilyMember(index)}
-                                            >
-                                                <FaTrash/>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                            </tbody>
-                        </table>
-                    </div>
-                );
-
-            case "Addresses":
-                return (
-                    <div className="staged-form-addresses">
-                        <div className="t-head">
-                            <h3>Addresses</h3>
-                            <div
-                                className="add-family-member"
-                                onClick={() => setShowAddressModal(true)}
-                            >
-                                <FaPlus className="react-icon-plus"/> Add Address
-                            </div>
-                        </div>
-                        <table className="staged-form-table">
-                            <thead>
-                            <tr>
-                                <th>Address Type</th>
-                                <th>Address Line 1</th>
-                                <th>Country</th>
-                                <th>Province</th>
-                                <th>City</th>
-                                <th>Postal Code</th>
-                                <th>Active</th>
-                                <th>Actions</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {addresses.length === 0 ? (
-                                <tr>
-                                    <td colSpan="7" className="staged-form-no-data">
-                                        No addresses added.
-                                    </td>
-                                </tr>
-                            ) : (
-                                addresses.map((address, index) => (
-                                    <tr key={index}>
-                                        <td>{address.addressType}</td>
-                                        <td>{address.addressLine1}</td>
-                                        <td>{address.country}</td>
-                                        <td>{address.province}</td>
-                                        <td>{address.city}</td>
-                                        <td>{address.postalCode}</td>
-                                        <td>{address.isActive ? "Yes" : "No"}</td>
-                                        <td>
-                                            <button
-                                                className="edit-icon"
-                                                onClick={() => handleEditAddress(index)}
-                                            >
-                                                <FaEdit/>
-                                            </button>
-                                            <button
-                                                className="remove-icon"
-                                                onClick={() => removeAddress(index)}
                                             >
                                                 <FaTrash/>
                                             </button>
@@ -755,44 +789,31 @@ const AddClientForm = () => {
 
     const renderPreviewSection = () => {
         const getOfficeName = () => {
-            const officeObj = offices.find((o) => o.id === parseInt(office));
-            return officeObj ? officeObj.name : "N/A";
+            const officeObj = clientTemplate.officeOptions?.find((o) => o.id === parseInt(office));
+            return officeObj ? officeObj.name : "";
         };
 
         const getStaffName = () => {
-            const staffObj = staffs.find((s) => s.id === parseInt(staff));
-            return staffObj ? staffObj.displayName : "N/A";
+            const staffObj = clientTemplate.staffOptions?.find((s) => s.id === parseInt(staff));
+            return staffObj ? staffObj.displayName : "";
         };
 
         const transformFamilyMembers = () =>
             familyMembers.length > 0
                 ? familyMembers.map((member) => ({
-                    "First Name": member.firstName || "N/A",
-                    "Middle Name": member.middleName || "N/A",
-                    "Last Name": member.lastName || "N/A",
-                    "Mobile Number": member.mobileNumber || "N/A",
-                    Age: member.age || "N/A",
-                    Gender: member.gender || "N/A",
-                    Profession: member.profession || "N/A",
-                    "Marital Status": member.maritalStatus || "N/A",
+                    "First Name": member.firstName || "",
+                    "Middle Name": member.middleName || "",
+                    "Last Name": member.lastName || "",
+                    "Mobile Number": member.mobileNumber || "",
+                    Age: member.age || "",
+                    Gender: clientTemplate.genderOptions?.find((g) => g.id === member.gender)?.name || "",
+                    Profession: member.profession || "",
+                    "Marital Status":
+                        clientTemplate.maritalStatusIdOptions?.find((m) => m.id === member.maritalStatus)?.name || "",
                     "Date of Birth": member.dateOfBirth
                         ? format(new Date(member.dateOfBirth), "MMMM d, yyyy")
-                        : "N/A",
+                        : "",
                     Dependent: member.isDependent ? "Yes" : "No",
-                }))
-                : null;
-
-        const transformAddresses = () =>
-            addresses.length > 0
-                ? addresses.map((address) => ({
-                    "Address Type": address.addressType || "N/A",
-                    "Address Line 1": address.addressLine1 || "N/A",
-                    "Address Line 2": address.addressLine2 || "N/A",
-                    Country: address.country || "N/A",
-                    Province: address.province || "N/A",
-                    City: address.city || "N/A",
-                    "Postal Code": address.postalCode || "N/A",
-                    Active: address.isActive ? "Yes" : "No",
                 }))
                 : null;
 
@@ -802,17 +823,17 @@ const AddClientForm = () => {
                 data: {
                     Office: getOfficeName(),
                     Staff: getStaffName(),
-                    "Legal Form": legalForm || "N/A",
-                    ...(legalForm === "PERSON"
+                    "Legal Form": legalForm || "",
+                    ...(legalForm === clientTemplate.clientLegalFormOptions?.find(option => option.code === "legalFormType.person")?.value
                         ? {
-                            "First Name": firstName || "N/A",
-                            "Middle Name": middleName || "N/A",
-                            "Last Name": lastName || "N/A",
-                            "Mobile Number": mobileNumber || "N/A",
+                            "First Name": firstName || "",
+                            "Middle Name": middleName || "",
+                            "Last Name": lastName || "",
+                            "Mobile Number": mobileNumber || "",
                         }
                         : {
-                            Name: name || "N/A",
-                            "Mobile Number": mobileNumber || "N/A",
+                            Name: name || "",
+                            "Mobile Number": mobileNumber || "",
                         }),
                     "Active Client": isActive ? "Yes" : "No",
                 },
@@ -820,29 +841,36 @@ const AddClientForm = () => {
             {
                 title: "Additional Details",
                 data: {
-                    ...(legalForm === "PERSON"
+                    ...(legalForm === clientTemplate.clientLegalFormOptions?.find(option => option.code === "legalFormType.person")?.value
                         ? {
                             "Date of Birth": dateOfBirth
                                 ? format(new Date(dateOfBirth), "MMMM d, yyyy")
-                                : "N/A",
-                            Gender: gender || "N/A",
-                            "Client Type": clientType || "N/A",
-                            "Client Classification": clientClassification || "N/A",
+                                : "",
+                            Gender: clientTemplate.genderOptions?.find((g) => g.name === gender)?.name || "",
+                            "Client Type": clientTemplate.clientTypeOptions?.find((t) => t.name === clientType)?.name || "",
+                            "Client Classification":
+                                clientTemplate.clientClassificationOptions?.find((c) => c.name === clientClassification)?.name ||
+                                "",
+                            "Is Staff": isStaff ? "Yes" : "No",
                         }
                         : {
                             "Incorporation Date": incorporationDate
                                 ? format(new Date(incorporationDate), "MMMM d, yyyy")
-                                : "N/A",
+                                : "",
                             "Valid Until": incorporationValidUntil
                                 ? format(new Date(incorporationValidUntil), "MMMM d, yyyy")
-                                : "N/A",
-                            "Incorporation Number": incorporationNumber || "N/A",
-                            "Main Business Line": mainBusinessLine || "N/A",
-                            Constitution: constitution || "N/A",
-                            Remarks: remarks || "N/A",
+                                : "",
+                            "Incorporation Number": incorporationNumber || "",
+                            "Main Business Line":
+                                clientTemplate.clientNonPersonMainBusinessLineOptions?.find((b) => b.name === mainBusinessLine)
+                                    ?.name || "",
+                            Constitution:
+                                clientTemplate.clientNonPersonConstitutionOptions?.find((c) => c.name === constitution)?.name ||
+                                "",
+                            Remarks: remarks || "",
                             "Submitted On": submittedOn
                                 ? format(new Date(submittedOn), "MMMM d, yyyy")
-                                : "N/A",
+                                : "",
                             "Open Savings Account": openSavingsAccount ? "Yes" : "No",
                         }),
                 },
@@ -850,10 +878,6 @@ const AddClientForm = () => {
             {
                 title: "Family Members",
                 data: transformFamilyMembers(),
-            },
-            {
-                title: "Addresses",
-                data: transformAddresses(),
             },
         ];
 
@@ -884,7 +908,7 @@ const AddClientForm = () => {
                                     {Object.entries(data).map(([key, value]) => (
                                         <tr key={key}>
                                             <td>{key}</td>
-                                            <td>{value || "N/A"}</td>
+                                            <td>{value || ""}</td>
                                         </tr>
                                     ))}
                                     </tbody>
@@ -906,7 +930,7 @@ const AddClientForm = () => {
                                             <td key={i}>
                                                 {typeof value === "object"
                                                     ? JSON.stringify(value)
-                                                    : value || "N/A"}
+                                                    : value || ""}
                                             </td>
                                         ))}
                                     </tr>
@@ -927,23 +951,108 @@ const AddClientForm = () => {
             const stageComplete =
                 (currentStage === 0 && isStep1Complete) ||
                 (currentStage === 1 && isStep2Complete) ||
-                (currentStage === 2 && familyMembers.length > 0) ||
-                (currentStage === 3 && addresses.length > 0);
+                (currentStage === 2 && familyMembers.length >= 0);
 
-            if (stageComplete) {
+            if (stageComplete || (currentStage === stages.length - 1 && allStagesComplete)) {
                 setCompletedStages((prev) => {
                     const updatedStages = new Set(prev);
                     updatedStages.add(stages[currentStage]);
                     return updatedStages;
                 });
+
                 setCurrentStage((prev) => prev + 1);
             }
+        } else if (currentStage === stages.length && allStagesComplete) {
+            setCompletedStages((prev) => {
+                const updatedStages = new Set(prev);
+                updatedStages.add("Preview");
+                return updatedStages;
+            });
         }
     };
 
-    const handleSubmit = () => {
-        if (allStagesComplete) {
-            console.log("Form submitted successfully!");
+    const handleSubmit = async () => {
+        startLoading();
+        try {
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': 'default',
+                'Content-Type': 'application/json',
+            };
+
+            if (!legalForm) {
+                console.error('Legal form must be selected.');
+                return;
+            }
+
+            if (legalForm === clientTemplate.clientLegalFormOptions?.find(option => option.code === "legalFormType.person")?.value && (!firstName || !lastName)) {
+                console.error('First and Last Name are required for Person legal form.');
+                return;
+            }
+
+            if (legalForm === clientTemplate.clientLegalFormOptions?.find(option => option.code === "legalFormType.entity")?.value && !name) {
+                console.error('Name is required for Entity legal form.');
+                return;
+            }
+
+            if (isActive && !activationDate) {
+                console.error('Activation date is required when activating the client.');
+                return;
+            }
+
+            const formattedActivationDate = isActive ? format(new Date(activationDate), 'dd MMMM yyyy') : null;
+            const formattedSubmittedOnDate = submittedOn ? format(new Date(submittedOn), 'dd MMMM yyyy') : null;
+
+            const clientData = {
+                officeId: parseInt(office),
+                legalFormId: clientTemplate.clientLegalFormOptions?.find(option => option.value === legalForm)?.id,
+                firstname: legalForm === clientTemplate.clientLegalFormOptions?.find(option => option.code === "legalFormType.person")?.value ? firstName : undefined,
+                lastname: legalForm === clientTemplate.clientLegalFormOptions?.find(option => option.code === "legalFormType.person")?.value ? lastName : undefined,
+                fullname: legalForm === clientTemplate.clientLegalFormOptions?.find(option => option.code === "legalFormType.entity")?.value ? name : undefined,
+                mobileNo: mobileNumber || undefined,
+                isStaff,
+                active: isActive,
+                activationDate: formattedActivationDate,
+                submittedOnDate: formattedSubmittedOnDate,
+                dateFormat: 'dd MMMM yyyy',
+                locale: 'en',
+                genderId: gender ? parseInt(clientTemplate.genderOptions?.find((g) => g.name === gender)?.id) : undefined,
+                clientTypeId: clientType ? parseInt(clientTemplate.clientTypeOptions?.find((t) => t.name === clientType)?.id) : undefined,
+                clientClassificationId: clientClassification ? parseInt(clientTemplate.clientClassificationOptions?.find((c) => c.name === clientClassification)?.id) : undefined,
+                savingsProductId: openSavingsAccount ? parseInt(selectedSavingsProduct) : undefined,
+            };
+
+            const response = await axios.post(`${API_CONFIG.baseURL}/clients`, clientData, { headers });
+
+            setLegalForm('');
+            setFirstName('');
+            setMiddleName('');
+            setLastName('');
+            setName('');
+            setMobileNumber('');
+            setIsStaff(false);
+            setIsActive(false);
+            setActivationDate(null);
+            setSubmittedOn(null);
+            setGender('');
+            setClientType('');
+            setClientClassification('');
+            setSelectedSavingsProduct('');
+            setOpenSavingsAccount(false);
+
+            navigate("/clients", {
+                state: {
+                    clientId: response.data.clientId,
+                    clientName: legalForm === clientTemplate.clientLegalFormOptions?.find(option => option.code === "legalFormType.person")?.value
+                        ? `${firstName} ${lastName}`
+                        : name || "Client Details",
+                    preventDuplicate: true,
+                },
+            });
+        } catch (error) {
+            console.error('Error submitting client data:', error.response?.data || error.message);
+        } finally {
+            stopLoading();
         }
     };
 
@@ -951,12 +1060,6 @@ const AddClientForm = () => {
         setCurrentEditIndex(index);
         setNewFamilyMember(familyMembers[index]);
         setShowModal(true);
-    };
-
-    const handleEditAddress = (index) => {
-        setCurrentEditAddressIndex(index);
-        setNewAddress(addresses[index]);
-        setShowAddressModal(true);
     };
 
     return (
@@ -969,38 +1072,37 @@ const AddClientForm = () => {
                     ) : (
                         renderStageContent()
                     )}
-                </div>
-                <div className="staged-form-stage-buttons">
-                    <button
-                        onClick={() => setCurrentStage((prev) => Math.max(prev - 1, 0))}
-                        disabled={currentStage === 0}
-                        className="staged-form-button-previous"
-                    >
-                        Previous
-                    </button>
-                    {currentStage < stages.length && (
+
+                    <div className="staged-form-stage-buttons">
                         <button
-                            onClick={handleNextStage}
-                            className="staged-form-button-next"
-                            disabled={
-                                (currentStage === 0 && !isStep1Complete) ||
-                                (currentStage === 1 && !isStep2Complete) ||
-                                (currentStage === 2 && familyMembers.length === 0) ||
-                                (currentStage === 3 && addresses.length === 0)
-                            }
+                            onClick={() => setCurrentStage((prev) => Math.max(prev - 1, 0))}
+                            disabled={currentStage === 0}
+                            className="staged-form-button-previous"
                         >
-                            Next
+                            Previous
                         </button>
-                    )}
-                    {currentStage === stages.length && (
-                        <button
-                            onClick={handleSubmit}
-                            className="staged-form-button-next"
-                            disabled={!allStagesComplete}
-                        >
-                            Submit
-                        </button>
-                    )}
+                        {currentStage < stages.length && (
+                            <button
+                                onClick={handleNextStage}
+                                className="staged-form-button-next"
+                                disabled={
+                                    (currentStage === 0 && !isStep1Complete) ||
+                                    (currentStage === 1 && !isStep2Complete)
+                                }
+                            >
+                                Next
+                            </button>
+                        )}
+                        {currentStage === stages.length && (
+                            <button
+                                onClick={handleSubmit}
+                                className="staged-form-button-next"
+                                disabled={!allStagesComplete}
+                            >
+                                Submit
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
             {showModal && (
@@ -1231,184 +1333,6 @@ const AddClientForm = () => {
                                 }
                             >
                                 {currentEditIndex !== null ? "Update" : "Save"}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-            {showAddressModal && (
-                <div
-                    className="create-provisioning-criteria-modal-overlay"
-                    onClick={() => setShowAddressModal(false)}
-                >
-                    <div
-                        className="create-provisioning-criteria-modal-content"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <h4 className="create-modal-title">
-                            {currentEditAddressIndex !== null ? "Edit Address" : "Add Address"}
-                        </h4>
-                        <div className="create-holiday-row">
-                            <div className="create-provisioning-criteria-group">
-                                <label htmlFor="addressType" className="create-provisioning-criteria-label">
-                                    Address Type <span>*</span>
-                                </label>
-                                <select
-                                    id="addressType"
-                                    value={newAddress.addressType}
-                                    onChange={(e) =>
-                                        setNewAddress({ ...newAddress, addressType: e.target.value })
-                                    }
-                                    className="create-provisioning-criteria-select"
-                                >
-                                    <option value="">-- Select Address Type --</option>
-                                    <option value="Permanent">Permanent</option>
-                                    <option value="Present">Present</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div className="create-holiday-row">
-                            <div className="create-provisioning-criteria-group">
-                                <label
-                                    htmlFor="addressLine1"
-                                    className="create-provisioning-criteria-label"
-                                >
-                                    Address Line 1 <span>*</span>
-                                </label>
-                                <input
-                                    id="addressLine1"
-                                    type="text"
-                                    value={newAddress.addressLine1}
-                                    onChange={(e) =>
-                                        setNewAddress({ ...newAddress, addressLine1: e.target.value })
-                                    }
-                                    className="create-provisioning-criteria-input"
-                                    placeholder="Enter Address Line 1"
-                                    required
-                                />
-                            </div>
-                            <div className="create-provisioning-criteria-group">
-                                <label
-                                    htmlFor="addressLine2"
-                                    className="create-provisioning-criteria-label"
-                                >
-                                    Address Line 2
-                                </label>
-                                <input
-                                    id="addressLine2"
-                                    type="text"
-                                    value={newAddress.addressLine2}
-                                    onChange={(e) =>
-                                        setNewAddress({ ...newAddress, addressLine2: e.target.value })
-                                    }
-                                    className="create-provisioning-criteria-input"
-                                    placeholder="Enter Address Line 2"
-                                />
-                            </div>
-                        </div>
-                        <div className="create-holiday-row">
-                            <div className="create-provisioning-criteria-group">
-                                <label htmlFor="country" className="create-provisioning-criteria-label">
-                                    Country <span>*</span>
-                                </label>
-                                <input
-                                    id="country"
-                                    type="text"
-                                    value={newAddress.country}
-                                    onChange={(e) =>
-                                        setNewAddress({ ...newAddress, country: e.target.value })
-                                    }
-                                    className="create-provisioning-criteria-input"
-                                    placeholder="Enter Country"
-                                    required
-                                />
-                            </div>
-                            <div className="create-provisioning-criteria-group">
-                                <label htmlFor="province" className="create-provisioning-criteria-label">
-                                    Province/State <span>*</span>
-                                </label>
-                                <input
-                                    id="province"
-                                    type="text"
-                                    value={newAddress.province}
-                                    onChange={(e) =>
-                                        setNewAddress({ ...newAddress, province: e.target.value })
-                                    }
-                                    className="create-provisioning-criteria-input"
-                                    placeholder="Enter Province/State"
-                                    required
-                                />
-                            </div>
-                        </div>
-                        <div className="create-holiday-row">
-                            <div className="create-provisioning-criteria-group">
-                                <label htmlFor="city" className="create-provisioning-criteria-label">
-                                    City <span>*</span>
-                                </label>
-                                <input
-                                    id="city"
-                                    type="text"
-                                    value={newAddress.city}
-                                    onChange={(e) =>
-                                        setNewAddress({ ...newAddress, city: e.target.value })
-                                    }
-                                    className="create-provisioning-criteria-input"
-                                    placeholder="Enter City"
-                                    required
-                                />
-                            </div>
-                            <div className="create-provisioning-criteria-group">
-                                <label
-                                    htmlFor="postalCode"
-                                    className="create-provisioning-criteria-label"
-                                >
-                                    Postal Code <span>*</span>
-                                </label>
-                                <input
-                                    id="postalCode"
-                                    type="text"
-                                    value={newAddress.postalCode}
-                                    onChange={(e) =>
-                                        setNewAddress({ ...newAddress, postalCode: e.target.value })
-                                    }
-                                    className="create-provisioning-criteria-input"
-                                    placeholder="Enter Postal Code"
-                                    required
-                                />
-                            </div>
-                        </div>
-                        <div className="create-holiday-row">
-                            <div className="create-provisioning-criteria-group">
-                                <label className='create-provisioning-criteria-label'>
-                                    <input
-                                        type="checkbox"
-                                        checked={newAddress.isActive}
-                                        onChange={(e) =>
-                                            setNewAddress({ ...newAddress, isActive: e.target.checked })
-                                        }
-                                    />  Is Active?
-                                </label>
-                            </div>
-                        </div>
-                        <div className="create-provisioning-criteria-modal-actions">
-                            <button
-                                onClick={() => setShowAddressModal(false)}
-                                className="create-provisioning-criteria-cancel"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={addAddress}
-                                className="create-provisioning-criteria-confirm"
-                                disabled={
-                                    !newAddress.addressType ||
-                                    !newAddress.addressLine1 ||
-                                    !newAddress.country ||
-                                    !newAddress.city ||
-                                    !newAddress.postalCode
-                                }
-                            >
-                                {currentEditAddressIndex !== null ? "Update" : "Save"}
                             </button>
                         </div>
                     </div>

@@ -59,33 +59,6 @@
     font-size: 1em;
 }
 
-.pagination {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 20px;
-}
-
-.pagination button {
-    padding: 8px 14px;
-    font-size: 1em;
-    color: #007bff;
-    background: none;
-    border: 1px solid #007bff;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.pagination button:hover {
-    background-color: #007bff;
-    color: #ffffff;
-}
-
-.pagination button:disabled {
-    color: #b0c4de;
-    border-color: #b0c4de;
-    cursor: not-allowed;
-}
 .mapping-icon {
     margin: 0 6px;
     vertical-align: middle;

@@ -1,9 +1,9 @@
-import React, {useEffect} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {BrowserRouter as Router, Routes, Route, useLocation} from 'react-router-dom';
 import { loadConfig } from './config';
 import Login from './components/auth/Login';
 import Dashboard from './components/Dashboard';
-import { AuthProvider } from './context/AuthContext';
+import {AuthContext, AuthProvider} from './context/AuthContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { LoadingProvider } from './context/LoadingContext';
 import Notification from './components/utilities/Notification';
@@ -132,9 +132,17 @@ const App = () => {
         loadConfig().then();
     }, []);
 
+    const { redirectToLogin } = useContext(AuthContext);
+
     const location = useLocation();
+    const [isLoginRendered, setIsLoginRendered] = useState(false);
 
     const isLoginPage = location.pathname === '/login';
+    useEffect(() => {
+        if (location.pathname === '/login' && !isLoginRendered) {
+            setIsLoginRendered(true);
+        }
+    }, [location.pathname, isLoginRendered]);
 
     return (
         <AuthProvider>
@@ -146,7 +154,9 @@ const App = () => {
                     {!isLoginPage && <Navbar />}
                     {!isLoginPage && <Sidebar className="sidebar" />}
                     <Routes>
-                        <Route path="/login" element={<Login />} />
+                        {redirectToLogin || isLoginPage ? (
+                            <Route path="/login" element={<Login />} />
+                        ) : null}
                         <Route path='*' element={<NotFound />} />
                         <Route element={<ProtectedLayout />}>
                             <Route path="/" element={<Dashboard />} />

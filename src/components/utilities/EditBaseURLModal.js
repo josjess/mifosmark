@@ -24,7 +24,6 @@ const EditBaseURLModal = ({ isOpen, onClose }) => {
         onClose();
         logout();
         alert("Base URL updated successfully! You have been logged out.");
-        window.location.reload();
     };
 
     const handleProceedToConfirmation = () => {
