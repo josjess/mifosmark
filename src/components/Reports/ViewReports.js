@@ -5,6 +5,7 @@ import { AuthContext } from "../../context/AuthContext";
 import { useLoading } from "../../context/LoadingContext";
 import { API_CONFIG } from "../../config";
 import "./ViewReports.css";
+import DatePicker from "react-datepicker";
 
 const ReportFormPage = () => {
     const { user } = useContext(AuthContext);
@@ -59,6 +60,30 @@ const ReportFormPage = () => {
         }
     };
 
+    // Utility: determine which column indices to treat as ID vs. Name
+    function getColumnIndices(columnHeaders) {
+        const ID_ALIASES = ["id", "code"];
+        const NAME_ALIASES = ["name", "displayName", "tc"];
+
+        let idIndex = -1;
+        let nameIndex = -1;
+
+        columnHeaders.forEach((header, idx) => {
+            const colName = header.columnName.toLowerCase();
+
+            // Find the first column that looks like an ID
+            if (ID_ALIASES.includes(colName) && idIndex === -1) {
+                idIndex = idx;
+            }
+            // Find the first column that looks like a Name
+            if (NAME_ALIASES.includes(colName) && nameIndex === -1) {
+                nameIndex = idx;
+            }
+        });
+
+        return { idIndex, nameIndex };
+    }
+
     const fetchOptionsForField = async (parameterName) => {
         const headers = {
             Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
@@ -68,18 +93,21 @@ const ReportFormPage = () => {
 
         try {
             const endpoint = `/runreports/${parameterName}?parameterType=true`;
-
             const response = await axios.get(`${API_CONFIG.baseURL}${endpoint}`, { headers });
-            const { data, columnHeaders } = response.data;
 
-            const idIndex = columnHeaders.findIndex((header) => header.columnName === "id");
-            const nameIndex = columnHeaders.findIndex((header) => header.columnName === "name" || header.columnName === "displayName");
+            const { data, columnHeaders } = response.data || {};
+
+            const { idIndex, nameIndex } = getColumnIndices(columnHeaders || []);
 
             if (idIndex !== -1 && nameIndex !== -1) {
-                const parsedOptions = data.map((row) => ({
-                    id: row.row[idIndex],
-                    name: row.row[nameIndex],
-                }));
+                const parsedOptions = data.map((rowObj) => {
+                    const row = rowObj.row || [];
+                    return {
+                        id: row[idIndex],
+                        name: row[nameIndex] || "-",
+                    };
+                });
+
                 setOptions((prev) => ({
                     ...prev,
                     [parameterName]: parsedOptions,
@@ -92,7 +120,10 @@ const ReportFormPage = () => {
                     }));
                 }
             } else {
-                console.warn(`Unexpected data structure for ${parameterName}`);
+                console.warn(
+                    `No valid ID/Name columns found for ${parameterName}. Column headers were:`,
+                    columnHeaders
+                );
             }
         } catch (err) {
             console.error(`Error fetching options for ${parameterName}:`, err);
@@ -105,21 +136,36 @@ const ReportFormPage = () => {
             [parameterName]: value,
         }));
     };
-    const renderLabel = (parameterName) => {
-        const firstWord = parameterName.split(/(?=[A-Z])/)[0];
-        return firstWord.charAt(0).toUpperCase() + firstWord.slice(1).toLowerCase();
-    };
+
+    function renderLabel(parameterName) {
+        const [labelBase] = parameterName.split("Id");
+
+        // Split the base on uppercase letters for better readability
+        const parts = labelBase.split(/(?=[A-Z])/);
+
+        const formattedLabel = parts.map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
+
+        return formattedLabel.trim();
+    }
+
 
     const renderField = (param) => {
         const { parameterName } = param;
 
         if (parameterName === "startDateSelect" || parameterName === "endDateSelect") {
             return (
-                <input
-                    type="date"
-                    value={formValues[parameterName]}
-                    onChange={(e) => handleInputChange(parameterName, e.target.value)}
-                    className="custom-date-input"
+                <DatePicker
+                    selected={formValues[parameterName] ? new Date(formValues[parameterName]) : null}
+                    onChange={(date) =>
+                        handleInputChange(parameterName, date ? date.toISOString().split("T")[0] : "")
+                    }
+                    className="custom-date-picker"
+                    placeholderText="Select a date"
+                    dateFormat="yyyy-MM-dd"
+                    showPopperArrow={false}
+                    showMonthDropdown
+                    showYearDropdown
+                    dropdownMode="select"
                 />
             );
         }
@@ -245,8 +291,6 @@ const ReportFormPage = () => {
                 {reportDetails?.reportName || "Report Form"}
             </h2>
             <div className="custom-content">
-                <h2>{reportDetails?.reportName || "Report Form"}</h2>
-
                 {error && <p className="error-message">{error}</p>}
 
                 {!error && (

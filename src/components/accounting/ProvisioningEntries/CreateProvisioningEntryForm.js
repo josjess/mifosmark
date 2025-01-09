@@ -4,6 +4,7 @@ import { AuthContext } from '../../../context/AuthContext';
 import { API_CONFIG } from '../../../config';
 import { useNavigate } from 'react-router-dom';
 import './ProvisioningEntries.css';
+import DatePicker from "react-datepicker";
 
 const CreateProvisioningEntryForm = () => {
     const { user } = useContext(AuthContext);
@@ -37,11 +38,16 @@ const CreateProvisioningEntryForm = () => {
             <h3 className="provisioning-form-title">Create Provisioning Entry</h3>
             <div className="provisioning-form-group">
                 <label className="provisioning-form-label">Provisioning Date:</label>
-                <input
-                    type="date"
-                    value={provisioningDate}
-                    onChange={(e) => setProvisioningDate(e.target.value)}
+                <DatePicker
+                    selected={provisioningDate ? new Date(provisioningDate) : null}
+                    onChange={(date) => setProvisioningDate(date ? date.toISOString().split("T")[0] : "")}
                     className="provisioning-form-date-input"
+                    placeholderText="Select a date"
+                    dateFormat="yyyy-MM-dd"
+                    showPopperArrow={false}
+                    showMonthDropdown
+                    showYearDropdown
+                    dropdownMode="select"
                 />
             </div>
             <div className="provisioning-form-group checkbox-group">

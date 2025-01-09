@@ -520,13 +520,6 @@ const AddJournalEntries = () => {
 
     return (
         <div className="form-container-client">
-            <h2>
-                <Link to="/accounting" className="breadcrumb-link">
-                    Accounting
-                </Link>{" "}
-                . Add Journal Entries
-            </h2>
-
             <div className="staged-form-add-client">
                 {renderStageTracker()}
                 <div className="staged-form-stage-content">

@@ -36,11 +36,12 @@ const AddAccountForm = () => {
                 // console.log('Template Data:', response.data);
 
                 setAccountTypes(response.data.accountTypeOptions || []);
-                setParents(response.data.assetHeaderAccountOptions.concat(
-                    response.data.liabilityHeaderAccountOptions,
-                    response.data.equityHeaderAccountOptions,
-                    response.data.incomeHeaderAccountOptions
-                ));
+                setParents(
+                    (response.data.assetHeaderAccountOptions || [])
+                        .concat(response.data.liabilityHeaderAccountOptions || [])
+                        .concat(response.data.equityHeaderAccountOptions || [])
+                        .concat(response.data.incomeHeaderAccountOptions || [])
+                );
                 setUsageOptions(response.data.usageOptions || []);
                 setTags(response.data.allowedIncomeTagOptions || []);
             } catch (error) {
@@ -101,27 +102,33 @@ const AddAccountForm = () => {
                         <label>Account Type <span className="required-asterisk">*</span></label>
                         <select value={accountType} onChange={(e) => setAccountType(e.target.value)} required>
                             <option value="">Select Account Type</option>
-                            {accountTypes.map((type) => (
-                                <option key={type.id} value={type.value}>{type.value}</option>
-                            ))}
+                            {accountTypes?.length > 0
+                                ? accountTypes.map((type) => (
+                                    <option key={type.id} value={type.value}>{type.value}</option>
+                                ))
+                                : <option value="" disabled>No options available</option>
+                            }
                         </select>
                     </div>
                     <div className="account-form-group">
                         <label>Parent</label>
                         <select value={parent} onChange={(e) => setParent(e.target.value)}>
                             <option value="">Select Parent</option>
-                            {parents.map((parentOption) => (
-                                <option key={parentOption.id} value={parentOption.id}>
-                                    {parentOption.name}
-                                </option>
-                            ))}
+                            {parents?.length > 0
+                                ? parents.map((parentOption) => (
+                                    <option key={parentOption.id} value={parentOption.id}>
+                                        {parentOption.name}
+                                    </option>
+                                ))
+                                : <option value="" disabled>No options available</option>
+                            }
                         </select>
                     </div>
                 </div>
                 <div className="account-form-row">
                     <div className="account-form-group">
                         <label>GL Code <span className="required-asterisk">*</span></label>
-                        <input type="text" value={glCode} onChange={(e) => setGlCode(e.target.value)} required />
+                        <input type="text" value={glCode} onChange={(e) => setGlCode(e.target.value)} required/>
                     </div>
                     <div className="account-form-group">
                         <label>Account Name <span className="required-asterisk">*</span></label>

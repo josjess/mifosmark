@@ -410,49 +410,51 @@ const FrequentPostingForm = () => {
 
 
     return (
-        <div className="form-container-client posting">
-            <h2>
-                <Link to="/accounting" className="breadcrumb-link">Accounting</Link> . Frequent Posting
-            </h2>
+        <div className="journal-entries-screen">
+            <div className="form-container-client">
+                <h2>
+                    <Link to="/accounting" className="breadcrumb-link">Accounting</Link> . Frequent Posting
+                </h2>
 
-            <div className="staged-form-add-client">
-                {renderStageTracker()}
-                <div className="staged-form-stage-content">
-                    {currentStage === stages.length - 1 ? (
-                        renderPreviewSection()
-                    ) : (
-                        renderStageContent()
-                    )}
+                <div className="staged-form-add-client">
+                    {renderStageTracker()}
+                    <div className="staged-form-stage-content">
+                        {currentStage === stages.length - 1 ? (
+                            renderPreviewSection()
+                        ) : (
+                            renderStageContent()
+                        )}
 
-                    <div className="staged-form-stage-buttons">
-                        <button
-                            onClick={() => setCurrentStage((prev) => Math.max(prev - 1, 0))}
-                            disabled={currentStage === 0}
-                            className="staged-form-button-previous"
-                        >
-                            Previous
-                        </button>
-                        {currentStage < stages.length - 1 && (
+                        <div className="staged-form-stage-buttons">
                             <button
-                                onClick={handleNextStage}
-                                className="staged-form-button-next"
-                                disabled={
-                                    (currentStage === 0 && !isStep1Complete) ||
-                                    (currentStage === 1 && !isStep2Complete)
-                                }
+                                onClick={() => setCurrentStage((prev) => Math.max(prev - 1, 0))}
+                                disabled={currentStage === 0}
+                                className="staged-form-button-previous"
                             >
-                                Next
+                                Previous
                             </button>
-                        )}
-                        {currentStage === stages.length - 1 && (
-                            <button
-                                onClick={handleSubmit}
-                                className="staged-form-button-next"
-                                disabled={!allStagesComplete}
-                            >
-                                Submit
-                            </button>
-                        )}
+                            {currentStage < stages.length - 1 && (
+                                <button
+                                    onClick={handleNextStage}
+                                    className="staged-form-button-next"
+                                    disabled={
+                                        (currentStage === 0 && !isStep1Complete) ||
+                                        (currentStage === 1 && !isStep2Complete)
+                                    }
+                                >
+                                    Next
+                                </button>
+                            )}
+                            {currentStage === stages.length - 1 && (
+                                <button
+                                    onClick={handleSubmit}
+                                    className="staged-form-button-next"
+                                    disabled={!allStagesComplete}
+                                >
+                                    Submit
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

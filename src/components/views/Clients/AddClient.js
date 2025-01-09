@@ -118,6 +118,7 @@ const AddClientForm = () => {
 
     const isStep1Complete =
         office !== '' &&
+        externalId !== '' &&
         legalForm !== '' &&
         ((legalForm === clientTemplate.clientLegalFormOptions?.find(option => option.code === "legalFormType.person")?.value &&
                 firstName !== '' &&
@@ -305,23 +306,39 @@ const AddClientForm = () => {
                             </div>
                         </div>
 
-                        <div className="staged-form-field">
-                            <label htmlFor="legalForm">
-                                Legal Form <span className="staged-form-required">*</span>
-                            </label>
-                            <select
-                                id="legalForm"
-                                value={legalForm}
-                                onChange={(e) => setLegalForm(e.target.value)}
-                                className="staged-form-select"
-                            >
-                                <option value="">-- Select Legal Form --</option>
-                                {clientTemplate.clientLegalFormOptions?.map((option) => (
-                                    <option key={option.id} value={option.value}>
-                                        {option.value}
-                                    </option>
-                                ))}
-                            </select>
+                        <div className="staged-form-row">
+                            <div className="staged-form-field">
+                                <label htmlFor="externalId">
+                                    External ID <span className="staged-form-required">*</span>
+                                </label>
+                                <input
+                                    id="externalId"
+                                    type="text"
+                                    value={externalId}
+                                    onChange={(e) => setExternalId(e.target.value)}
+                                    className="staged-form-input"
+                                    placeholder="Enter External ID"
+                                    required
+                                />
+                            </div>
+                            <div className="staged-form-field">
+                                <label htmlFor="legalForm">
+                                    Legal Form <span className="staged-form-required">*</span>
+                                </label>
+                                <select
+                                    id="legalForm"
+                                    value={legalForm}
+                                    onChange={(e) => setLegalForm(e.target.value)}
+                                    className="staged-form-select"
+                                >
+                                    <option value="">-- Select Legal Form --</option>
+                                    {clientTemplate.clientLegalFormOptions?.map((option) => (
+                                        <option key={option.id} value={option.value}>
+                                            {option.value}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
 
                         {legalForm && (
@@ -460,14 +477,14 @@ const AddClientForm = () => {
                                     <div className="staged-form-row">
                                         <div className="staged-form-field">
                                             <label htmlFor="dateOfBirth">
-                                            Date of Birth <span className="staged-form-required">*</span>
-                                        </label>
-                                        <DatePicker
-                                            id="dateOfBirth"
-                                            selected={dateOfBirth ? new Date(dateOfBirth) : null}
-                                            onChange={(date) =>
-                                                setDateOfBirth(date.toISOString().split("T")[0])
-                                            }
+                                                Date of Birth <span className="staged-form-required">*</span>
+                                            </label>
+                                            <DatePicker
+                                                id="dateOfBirth"
+                                                selected={dateOfBirth ? new Date(dateOfBirth) : null}
+                                                onChange={(date) =>
+                                                    setDateOfBirth(date.toISOString().split("T")[0])
+                                                }
                                             className="staged-form-input"
                                             placeholderText="Select Date of Birth"
                                             dateFormat="MMMM d, yyyy"
@@ -794,8 +811,15 @@ const AddClientForm = () => {
         };
 
         const getStaffName = () => {
-            const staffObj = clientTemplate.staffOptions?.find((s) => s.id === parseInt(staff));
+            const staffObj = staffs.find((s) => s.id === parseInt(staff));
             return staffObj ? staffObj.displayName : "";
+        };
+
+        const getSelectedSavingsProductName = () => {
+            const productObj = clientTemplate.savingProductOptions?.find(
+                (p) => p.id === parseInt(selectedSavingsProduct)
+            );
+            return productObj ? productObj.name : "";
         };
 
         const transformFamilyMembers = () =>
@@ -823,6 +847,7 @@ const AddClientForm = () => {
                 data: {
                     Office: getOfficeName(),
                     Staff: getStaffName(),
+                    "External ID": externalId || "",
                     "Legal Form": legalForm || "",
                     ...(legalForm === clientTemplate.clientLegalFormOptions?.find(option => option.code === "legalFormType.person")?.value
                         ? {
@@ -836,6 +861,11 @@ const AddClientForm = () => {
                             "Mobile Number": mobileNumber || "",
                         }),
                     "Active Client": isActive ? "Yes" : "No",
+                    ...(isActive && activationDate
+                        ? {
+                            "Activation Date": format(new Date(activationDate), "MMMM d, yyyy"),
+                        }
+                        : {}),
                 },
             },
             {
@@ -872,6 +902,11 @@ const AddClientForm = () => {
                                 ? format(new Date(submittedOn), "MMMM d, yyyy")
                                 : "",
                             "Open Savings Account": openSavingsAccount ? "Yes" : "No",
+                            ...(openSavingsAccount && selectedSavingsProduct
+                                ? {
+                                    "Savings Product": getSelectedSavingsProductName(),
+                                }
+                                : {}),
                         }),
                 },
             },
@@ -1011,6 +1046,7 @@ const AddClientForm = () => {
                 fullname: legalForm === clientTemplate.clientLegalFormOptions?.find(option => option.code === "legalFormType.entity")?.value ? name : undefined,
                 mobileNo: mobileNumber || undefined,
                 isStaff,
+                staffId: staff ? parseInt(staff) : undefined,
                 active: isActive,
                 activationDate: formattedActivationDate,
                 submittedOnDate: formattedSubmittedOnDate,
@@ -1020,6 +1056,7 @@ const AddClientForm = () => {
                 clientTypeId: clientType ? parseInt(clientTemplate.clientTypeOptions?.find((t) => t.name === clientType)?.id) : undefined,
                 clientClassificationId: clientClassification ? parseInt(clientTemplate.clientClassificationOptions?.find((c) => c.name === clientClassification)?.id) : undefined,
                 savingsProductId: openSavingsAccount ? parseInt(selectedSavingsProduct) : undefined,
+                externalId: externalId || undefined,
             };
 
             const response = await axios.post(`${API_CONFIG.baseURL}/clients`, clientData, { headers });
@@ -1039,6 +1076,8 @@ const AddClientForm = () => {
             setClientClassification('');
             setSelectedSavingsProduct('');
             setOpenSavingsAccount(false);
+            setExternalId('');
+            setStaff('');
 
             navigate("/clients", {
                 state: {
