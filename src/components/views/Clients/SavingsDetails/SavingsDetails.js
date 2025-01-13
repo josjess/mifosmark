@@ -134,6 +134,11 @@ const SavingsAccounts = () => {
     const [transferFromAccountType, setTransferFromAccountType] = useState("");
     const [transferCurrency, setTransferCurrency] = useState("");
 
+    const [fromClientId, setFromClientId] = useState(null);
+    const [fromOfficeId, setFromOfficeId] = useState(null);
+    const [fromAccountId, setFromAccountId] = useState(null);
+    const [fromAccountTypeId, setFromAccountTypeId] = useState(null);
+
     const [transferTransactionDate, setTransferTransactionDate] = useState(new Date());
     const [transferToOfficeOptions, setTransferToOfficeOptions] = useState([]);
     const [transferToOffice, setTransferToOffice] = useState("");
@@ -150,6 +155,66 @@ const SavingsAccounts = () => {
     const [assignStaffOptions, setAssignStaffOptions] = useState([]);
     const [assignToStaff, setAssignToStaff] = useState("");
     const [assignmentDate, setAssignmentDate] = useState(new Date());
+
+    const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+    const [exportFromDate, setExportFromDate] = useState(null);
+    const [exportToDate, setExportToDate] = useState(null);
+
+    const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
+    const [transactionDetails, setTransactionDetails] = useState(null);
+
+    const [journalEntries, setJournalEntries] = useState([]);
+    const [isJournalEntriesModalOpen, setIsJournalEntriesModalOpen] = useState(false);
+
+    const handleOpenExportModal = () => {
+        setIsExportModalOpen(true);
+    };
+
+    const handleCloseExportModal = () => {
+        setExportFromDate(null);
+        setExportToDate(null);
+        setIsExportModalOpen(false);
+    };
+
+    const handleGenerateReport = async () => {
+        if (!exportFromDate || !exportToDate) return;
+
+        const fromDate = exportFromDate.toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
+        });
+        const toDate = exportToDate.toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
+        });
+
+        const reportURL = `${API_CONFIG.baseURL}/runreports/Client%20Saving%20Transactions?tenantIdentifier=default&locale=en&dateFormat=dd%20MMMM%20yyyy&output-type=EXCEL&R_startDate=${fromDate}&R_endDate=${toDate}&R_savingsAccountId=${transferFromAccount}`;
+
+        try {
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                "Fineract-Platform-TenantId": "default",
+                "Content-Type": "application/json",
+            };
+
+            const response = await axios.get(reportURL, { headers, responseType: "blob" });
+
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", `Client_Saving_Transactions_${fromDate}_to_${toDate}.xlsx`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            handleCloseExportModal();
+        } catch (error) {
+            console.error("Error generating report:", error);
+            alert("Failed to generate report. Please try again.");
+        }
+    };
 
     const handleOpenAssignStaffModal = async () => {
         startLoading();
@@ -189,7 +254,7 @@ const SavingsAccounts = () => {
         }
 
         const payload = {
-            staffId: assignToStaff,
+            toSavingsOfficerId: assignToStaff,
             assignmentDate: assignmentDate.toLocaleDateString("en-GB", {
                 day: "2-digit",
                 month: "long",
@@ -197,6 +262,7 @@ const SavingsAccounts = () => {
             }),
             dateFormat: "dd MMMM yyyy",
             locale: "en",
+            fromSavingsOfficerId: "",
         };
 
         startLoading();
@@ -208,12 +274,14 @@ const SavingsAccounts = () => {
             };
 
             await axios.post(
-                `${API_CONFIG.baseURL}/savingsaccounts/${savingsAccountId}?command=assignStaff`,
+                `${API_CONFIG.baseURL}/savingsaccounts/${savingsAccountId}?command=assignSavingsOfficer`,
                 payload,
                 { headers }
             );
 
-            alert("Staff assigned successfully.");
+            alert("Savings officer assigned successfully.");
+            setAssignToStaff("");
+            setAssignmentDate(null);
             handleCloseAssignStaffModal();
             fetchSavingsData();
         } catch (error) {
@@ -244,6 +312,11 @@ const SavingsAccounts = () => {
             setTransferFromAccount(data.fromAccount?.accountNo || "N/A");
             setTransferFromAccountType(data.fromAccountType?.value || "N/A");
             setTransferCurrency(data.currency?.name || "N/A");
+
+            setFromClientId(data.fromAccount?.clientId || null);
+            setFromOfficeId(data.fromOffice?.id || null);
+            setFromAccountId(data.fromAccount?.id || null);
+            setFromAccountTypeId(data.fromAccountType?.id || null);
 
             setTransferToOfficeOptions(data.toOfficeOptions || []);
             setTransferToClientOptions(data.fromClientOptions || []);
@@ -290,12 +363,16 @@ const SavingsAccounts = () => {
                 month: "long",
                 year: "numeric",
             }),
-            toOfficeId: transferToOffice,
-            toClientId: transferToClient,
-            toAccountType: transferToAccountType,
-            toAccountId: transferToAccount,
+            fromOfficeId: fromOfficeId,
+            fromClientId: fromClientId,
+            fromAccountType: fromAccountTypeId,
+            fromAccountId: fromAccountId,
+            toOfficeId: parseInt(transferToOffice, 10),
+            toClientId: parseInt(transferToClient, 10),
+            toAccountType: parseInt(transferToAccountType, 10),
+            toAccountId: parseInt(transferToAccount, 10),
             transferAmount: parseFloat(transferAmount),
-            description: transferDescription,
+            transferDescription,
             dateFormat: "dd MMMM yyyy",
             locale: "en",
         };
@@ -902,11 +979,18 @@ const SavingsAccounts = () => {
                 month: "long",
                 year: "numeric",
             }),
-            transactionAmount: withdrawTransactionAmount,
-            paymentTypeId: withdrawSelectedPaymentType,
-            note: withdrawNote,
+            transactionAmount: parseFloat(withdrawTransactionAmount),
+            paymentTypeId: parseInt(withdrawSelectedPaymentType),
+            note: withdrawNote || "",
             dateFormat: "dd MMMM yyyy",
             locale: "en",
+            ...(showWithdrawPaymentDetails && {
+                accountNumber: withdrawAccountNumber || "",
+                chequeNumber: withdrawChequeNumber || "",
+                routingCode: withdrawRoutingCode || "",
+                receiptNumber: withdrawReceiptNumber || "",
+                bankNumber: withdrawBankNumber || "",
+            }),
         };
 
         setIsSubmittingWithdraw(true);
@@ -926,6 +1010,18 @@ const SavingsAccounts = () => {
             );
 
             alert("Withdrawal submitted successfully.");
+
+            setWithdrawTransactionDate(null);
+            setWithdrawTransactionAmount("");
+            setWithdrawSelectedPaymentType("");
+            setWithdrawNote("");
+            setWithdrawAccountNumber("");
+            setWithdrawChequeNumber("");
+            setWithdrawRoutingCode("");
+            setWithdrawReceiptNumber("");
+            setWithdrawBankNumber("");
+            setShowWithdrawPaymentDetails(false);
+
             handleCloseWithdrawModal();
             fetchSavingsData();
         } catch (error) {
@@ -1062,11 +1158,18 @@ const SavingsAccounts = () => {
                 month: "long",
                 year: "numeric",
             }),
-            transactionAmount: depositTransactionAmount,
-            paymentTypeId: depositSelectedPaymentType,
-            note: depositNote,
+            transactionAmount: parseFloat(depositTransactionAmount),
+            paymentTypeId: parseInt(depositSelectedPaymentType),
+            note: depositNote || "",
             dateFormat: "dd MMMM yyyy",
             locale: "en",
+            ...(showDepositPaymentDetails && {
+                accountNumber: depositAccountNumber || "",
+                chequeNumber: depositChequeNumber || "",
+                routingCode: depositRoutingCode || "",
+                receiptNumber: depositReceiptNumber || "",
+                bankNumber: depositBankNumber || "",
+            }),
         };
 
         setIsSubmittingDeposit(true);
@@ -1086,6 +1189,16 @@ const SavingsAccounts = () => {
             );
 
             alert("Deposit submitted successfully.");
+            setDepositTransactionDate(null);
+            setDepositTransactionAmount("");
+            setDepositSelectedPaymentType("");
+            setDepositNote("");
+            setDepositAccountNumber("");
+            setDepositChequeNumber("");
+            setDepositRoutingCode("");
+            setDepositReceiptNumber("");
+            setDepositBankNumber("");
+            setShowDepositPaymentDetails(false);
             handleCloseDepositModal();
             fetchSavingsData();
         } catch (error) {
@@ -1325,38 +1438,116 @@ const SavingsAccounts = () => {
         setTotalPages(Math.ceil(filteredTransactions.length / pageSize));
     }, [hideReversed, hideAccruals, currentPage, pageSize, transactions]);
 
-    const viewTransaction = (id) => {
-        console.log("Viewing transaction with ID:", id);
-    };
-
-    const undoTransaction = async (id) => {
-        startLoading();
+    const viewTransaction = async (id) => {
         try {
-            await axios.post(
-                `${API_CONFIG.baseURL}/savingsaccounts/transactions/${id}?command=undo`,
-                {},
-                {
-                    headers: {
-                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        "Fineract-Platform-TenantId": "default",
-                        "Content-Type": "application/json",
-                    },
-                }
-            );
+            startLoading();
 
+            const endpoint = `${API_CONFIG.baseURL}/savingsaccounts/${savingsAccountId}/transactions/${id}`;
+
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                "Fineract-Platform-TenantId": "default",
+                "Content-Type": "application/json",
+            };
+
+            const response = await axios.get(endpoint, { headers });
+            const data = response.data;
+
+            setTransactionDetails(data);
+            setIsTransactionModalOpen(true);
         } catch (error) {
-            console.error("Error undoing transaction:", error);
+            console.error("Error fetching transaction details:", error);
+            alert("Failed to fetch transaction details.");
         } finally {
             stopLoading();
         }
     };
 
-    const viewReceipts = (id) => {
-        console.log("Viewing receipts for transaction ID:", id);
+    const undoTransaction = async (id) => {
+        if (!window.confirm("Are you sure you want to undo this transaction?")) return;
+
+        startLoading();
+        try {
+            const payload = {
+                transactionDate: new Date().toISOString(),
+                transactionAmount: 0,
+                dateFormat: "dd MMMM yyyy",
+                locale: "en",
+            };
+
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                "Fineract-Platform-TenantId": "default",
+                "Content-Type": "application/json",
+            };
+
+            await axios.post(
+                `${API_CONFIG.baseURL}/savingsaccounts/${savingsAccountId}/transactions/${id}?command=undo`,
+                payload,
+                { headers }
+            );
+
+            fetchSavingsData();
+        } catch (error) {
+            console.error("Error undoing transaction:", error);
+            alert("Failed to undo transaction. Please try again.");
+        } finally {
+            stopLoading();
+        }
     };
 
-    const viewJournalEntries = (id) => {
-        console.log("Viewing journal entries for transaction ID:", id);
+    const viewReceipts = async (id) => {
+        try {
+            startLoading();
+
+            const receiptURL = `${API_CONFIG.baseURL}/runreports/Savings%20Transaction%20Receipt?tenantIdentifier=default&locale=en&dateFormat=dd%20MMMM%20yyyy&output-type=PDF&R_transactionId=${id}`;
+
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                "Fineract-Platform-TenantId": "default",
+            };
+
+            const response = await axios.get(receiptURL, {
+                headers,
+                responseType: "blob",
+            });
+
+            const blob = new Blob([response.data], { type: "application/pdf" });
+            const link = document.createElement("a");
+            link.href = window.URL.createObjectURL(blob);
+            link.download = `Transaction_Receipt_${id}.pdf`;
+            link.click();
+        } catch (error) {
+            console.error("Error viewing receipt:", error);
+            alert("Failed to view receipt. Please try again.");
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const viewJournalEntries = async (id) => {
+        try {
+            startLoading();
+
+            const endpoint = `${API_CONFIG.baseURL}/journalentries?transactionId=S${id}&transactionDetails=true`;
+
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                "Fineract-Platform-TenantId": "default",
+                "Content-Type": "application/json",
+            };
+
+            const response = await axios.get(endpoint, { headers });
+            const data = response.data;
+
+            setJournalEntries(data);
+            setIsJournalEntriesModalOpen(true);
+        } catch (error) {
+            console.error("Error fetching journal entries:", error);
+            alert("Failed to fetch journal entries. Please try again.");
+        } finally {
+            stopLoading();
+        }
     };
 
     const handleToggleDropdown = () => {
@@ -1585,10 +1776,10 @@ const SavingsAccounts = () => {
                                     />
                                     Hide Accruals
                                 </label>
-                                <button className="export-btn">Export</button>
+                                <button className="export-btn" onClick={handleOpenExportModal}>Export</button>
                             </div>
                             <div className="filter-group">
-                                <label htmlFor="pageSize" className="filter-label">
+                            <label htmlFor="pageSize" className="filter-label">
                                     Rows per page:
                                 </label>
                                 <select
@@ -1600,7 +1791,6 @@ const SavingsAccounts = () => {
                                     }}
                                     className="filter-dropdown"
                                 >
-                                    <option value={1}>1</option>
                                     <option value={5}>5</option>
                                     <option value={10}>10</option>
                                     <option value={20}>20</option>
@@ -1636,17 +1826,17 @@ const SavingsAccounts = () => {
                                                 month: "long",
                                                 year: "numeric",
                                             })
-                                            : "N/A"}
+                                            : ""}
                                     </td>
-                                    <td>{transaction.externalId || "N/A"}</td>
-                                    <td>{transaction.transactionType?.value || "N/A"}</td>
+                                    <td>{transaction.externalId || ""}</td>
+                                    <td>{transaction.transactionType?.value || ""}</td>
                                     <td>
                                         {transaction.entryType === "DEBIT"
                                             ? `${transaction.currency?.displaySymbol || ""} ${transaction.amount.toLocaleString(
                                                 undefined,
                                                 {minimumFractionDigits: 2}
                                             )}`
-                                            : "N/A"}
+                                            : ""}
                                     </td>
                                     <td>
                                         {transaction.entryType === "CREDIT"
@@ -1654,7 +1844,7 @@ const SavingsAccounts = () => {
                                                 undefined,
                                                 {minimumFractionDigits: 2}
                                             )}`
-                                            : "N/A"}
+                                            : ""}
                                     </td>
                                     <td>{`${transaction.currency?.displaySymbol || ""} ${transaction.runningBalance.toLocaleString(
                                         undefined,
@@ -2844,7 +3034,7 @@ const SavingsAccounts = () => {
                 <div className="create-provisioning-criteria-modal-overlay">
                     <div className="create-provisioning-criteria-modal-content">
                         <h4 className="create-modal-title">Post Interest</h4>
-                        <p>Are you sure you want to post interest?</p>
+                        <p className="create-provisioning-criteria-label">Are you sure you want to post interest?</p>
                         <div className="create-provisioning-criteria-modal-actions">
                             <button
                                 onClick={handleClosePostInterestModal}
@@ -3128,9 +3318,9 @@ const SavingsAccounts = () => {
                         <h4 className="create-modal-title">Transfer Funds</h4>
 
                         {/* Transferring From Details */}
-                        <h5>Transferring From Details</h5>
+                        <h5 className="create-provisioning-criteria-label">Transferring From Details</h5>
                         <table className="vertical-table">
-                            <tbody>
+                            <tbody className="create-provisioning-criteria-label">
                             <tr>
                                 <td>Applicant</td>
                                 <td>{transferApplicant}</td>
@@ -3155,7 +3345,7 @@ const SavingsAccounts = () => {
                         </table>
 
                         {/* Transfer To Details */}
-                        <h5>Transfer To</h5>
+                        <h5 className="create-provisioning-criteria-label">Transfer To</h5>
                         <div className="create-provisioning-criteria-group">
                             <label htmlFor="transactionDate" className="create-provisioning-criteria-label">Transaction Date <span>*</span></label>
                             <DatePicker
@@ -3296,6 +3486,218 @@ const SavingsAccounts = () => {
                                 className="create-provisioning-criteria-confirm"
                             >
                                 Submit
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isExportModalOpen && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">Export Transactions Report</h4>
+                        <div className="create-provisioning-criteria-group">
+                            <label htmlFor="fromDate" className="create-provisioning-criteria-label">From Date <span>*</span></label>
+                            <DatePicker
+                                id="fromDate"
+                                selected={exportFromDate}
+                                onChange={(date) => {
+                                    setExportFromDate(date);
+                                    setExportToDate(null);
+                                }}
+                                maxDate={new Date()}
+                                dateFormat="dd MMMM yyyy"
+                                className="create-provisioning-criteria-input"
+                            />
+                        </div>
+                        <div className="create-provisioning-criteria-group">
+                            <label htmlFor="toDate" className="create-provisioning-criteria-label">To Date <span>*</span></label>
+                            <DatePicker
+                                id="toDate"
+                                selected={exportToDate}
+                                onChange={(date) => setExportToDate(date)}
+                                minDate={exportFromDate}
+                                maxDate={new Date()}
+                                dateFormat="dd MMMM yyyy"
+                                className="create-provisioning-criteria-input"
+                                disabled={!exportFromDate}
+                            />
+                        </div>
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button className="create-provisioning-criteria-cancel" onClick={handleCloseExportModal}>
+                                Cancel
+                            </button>
+                            <button
+                                className="create-provisioning-criteria-confirm"
+                                onClick={handleGenerateReport}
+                                disabled={!exportFromDate || !exportToDate}
+                            >
+                                Generate Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isTransactionModalOpen && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div
+                        className="create-provisioning-criteria-modal-content"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <h4 className="create-modal-title">Transaction Details</h4>
+                        {transactionDetails?.transferAmount ? (
+                            <table className="create-provisioning-criteria-table">
+                                <tbody>
+                                <tr>
+                                    <td className="create-provisioning-criteria-label">Transaction Amount</td>
+                                    <td>
+                                        {`${transactionDetails.currency?.displaySymbol || ""} ${transactionDetails.transferAmount.toFixed(2)} (${transactionDetails.currency?.code || ""})`}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td className="create-provisioning-criteria-label">Transaction Date</td>
+                                    <td>
+                                        {transactionDetails.transferDate
+                                            ? new Date(transactionDetails.transferDate.join("-")).toLocaleDateString("en-GB", {
+                                                day: "2-digit",
+                                                month: "long",
+                                                year: "numeric",
+                                            })
+                                            : ""}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td className="create-provisioning-criteria-label">Destination</td>
+                                    <td>{transactionDetails.transferDescription || ""}</td>
+                                </tr>
+                                <tr>
+                                    <td className="create-provisioning-criteria-label">Transferred From</td>
+                                    <td>
+                                        <ul>
+                                            <li>Office: {transactionDetails.fromOffice?.name || ""}</li>
+                                            <li>Client: {transactionDetails.fromClient?.displayName || ""}</li>
+                                            <li>Account Type: {transactionDetails.fromAccountType?.value || ""}</li>
+                                            <li>Account No: {transactionDetails.fromAccount?.accountNo || ""}</li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td className="create-provisioning-criteria-label">Transferred To</td>
+                                    <td>
+                                        <ul>
+                                            <li>Office: {transactionDetails.toOffice?.name || ""}</li>
+                                            <li>Client: {transactionDetails.toClient?.displayName || ""}</li>
+                                            <li>Account Type: {transactionDetails.toAccountType?.value || ""}</li>
+                                            <li>Account No: {transactionDetails.toAccount?.accountNo || ""}</li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        ) : (
+                            <table className="create-provisioning-criteria-table">
+                                <tbody>
+                                <tr>
+                                    <td className="create-provisioning-criteria-label">ID</td>
+                                    <td>{transactionDetails.id || ""}</td>
+                                </tr>
+                                <tr>
+                                    <td className="create-provisioning-criteria-label">Transaction Type</td>
+                                    <td>{transactionDetails.transactionType?.value || ""}</td>
+                                </tr>
+                                <tr>
+                                    <td className="create-provisioning-criteria-label">Transaction Date</td>
+                                    <td>
+                                        {transactionDetails.date
+                                            ? new Date(transactionDetails.date.join("-")).toLocaleDateString("en-GB", {
+                                                day: "2-digit",
+                                                month: "long",
+                                                year: "numeric",
+                                            })
+                                            : ""}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td className="create-provisioning-criteria-label">Currency</td>
+                                    <td>{transactionDetails.currency?.name || ""}</td>
+                                </tr>
+                                <tr>
+                                    <td className="create-provisioning-criteria-label">Amount</td>
+                                    <td>{`${transactionDetails.currency?.displaySymbol || ""} ${transactionDetails.amount.toFixed(2)}`}</td>
+                                </tr>
+                                <tr>
+                                    <td className="create-provisioning-criteria-label">Note</td>
+                                    <td>{transactionDetails.note || ""}</td>
+                                </tr>
+                                <tr>
+                                    <td className="create-provisioning-criteria-label">Payment Type</td>
+                                    <td>{transactionDetails.paymentDetailData?.paymentType?.name || ""}</td>
+                                </tr>
+                                <tr>
+                                    <td className="create-provisioning-criteria-label">Payment Details</td>
+                                    <td>
+                                        <ul>
+                                            <li>Account #: {transactionDetails.paymentDetailData?.accountNumber || ""}</li>
+                                            <li>Cheque #: {transactionDetails.paymentDetailData?.checkNumber || ""}</li>
+                                            <li>Routing Code: {transactionDetails.paymentDetailData?.routingCode || ""}</li>
+                                            <li>Receipt #: {transactionDetails.paymentDetailData?.receiptNumber || ""}</li>
+                                            <li>Bank #: {transactionDetails.paymentDetailData?.bankNumber || ""}</li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        )}
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button
+                                className="create-provisioning-criteria-cancel"
+                                onClick={() => setIsTransactionModalOpen(false)}
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isJournalEntriesModalOpen && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">Journal Entries</h4>
+                        <table className="create-provisioning-criteria-table">
+                            <thead>
+                            <tr>
+                                <th>GL Account</th>
+                                <th>Debit</th>
+                                <th>Credit</th>
+                                <th>Transaction Date</th>
+                                <th>Office</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {journalEntries.map((entry, index) => (
+                                <tr key={index}>
+                                    <td>{entry.glAccountName || "N/A"}</td>
+                                    <td>{entry.debitAmount || 0}</td>
+                                    <td>{entry.creditAmount || 0}</td>
+                                    <td>
+                                        {entry.transactionDate
+                                            ? new Date(entry.transactionDate).toLocaleDateString("en-GB", {
+                                                day: "2-digit",
+                                                month: "long",
+                                                year: "numeric",
+                                            })
+                                            : "N/A"}
+                                    </td>
+                                    <td>{entry.officeName || "N/A"}</td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button
+                                onClick={() => setIsJournalEntriesModalOpen(false)}
+                                className="create-provisioning-criteria-cancel"
+                            >
+                                Close
                             </button>
                         </div>
                     </div>

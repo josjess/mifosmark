@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react';
+import bcrypt from "bcryptjs";
 
 export const AuthContext = createContext();
 
@@ -12,6 +13,19 @@ export const AuthProvider = ({ children }) => {
     const [authInitialized, setAuthInitialized] = useState(false);
     const [isBaseURLChanged, setIsBaseURLChanged] = useState(false);
     const [redirectToLogin, setRedirectToLogin] = useState(false);
+
+    const [isSuperAdminFirstLogin, setIsSuperAdminFirstLogin] = useState(false);
+
+    const [superAdmin, setSuperAdmin] = useState(() => {
+        const storedAdmin = JSON.parse(localStorage.getItem("superAdmin"));
+        return (
+            storedAdmin || {
+                username: "SuperAdmin",
+                password: null,
+                securityQuestions: [],
+            }
+        );
+    });
 
     useEffect(() => {
         const initializeAuth = async () => {
@@ -40,6 +54,11 @@ export const AuthProvider = ({ children }) => {
                     localStorage.removeItem('loginTimestamp');
                 }
             }
+
+            if (!superAdmin.password) {
+                setIsSuperAdminFirstLogin(true);
+            }
+
             setAuthInitialized(true);
         };
 
@@ -62,6 +81,55 @@ export const AuthProvider = ({ children }) => {
         setIsBaseURLChanged(false);
     };
 
+    const superAdminLogin = async (username, password) => {
+        if (username === superAdmin.username) {
+            if (isSuperAdminFirstLogin) {
+                return { firstLogin: true };
+            }
+
+            const isValidPassword = await bcrypt.compare(password, superAdmin.password);
+            if (isValidPassword) {
+
+                const superAdminData = {
+                    username: superAdmin.username,
+                    userId: "1",
+                    roles: ["Super Admin"],
+                    permissions: ["ALL"],
+                    isSuperAdmin: true,
+                    authenticated: true,
+                };
+
+                login(superAdminData, true);
+                return { success: true };
+            }
+
+            return { success: false, message: "Invalid Super Admin credentials" };
+        }
+        return null;
+    };
+
+    const updateSuperAdminCredentials = async (username, password, securityQuestions = []) => {
+        const hashedSecurityQuestions = await Promise.all(
+            securityQuestions.map(async (q) => ({
+                question: q.question,
+                answer: await bcrypt.hash(q.answer, 10),
+            }))
+        );
+
+        const updatedAdmin = {
+            username: username || superAdmin.username,
+            password: password ? await bcrypt.hash(password, 10) : superAdmin.password,
+            securityQuestions: hashedSecurityQuestions.length ? hashedSecurityQuestions : superAdmin.securityQuestions,
+        };
+
+        setSuperAdmin(updatedAdmin);
+        localStorage.setItem("superAdmin", JSON.stringify(updatedAdmin));
+
+        if (username && password && securityQuestions.length > 0) {
+            setIsSuperAdminFirstLogin(false);
+        }
+    };
+
     const logout = (notify = false) => {
         setUser(null);
         setIsAuthenticated(false);
@@ -80,7 +148,21 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, user, login, logout, baseURL, updateBaseURL, isBaseURLChanged, redirectToLogin, authInitialized }}>
+        <AuthContext.Provider value={{
+            isAuthenticated,
+            user,
+            login,
+            logout,
+            baseURL,
+            updateBaseURL,
+            isBaseURLChanged,
+            redirectToLogin,
+            authInitialized,
+            superAdmin,
+            isSuperAdminFirstLogin,
+            superAdminLogin,
+            updateSuperAdminCredentials,
+        }}>
             {children}
         </AuthContext.Provider>
     );

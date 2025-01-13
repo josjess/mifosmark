@@ -167,25 +167,34 @@ const CreateLoanProducts = () => {
             const payload = {
                 name: Details.name,
                 shortName: Details.shortName,
-                includeInBorrowerCycle: Settings.includeInBorrowerCycle || false,
+                description: Details.description,
+                includeInBorrowerCycle: Settings.includeInBorrowerCycle || true,
                 currencyCode: Currency.currencyCode,
                 dateFormat: "dd MMMM yyyy",
                 locale: "en",
-                principal: Settings.principal,
-                numberOfRepayments: Settings.numberOfRepayments,
-                repaymentEvery: Settings.repaymentEvery,
-                repaymentFrequencyType: Settings.repaymentFrequencyType,
-                interestRatePerPeriod: Settings.interestRatePerPeriod,
-                interestRateFrequencyType: Settings.interestRateFrequencyType,
-                amortizationType: Settings.amortization,
-                interestType: Settings.interestMethod,
-                interestCalculationPeriodType: Settings.interestCalculationPeriod,
+                principal: Terms.principalDefault || 0,
+                numberOfRepayments: Terms.repaymentDefault || 0,
+                repaymentEvery: Terms.frequencyRepaid || 0,
+                repaymentFrequencyType: Terms.frequencyType || 0,
+                interestRatePerPeriod: Terms.nominalInterestDefault || 0,
+                interestRateFrequencyType: Terms.frequency || 0,
+                amortizationType: Settings.amortization || 1,
+                interestType: Settings.interestMethod || 0,
+                interestCalculationPeriodType: Settings.interestCalculationPeriod || 1,
                 isEqualAmortization: Settings.isEqualAmortization || false,
-                loanScheduleType: Settings.loanScheduleType,
-                daysInMonthType: Settings.daysInMonth,
-                daysInYearType: Settings.daysInYear,
-                transactionProcessingStrategyCode: Settings.repaymentStrategy,
-                useBorrowerCycle: Settings.useBorrowerCycle || false,
+                loanScheduleType: Settings.loanScheduleType || "CUMULATIVE",
+                daysInMonthType: Settings.daysInMonth || 1,
+                daysInYearType: Settings.daysInYear || 1,
+                transactionProcessingStrategyCode: Settings.repaymentStrategy || "",
+                allowApprovedDisbursedAmountsOverApplied: Terms.allowApprovalAboveLoanAmount || false,
+                canDefineInstallmentAmount: Settings.allowFixingInstallmentAmount || false,
+                canUseForTopup: Settings.topUpLoans || false,
+                holdGuaranteeFunds: Settings.placeGuaranteeFundsOnHold || false,
+                enableDownPayment: Settings.enableDownPayment || false,
+                delinquencyBucketId: Settings.delinquencyBucket || null,
+                isInterestRecalculationEnabled: Settings.recalculateInterest || false,
+                dueDaysForRepaymentEvent: Settings.dueDaysForRepayment || 1,
+                overDueDaysForRepaymentEvent: Settings.overDueDaysForRepayment || 1,
                 charges: loanCycleData.charges?.map((charge) => ({
                     chargeId: parseInt(charge.charge),
                 })) || [],
@@ -198,17 +207,9 @@ const CreateLoanProducts = () => {
                 interestRateVariationsForBorrowerCycle: Terms.termsVaryByLoanCycle
                     ? loanCycleData.interest
                     : [],
-                repaymentStartDateType: Terms.installmentDayCalcFrom,
-                allowApprovedDisbursedAmountsOverApplied: Settings.allowApprovedDisbursedAmountsOverApplied || false,
-                allowVariableInstallments: Settings.allowVariableInstallments || false,
-                canDefineInstallmentAmount: Settings.canDefineInstallmentAmount || false,
-                canUseForTopup: Settings.canUseForTopup || false,
-                delinquencyBucketId: Settings.delinquencyBucket || null,
-                inArrearsTolerance: Settings.inArrearsTolerance || 0,
-                overDueDaysForRepaymentEvent: Settings.overDueDays || 1,
-                dueDaysForRepaymentEvent: Settings.dueDaysForRepayment || 1,
-                isInterestRecalculationEnabled: Settings.isInterestRecalculationEnabled || false,
-                holdGuaranteeFunds: Settings.holdGuaranteeFunds || false,
+                repaymentStartDateType: Terms.installmentDayCalcFrom || 1,
+                startDate: Details.startDate || "",
+                closeDate: Details.closeDate || "",
             };
 
             const response = await axios.post(
@@ -233,7 +234,7 @@ const CreateLoanProducts = () => {
             console.error("Error in handleSubmit:", error);
             alert(
                 error.response?.data?.defaultUserMessage ||
-                "An unexpected error occurred.."
+                "An unexpected error occurred."
             );
         }
     };

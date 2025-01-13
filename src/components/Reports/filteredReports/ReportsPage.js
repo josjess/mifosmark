@@ -96,7 +96,7 @@ const ReportsPage = () => {
             return;
         }
 
-        console.log("Navigating to Report Form for:", report.reportName);
+        // console.log("Navigating to Report Form for:", report.reportName);
         navigate(`/reports/view/${report.id}`);
     };
 

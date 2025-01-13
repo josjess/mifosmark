@@ -12,6 +12,8 @@ const FinancialActivityMappingsTable = () => {
     const [pageSize, setPageSize] = useState(10);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [selectedMapping, setSelectedMapping] = useState(null);
+    const [showMappingModal, setShowMappingModal] = useState(false);
 
     useEffect(() => {
         fetchMappings();
@@ -38,9 +40,32 @@ const FinancialActivityMappingsTable = () => {
         }
     };
 
-    const handleRowClick = (mapping) => {
-        console.log("Row Data:", mapping);
-        // Future functionality for displaying detailed information in a new component can be added here
+    const fetchMappingDetails = async (id) => {
+        startLoading();
+        try {
+            const response = await axios.get(`${API_CONFIG.baseURL}/financialactivityaccounts/${id}?template=false`, {
+                headers: {
+                    Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                    'Fineract-Platform-TenantId': 'default',
+                    'Content-Type': 'application/json',
+                },
+            });
+            setSelectedMapping(response.data);
+            setShowMappingModal(true);
+        } catch (error) {
+            console.error('Error fetching mapping details:', error);
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const handleRowClick = (mappingId) => {
+        fetchMappingDetails(mappingId);
+    };
+
+    const handleCloseModal = () => {
+        setShowMappingModal(false);
+        setSelectedMapping(null);
     };
 
     return (
@@ -57,7 +82,7 @@ const FinancialActivityMappingsTable = () => {
                     mappings.map((mapping) => (
                         <tr
                             key={mapping.id}
-                            onClick={() => handleRowClick(mapping)}
+                            onClick={() => handleRowClick(mapping.id)}
                             className="clickable-row"
                         >
                             <td>{mapping.financialActivityData?.name || 'N/A'}</td>
@@ -82,6 +107,45 @@ const FinancialActivityMappingsTable = () => {
                     <button onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                             disabled={currentPage === totalPages}>Next</button>
                     <button onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages}>End</button>
+                </div>
+            )}
+
+            {showMappingModal && selectedMapping && (
+                <div
+                    className="create-provisioning-criteria-modal-overlay"
+                    onClick={handleCloseModal}
+                >
+                    <div
+                        className="create-provisioning-criteria-modal-content"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <h4 className="create-modal-title">Mapping Details</h4>
+                        <table className="create-provisioning-criteria-table">
+                            <tbody>
+                            <tr>
+                                <td className="create-provisioning-criteria-label">Financial Activity</td>
+                                <td>{selectedMapping.financialActivityData?.name || 'N/A'}</td>
+                            </tr>
+                            <tr>
+                                <td className="create-provisioning-criteria-label">Account Type</td>
+                                <td>{selectedMapping.financialActivityData?.mappedGLAccountType || 'N/A'}</td>
+                            </tr>
+                            <tr>
+                                <td className="create-provisioning-criteria-label">Account Name</td>
+                                <td>{selectedMapping.glAccountData?.name || 'N/A'}</td>
+                            </tr>
+                            <tr>
+                                <td className="create-provisioning-criteria-label">GL Code</td>
+                                <td>{selectedMapping.glAccountData?.glCode || 'N/A'}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button className="create-provisioning-criteria-cancel" onClick={handleCloseModal}>
+                                Close
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

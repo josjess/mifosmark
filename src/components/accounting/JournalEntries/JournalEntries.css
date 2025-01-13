@@ -79,3 +79,104 @@
     background-color: #ffffff;
     border-radius: 5px;
 }
+
+.transaction-details-section {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+}
+.transactions-head {
+    display: flex;
+    justify-content: space-between;
+}
+.transaction-details-section h2 {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.revert-button, .back-to-form-button {
+    padding: 10px 20px;
+    margin: 10px 5px 20px 0;
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.revert-button:disabled, .back-to-form-button:disabled {
+    background-color: #d6d6d6;
+    color: #777;
+    cursor: not-allowed;
+}
+
+.revert-button:hover:not(:disabled), .back-to-form-button:hover:not(:disabled) {
+    background-color: #0056b3;
+}
+
+.transaction-summary-table {
+    min-width: 700px;
+    border-collapse: collapse;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 20px;
+    background-color: #fff;
+}
+
+.transaction-summary-table th, .transaction-summary-table td {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    text-align: left;
+    font-size: 16px;
+}
+
+.transaction-summary-table th {
+    background-color: #f1f1f1;
+    font-weight: bold;
+    color: #302e2e;
+}
+
+.transaction-summary-table td {
+    color: #333;
+}
+
+.transaction-details-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    margin-bottom: 20px;
+}
+
+.transaction-details-table th, .transaction-details-table td {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    text-align: left;
+    font-size: 16px;
+    color: #333;
+}
+
+.transaction-details-table th {
+    background-color: #f1f1f1;
+    font-weight: bold;
+    color: #333;
+}
+
+.transaction-details-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.transaction-details-table tbody tr:hover {
+    background-color: #f1f7ff;
+}
+
+.revert-button:disabled {
+    background-color: #c3c3c3;
+    cursor: not-allowed;
+}

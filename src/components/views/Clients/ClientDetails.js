@@ -3422,22 +3422,23 @@ const ClientDetails = ({ clientId, onClose }) => {
             const payload = {
                 dateFormat: "dd MMMM yyyy",
                 locale: "en",
-                transactionDate: transactionDate
-                    .toISOString()
-                    .split("T")[0],
-                transactionAmount,
+                    transactionDate: transactionDate.toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric",
+                    }),
+                transactionAmount: parseFloat(transactionAmount),
                 paymentTypeId: selectedPaymentType,
-                externalId: externalId || null,
-                note: note || null,
+                externalId: externalId || "",
+                note: note || "",
+                ...(showPaymentDetails && {
+                    accountNumber: accountNumber || null,
+                    chequeNumber: chequeNumber || null,
+                    routingCode: routingCode || null,
+                    receiptNumber: receiptNumber || null,
+                    bankNumber: bankNumber || null,
+                }),
             };
-
-            if (showPaymentDetails) {
-                payload.accountNumber = accountNumber || null;
-                payload.chequeNumber = chequeNumber || null;
-                payload.routingCode = routingCode || null;
-                payload.receiptNumber = receiptNumber || null;
-                payload.bankNumber = bankNumber || null;
-            }
 
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
@@ -3453,7 +3454,7 @@ const ClientDetails = ({ clientId, onClose }) => {
 
             alert("Loan repayment successful.");
             setIsRepaymentModalOpen(false);
-            fetchGeneralTabData(); // Refresh loan accounts list
+            fetchGeneralTabData();
         } catch (error) {
             console.error("Error processing loan repayment:", error);
             alert("Loan repayment failed. Please try again.");
@@ -3492,17 +3493,23 @@ const ClientDetails = ({ clientId, onClose }) => {
             startLoading();
 
             const payload = {
-                transactionDate: depositTransactionDate.toISOString().split('T')[0],
-                transactionAmount: depositTransactionAmount,
-                paymentTypeId: depositPaymentType,
-                note: depositNote,
-                accountNumber: depositPaymentDetailsVisible ? depositAccountNumber : undefined,
-                chequeNumber: depositPaymentDetailsVisible ? depositChequeNumber : undefined,
-                routingCode: depositPaymentDetailsVisible ? depositRoutingCode : undefined,
-                receiptNumber: depositPaymentDetailsVisible ? depositReceiptNumber : undefined,
-                bankNumber: depositPaymentDetailsVisible ? depositBankNumber : undefined,
-                dateFormat: 'yyyy-MM-dd',
-                locale: 'en',
+                transactionDate: depositTransactionDate.toLocaleDateString("en-GB", {
+                    day: "2-digit",
+                    month: "long",
+                    year: "numeric",
+                }),
+                transactionAmount: parseFloat(depositTransactionAmount),
+                paymentTypeId: parseInt(depositPaymentType),
+                note: depositNote || "",
+                dateFormat: "dd MMMM yyyy",
+                locale: "en",
+                ...(depositPaymentDetailsVisible && {
+                    accountNumber: depositAccountNumber || "",
+                    chequeNumber: depositChequeNumber || "",
+                    routingCode: depositRoutingCode || "",
+                    receiptNumber: depositReceiptNumber || "",
+                    bankNumber: depositBankNumber || "",
+                }),
             };
 
             const headers = {
@@ -3511,9 +3518,25 @@ const ClientDetails = ({ clientId, onClose }) => {
                 'Content-Type': 'application/json',
             };
 
-            await axios.post(`${API_CONFIG.baseURL}/savingsaccounts/${clientId}/transactions`, payload, { headers });
+            await axios.post(
+                `${API_CONFIG.baseURL}/savingsaccounts/${clientId}/transactions?command=deposit`,
+                payload,
+                { headers }
+            );
 
+            alert("Deposit successful.");
+            setDepositTransactionDate(null);
+            setDepositTransactionAmount("");
+            setDepositPaymentType("");
+            setDepositNote("");
+            setDepositAccountNumber("");
+            setDepositChequeNumber("");
+            setDepositRoutingCode("");
+            setDepositReceiptNumber("");
+            setDepositBankNumber("");
+            setDepositPaymentDetailsVisible(false);
             setIsDepositModalOpen(false);
+            fetchGeneralTabData();
         } catch (error) {
             console.error('Error making deposit:', error);
             alert('Deposit failed. Please try again.');
@@ -3530,10 +3553,8 @@ const ClientDetails = ({ clientId, onClose }) => {
                 'Fineract-Platform-TenantId': 'default',
             };
 
-            // Fetch client details
             await axios.get(`${API_CONFIG.baseURL}/clients/${clientId}`, { headers });
 
-            // Fetch transaction template
             const transactionResponse = await axios.get(
                 `${API_CONFIG.baseURL}/savingsaccounts/${clientId}/transactions/template`,
                 { headers }
@@ -3554,31 +3575,53 @@ const ClientDetails = ({ clientId, onClose }) => {
             startLoading();
 
             const payload = {
-                transactionDate: withdrawTransactionDate.toISOString().split('T')[0],
-                transactionAmount: withdrawTransactionAmount,
-                paymentTypeId: withdrawPaymentType,
-                note: withdrawNote,
-                accountNumber: withdrawPaymentDetailsVisible ? withdrawAccountNumber : undefined,
-                chequeNumber: withdrawPaymentDetailsVisible ? withdrawChequeNumber : undefined,
-                routingCode: withdrawPaymentDetailsVisible ? withdrawRoutingCode : undefined,
-                receiptNumber: withdrawPaymentDetailsVisible ? withdrawReceiptNumber : undefined,
-                bankNumber: withdrawPaymentDetailsVisible ? withdrawBankNumber : undefined,
-                dateFormat: 'yyyy-MM-dd',
-                locale: 'en',
+                transactionDate: withdrawTransactionDate.toLocaleDateString("en-GB", {
+                    day: "2-digit",
+                    month: "long",
+                    year: "numeric",
+                }),
+                transactionAmount: parseFloat(withdrawTransactionAmount),
+                paymentTypeId: parseInt(withdrawPaymentType),
+                note: withdrawNote || "",
+                dateFormat: "dd MMMM yyyy",
+                locale: "en",
+                ...(withdrawPaymentDetailsVisible && {
+                    accountNumber: withdrawAccountNumber || "",
+                    chequeNumber: withdrawChequeNumber || "",
+                    routingCode: withdrawRoutingCode || "",
+                    receiptNumber: withdrawReceiptNumber || "",
+                    bankNumber: withdrawBankNumber || "",
+                }),
             };
 
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                'Fineract-Platform-TenantId': 'default',
-                'Content-Type': 'application/json',
+                "Fineract-Platform-TenantId": "default",
+                "Content-Type": "application/json",
             };
 
-            await axios.post(`${API_CONFIG.baseURL}/savingsaccounts/${accountId}/transactions`, payload, { headers });
+            await axios.post(
+                `${API_CONFIG.baseURL}/savingsaccounts/${accountId}/transactions?command=withdrawal`,
+                payload,
+                { headers }
+            );
+
+            alert("Withdrawal successful.");
+            setWithdrawTransactionDate(null);
+            setWithdrawTransactionAmount("");
+            setWithdrawPaymentType("");
+            setWithdrawNote("");
+            setWithdrawAccountNumber("");
+            setWithdrawChequeNumber("");
+            setWithdrawRoutingCode("");
+            setWithdrawReceiptNumber("");
+            setWithdrawBankNumber("");
+            setWithdrawPaymentDetailsVisible(false);
 
             setIsWithdrawModalOpen(false);
         } catch (error) {
-            console.error('Error making withdrawal:', error);
-            alert('Withdrawal failed. Please try again.');
+            console.error("Error making withdrawal:", error.response?.data || error.message);
+            alert(error.response?.data?.defaultUserMessage || "Withdrawal failed. Please try again.");
         } finally {
             stopLoading();
         }
@@ -5181,7 +5224,6 @@ const ClientDetails = ({ clientId, onClose }) => {
                     </div>
                 </div>
             )}
-
 
         </div>
     );

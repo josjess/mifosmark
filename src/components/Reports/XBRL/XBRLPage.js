@@ -7,6 +7,7 @@ import { FaInfoCircle, FaCog, FaDownload } from "react-icons/fa";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import "./XBRLPage.css";
 import {Link} from "react-router-dom";
+import DatePicker from "react-datepicker";
 
 const XBRLReports = () => {
     const [taxonomyData, setTaxonomyData] = useState([]);
@@ -261,14 +262,13 @@ const XBRLReports = () => {
                         <div className="staged-form-row">
                             <div className="staged-form-field">
                                 <label htmlFor="startDate">Start Date</label>
-                                <input
+                                <DatePicker
                                     id="startDate"
-                                    type="date"
-                                    value={reportDates.startDate}
-                                    max={getDateStringToday()}
-                                    onChange={(e) => {
-                                        const selectedDate = new Date(e.target.value);
-                                        if (!isPastDate(selectedDate)) {
+                                    selected={reportDates.startDate ? new Date(reportDates.startDate) : null}
+                                    maxDate={new Date()}
+                                    dateFormat="yyyy-MM-dd"
+                                    onChange={(date) => {
+                                        if (!isPastDate(date)) {
                                             setReportDates((prev) => ({
                                                 ...prev,
                                                 startDate: getDateStringOneWeekAgo(),
@@ -276,25 +276,29 @@ const XBRLReports = () => {
                                         } else {
                                             setReportDates((prev) => ({
                                                 ...prev,
-                                                startDate: e.target.value,
+                                                startDate: date ? date.toISOString().split("T")[0] : "",
                                             }));
                                         }
                                     }}
+                                    placeholderText="Select a start date"
+                                    className="custom-date-picker"
+                                    isClearable
                                 />
                             </div>
                             <div className="staged-form-field">
                                 <label htmlFor="endDate">End Date</label>
-                                <input
+                                <DatePicker
                                     id="endDate"
-                                    type="date"
-                                    value={reportDates.endDate}
-                                    min={reportDates.startDate || getDateStringOneWeekAgo()}
-                                    max={getDateStringToday()}
-                                    onChange={(e) => {
-                                        const selectedDate = new Date(e.target.value);
+                                    selected={reportDates.endDate ? new Date(reportDates.endDate) : null}
+                                    minDate={
+                                        reportDates.startDate ? new Date(reportDates.startDate) : undefined
+                                    }
+                                    maxDate={new Date()}
+                                    dateFormat="yyyy-MM-dd"
+                                    onChange={(date) => {
                                         if (
-                                            selectedDate <= new Date(reportDates.startDate) ||
-                                            !isPastDate(selectedDate)
+                                            date <= new Date(reportDates.startDate) ||
+                                            !isPastDate(date)
                                         ) {
                                             setReportDates((prev) => ({
                                                 ...prev,
@@ -303,10 +307,13 @@ const XBRLReports = () => {
                                         } else {
                                             setReportDates((prev) => ({
                                                 ...prev,
-                                                endDate: e.target.value,
+                                                endDate: date ? date.toISOString().split("T")[0] : "",
                                             }));
                                         }
                                     }}
+                                    placeholderText="Select an end date"
+                                    className="custom-date-picker"
+                                    isClearable
                                 />
                             </div>
                         </div>

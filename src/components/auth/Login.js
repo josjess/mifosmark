@@ -6,6 +6,7 @@ import { AuthContext } from '../../context/AuthContext';
 import { NotificationContext } from '../../context/NotificationContext';
 import { useLoading } from '../../context/LoadingContext';
 import {FaEye, FaEyeSlash} from "react-icons/fa";
+import bcrypt from "bcryptjs";
 
 const Login = () => {
     const [username, setUsername] = useState('');
@@ -14,10 +15,29 @@ const Login = () => {
     const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] = useState(false);
     const { showNotification } = useContext(NotificationContext);
     const [showPassword, setShowPassword] = useState(false);
-    const { login } = useContext(AuthContext);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [showSecurityAnswer1, setShowSecurityAnswer1] = useState(false);
+    const [showSecurityAnswer2, setShowSecurityAnswer2] = useState(false);
+    const {
+        login,
+        superAdminLogin,
+        updateSuperAdminCredentials,
+        superAdmin,
+        isSuperAdminFirstLogin
+    } = useContext(AuthContext);
     const { baseURL, isBaseURLChanged, updateBaseURL } = useContext(AuthContext);
     const { startLoading, stopLoading } = useLoading();
     const navigate = useNavigate();
+
+    const [isSettingUp, setIsSettingUp] = useState(false);
+    const [setupStep, setSetupStep] = useState(1);
+    const [newUsername, setNewUsername] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [securityQuestion1, setSecurityQuestion1] = useState("");
+    const [securityAnswer1, setSecurityAnswer1] = useState("");
+    const [securityQuestion2, setSecurityQuestion2] = useState("");
+    const [securityAnswer2, setSecurityAnswer2] = useState("");
 
     const handleResetBaseURL = async () => {
         try {
@@ -45,9 +65,27 @@ const Login = () => {
     const handleLogin = async (e) => {
         e.preventDefault();
         startLoading();
-        const loginData = { username, password };
 
         try {
+            if (username === superAdmin.username) {
+                const response = await superAdminLogin(username, password);
+                if (response?.firstLogin) {
+                    setIsSettingUp(true);
+                    stopLoading();
+                    return;
+                } else if (response?.success) {
+                    showNotification("Super Admin logged in successfully!", "success");
+                    stopLoading();
+                    navigate("/");
+                    return;
+                } else {
+                    showNotification(response?.message || "Login failed for Super Admin.", "error");
+                    stopLoading();
+                    return;
+                }
+            }
+
+            const loginData = { username, password };
             const response = await fetch(`${API_CONFIG.baseURL}/authentication`, {
                 method: "POST",
                 headers: {
@@ -78,10 +116,46 @@ const Login = () => {
             } else {
                 showNotification(data.message || "Login failed", "error");
             }
-        } catch (err) {
+        } catch (error) {
+            console.error("Error during login:", error);
             showNotification("Error connecting to API", "error");
         } finally {
             stopLoading();
+        }
+    };
+
+    const handleFirstSetup = async () => {
+        try {
+            if (setupStep === 1) {
+                if (!newUsername || !newPassword || !confirmPassword) {
+                    alert("All fields are required.");
+                    return;
+                }
+
+                if (newPassword !== confirmPassword) {
+                    alert("Passwords do not match.");
+                    return;
+                }
+
+                await updateSuperAdminCredentials(newUsername, await bcrypt.hash(newPassword, 10));
+                setSetupStep(2);
+            } else if (setupStep === 2) {
+                if (!securityQuestion1 || !securityAnswer1 || !securityQuestion2 || !securityAnswer2) {
+                    alert("All fields are required.");
+                    return;
+                }
+
+                await updateSuperAdminCredentials(null, null, [
+                    { question: securityQuestion1, answer: securityAnswer1 },
+                    { question: securityQuestion2, answer: securityAnswer2 },
+                ]);
+
+                alert("Super Admin setup completed!");
+                navigate("/");
+            }
+        } catch (error) {
+            console.error("Error during setup:", error);
+            alert("An error occurred during setup. Please try again.");
         }
     };
 
@@ -89,7 +163,7 @@ const Login = () => {
         setIsForgotPasswordModalOpen(!isForgotPasswordModalOpen);
     };
 
-    return (
+    const renderSetupFormStep1 = () => (
         <div className="body"
              style={{
                  background: `url(${process.env.PUBLIC_URL}/Images/microfinance.jpg) no-repeat center center/cover`,
@@ -97,19 +171,176 @@ const Login = () => {
         >
             <div className="login-container">
                 <header className="login-header">
-                    <h1>Welcome Back!</h1>
-                    <p>Please log in to continue</p>
+                    <h1>Super Admin Setup</h1>
+                    <p>Change your credentials to continue</p>
                 </header>
-
                 <section className="login-form">
-                    <form onSubmit={handleLogin}>
-                        <div className="form-group-login">
-                            <label htmlFor="username">Username</label>
+                    <div className="form-group-login">
+                        <label htmlFor="newUsername">New Username</label>
+                        <input
+                            type="text"
+                            id="newUsername"
+                            placeholder="Enter new username"
+                            value={newUsername}
+                            onChange={(e) => setNewUsername(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div className="form-group-login">
+                        <label htmlFor="newPassword">New Password</label>
+                        <div className="password-input-container">
                             <input
-                                type="text"
-                                id="username"
-                                placeholder="Enter your username"
-                                value={username}
+                                type={showPassword ? "text" : "password"}
+                                id="newPassword"
+                                placeholder="Enter new password"
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                required
+                            />
+                            <button
+                                type="button"
+                                className="toggle-password-visibility"
+                                onClick={() => setShowPassword(!showPassword)}
+                            >
+                                {showPassword ? <FaEyeSlash size={18}/> : <FaEye size={18}/>}
+                            </button>
+                        </div>
+                    </div>
+                    <div className="form-group-login">
+                        <label htmlFor="confirmPassword">Confirm Password</label>
+                        <div className="password-input-container">
+                            <input
+                                type={showConfirmPassword ? "text" : "password"}
+                                id="confirmPassword"
+                                placeholder="Confirm new password"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                required
+                            />
+                            <button
+                                type="button"
+                                className="toggle-password-visibility"
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            >
+                                {showConfirmPassword ? <FaEyeSlash size={18}/> : <FaEye size={18}/>}
+                            </button>
+                        </div>
+                    </div>
+                    <button className="login-btn" onClick={handleFirstSetup}>
+                        Continue
+                    </button>
+                </section>
+            </div>
+        </div>
+    );
+
+    const renderSetupFormStep2 = () => (
+        <div className="body"
+             style={{
+                 background: `url(${process.env.PUBLIC_URL}/Images/microfinance.jpg) no-repeat center center/cover`,
+             }}
+        >
+            <div className="login-container">
+                <header className="login-header">
+                    <h1>Security Questions Setup</h1>
+                    <p>for resetting password or username</p>
+                </header>
+                <section className="login-form">
+                    <div className="form-group-login">
+                        <label htmlFor="securityQuestion1">Security Question 1</label>
+                        <input
+                            type="text"
+                            id="securityQuestion1"
+                            placeholder="Enter security question 1"
+                            value={securityQuestion1}
+                            onChange={(e) => setSecurityQuestion1(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div className="form-group-login">
+                        <label htmlFor="securityAnswer1">Answer 1</label>
+                        <div className="password-input-container">
+                            <input
+                                type={showSecurityAnswer1 ? "text" : "password"}
+                                id="securityAnswer1"
+                                placeholder="Enter answer for question 1"
+                                value={securityAnswer1}
+                                onChange={(e) => setSecurityAnswer1(e.target.value)}
+                                required
+                            />
+                            <button
+                                type="button"
+                                className="toggle-password-visibility"
+                                onClick={() => setShowSecurityAnswer1(!showSecurityAnswer1)}
+                            >
+                                {showSecurityAnswer1 ? <FaEyeSlash size={18}/> : <FaEye size={18}/>}
+                            </button>
+                        </div>
+                    </div>
+                    <div className="form-group-login">
+                        <label htmlFor="securityQuestion2">Security Question 2</label>
+                        <input
+                            type="text"
+                            id="securityQuestion2"
+                            placeholder="Enter security question 2"
+                            value={securityQuestion2}
+                            onChange={(e) => setSecurityQuestion2(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div className="form-group-login">
+                        <label htmlFor="securityAnswer2">Answer 2</label>
+                        <div className="password-input-container">
+                            <input
+                                type={showSecurityAnswer2 ? "text" : "password"}
+                                id="securityAnswer2"
+                                placeholder="Enter answer for question 2"
+                                value={securityAnswer2}
+                                onChange={(e) => setSecurityAnswer2(e.target.value)}
+                                required
+                            />
+                            <button
+                                type="button"
+                                className="toggle-password-visibility"
+                                onClick={() => setShowSecurityAnswer2(!showSecurityAnswer2)}
+                            >
+                                {showSecurityAnswer2 ? <FaEyeSlash size={18}/> : <FaEye size={18}/>}
+                            </button>
+                        </div>
+                    </div>
+                    <button className="login-btn" onClick={handleFirstSetup}>
+                        Complete Setup
+                    </button>
+                </section>
+            </div>
+        </div>
+    );
+
+    return isSettingUp
+        ? setupStep === 1
+            ? renderSetupFormStep1()
+            : renderSetupFormStep2()
+        : (
+            <div className="body"
+                 style={{
+                     background: `url(${process.env.PUBLIC_URL}/Images/microfinance.jpg) no-repeat center center/cover`,
+                 }}
+            >
+                <div className="login-container">
+                    <header className="login-header">
+                        <h1>Welcome Back!</h1>
+                        <p>Please log in to continue</p>
+                    </header>
+
+                    <section className="login-form">
+                        <form onSubmit={handleLogin}>
+                            <div className="form-group-login">
+                                <label htmlFor="username">Username</label>
+                                <input
+                                    type="text"
+                                    id="username"
+                                    placeholder="Enter your username"
+                                    value={username}
                                 onChange={(e) => setUsername(e.target.value)}
                                 required
                             />

@@ -30,8 +30,13 @@ const AddAccountingRule = () => {
     const [completedStages, setCompletedStages] = useState(new Set());
     const [allStagesComplete, setAllStagesComplete] = useState(false);
 
+    const [showRuleModal, setShowRuleModal] = useState(false);
+    const [ruleDetails, setRuleDetails] = useState(null);
+
     const { user } = useContext(AuthContext);
     const { startLoading, stopLoading } = useLoading();
+
+    const [isEditMode, setIsEditMode] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -67,29 +72,72 @@ const AddAccountingRule = () => {
     const stages = [
         "Basic Information",
         "Debit Details",
-        "Credit Details"
+        "Credit Details",
+        "Preview"
     ];
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("Submitting Accounting Rule Data:", accountingRuleData);
+        startLoading();
 
-        setAccountingRuleData({
-            name: '',
-            office: '',
-            description: '',
-            debitAccount: '',
-            creditAccount: '',
-            allowMultipleDebits: false,
-            allowMultipleCredits: false,
-            debitRuleType: 'fixedAccount',
-            creditRuleType: 'fixedAccount',
-            debitCheckbox: false,
-            creditCheckbox: false,
-            debitTag: false,
-            creditTag: false,
-        });
-        setStep(1);
+        const payload = {
+            name: accountingRuleData.name,
+            officeId: parseInt(accountingRuleData.office, 10),
+            accountToDebit: parseInt(accountingRuleData.debitAccount, 10),
+            accountToCredit: parseInt(accountingRuleData.creditAccount, 10),
+            description: accountingRuleData.description,
+        };
+
+        try {
+            const response = await axios.post(`${API_CONFIG.baseURL}/accountingrules`, payload, {
+                headers: {
+                    Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                    'Fineract-Platform-TenantId': 'default',
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            const ruleId = response.data.resourceId;
+            const ruleDetailsResponse = await axios.get(`${API_CONFIG.baseURL}/accountingrules/${ruleId}`, {
+                headers: {
+                    Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                    'Fineract-Platform-TenantId': 'default',
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            setRuleDetails(ruleDetailsResponse.data);
+            setShowRuleModal(true);
+        } catch (error) {
+            console.error('Error submitting or fetching rule details:', error);
+        } finally {
+            stopLoading();
+            resetForm();
+        }
+    };
+
+    const handleCloseModal = () => {
+        setShowRuleModal(false);
+        setRuleDetails(null);
+    };
+
+    const handleDeleteRule = async () => {
+        if (window.confirm('Are you sure you want to delete this rule?')) {
+            startLoading();
+            try {
+                await axios.delete(`${API_CONFIG.baseURL}/accountingrules/${ruleDetails.id}`, {
+                    headers: {
+                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                        'Fineract-Platform-TenantId': 'default',
+                    },
+                });
+                handleCloseModal();
+            } catch (error) {
+                console.error('Error deleting accounting rule:', error);
+            } finally {
+                stopLoading();
+            }
+        }
     };
 
     const renderStageContent = () => {
@@ -385,7 +433,7 @@ const AddAccountingRule = () => {
 
         const stageData = [
             {
-                title: "Basic Info",
+                title: "Basic Information",
                 data: {
                     "Accounting Rule Name": accountingRuleData.name || "N/A",
                     Office: getOfficeName(),
@@ -540,6 +588,89 @@ const AddAccountingRule = () => {
         return false;
     };
 
+    const handleEditRule = () => {
+        setIsEditMode(true);
+        setAccountingRuleData({
+            name: ruleDetails.name,
+            office: ruleDetails.officeId.toString(),
+            description: ruleDetails.description,
+            debitAccount: ruleDetails.debitAccounts?.[0]?.id?.toString() || '',
+            creditAccount: ruleDetails.creditAccounts?.[0]?.id?.toString() || '',
+            allowMultipleDebits: ruleDetails.allowMultipleDebitEntries,
+            allowMultipleCredits: ruleDetails.allowMultipleCreditEntries,
+            debitRuleType: ruleDetails.debitAccounts ? 'fixedAccount' : 'listOfProducts',
+            creditRuleType: ruleDetails.creditAccounts ? 'fixedAccount' : 'listOfAccounts',
+            debitCheckbox: false,
+            creditCheckbox: false,
+            debitTag: false,
+            creditTag: false,
+        });
+        setShowRuleModal(false);
+    };
+
+    const handleEditSubmit = async (e) => {
+        e.preventDefault();
+        startLoading();
+
+        const updatedPayload = {
+            name: accountingRuleData.name,
+            officeId: parseInt(accountingRuleData.office, 10),
+            accountToDebit: parseInt(accountingRuleData.debitAccount, 10),
+            accountToCredit: parseInt(accountingRuleData.creditAccount, 10),
+            description: accountingRuleData.description,
+        };
+
+        try {
+            await axios.put(`${API_CONFIG.baseURL}/accountingrules/${ruleDetails.id}`, updatedPayload, {
+                headers: {
+                    Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                    'Fineract-Platform-TenantId': 'default',
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            const updatedRuleDetailsResponse = await axios.get(
+                `${API_CONFIG.baseURL}/accountingrules/${ruleDetails.id}`,
+                {
+                    headers: {
+                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                        'Fineract-Platform-TenantId': 'default',
+                    },
+                }
+            );
+
+            setRuleDetails(updatedRuleDetailsResponse.data);
+            setShowRuleModal(true);
+
+            setIsEditMode(false);
+        } catch (error) {
+            console.error('Error updating accounting rule:', error);
+        } finally {
+            stopLoading();
+            resetForm();
+        }
+    };
+
+    const resetForm = () => {
+        setAccountingRuleData({
+            name: '',
+            office: '',
+            description: '',
+            debitAccount: '',
+            creditAccount: '',
+            allowMultipleDebits: false,
+            allowMultipleCredits: false,
+            debitRuleType: 'fixedAccount',
+            creditRuleType: 'fixedAccount',
+            debitCheckbox: false,
+            creditCheckbox: false,
+            debitTag: false,
+            creditTag: false,
+        });
+        setCurrentStage(0);
+        setCompletedStages(new Set());
+        setIsEditMode(false);
+    };
 
     return (
         <div className="form-container-accounting-rule">
@@ -548,7 +679,6 @@ const AddAccountingRule = () => {
                 {renderStageTracker()}
                 <div className="staged-form-stage-content">
                     {currentStage === stages.length - 1 ? renderPreviewSection() : renderStageContent()}
-
 
                     <div className="staged-form-stage-buttons">
                         <button
@@ -572,13 +702,88 @@ const AddAccountingRule = () => {
                             </button>
                         )}
                         {currentStage === stages.length - 1 && (
-                            <button onClick={handleSubmit} className="staged-form-button-next">
-                                Submit
+                            <button
+                                onClick={isEditMode ? handleEditSubmit : handleSubmit}
+                                className="staged-form-button-next"
+                            >
+                                {isEditMode ? 'Update Rule' : 'Submit'}
                             </button>
                         )}
                     </div>
                 </div>
             </div>
+            {showRuleModal && ruleDetails && (
+                <div
+                    className="create-provisioning-criteria-modal-overlay"
+                >
+                    <div
+                        className="create-provisioning-criteria-modal-content"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <h4 className="create-modal-title">Accounting Rule Details</h4>
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button className="create-provisioning-criteria-cancel" onClick={handleCloseModal}>
+                                Close
+                            </button>
+                            <button
+                                className="create-provisioning-criteria-confirm"
+                                onClick={handleEditRule}
+                            >
+                                Edit
+                            </button>
+                            <button
+                                className="create-provisioning-criteria-cancel"
+                                onClick={handleDeleteRule}
+                            >
+                                Delete
+                            </button>
+                        </div>
+                        <table className="create-provisioning-criteria-table">
+                            <tbody>
+                            <tr>
+                                <td className="create-provisioning-criteria-label">Name</td>
+                                <td>{ruleDetails.name}</td>
+                            </tr>
+                            <tr>
+                                <td className="create-provisioning-criteria-label">Office</td>
+                                <td>{ruleDetails.officeName}</td>
+                            </tr>
+                            <tr>
+                                <td className="create-provisioning-criteria-label">Description</td>
+                                <td>{ruleDetails.description}</td>
+                            </tr>
+                            <tr>
+                                <td className="create-provisioning-criteria-label">
+                                    Multiple Debit Entries Allowed
+                                </td>
+                                <td>{ruleDetails.allowMultipleDebitEntries ? 'Yes' : 'No'}</td>
+                            </tr>
+                            <tr>
+                                <td className="create-provisioning-criteria-label">
+                                    Multiple Credit Entries Allowed
+                                </td>
+                                <td>{ruleDetails.allowMultipleCreditEntries ? 'Yes' : 'No'}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <table className="create-provisioning-criteria-table">
+                            <thead>
+                            <tr>
+                                <th>Debit Account Name</th>
+                                <th>Credit Account Name</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>{ruleDetails.debitAccounts?.[0]?.name || 'N/A'}</td>
+                                <td>{ruleDetails.creditAccounts?.[0]?.name || 'N/A'}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
+
         </div>
     );
 

@@ -15,6 +15,10 @@ const ChartOfAccountsTable = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
 
+    const [showAccountModal, setShowAccountModal] = useState(false);
+    const [accountDetails, setAccountDetails] = useState(null);
+    const [parents, setParents] = useState([]);
+
     useEffect(() => {
         fetchAccounts();
     }, [filters]);
@@ -64,8 +68,86 @@ const ChartOfAccountsTable = () => {
         setCurrentPage(1);
     };
 
-    const handleRowClick = (id) => {
-        console.log("Row ID:", id);
+    const handleRowClick = async (id) => {
+        startLoading();
+        try {
+            const accountDetailsResponse = await axios.get(
+                `${API_CONFIG.baseURL}/glaccounts/${id}?template=true`,
+                {
+                    headers: {
+                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                        'Fineract-Platform-TenantId': 'default',
+                    },
+                }
+            );
+
+            setAccountDetails(accountDetailsResponse.data);
+
+            const { assetHeaderAccountOptions, liabilityHeaderAccountOptions, equityHeaderAccountOptions, incomeHeaderAccountOptions } =
+                accountDetailsResponse.data;
+
+            setParents([
+                ...(assetHeaderAccountOptions || []),
+                ...(liabilityHeaderAccountOptions || []),
+                ...(equityHeaderAccountOptions || []),
+                ...(incomeHeaderAccountOptions || []),
+            ]);
+
+            setShowAccountModal(true);
+        } catch (error) {
+            console.error('Error fetching account details:', error);
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const toggleDisable = async () => {
+        startLoading();
+        try {
+            const payload = { disabled: !accountDetails.disabled };
+            await axios.put(`${API_CONFIG.baseURL}/glaccounts/${accountDetails.id}`, payload, {
+                headers: {
+                    Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                    'Fineract-Platform-TenantId': 'default',
+                    'Content-Type': 'application/json',
+                },
+            });
+            setAccountDetails((prev) => ({ ...prev, disabled: !prev.disabled }));
+        } catch (error) {
+            console.error('Error toggling account status:', error);
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const handleDelete = async () => {
+        if (window.confirm('Are you sure you want to delete this account?')) {
+            startLoading();
+            try {
+                await axios.delete(`${API_CONFIG.baseURL}/glaccounts/${accountDetails.id}`, {
+                    headers: {
+                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                        'Fineract-Platform-TenantId': 'default',
+                    },
+                });
+                setShowAccountModal(false);
+                alert('Account deleted successfully.');
+            } catch (error) {
+                console.error('Error deleting account:', error);
+            } finally {
+                stopLoading();
+            }
+        }
+    };
+
+    const getParentAccountName = (parentId, parents) => {
+        const parentAccount = parents.find((parent) => parent.id === parentId);
+        return parentAccount ? parentAccount.name : 'None';
+    };
+
+    const resetFormFields = () => {
+        setAccountDetails(null);
+        setParents([]);
     };
 
     return (
@@ -80,7 +162,6 @@ const ChartOfAccountsTable = () => {
                         <option value={50}>50</option>
                     </select>
                 </div>
-                <button className="tree-view-toggle">Tree View</button>
             </div>
             <div className="filter-row">
                 <input
@@ -167,6 +248,79 @@ const ChartOfAccountsTable = () => {
                     >
                         End
                     </button>
+                </div>
+            )}
+            {showAccountModal && accountDetails && (
+                <div
+                    className="create-provisioning-criteria-modal-overlay"
+                    onClick={() => {
+                        setShowAccountModal(false);
+                        resetFormFields();
+                    }}
+                >
+                    <div
+                        className="create-provisioning-criteria-modal-content"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <h4 className="create-modal-title">Account Details</h4>
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button
+                                className="create-provisioning-criteria-cancel"
+                                onClick={() => {
+                                    setShowAccountModal(false);
+                                    resetFormFields();
+                                }}
+                            >
+                                Back
+                            </button>
+                            <button
+                                className="create-provisioning-criteria-toggle"
+                                onClick={toggleDisable}
+                            >
+                                {accountDetails.disabled ? 'Enable' : 'Disable'}
+                            </button>
+                            <button
+                                className="create-provisioning-criteria-cancel"
+                                onClick={handleDelete}
+                            >
+                                Delete
+                            </button>
+                        </div>
+                        <table className="create-provisioning-criteria-table">
+                            <tbody>
+                            <tr>
+                                <td className="create-provisioning-criteria-label">Account Name</td>
+                                <td>{accountDetails.name}</td>
+                            </tr>
+                            <tr>
+                                <td className="create-provisioning-criteria-label">Account Type</td>
+                                <td>{accountDetails.type.value}</td>
+                            </tr>
+                            <tr>
+                                <td className="create-provisioning-criteria-label">GL Code</td>
+                                <td>{accountDetails.glCode}</td>
+                            </tr>
+                            <tr>
+                                <td className="create-provisioning-criteria-label">Parent Account</td>
+                                <td>
+                                    {getParentAccountName(accountDetails.parentId, parents)}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td className="create-provisioning-criteria-label">Account Usage</td>
+                                <td>{accountDetails.usage.value}</td>
+                            </tr>
+                            <tr>
+                                <td className="create-provisioning-criteria-label">Manual Entries Allowed</td>
+                                <td>{accountDetails.manualEntriesAllowed ? 'Yes' : 'No'}</td>
+                            </tr>
+                            <tr>
+                                <td className="create-provisioning-criteria-label">Description</td>
+                                <td>{accountDetails.description}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             )}
         </div>

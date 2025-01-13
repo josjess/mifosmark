@@ -1,5 +1,6 @@
 .reports-page {
     margin-left: 250px;
+    min-height: 90vh;
     padding: 60px 20px;
     background-color: #f9f9fb;
 }

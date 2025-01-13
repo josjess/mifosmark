@@ -13,6 +13,9 @@ const AccountingRulesTable = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
 
+    const [showRuleModal, setShowRuleModal] = useState(false);
+    const [selectedRule, setSelectedRule] = useState(null);
+
     useEffect(() => {
         fetchAccountingRules();
     }, []);
@@ -45,8 +48,23 @@ const AccountingRulesTable = () => {
         setCurrentPage(1);
     };
 
-    const handleRowClick = (rule) => {
-        console.log("Row Data:", rule);
+    const handleRowClick = async (rule) => {
+        startLoading();
+        try {
+            const response = await axios.get(`${API_CONFIG.baseURL}/accountingrules/${rule.id}`, {
+                headers: {
+                    Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                    'Fineract-Platform-TenantId': 'default',
+                    'Content-Type': 'application/json',
+                },
+            });
+            setSelectedRule(response.data);
+            setShowRuleModal(true);
+        } catch (error) {
+            console.error('Error fetching rule details:', error);
+        } finally {
+            stopLoading();
+        }
     };
 
     const paginatedData = allAccountingRules.slice(
@@ -85,26 +103,26 @@ const AccountingRulesTable = () => {
                             className="clickable-row"
                         >
                             <td>{rule.name}</td>
-                            <td>{rule.officeName || 'N/A'}</td>
+                            <td>{rule.officeName || ''}</td>
                             <td>
                                 {Array.isArray(rule.debitAccounts) && rule.debitAccounts.length > 0
                                     ? rule.debitAccounts.map(account => account.name).join(', ')
-                                    : 'N/A'}
+                                    : ''}
                             </td>
                             <td>
                                 {Array.isArray(rule.creditAccounts) && rule.creditAccounts.length > 0
                                     ? rule.creditAccounts.map(account => account.name).join(', ')
-                                    : 'N/A'}
+                                    : ''}
                             </td>
                             <td>
                                 {Array.isArray(rule.debitTags) && rule.debitTags.length > 0
                                     ? rule.debitTags.map(tag => `${tag.tag.name} (${tag.transactionType.value})`).join(', ')
-                                    : 'N/A'}
+                                    : ''}
                             </td>
                             <td>
                                 {Array.isArray(rule.creditTags) && rule.creditTags.length > 0
                                     ? rule.creditTags.map(tag => `${tag.tag.name} (${tag.transactionType.value})`).join(', ')
-                                    : 'N/A'}
+                                    : ''}
                             </td>
                         </tr>
                     ))
@@ -127,6 +145,69 @@ const AccountingRulesTable = () => {
                     </button>
                     <button onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages}>End
                     </button>
+                </div>
+            )}
+            {showRuleModal && selectedRule && (
+                <div
+                    className="create-provisioning-criteria-modal-overlay"
+                    onClick={() => setShowRuleModal(false)}
+                >
+                    <div
+                        className="create-provisioning-criteria-modal-content"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <h4 className="create-modal-title">Accounting Rule Details</h4>
+                        <table className="create-provisioning-criteria-table">
+                            <tbody>
+                            <tr>
+                                <td className="create-provisioning-criteria-label">Name</td>
+                                <td>{selectedRule.name}</td>
+                            </tr>
+                            <tr>
+                                <td className="create-provisioning-criteria-label">Office</td>
+                                <td>{selectedRule.officeName}</td>
+                            </tr>
+                            <tr>
+                                <td className="create-provisioning-criteria-label">Description</td>
+                                <td>{selectedRule.description}</td>
+                            </tr>
+                            <tr>
+                                <td className="create-provisioning-criteria-label">
+                                    Multiple Debit Entries Allowed
+                                </td>
+                                <td>{selectedRule.allowMultipleDebitEntries ? 'Yes' : 'No'}</td>
+                            </tr>
+                            <tr>
+                                <td className="create-provisioning-criteria-label">
+                                    Multiple Credit Entries Allowed
+                                </td>
+                                <td>{selectedRule.allowMultipleCreditEntries ? 'Yes' : 'No'}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <table className="create-provisioning-criteria-table">
+                            <thead>
+                            <tr>
+                                <th>Debit Account Name</th>
+                                <th>Credit Account Name</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>{selectedRule.debitAccounts?.[0]?.name || 'N/A'}</td>
+                                <td>{selectedRule.creditAccounts?.[0]?.name || 'N/A'}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button
+                                className="create-provisioning-criteria-cancel"
+                                onClick={() => setShowRuleModal(false)}
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
