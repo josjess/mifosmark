@@ -477,8 +477,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    /*width: 32px;*/
+    /*height: 32px;*/
     border: none;
     border-radius: 4px;
     background-color: #e0e0e0;
@@ -590,16 +590,14 @@
 }
 
 .general-sidebar-container {
-    /*display: flex;*/
-    /*flex-direction: column;*/
     width: 250px;
-    /*position: relative;*/
-    transition: width 0.3s ease, opacity 0.3s ease;
+    transform: translateX(0);
+    transition: transform 0.3s ease, opacity 0.3s ease;
     overflow: hidden;
 }
 
 .general-sidebar-container.hidden {
-    width: 0;
+    transform: translateX(-100%);
     opacity: 0;
     pointer-events: none;
 }
@@ -667,6 +665,7 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    transition: transform 0.3s ease;
 }
 .sidebar-toggle-handle:hover {
     transform: translateY(-100%);
@@ -677,7 +676,11 @@
     height: 3px;
     background: #353535;
     margin: 3px 0;
-    border-radius: 5px;
+    border-radius: 5px;transition: background 0.3s ease;
+}
+
+.sidebar-toggle-handle:hover .toggle-bar {
+    background: #007bff;
 }
 
 .add-entry-button {
@@ -724,5 +727,24 @@
     background-color: #d4d4d4;
     color: #888;
     cursor: not-allowed;
+}
+.loan-row-active {
+    background-color: rgba(0, 255, 0, 0.1);
+}
+
+.loan-row-closed {
+    background-color: rgba(192, 192, 192, 0.5);
+}
+
+.loan-row-pending-approval {
+    background-color: rgba(255, 165, 0, 0.1);
+}
+
+.loan-row-waiting-disbursal {
+    background-color: rgba(99, 206, 239, 0.1);
+}
+
+.loan-row-in-arrears {
+    background-color: rgba(255, 0, 0, 0.1);
 }
 

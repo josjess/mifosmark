@@ -23,7 +23,7 @@ const NotificationService = () => {
             const response = await axios.get(`${API_CONFIG.baseURL}/externalservice/NOTIFICATION`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    "Fineract-Platform-TenantId": "default",
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     "Content-Type": "application/json",
                 },
             });
@@ -64,7 +64,7 @@ const NotificationService = () => {
                 {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        "Fineract-Platform-TenantId": "default",
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                         "Content-Type": "application/json",
                     },
                 }
@@ -86,7 +86,7 @@ const NotificationService = () => {
     };
 
     return (
-        <div className="notification-service-page">
+        <div className="notification-service-page neighbor-element">
             <nav className="notification-page-title">
                 <Link to="/external-services" className="notification-breadcrumb-link">
                     External Services

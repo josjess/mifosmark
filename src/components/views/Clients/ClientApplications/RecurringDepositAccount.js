@@ -65,7 +65,7 @@ const RecurringDeposits = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                'Fineract-Platform-TenantId': 'default',
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
             };
 
             const [clientResponse, recurringDepositResponse] = await Promise.all([

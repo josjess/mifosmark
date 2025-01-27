@@ -9,7 +9,7 @@ const Clients = ({ onRowClick }) => {
     const [clients, setClients] = useState([]);
     const [filteredClients, setFilteredClients] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
-    const [pageSize, setPageSize] = useState(10);
+    const [pageSize, setPageSize] = useState(20);
     const [totalPages, setTotalPages] = useState(1);
     const [filters, setFilters] = useState({ searchQuery: '' });
     const { user } = useContext(AuthContext);
@@ -21,7 +21,7 @@ const Clients = ({ onRowClick }) => {
             const response = await axios.get(`${API_CONFIG.baseURL}/clients`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });

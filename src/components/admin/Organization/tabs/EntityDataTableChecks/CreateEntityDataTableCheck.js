@@ -26,7 +26,7 @@ const CreateEntityDataTableCheck = () => {
             const response = await axios.get(`${API_CONFIG.baseURL}/entityDatatableChecks/template`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    "Fineract-Platform-TenantId": "default",
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 },
             });
 
@@ -67,7 +67,7 @@ const CreateEntityDataTableCheck = () => {
                 const response = await axios.get(`${API_CONFIG.baseURL}/entityDatatableChecks/template`, {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        "Fineract-Platform-TenantId": "default",
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     },
                 });
                 setStatusOptions(response.data[statusField] || []);
@@ -100,7 +100,7 @@ const CreateEntityDataTableCheck = () => {
             await axios.post(`${API_CONFIG.baseURL}/entityDatatableChecks`, payload, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    "Fineract-Platform-TenantId": "default",
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     "Content-Type": "application/json",
                 },
             });

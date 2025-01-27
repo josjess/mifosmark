@@ -7,7 +7,7 @@ const ManageHolidays = () => {
     const [activeTab, setActiveTab] = useState('viewHolidays');
 
     return (
-        <div className="tab-products-page">
+        <div className="tab-products-page neighbor-element">
             <h2 className="page-heading">
                 <Link to="/organization" className="breadcrumb-link">Organization</Link> . Manage Holidays
             </h2>

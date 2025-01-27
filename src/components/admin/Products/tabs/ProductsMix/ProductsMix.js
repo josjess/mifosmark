@@ -7,7 +7,7 @@ const ProductsMix = () => {
     const [activeTab, setActiveTab] = useState('viewProductsMix');
 
     return (
-        <div className="tab-products-page">
+        <div className="tab-products-page neighbor-element">
             <h2 className="page-heading">
                 <Link to="/products" className="breadcrumb-link">Products</Link> . Products Mix
             </h2>

@@ -33,7 +33,7 @@ const ViewEmployees = () => {
             const response = await axios.get(`${API_CONFIG.baseURL}/offices`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });
@@ -51,7 +51,7 @@ const ViewEmployees = () => {
             const response = await axios.get(`${API_CONFIG.baseURL}/staff?status=all`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });
@@ -90,7 +90,7 @@ const ViewEmployees = () => {
                 {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        'Fineract-Platform-TenantId': 'default',
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                         'Content-Type': 'application/json',
                     },
                 }
@@ -113,7 +113,7 @@ const ViewEmployees = () => {
                 {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        'Fineract-Platform-TenantId': 'default',
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                         'Content-Type': 'application/json',
                     },
                 }

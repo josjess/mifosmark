@@ -26,7 +26,7 @@ const FinancialActivityMappingsTable = () => {
                 params: { offset: (currentPage - 1) * pageSize, limit: pageSize },
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });
@@ -46,7 +46,7 @@ const FinancialActivityMappingsTable = () => {
             const response = await axios.get(`${API_CONFIG.baseURL}/financialactivityaccounts/${id}?template=false`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });

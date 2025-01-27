@@ -8,7 +8,7 @@ const ManageReports = () => {
     const [activeTab, setActiveTab] = useState('viewReports');
 
     return (
-        <div className="manage-reports-page">
+        <div className="manage-reports-page neighbor-element">
             <h2 className="page-heading">
                 <Link to="/system" className="breadcrumb-link">System</Link> . Manage Reports
             </h2>

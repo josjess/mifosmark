@@ -30,7 +30,7 @@ const ViewHoliday = () => {
             const response = await axios.get(`${API_CONFIG.baseURL}/holidays/template`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    "Fineract-Platform-TenantId": "default",
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     "Content-Type": "application/json",
                 },
             });
@@ -69,7 +69,7 @@ const ViewHoliday = () => {
             const response = await axios.get(`${API_CONFIG.baseURL}/holidays/${id}`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    "Fineract-Platform-TenantId": "default",
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 },
             });
             setHolidayDetails(response.data);
@@ -91,7 +91,7 @@ const ViewHoliday = () => {
                         {
                             headers: {
                                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                                "Fineract-Platform-TenantId": "default",
+                                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                             },
                         }
                     );
@@ -110,7 +110,7 @@ const ViewHoliday = () => {
                     await axios.delete(`${API_CONFIG.baseURL}/holidays/${id}`, {
                         headers: {
                             Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                            "Fineract-Platform-TenantId": "default",
+                            'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                         },
                     });
                     navigate("/manage-holidays");
@@ -166,7 +166,7 @@ const ViewHoliday = () => {
                 {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        "Fineract-Platform-TenantId": "default",
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                         "Content-Type": "application/json",
                     },
                 }
@@ -186,7 +186,7 @@ const ViewHoliday = () => {
     }
 
     return (
-        <div className="view-holiday-container">
+        <div className="view-holiday-container neighbor-element">
             <h2 className="page-heading">
                 <Link to="/organization" className="breadcrumb-link">
                     Organization

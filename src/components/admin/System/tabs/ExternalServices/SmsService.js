@@ -23,7 +23,7 @@ const SmsService = () => {
             const response = await axios.get(`${API_CONFIG.baseURL}/externalservice/SMS`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    "Fineract-Platform-TenantId": "default",
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     "Content-Type": "application/json",
                 },
             });
@@ -65,7 +65,7 @@ const SmsService = () => {
                 {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        "Fineract-Platform-TenantId": "default",
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                         "Content-Type": "application/json",
                     },
                 }
@@ -81,7 +81,7 @@ const SmsService = () => {
     };
 
     return (
-        <div className="sms-service-page">
+        <div className="sms-service-page neighbor-element">
             <nav className="sms-page-title">
                 <Link to="/external-services" className="sms-breadcrumb-link">
                     External Services

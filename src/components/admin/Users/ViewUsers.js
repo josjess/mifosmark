@@ -25,7 +25,7 @@ const ViewUsers = ({ onRowClick }) => {
             const response = await axios.get(`${API_CONFIG.baseURL}/users`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });

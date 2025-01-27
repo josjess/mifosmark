@@ -39,7 +39,7 @@ const ManageDataTables = () => {
     };
 
     return (
-        <div className="manage-data-tables-page">
+        <div className="manage-data-tables-page neighbor-element">
             <h2 className="page-heading">
                 <Link to="/system" className="breadcrumb-link">System </Link>. Manage Data Tables
             </h2>

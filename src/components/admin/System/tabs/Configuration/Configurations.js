@@ -30,7 +30,7 @@ const ConfigurationPage = () => {
             const response = await axios.get(`${API_CONFIG.baseURL}/configurations`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });
@@ -64,7 +64,7 @@ const ConfigurationPage = () => {
             await axios.put(`${API_CONFIG.baseURL}/configurations/${id}`, payload, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });
@@ -119,7 +119,7 @@ const ConfigurationPage = () => {
                 {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        "Fineract-Platform-TenantId": "default",
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                         "Content-Type": "application/json",
                     },
                 }
@@ -161,7 +161,7 @@ const ConfigurationPage = () => {
                 {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        "Fineract-Platform-TenantId": "default",
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                         "Content-Type": "application/json",
                     },
                 }
@@ -184,7 +184,7 @@ const ConfigurationPage = () => {
     };
 
     return (
-        <div className="configuration-page">
+        <div className="configuration-page neighbor-element">
             <h2 className="page-heading">
                 <Link to="/system" className="breadcrumb-link">System</Link> . Configuration
             </h2>

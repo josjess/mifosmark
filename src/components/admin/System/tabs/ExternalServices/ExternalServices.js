@@ -14,7 +14,7 @@ const ExternalServices = () => {
     ];
 
     return (
-        <div className="external-services-page">
+        <div className="external-services-page neighbor-element">
             <h2 className="external-services-heading">
                 <Link to="/system" className="breadcrumb-link">System</Link> . External Services
             </h2>

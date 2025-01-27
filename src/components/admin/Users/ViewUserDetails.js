@@ -36,7 +36,7 @@ const ViewUserDetails = ({ selectedUser, onClose }) => {
             const response = await axios.get(`${API_CONFIG.baseURL}/users/${selectedUser.id}`, { // Use "selectedUser"
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 },
             });
             setUserDetails({ ...response.data, selectedRoles: response.data.selectedRoles || [] });
@@ -56,7 +56,7 @@ const ViewUserDetails = ({ selectedUser, onClose }) => {
                 {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        "Fineract-Platform-TenantId": "default",
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                         "Content-Type": "application/json",
                     },
                 }
@@ -67,7 +67,7 @@ const ViewUserDetails = ({ selectedUser, onClose }) => {
                 {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        "Fineract-Platform-TenantId": "default",
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                         "Content-Type": "application/json",
                     },
                 }
@@ -78,7 +78,7 @@ const ViewUserDetails = ({ selectedUser, onClose }) => {
                 {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        "Fineract-Platform-TenantId": "default",
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                         "Content-Type": "application/json",
                     },
                 }
@@ -121,7 +121,7 @@ const ViewUserDetails = ({ selectedUser, onClose }) => {
             await axios.put(`${API_CONFIG.baseURL}/users/${userDetails.id}`, payload, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    "Fineract-Platform-TenantId": "default",
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     "Content-Type": "application/json",
                 },
             });
@@ -162,7 +162,7 @@ const ViewUserDetails = ({ selectedUser, onClose }) => {
             await axios.put(`${API_CONFIG.baseURL}/users/${userDetails.id}`, payload, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    "Fineract-Platform-TenantId": "default",
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     "Content-Type": "application/json",
                 },
             });
@@ -187,7 +187,7 @@ const ViewUserDetails = ({ selectedUser, onClose }) => {
             await axios.delete(`${API_CONFIG.baseURL}/users/${userDetails.id}`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    "Fineract-Platform-TenantId": "default",
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 },
             });
 

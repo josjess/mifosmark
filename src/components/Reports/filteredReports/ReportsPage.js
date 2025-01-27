@@ -62,7 +62,7 @@ const ReportsPage = () => {
             const response = await axios.get(`${API_CONFIG.baseURL}/reports`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    "Fineract-Platform-TenantId": "default",
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     "Content-Type": "application/json",
                 },
             });
@@ -101,7 +101,7 @@ const ReportsPage = () => {
     };
 
     return (
-        <div className="reports-page">
+        <div className="reports-page neighbor-element">
             <h2 className="page-heading">
                 <Link to="/reports" className="breadcrumb-link">Reports</Link> .{" "}
                 {reportType.charAt(0).toUpperCase() + reportType.slice(1).toLowerCase()}

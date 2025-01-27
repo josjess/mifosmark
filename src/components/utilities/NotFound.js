@@ -4,7 +4,7 @@ import './NotFound.css';
 
 const NotFound = () => {
     return (
-        <div className="not-found-container">
+        <div className="not-found-container neighbor-element">
             <div className="not-found-content">
                 <h1 className="not-found-title">
                     <span className="glitch" data-text="404">404</span>

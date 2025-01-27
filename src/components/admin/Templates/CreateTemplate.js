@@ -39,7 +39,7 @@ const CreateTemplateForm = () => {
             const response = await axios.get(`${API_CONFIG.baseURL}/templates/template`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });
@@ -125,7 +125,7 @@ const CreateTemplateForm = () => {
             const response = await axios.post(`${API_CONFIG.baseURL}/templates`, payload, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    "Fineract-Platform-TenantId": "default",
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     "Content-Type": "application/json",
                 },
             });

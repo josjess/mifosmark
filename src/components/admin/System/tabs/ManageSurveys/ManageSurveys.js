@@ -8,7 +8,7 @@ const ManageSurveys = () => {
     const [activeTab, setActiveTab] = useState('viewSurveys');
 
     return (
-        <div className="manage-surveys-page">
+        <div className="manage-surveys-page neighbor-element">
             <h2 className="page-heading">
                 <Link to="/system" className="breadcrumb-link">System </Link>. Manage Surveys
             </h2>

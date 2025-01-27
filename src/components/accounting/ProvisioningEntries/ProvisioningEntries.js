@@ -8,7 +8,7 @@ const ProvisioningEntriesPage = () => {
     const [activeTab, setActiveTab] = useState('view');
 
     return (
-        <div className="provisioning-entries-screen">
+        <div className="provisioning-entries-screen neighbor-element">
             <h2 className="provisioning-head">
                 <Link to="/accounting" className="breadcrumb-link">Accounting</Link> . Provisioning Entries
             </h2>

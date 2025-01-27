@@ -22,7 +22,7 @@ const Reports = () => {
     ];
 
     return (
-        <div className="reports-layout">
+        <div className="reports-layout neighbor-element">
             <header className="reports-header">
                 <h1>Reports Dashboard</h1>
                 <p>Generate various financial and client reports</p>

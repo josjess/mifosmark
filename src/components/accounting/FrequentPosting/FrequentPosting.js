@@ -44,7 +44,7 @@ const FrequentPostingForm = () => {
             try {
                 const headers = {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    "Fineract-Platform-TenantId": "default",
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     "Content-Type": "application/json",
                 };
 
@@ -410,7 +410,7 @@ const FrequentPostingForm = () => {
 
 
     return (
-        <div className="journal-entries-screen">
+        <div className="journal-entries-screen neighbor-element">
             <div className="form-container-client">
                 <h2>
                     <Link to="/accounting" className="breadcrumb-link">Accounting</Link> . Frequent Posting

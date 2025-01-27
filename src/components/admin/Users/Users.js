@@ -33,7 +33,7 @@ const UsersPage = () => {
     };
 
     return (
-        <div className="users-page-screen">
+        <div className="users-page-screen neighbor-element">
             <h2 className="users-page-head">
                 <Link to="/admin" className="breadcrumb-link">Admin </Link> . Users
             </h2>

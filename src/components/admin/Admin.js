@@ -1,17 +1,19 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaUserShield, FaBuilding, FaBoxes, FaClipboard, FaCog } from 'react-icons/fa';
 import './Admin.css';
+import {AuthContext} from "../../context/AuthContext";
 
 const Admin = () => {
     const navigate = useNavigate();
+    const { componentVisibility } = useContext(AuthContext);
 
     const options = [
-        { label: 'Users', description: 'Manage user roles', icon: FaUserShield, path: '/users', color: '#6a82fb' },
-        { label: 'Organization', description: 'Structure & hierarchy', icon: FaBuilding, path: '/organization', color: '#70bc0e' },
-        { label: 'Products', description: 'Product catalog', icon: FaBoxes, path: '/products', color: '#ff7b42' },
-        { label: 'Templates', description: 'Document templates', icon: FaClipboard, path: '/templates', color: '#4a90e2' },
-        { label: 'System', description: 'System settings', icon: FaCog, path: '/system', color: '#1abc9c' }
+        { id: "admin-users", label: 'Users', description: 'Manage user roles', icon: FaUserShield, path: '/users', color: '#6a82fb' },
+        { id: "admin-organization", label: 'Organization', description: 'Structure & hierarchy', icon: FaBuilding, path: '/organization', color: '#70bc0e' },
+        { id: "admin-products",label: 'Products', description: 'Product catalog', icon: FaBoxes, path: '/products', color: '#ff7b42' },
+        { id: "admin-templates",label: 'Templates', description: 'Document templates', icon: FaClipboard, path: '/templates', color: '#4a90e2' },
+        { id: "admin-system", label: 'System', description: 'System settings', icon: FaCog, path: '/system', color: '#1abc9c' }
     ];
 
     const columns = [
@@ -20,7 +22,7 @@ const Admin = () => {
     ];
 
     return (
-        <div className="admin-layout">
+        <div className="admin-layout neighbor-element">
             <header className="admin-header">
                 <h1>Admin Dashboard</h1>
                 <p>Manage administrative settings and tasks</p>
@@ -28,8 +30,10 @@ const Admin = () => {
             <div className="admin-cards">
                 {columns.map((column, index) => (
                     <div key={index} className="admin-card">
-                        {column.map(({ label, description, icon: Icon, path, color }) => (
-                            <div key={label} className="admin-item" onClick={() => navigate(path)}>
+                        {column.map(({ id, label, description, icon: Icon, path, color }) => (
+                            <div key={id}
+                                 className={`admin-item ${componentVisibility[id] ? "" : "hidden"}`}
+                                 onClick={() => navigate(path)}>
                                 <div className="icon-container" style={{ backgroundColor: color }}>
                                     <Icon className="admin-icon" />
                                 </div>

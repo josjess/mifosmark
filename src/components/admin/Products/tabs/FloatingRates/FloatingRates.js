@@ -7,7 +7,7 @@ const FloatingRates = () => {
     const [activeTab, setActiveTab] = useState('viewFloatingRates');
 
     return (
-        <div className="tab-products-page">
+        <div className="tab-products-page neighbor-element">
             <h2 className="page-heading">
                 <Link to="/products" className="breadcrumb-link">Products</Link> . Floating Rates
             </h2>

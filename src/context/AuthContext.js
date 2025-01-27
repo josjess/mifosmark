@@ -1,67 +1,189 @@
 import React, { createContext, useState, useEffect } from 'react';
 import bcrypt from "bcryptjs";
+import {loadConfig} from "../config";
 
 export const AuthContext = createContext();
 
 const AUTH_DURATION_SHORT = 3 * 60 * 60 * 1000;
 const AUTH_DURATION_LONG = 10 * 24 * 60 * 60 * 1000;
+const ALL_COMPONENTS = {
+    "accounting-frequent-postings": true,
+    "accounting-journal-entries": true,
+    "accounting-closing-entries": true,
+    "accounting-chart-of-accounts": true,
+    "accounting-financial-activity-mappings": true,
+    "accounting-rules": true,
+    "accounting-accruals": true,
+    "accounting-provisioning-entries": true,
+    "sidebar-dashboard": true,
+    "sidebar-clients": true,
+    "sidebar-groups": true,
+    "sidebar-centers": true,
+    "sidebar-reports": true,
+    "sidebar-reports-all": true,
+    "sidebar-reports-clients": true,
+    "sidebar-reports-loans": true,
+    "sidebar-reports-savings": true,
+    "sidebar-reports-funds": true,
+    "sidebar-reports-accounting": true,
+    "sidebar-reports-XBRL": true,
+    "sidebar-accounting": true,
+    "sidebar-accounting-frequent-postings": true,
+    "sidebar-accounting-closing-entries": true,
+    "sidebar-accounting-charts-of-accounts": true,
+    "sidebar-accounting-financial-activity-mappings": true,
+    "sidebar-accounting-rules": true,
+    "sidebar-accounting-accruals": true,
+    "sidebar-accounting-provisioning-entries": true,
+    "sidebar-admin": true,
+    "sidebar-admin-users": true,
+    "sidebar-admin-organization": true,
+    "sidebar-admin-products": true,
+    "sidebar-admin-templates": true,
+    "sidebar-admin-system": true,
+    "admin-system-manage-data-tables": true,
+    "admin-system-manage-codes": true,
+    "admin-system-manage-roles-and-permissions": true,
+    "admin-system-configure-maker-and-checker-tasks": true,
+    "admin-system-manage-hooks": true,
+    "admin-system-entity-to-entity-mapping": true,
+    "admin-system-manage-surveys": true,
+    "admin-system-manage-external-events": true,
+    "admin-system-audit-trails": true,
+    "admin-system-manage-reports": true,
+    "admin-system-scheduler-jobs": true,
+    "admin-system-configurations": true,
+    "admin-system-account-number-preferences": true,
+    "admin-system-external-services": true,
+    "admin-system-two-factor": true,
+    "admin-users": true,
+    "admin-organization": true,
+    "admin-products": true,
+    "admin-templates": true,
+    "admin-system": true,
+    "admin-products-loan-products": true,
+    "admin-products-savings-products": true,
+    "admin-products-share-products": true,
+    "admin-products-charges": true,
+    "admin-products-collateral-management": true,
+    "admin-products-delinquency-buckets": true,
+    "admin-products-products-mix": true,
+    "admin-products-fixed-deposit-products": true,
+    "admin-products-recurring-deposit-products": true,
+    "admin-products-manage-tax-configurations": true,
+    "admin-products-floating-rates": true,
+    "admin-organization-manage-offices": true,
+    "admin-organization-manage-holidays": true,
+    "admin-organization-manage-employees": true,
+    "admin-organization-standing-instructions-history": true,
+    "admin-organization-manage-investors": true,
+    "admin-organization-fund-mapping": true,
+    "admin-organization-password-preferences": true,
+    "admin-organization-loan-provisioning-criteria": true,
+    "admin-organization-entity-data-table-checks": true,
+    "admin-organization-adhocquery": true,
+    "admin-organization-currency-configuration": true,
+    "admin-organization-manage-funds": true,
+    "admin-organization-bulk-loan-reassignment": true,
+    "admin-organization-teller/cashier-management": true,
+    "admin-organization-working-days": true,
+    "admin-organization-payment-types": true,
+    "admin-organization-sms-campaigns": true,
+    "admin-organization-bulk-imports": true,
+};
 
 export const AuthProvider = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [user, setUser] = useState(null);
     const [baseURL, setBaseURL] = useState(null);
+    const [tenantId, setTenantId] = useState(null);
     const [authInitialized, setAuthInitialized] = useState(false);
     const [isBaseURLChanged, setIsBaseURLChanged] = useState(false);
     const [redirectToLogin, setRedirectToLogin] = useState(false);
-
-    const [isSuperAdminFirstLogin, setIsSuperAdminFirstLogin] = useState(false);
 
     const [superAdmin, setSuperAdmin] = useState(() => {
         const storedAdmin = JSON.parse(localStorage.getItem("superAdmin"));
         return (
             storedAdmin || {
                 username: "SuperAdmin",
-                password: null,
+                password: "1234",
                 securityQuestions: [],
             }
         );
     });
 
+    const [componentVisibility, setComponentVisibility] = useState({});
+
     useEffect(() => {
-        const initializeAuth = async () => {
-            const savedUser = JSON.parse(localStorage.getItem('user'));
-            const savedTimestamp = localStorage.getItem('loginTimestamp');
-            const customBaseURL = localStorage.getItem('customBaseURL');
+        const savedVisibility = JSON.parse(localStorage.getItem("componentVisibility"));
 
-            if (customBaseURL) {
-                setBaseURL(customBaseURL);
-            }
+        if (savedVisibility) {
+            const updatedVisibility = {};
 
-            if (savedUser && savedTimestamp) {
-                const now = new Date().getTime();
-                const authDuration = savedUser.rememberMe ? AUTH_DURATION_LONG : AUTH_DURATION_SHORT;
-
-                if (now - savedTimestamp < authDuration) {
-                    setIsAuthenticated(true);
-                    setUser(savedUser);
-
-                    const remainingTime = authDuration - (now - savedTimestamp);
-                    setTimeout(() => {
-                        logout(true);
-                    }, remainingTime);
-                } else {
-                    localStorage.removeItem('user');
-                    localStorage.removeItem('loginTimestamp');
+            Object.keys(savedVisibility).forEach((componentId) => {
+                if (ALL_COMPONENTS.hasOwnProperty(componentId)) {
+                    updatedVisibility[componentId] = savedVisibility[componentId];
                 }
+            });
+
+            Object.keys(ALL_COMPONENTS).forEach((componentId) => {
+                if (!updatedVisibility.hasOwnProperty(componentId)) {
+                    updatedVisibility[componentId] = ALL_COMPONENTS[componentId];
+                }
+            });
+
+            setComponentVisibility(updatedVisibility);
+            localStorage.setItem("componentVisibility", JSON.stringify(updatedVisibility));
+        } else {
+            localStorage.setItem("componentVisibility", JSON.stringify(ALL_COMPONENTS));
+            setComponentVisibility(ALL_COMPONENTS);
+        }
+
+        initializeAuth();
+    }, []);
+
+    useEffect(() => {
+        if (componentVisibility && Object.keys(componentVisibility).length > 0) {
+            localStorage.setItem("componentVisibility", JSON.stringify(componentVisibility));
+        }
+    }, [componentVisibility]);
+
+    const initializeAuth = async () => {
+        await loadConfig();
+
+        const savedUser = JSON.parse(localStorage.getItem('user'));
+        const savedTimestamp = localStorage.getItem('loginTimestamp');
+        const customBaseURL = localStorage.getItem('customBaseURL');
+        const tenantId = localStorage.getItem('tenantId');
+
+        if (customBaseURL) {
+            setBaseURL(customBaseURL);
+        }
+        if (tenantId) {
+            setTenantId(tenantId);
+        }
+
+        if (savedUser && savedTimestamp) {
+            const now = new Date().getTime();
+            const authDuration = savedUser.rememberMe ? AUTH_DURATION_LONG : AUTH_DURATION_SHORT;
+
+            if (now - savedTimestamp < authDuration) {
+                setIsAuthenticated(true);
+                setUser(savedUser);
+
+                const remainingTime = authDuration - (now - savedTimestamp);
+                setTimeout(() => {
+                    logout(true);
+                }, remainingTime);
+            } else {
+                localStorage.removeItem('user');
+                localStorage.removeItem('loginTimestamp');
             }
+        }
+        setAuthInitialized(true);
+    };
 
-            if (!superAdmin.password) {
-                setIsSuperAdminFirstLogin(true);
-            }
-
-            setAuthInitialized(true);
-        };
-
+    useEffect(() => {
         initializeAuth();
     }, []);
 
@@ -83,26 +205,25 @@ export const AuthProvider = ({ children }) => {
 
     const superAdminLogin = async (username, password) => {
         if (username === superAdmin.username) {
-            if (isSuperAdminFirstLogin) {
+            if (!superAdmin.password.startsWith("$2")) {
                 return { firstLogin: true };
             }
 
-            const isValidPassword = await bcrypt.compare(password, superAdmin.password);
+            const trimmedPassword = password.trim();
+            const isValidPassword = await bcrypt.compare(trimmedPassword, superAdmin.password);
             if (isValidPassword) {
-
                 const superAdminData = {
                     username: superAdmin.username,
                     userId: "1",
-                    roles: ["Super Admin"],
+                    roles: ["System-Configuration-Manager"],
                     permissions: ["ALL"],
                     isSuperAdmin: true,
                     authenticated: true,
                 };
 
-                login(superAdminData, true);
+                login(superAdminData, false);
                 return { success: true };
             }
-
             return { success: false, message: "Invalid Super Admin credentials" };
         }
         return null;
@@ -116,18 +237,22 @@ export const AuthProvider = ({ children }) => {
             }))
         );
 
+        const updatedPassword = password
+            ? (!superAdmin.password || superAdmin.password === "1234" || !password.startsWith("$2"))
+                ? await bcrypt.hash(password, 10)
+                : superAdmin.password
+            : superAdmin.password;
+
         const updatedAdmin = {
             username: username || superAdmin.username,
-            password: password ? await bcrypt.hash(password, 10) : superAdmin.password,
-            securityQuestions: hashedSecurityQuestions.length ? hashedSecurityQuestions : superAdmin.securityQuestions,
+            password: updatedPassword,
+            securityQuestions: hashedSecurityQuestions.length
+                ? hashedSecurityQuestions
+                : superAdmin.securityQuestions,
         };
 
         setSuperAdmin(updatedAdmin);
         localStorage.setItem("superAdmin", JSON.stringify(updatedAdmin));
-
-        if (username && password && securityQuestions.length > 0) {
-            setIsSuperAdminFirstLogin(false);
-        }
     };
 
     const logout = (notify = false) => {
@@ -147,6 +272,19 @@ export const AuthProvider = ({ children }) => {
         setIsBaseURLChanged(true);
     };
 
+    const updateTenantId = (newTenantId) => {
+        setTenantId(newTenantId);
+        localStorage.setItem('tenantId', newTenantId);
+        setIsBaseURLChanged(true);
+    };
+
+    const toggleComponentVisibility = (componentId) => {
+        setComponentVisibility((prevState) => ({
+            ...prevState,
+            [componentId]: !prevState[componentId],
+        }));
+    };
+
     return (
         <AuthContext.Provider value={{
             isAuthenticated,
@@ -155,13 +293,16 @@ export const AuthProvider = ({ children }) => {
             logout,
             baseURL,
             updateBaseURL,
+            tenantId,
+            updateTenantId,
             isBaseURLChanged,
             redirectToLogin,
             authInitialized,
             superAdmin,
-            isSuperAdminFirstLogin,
             superAdminLogin,
             updateSuperAdminCredentials,
+            componentVisibility,
+            toggleComponentVisibility,
         }}>
             {children}
         </AuthContext.Provider>

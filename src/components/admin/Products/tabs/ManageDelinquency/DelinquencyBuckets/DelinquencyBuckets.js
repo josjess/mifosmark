@@ -7,7 +7,7 @@ const DelinquencyBuckets = () => {
     const [activeTab, setActiveTab] = useState("viewDelinquencyBuckets");
 
     return (
-        <div className="tab-products-page">
+        <div className="tab-products-page neighbor-element">
             <h2 className="page-heading">
                 <Link to="/manage-delinquency" className="breadcrumb-link">Manage Delinquency</Link> . Delinquency Buckets
             </h2>

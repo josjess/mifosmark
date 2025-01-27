@@ -35,7 +35,7 @@ const AddAccountForm = () => {
                 const response = await axios.get(`${API_CONFIG.baseURL}/glaccounts/template?type=0`, {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        'Fineract-Platform-TenantId': 'default',
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                         'Content-Type': 'application/json',
                     },
                 });
@@ -77,7 +77,7 @@ const AddAccountForm = () => {
             const response = await axios.post(`${API_CONFIG.baseURL}/glaccounts`, newAccountData, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });
@@ -89,7 +89,7 @@ const AddAccountForm = () => {
                 {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        'Fineract-Platform-TenantId': 'default',
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     },
                 }
             );
@@ -119,7 +119,7 @@ const AddAccountForm = () => {
             await axios.put(`${API_CONFIG.baseURL}/glaccounts/${accountDetails.id}`, payload, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });
@@ -150,7 +150,7 @@ const AddAccountForm = () => {
             await axios.put(`${API_CONFIG.baseURL}/glaccounts/${accountId}`, accountData, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });
@@ -160,7 +160,7 @@ const AddAccountForm = () => {
                 {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        'Fineract-Platform-TenantId': 'default',
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     },
                 }
             );
@@ -198,7 +198,7 @@ const AddAccountForm = () => {
                 await axios.delete(`${API_CONFIG.baseURL}/glaccounts/${accountDetails.id}`, {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        'Fineract-Platform-TenantId': 'default',
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     },
                 });
                 setShowAccountModal(false);

@@ -72,7 +72,7 @@ const CreateUserForm = ({ onUserCreated }) => {
             const response = await axios.get(`${API_CONFIG.baseURL}/users/template`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    "Fineract-Platform-TenantId": "default",
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     "Content-Type": "application/json",
                 },
             });
@@ -81,7 +81,7 @@ const CreateUserForm = ({ onUserCreated }) => {
             const officesResponse = await axios.get(`${API_CONFIG.baseURL}/offices`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    "Fineract-Platform-TenantId": "default",
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     "Content-Type": "application/json",
                 },
             });
@@ -96,7 +96,7 @@ const CreateUserForm = ({ onUserCreated }) => {
             const response = await axios.get(`${API_CONFIG.baseURL}/staff?officeId=${officeId}&status=all`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    "Fineract-Platform-TenantId": "default",
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     "Content-Type": "application/json",
                 },
             });
@@ -151,7 +151,7 @@ const CreateUserForm = ({ onUserCreated }) => {
             const response = await axios.post(`${API_CONFIG.baseURL}/users`, payload, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    "Fineract-Platform-TenantId": "default",
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     "Content-Type": "application/json",
                 },
             });

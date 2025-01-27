@@ -28,7 +28,7 @@ const CodeDetail = ({ code }) => {
             const response = await axios.get(`${API_CONFIG.baseURL}/codes/${codeId}/codevalues`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });
@@ -58,7 +58,7 @@ const CodeDetail = ({ code }) => {
                 {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        'Fineract-Platform-TenantId': 'default',
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                         'Content-Type': 'application/json',
                     },
                 }
@@ -88,7 +88,7 @@ const CodeDetail = ({ code }) => {
                 {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        'Fineract-Platform-TenantId': 'default',
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                         'Content-Type': 'application/json',
                     },
                 }
@@ -110,7 +110,7 @@ const CodeDetail = ({ code }) => {
             await axios.delete(`${API_CONFIG.baseURL}/codes/${codeId}/codevalues/${id}`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });

@@ -8,7 +8,7 @@ const FinancialActivityMappings = () => {
     const [activeTab, setActiveTab] = useState('table');
 
     return (
-        <div className="financial-mappings-container">
+        <div className="financial-mappings-container neighbor-element">
             <h2 className="financial-mappings-head">
                 <Link to="/accounting" className="breadcrumb-link">Accounting .</Link> Financial Activity Mappings
             </h2>

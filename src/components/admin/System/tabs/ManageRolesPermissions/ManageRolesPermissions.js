@@ -38,7 +38,7 @@ const ManageRolesPermissions = () => {
     };
 
     return (
-        <div className="manage-roles-permissions-page">
+        <div className="manage-roles-permissions-page neighbor-element">
             <h2 className="page-heading">
                 <Link to="/system" className="breadcrumb-link">System </Link>. Manage Roles and Permissions
             </h2>

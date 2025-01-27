@@ -12,7 +12,7 @@ const ManageDelinquency = () => {
     ];
 
     return (
-        <div className="manage-delinquency-page">
+        <div className="manage-delinquency-page neighbor-element">
             <h2 className="system-page-heading">
                 <Link to="/products" className="breadcrumb-link">Products</Link> . Manage Delinquency
             </h2>

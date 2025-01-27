@@ -43,7 +43,7 @@ const StandingInstructionsHistory = () => {
                 {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        'Fineract-Platform-TenantId': 'default',
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                         'Content-Type': 'application/json',
                     },
                 }
@@ -101,7 +101,7 @@ const StandingInstructionsHistory = () => {
                 {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        'Fineract-Platform-TenantId': 'default',
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                         'Content-Type': 'application/json',
                     },
                 }
@@ -139,7 +139,7 @@ const StandingInstructionsHistory = () => {
     const totalPages = Math.ceil(results.length / pageSize);
 
     return (
-        <div className="standing-instructions-history-container">
+        <div className="standing-instructions-history-container neighbor-element">
             <h2 className="page-heading">
                 <Link to="/organization" className="breadcrumb-link">Organization</Link> . Standing Instructions History
             </h2>

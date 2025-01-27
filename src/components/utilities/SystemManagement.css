@@ -1,0 +1,147 @@
+.system-management {
+    margin-top: 80px;
+    margin-left: 250px;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.system-management-header {
+    font-size: 28px;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #fee
+}
+
+.system-management-content {
+    display: flex;
+    gap: 40px;
+    justify-content: space-evenly;
+}
+
+.system-management-table {
+    width: 45%;
+    max-width: 800px;
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    max-height: 70vh;
+    overflow-y: auto;
+    margin-bottom: 20px;
+}
+.system-management-table h3 {
+    color: #333333;
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: bold;
+    font-size: 24px;
+}
+.system-management-group {
+    margin-bottom: 30px;
+}
+
+.system-management-group h4 {
+    font-size: 22px;
+    margin-bottom: 10px;
+    color: #2c1f60;
+}
+
+.system-management-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.system-management-toggle-name {
+    font-size: 17px;
+    padding-left: 20px;
+    color: #333;
+}
+
+.system-management-toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 25px;
+}
+
+.system-management-toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.system-management-slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: 0.4s;
+}
+
+.system-management-slider:before {
+    content: "";
+    position: absolute;
+    height: 17px;
+    width: 17px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    border-radius: 50%;
+    transition: 0.4s;
+}
+
+.system-management-toggle-switch input:checked + .system-management-slider {
+    background-color: #4caf50;
+}
+
+.system-management-toggle-switch input:checked + .system-management-slider:before {
+    transform: translateX(25px);
+}
+
+.system-management-state-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.system-management-state-name {
+    font-size: 17px;
+    padding-left: 20px;
+    color: #333;
+}
+
+.system-management-state-value {
+    font-size: 16px;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.system-management-state-value.visible {
+    color: #4caf50;
+}
+
+.system-management-state-value.hidden-color {
+    color: #ff4c4c;
+}
+.system-management-group-subgroup {
+    margin-left: 20px;
+}
+
+.system-management-group-subgroup h5 {
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: #15152b;
+}
+
+.system-management-group ul {
+    list-style-type: none;
+    padding-left: 0;
+}

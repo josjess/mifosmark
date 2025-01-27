@@ -3,8 +3,9 @@ import { AuthContext } from "../../context/AuthContext";
 import './EditBaseURLModal.css';
 
 const EditBaseURLModal = ({ isOpen, onClose }) => {
-    const { baseURL, updateBaseURL, logout } = useContext(AuthContext);
+    const { baseURL, tenantId, updateBaseURL, updateTenantId, logout } = useContext(AuthContext);
     const [newBaseURL, setNewBaseURL] = useState(baseURL || "https://");
+    const [newTenantId, setNewTenantId] = useState(tenantId || "");
     const [confirmChange, setConfirmChange] = useState(false);
     const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
 
@@ -19,11 +20,16 @@ const EditBaseURLModal = ({ isOpen, onClose }) => {
         setNewBaseURL(value);
     };
 
+    const handleTenantIdChange = (e) => {
+        setNewTenantId(e.target.value);
+    };
+
     const handleSave = () => {
         updateBaseURL(newBaseURL);
+        updateTenantId(newTenantId);
         onClose();
         logout();
-        alert("Base URL updated successfully! You have been logged out.");
+        alert("Base URL and Tenant ID updated successfully! You have been logged out.");
     };
 
     const handleProceedToConfirmation = () => {
@@ -60,6 +66,7 @@ const EditBaseURLModal = ({ isOpen, onClose }) => {
                         </div>
                     </div>
                     {confirmChange && (
+                        <>
                         <div className="Edit-URL-input-group">
                             <label htmlFor="baseURL" className="Edit-URL-label">
                                 Base URL <span>*</span>
@@ -73,6 +80,20 @@ const EditBaseURLModal = ({ isOpen, onClose }) => {
                                 required
                             />
                         </div>
+                        <div className="Edit-URL-input-group">
+                            <label htmlFor="tenantId" className="Edit-URL-label">
+                                Tenant ID <span>*</span>
+                            </label>
+                            <input
+                                type="text"
+                                id={"tenantId"}
+                                value={newTenantId}
+                                onChange={handleTenantIdChange}
+                                className={"Edit-URL-input"}
+                                required
+                            />
+                        </div>
+                        </>
                     )}
                     <div className="Edit-URL-modal-actions">
                         <button onClick={onClose} className="Edit-URL-cancel-button">
@@ -82,7 +103,11 @@ const EditBaseURLModal = ({ isOpen, onClose }) => {
                             <button
                                 onClick={handleProceedToConfirmation}
                                 className="Edit-URL-proceed-button"
-                                disabled={!newBaseURL || newBaseURL === "https://" || newBaseURL === baseURL}
+                                disabled={!newBaseURL
+                                    || newBaseURL === "https://" ||
+                                    !newTenantId ||
+                                    (newBaseURL === baseURL && newTenantId === tenantId)
+                            }
                             >
                                 Proceed
                             </button>
@@ -96,7 +121,8 @@ const EditBaseURLModal = ({ isOpen, onClose }) => {
                     <div className="Edit-URL-confirm-modal-content">
                         <h4 className="Edit-URL-modal-title">Confirm Base URL</h4>
                         <p className="Edit-URL-confirm-text">
-                            You are about to set the Base URL to: <strong>{newBaseURL}</strong>
+                            You are about to set the Base URL to: <strong>{newBaseURL}</strong> and Tenant ID to: {" "}
+                            <strong>{newTenantId}</strong>
                         </p>
                         <div className="Edit-URL-modal-actions">
                             <button onClick={handleCancelConfirmation} className="Edit-URL-cancel-button">

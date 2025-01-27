@@ -23,7 +23,7 @@ const EmailService = () => {
             const response = await axios.get(`${API_CONFIG.baseURL}/externalservice/SMTP`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    "Fineract-Platform-TenantId": "default",
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     "Content-Type": "application/json",
                 },
             });
@@ -72,7 +72,7 @@ const EmailService = () => {
                 {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        "Fineract-Platform-TenantId": "default",
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                         "Content-Type": "application/json",
                     },
                 }
@@ -89,7 +89,7 @@ const EmailService = () => {
     };
 
     return (
-        <div className="email-service-page">
+        <div className="email-service-page neighbor-element">
             <nav className="email-page-title">
                 <Link to="/external-services" className="email-breadcrumb-link">
                     External Services

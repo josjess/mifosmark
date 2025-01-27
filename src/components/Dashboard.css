@@ -174,10 +174,11 @@ body {
 }
 
 .card {
-    background-color: #213f5a;
+    /*background-color: #213f5a;*/
+    background-color: #ffffff;
     border-radius: 20px;
     padding: 20px;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     height: 150px;
     width: auto;
@@ -216,16 +217,18 @@ body {
 .card h3 {
     font-size: 1.2em;
     margin: 0;
-    color: #ffffff;
+    color: #5b5cdc;
     text-align: right;
     flex-grow: 1;
 }
 
 .card p {
     font-size: 1.5em;
-    color: #f6f6f6;
+    color: #282aea;
     margin-top: 10px;
     text-align: center;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .card:hover {

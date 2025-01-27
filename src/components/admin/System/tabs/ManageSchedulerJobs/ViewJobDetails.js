@@ -31,7 +31,7 @@ const ViewJobDetails = ({ job }) => {
             const response = await axios.get(`${API_CONFIG.baseURL}/jobs/${job.jobId}`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 },
             });
             setJobDetails(response.data);
@@ -53,7 +53,7 @@ const ViewJobDetails = ({ job }) => {
             const response = await axios.get(`${API_CONFIG.baseURL}/jobs/${job.jobId}/runhistory`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 },
             });
             setHistoryData(response.data.pageItems);
@@ -75,7 +75,7 @@ const ViewJobDetails = ({ job }) => {
             await axios.put(`${API_CONFIG.baseURL}/jobs/${job.jobId}`, payload, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 },
             });
             fetchJobDetails();

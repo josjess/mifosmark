@@ -33,7 +33,7 @@ const AddGroupForm = () => {
             try {
                 const headers = {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 };
 
@@ -83,7 +83,7 @@ const AddGroupForm = () => {
 
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                'Fineract-Platform-TenantId': 'default',
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 'Content-Type': 'application/json',
             };
 
@@ -114,7 +114,7 @@ const AddGroupForm = () => {
             try {
                 const headers = {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 };
 

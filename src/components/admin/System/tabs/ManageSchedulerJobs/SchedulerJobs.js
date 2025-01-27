@@ -36,7 +36,7 @@ const SchedulerJobs = ({ onRowClick }) => {
             const response = await axios.get(`${API_CONFIG.baseURL}/scheduler`, {
                 headers: {
                     Authorization: `Basic ${token}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });
@@ -59,7 +59,7 @@ const SchedulerJobs = ({ onRowClick }) => {
             const response = await axios.get(`${API_CONFIG.baseURL}/jobs`, {
                 headers: {
                     Authorization: `Basic ${token}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });
@@ -93,7 +93,7 @@ const SchedulerJobs = ({ onRowClick }) => {
             const response = await axios.post(endpoint, null, {
                 headers: {
                     Authorization: `Basic ${token}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });
@@ -165,7 +165,7 @@ const SchedulerJobs = ({ onRowClick }) => {
                     {
                         headers: {
                             Authorization: `Basic ${user?.base64EncodedAuthenticationKey}`,
-                            'Fineract-Platform-TenantId': 'default',
+                            'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                             'Content-Type': 'application/json',
                         },
                     }
@@ -219,7 +219,7 @@ const SchedulerJobs = ({ onRowClick }) => {
                     {
                         headers: {
                             Authorization: `Basic ${token}`,
-                            "Fineract-Platform-TenantId": "default",
+                            'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                             "Content-Type": "application/json",
                         },
                     }

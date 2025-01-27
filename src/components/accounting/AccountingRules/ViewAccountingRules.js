@@ -30,7 +30,7 @@ const AccountingRulesTable = () => {
             const response = await axios.get(`${API_CONFIG.baseURL}/accountingrules`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });
@@ -54,7 +54,7 @@ const AccountingRulesTable = () => {
             const response = await axios.get(`${API_CONFIG.baseURL}/accountingrules/${rule.id}`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });

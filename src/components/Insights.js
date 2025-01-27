@@ -4,30 +4,9 @@ import { useLoading } from '../context/LoadingContext';
 import axios from 'axios';
 import {Pie, Line, Doughnut, Bar} from 'react-chartjs-2';
 import { API_CONFIG } from '../config';
-import {
-    Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    LineElement,
-    PointElement,
-    ArcElement,
-    Title,
-    Tooltip,
-    Legend,
-} from 'chart.js';
+import {Chart as ChartJS, CategoryScale, LinearScale, BarElement, LineElement, PointElement, ArcElement, Title, Tooltip, Legend,} from 'chart.js';
 
-ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    LineElement,
-    PointElement,
-    ArcElement,
-    Title,
-    Tooltip,
-    Legend
-);
+ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, ArcElement, Title, Tooltip, Legend);
 
 const Insights = ({ selectedOffice, officeOptions }) => {
     const { isAuthenticated, user } = useContext(AuthContext);
@@ -42,16 +21,18 @@ const Insights = ({ selectedOffice, officeOptions }) => {
         weeklyDisbursement: [],
         repaymentTrend: { actual: [], expected: [] },
     });
+    const isSuperUser = user?.roles?.some(role => role.name === 'Super user');
 
     const API_BASE_URL = API_CONFIG.baseURL;
     const AUTH_TOKEN = user?.base64EncodedAuthenticationKey;
     const headers = {
         'Authorization': `Basic ${AUTH_TOKEN}`,
         'Content-Type': 'application/json',
-        'Fineract-Platform-TenantId': 'default',
+        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
     };
 
     const fetchOfficeData = async (endpoint, officeId) => {
+        startLoading();
         try {
             const response = await axios.get(`${API_BASE_URL}/runreports/${endpoint}`, {
                 headers,
@@ -64,6 +45,8 @@ const Insights = ({ selectedOffice, officeOptions }) => {
         } catch (error) {
             console.error(`Error fetching data from ${endpoint} for office ${officeId}`, error);
             return [];
+        } finally {
+            stopLoading();
         }
     };
 
@@ -78,8 +61,6 @@ const Insights = ({ selectedOffice, officeOptions }) => {
         try {
             const currentOfficeId = selectedOffice === 'all' ? user?.officeId : selectedOffice;
 
-            const disbursalData = await fetchOfficeData('Disbursal%20Vs%20Awaitingdisbursal', currentOfficeId);
-            const demandData = await fetchOfficeData('Demand%20Vs%20Collection', currentOfficeId);
             const clientTrendsDayData = await fetchOfficeData('ClientTrendsByDay', currentOfficeId);
             const clientTrendsWeekData = await fetchOfficeData('ClientTrendsByWeek', currentOfficeId);
             const clientTrendsMonthData = await fetchOfficeData('ClientTrendsByMonth', currentOfficeId);
@@ -87,8 +68,18 @@ const Insights = ({ selectedOffice, officeOptions }) => {
             const loanTrendsWeekData = await fetchOfficeData('LoanTrendsByWeek', currentOfficeId);
             const loanTrendsMonthData = await fetchOfficeData('LoanTrendsByMonth', currentOfficeId);
             const loanAccountData = await fetchLoanAccountData(currentOfficeId);
-            const weeklyDisbursement = await fetchWeeklyDisbursement(currentOfficeId);
-            const repaymentTrend = await fetchRepaymentTrend(currentOfficeId);
+
+            let disbursalData = { disbursedAmount: 0, amountToBeDisburse: 0 };
+            let demandData = { AmountPaid: 0, AmountDue: 0 };
+            let weeklyDisbursement = [];
+            let repaymentTrend = { actual: [], expected: [], labels: [] };
+
+            if (isSuperUser) {
+                disbursalData = await fetchOfficeData('Disbursal%20Vs%20Awaitingdisbursal', currentOfficeId);
+                demandData = await fetchOfficeData('Demand%20Vs%20Collection', currentOfficeId);
+                weeklyDisbursement = await fetchWeeklyDisbursement(currentOfficeId);
+                repaymentTrend = await fetchRepaymentTrend(currentOfficeId);
+            }
 
             setGraphData({
                 disbursalVsAwaiting: disbursalData[0] || { disbursedAmount: 0, amountToBeDisburse: 0 },
@@ -117,6 +108,7 @@ const Insights = ({ selectedOffice, officeOptions }) => {
     };
 
     const fetchLoanAccountData = async (officeId) => {
+        startLoading();
         try {
             const response = await axios.get(`${API_BASE_URL}/loans`, {
                 headers,
@@ -137,20 +129,26 @@ const Insights = ({ selectedOffice, officeOptions }) => {
         } catch (error) {
             console.error('Error fetching loan accounts data:', error);
             return { active: 0, inArrears: 0 };
+        } finally {
+            stopLoading();
         }
     };
 
     const fetchWeeklyDisbursement = async (officeId) => {
+        startLoading();
         try {
             const response = await fetchOfficeData('WeeklyDisbursementHistory', officeId);
             return response || [];
         } catch (error) {
             console.error('Error fetching weekly disbursement data:', error);
             return [];
+        } finally {
+            stopLoading();
         }
     };
 
     const fetchRepaymentTrend = async (officeId) => {
+        startLoading();
         try {
             const response = await fetchOfficeData('RepaymentTrendActualVsExpected', officeId);
             const actual = response.map(item => item.actual);
@@ -161,6 +159,8 @@ const Insights = ({ selectedOffice, officeOptions }) => {
         } catch (error) {
             console.error('Error fetching repayment trend data:', error);
             return { actual: [], expected: [], labels: [] };
+        } finally {
+            stopLoading();
         }
     };
 
@@ -170,56 +170,51 @@ const Insights = ({ selectedOffice, officeOptions }) => {
         }
     }, [selectedOffice, isAuthenticated, user]);
 
-    const officeName =
-        selectedOffice === 'all'
-            ? user?.officeName
-            : officeOptions.find((office) => office.id === parseInt(selectedOffice))?.name || 'Unknown Office';
-
     const safeMap = (data, callback) => (data ? data.map(callback) : []);
 
     return (
         <div className="insights-container">
-            {/* Office Label */}
-            <div className="office-label-container">
-                <h4 className="office-label">Office: {officeName}</h4>
-            </div>
             {/* Disbursal vs Awaiting */}
-            <div className="graph-container">
-                <h3>Disbursal vs Awaiting Disbursal</h3>
-                <Pie
-                    data={{
-                        labels: ['Disbursed', 'Awaiting Disbursal'],
-                        datasets: [
-                            {
-                                data: [
-                                    graphData.disbursalVsAwaiting.disbursedAmount || 0,
-                                    graphData.disbursalVsAwaiting.amountToBeDisburse || 0,
-                                ],
-                                backgroundColor: ['#4caf50', '#f44336'],
-                            },
-                        ],
-                    }}
-                />
-            </div>
+            {isSuperUser && (
+                <div className="graph-container">
+                    <h3>Disbursal vs Awaiting Disbursal</h3>
+                    <Pie
+                        data={{
+                            labels: ['Disbursed', 'Awaiting Disbursal'],
+                            datasets: [
+                                {
+                                    data: [
+                                        graphData.disbursalVsAwaiting.disbursedAmount || 0,
+                                        graphData.disbursalVsAwaiting.amountToBeDisburse || 0,
+                                    ],
+                                    backgroundColor: ['#4caf50', '#f44336'],
+                                },
+                            ],
+                        }}
+                    />
+                </div>
+            )}
 
             {/* Demand vs Collection */}
-            <div className="graph-container">
-                <h3>Demand vs Collection</h3>
-                <Pie
-                    data={{
-                        labels: ['Amount Collected', 'Amount Pending'],
-                        datasets: [
-                            {
-                                data: [
-                                    graphData.demandVsCollection.AmountPaid || 0,
-                                    (graphData.demandVsCollection.AmountDue || 0) - (graphData.demandVsCollection.AmountPaid || 0),
-                                ],
-                                backgroundColor: ['#3b83f6', '#f6c23e'],
-                            },
-                        ],
-                    }}
-                />
-            </div>
+            {isSuperUser && (
+                <div className="graph-container">
+                    <h3>Demand vs Collection</h3>
+                    <Pie
+                        data={{
+                            labels: ['Amount Collected', 'Amount Pending'],
+                            datasets: [
+                                {
+                                    data: [
+                                        graphData.demandVsCollection.AmountPaid || 0,
+                                        (graphData.demandVsCollection.AmountDue || 0) - (graphData.demandVsCollection.AmountPaid || 0),
+                                    ],
+                                    backgroundColor: ['#3b83f6', '#f6c23e'],
+                                },
+                            ],
+                        }}
+                    />
+                </div>
+            )}
 
             {/* Loan Accounts: Active vs In Arrears */}
             <div className="graph-container">
@@ -274,62 +269,66 @@ const Insights = ({ selectedOffice, officeOptions }) => {
             </div>
 
             {/* Weekly Disbursement History */}
-            <div className="graph-container">
-                <h3>Weekly Disbursement History</h3>
-                <Bar
-                    data={{
-                        labels: graphData.weeklyDisbursement.map(item => item.week),
-                        datasets: [
-                            {
-                                label: 'Disbursed Amount',
-                                data: graphData.weeklyDisbursement.map(item => item.amount),
-                                backgroundColor: '#4caf50',
-                                borderColor: '#388e3c',
-                                borderWidth: 1,
+            {isSuperUser && (
+                <div className="graph-container">
+                    <h3>Weekly Disbursement History</h3>
+                    <Bar
+                        data={{
+                            labels: graphData.weeklyDisbursement.map(item => item.week),
+                            datasets: [
+                                {
+                                    label: 'Disbursed Amount',
+                                    data: graphData.weeklyDisbursement.map(item => item.amount),
+                                    backgroundColor: '#4caf50',
+                                    borderColor: '#388e3c',
+                                    borderWidth: 1,
+                                },
+                            ],
+                        }}
+                        options={{
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Weekly Disbursement History',
+                                },
                             },
-                        ],
-                    }}
-                    options={{
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                position: 'top',
-                            },
-                            title: {
-                                display: true,
-                                text: 'Weekly Disbursement History',
-                            },
-                        },
-                    }}
-                    key={`weekly-disbursement-${selectedOffice}`}
-                />
-            </div>
+                        }}
+                        key={`weekly-disbursement-${selectedOffice}`}
+                    />
+                </div>
+            )}
 
             {/* Repayment Trend: Actual vs Expected */}
-            <div className="graph-container">
-                <h3>Repayment Trend: Actual vs Expected</h3>
-                <Line
-                    data={{
-                        labels: graphData.repaymentTrend.labels,
-                        datasets: [
-                            {
-                                label: 'Actual',
-                                data: graphData.repaymentTrend.actual,
-                                borderColor: '#4caf50',
-                                backgroundColor: 'rgba(76, 175, 80, 0.2)',
-                                fill: true,
-                            },
-                            {
-                                label: 'Expected',
-                                data: graphData.repaymentTrend.expected,
-                                borderColor: '#f44336',
-                                backgroundColor: 'rgba(244, 67, 54, 0.2)',
-                                fill: true,
-                            },
-                        ],
-                    }}
-                />
-            </div>
+            {isSuperUser && (
+                <div className="graph-container">
+                    <h3>Repayment Trend: Actual vs Expected</h3>
+                    <Line
+                        data={{
+                            labels: graphData.repaymentTrend.labels,
+                            datasets: [
+                                {
+                                    label: 'Actual',
+                                    data: graphData.repaymentTrend.actual,
+                                    borderColor: '#4caf50',
+                                    backgroundColor: 'rgba(76, 175, 80, 0.2)',
+                                    fill: true,
+                                },
+                                {
+                                    label: 'Expected',
+                                    data: graphData.repaymentTrend.expected,
+                                    borderColor: '#f44336',
+                                    backgroundColor: 'rgba(244, 67, 54, 0.2)',
+                                    fill: true,
+                                },
+                            ],
+                        }}
+                    />
+                </div>
+            )}
 
             {/* Trends by Day */}
             <div className="graph-container">

@@ -34,7 +34,7 @@ const ManageInvestors = () => {
                 {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        'Fineract-Platform-TenantId': 'default',
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                         'Content-Type': 'application/json',
                     },
                 }
@@ -49,7 +49,7 @@ const ManageInvestors = () => {
     };
 
     return (
-        <div className="manage-investors-container">
+        <div className="manage-investors-container neighbor-element">
             <h2 className="page-heading">
                 <Link to="/organization" className="breadcrumb-link"> Organization </Link>{' '}. Manage Investors
             </h2>

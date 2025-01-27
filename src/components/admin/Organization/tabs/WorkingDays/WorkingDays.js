@@ -29,14 +29,14 @@ const WorkingDays = () => {
             const response = await axios.get(`${API_CONFIG.baseURL}/workingdays`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });
 
             const data = response.data;
             const recurrenceDays = (data.recurrence || '').split('BYDAY=')[1]?.split(',') || [];
-            setWorkingDays(['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU']); // Static days
+            setWorkingDays(['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU']);
             setSelectedDays(recurrenceDays);
             setRepaymentOptions(data.repaymentRescheduleOptions || []);
             setSelectedRepaymentOption(data.repaymentRescheduleType?.id || null);
@@ -96,7 +96,7 @@ const WorkingDays = () => {
             await axios.put(`${API_CONFIG.baseURL}/workingdays`, payload, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });
@@ -111,7 +111,7 @@ const WorkingDays = () => {
     };
 
     return (
-        <div className="working-days-container">
+        <div className="working-days-container neighbor-element">
             <h2 className="page-heading">
                 <Link to="/organization" className="breadcrumb-link">Organization</Link> . Working Days
             </h2>

@@ -7,6 +7,36 @@
     height: 100%;
     background-color: #2c3e50;
     position: fixed;
+    transition: width 0.3s;
+}
+.sidebar.collapsed {
+    width: 0;
+}
+
+.toggle-sidebar-btn {
+    position: absolute;
+    top: 65px;
+    right: -90px;
+    background-color: #1ABC9C;
+    color: #ffffff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 50px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.toggle-sidebar-btn:hover {
+    background-color: #16a085;
+    transform: scale(1.05);
+}
+
+.toggle-sidebar-btn:focus {
+    outline: none;
 }
 
 .sidebar .user-info {
@@ -123,4 +153,8 @@
 
 .logout-item:hover {
     background-color: #c0392b;
+}
+.user-info.hidden {
+    display: none;
+    margin: 0;
 }

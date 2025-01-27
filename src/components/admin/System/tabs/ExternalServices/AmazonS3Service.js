@@ -24,7 +24,7 @@ const AmazonS3Service = () => {
             const response = await axios.get(`${API_CONFIG.baseURL}/externalservice/S3`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    "Fineract-Platform-TenantId": "default",
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     "Content-Type": "application/json",
                 },
             });
@@ -67,7 +67,7 @@ const AmazonS3Service = () => {
                 {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        "Fineract-Platform-TenantId": "default",
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                         "Content-Type": "application/json",
                     },
                 }
@@ -84,7 +84,7 @@ const AmazonS3Service = () => {
     };
 
     return (
-        <div className="amazon-s3-service-page">
+        <div className="amazon-s3-service-page neighbor-element">
             <nav className="page-title">
                 <Link to="/external-services" className="breadcrumb-link">External Services .</Link> Amazon S3 Service
             </nav>

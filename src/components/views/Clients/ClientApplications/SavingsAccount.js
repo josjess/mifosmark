@@ -1,18 +1,24 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
-import { useParams } from 'react-router-dom';
+import {useLocation, useNavigate, useParams} from 'react-router-dom';
 import { AuthContext } from '../../../../context/AuthContext';
 import { useLoading } from '../../../../context/LoadingContext';
 import { API_CONFIG } from '../../../../config';
 import DatePicker from 'react-datepicker';
+import {FaTrash} from "react-icons/fa";
 
 const SavingsAccount = () => {
     const { clientId } = useParams();
     const { user } = useContext(AuthContext);
     const { startLoading, stopLoading } = useLoading();
+    const navigate = useNavigate();
+    const location = useLocation();
+    const { isModification, accountId } = location.state || {};
 
-    const stages = ["Details", "Terms", "Charges"];
-    const [currentStage, setCurrentStage] = useState(1);
+    const [isModifying, setIsModifying] = useState(isModification || false);
+    const [account, setAccount] = useState(accountId || null);
+    const stages = ["Details", "Terms", "Charges", "Preview"];
+    const [currentStage, setCurrentStage] = useState("Details");
     const [completedStages, setCompletedStages] = useState(new Set());
     const [clientData, setClientData] = useState(null);
     const [savingsTemplate, setSavingsTemplate] = useState(null);
@@ -20,7 +26,7 @@ const SavingsAccount = () => {
     const [addedCharges, setAddedCharges] = useState([]);
     const [selectedCharge, setSelectedCharge] = useState("");
     const [submittedOn, setSubmittedOn] = useState("");
-    const [nominalAnnualInterestRate, setNominalAnnualInterestRate] = useState("");
+    const [nominalAnnualInterestRate, setNominalAnnualInterestRate] = useState(0);
     const [interestCompoundingPeriod, setInterestCompoundingPeriod] = useState("");
     const [interestPostingPeriod, setInterestPostingPeriod] = useState("");
     const [interestCalculatedUsing, setInterestCalculatedUsing] = useState("");
@@ -30,33 +36,36 @@ const SavingsAccount = () => {
     const [lockInFrequency, setLockInFrequency] = useState("");
     const [lockInType, setLockInType] = useState("");
     const [isOverdraftAllowed, setIsOverdraftAllowed] = useState(false);
+    const [minimumOverdraftForInterestCalculation, setMinimumOverdraftForInterestCalculation] = useState('');
+    const [nominalAnnualInterestForOverdraft, setNominalAnnualInterestForOverdraft] = useState('');
+    const [maximumOverdraftAmountLimit, setMaximumOverdraftAmountLimit] = useState('');
     const [enforceMinimumBalance, setEnforceMinimumBalance] = useState(false);
     const [minimumBalance, setMinimumBalance] = useState("");
     const [fieldOfficer, setFieldOfficer] = useState("");
     const [selectedProduct, setSelectedProduct] = useState("");
-    const [allStagesComplete, setAllStagesComplete] = useState(false);
+    const [externalId, setExternalId] = useState("");
+    const [modifyData, setModifyData] = useState(null);
+    const [currency, setCurrency] = useState('');
+    const [decimalPlaces, setDecimalPlaces] = useState('');
 
     const fetchData = async () => {
         startLoading();
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                'Fineract-Platform-TenantId': 'default',
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
             };
 
             const [
                 clientResponse,
                 savingsTemplateResponse,
-                chargesResponse,
             ] = await Promise.all([
                 axios.get(`${API_CONFIG.baseURL}/clients/${clientId}`, { headers }),
                 axios.get(`${API_CONFIG.baseURL}/savingsaccounts/template?clientId=${clientId}`, { headers }),
-                axios.get(`${API_CONFIG.baseURL}/clients/${clientId}/charges?pendingPayment=true`, { headers }),
             ]);
 
             setClientData(clientResponse.data);
             setSavingsTemplate(savingsTemplateResponse.data);
-            setChargeOptions(chargesResponse.data.pageItems);
         } catch (error) {
             console.error('Error fetching savings account data:', error);
         } finally {
@@ -65,12 +74,108 @@ const SavingsAccount = () => {
     };
 
     useEffect(() => {
+        if (isModifying) {
+            const fetchModificationData = async () => {
+                startLoading();
+                try {
+                    const headers = {
+                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+                    };
+
+                    const response = await axios.get(`${API_CONFIG.baseURL}/savingsaccounts/${account}?template=true&associations=charges`, { headers });
+                    setModifyData(response.data);
+                } catch (error) {
+                    console.error('Error fetching modification data', error);
+                }
+            };
+
+            fetchModificationData();
+        }
+    }, [isModifying]);
+
+    useEffect(() => {
+        if (modifyData) {
+            setExternalId(modifyData?.externalId);
+            setSelectedProduct(modifyData?.savingsProductId);
+            setDateForSubmittedOn(modifyData?.timeline?.submittedOnDate);
+            setFieldOfficer(modifyData?.fieldOfficerId);
+            setCurrency(`${modifyData?.currency?.name || ''} - ${modifyData?.currency?.code || ''}`);
+            setDecimalPlaces(modifyData?.currency?.decimalPlaces || '');
+            setNominalAnnualInterestRate(modifyData?.nominalAnnualInterestRate || '');
+            setInterestCompoundingPeriod(modifyData?.interestCompoundingPeriodType?.id || '');
+            setInterestPostingPeriod(modifyData?.interestPostingPeriodType?.id || '');
+            setInterestCalculatedUsing(modifyData?.interestCalculationType?.id || '');
+            setDaysInYear(modifyData?.interestCalculationDaysInYearType?.id || '');
+            setMinimumOpeningBalance(modifyData?.minRequiredOpeningBalance || '');
+            setApplyWithdrawalFee(modifyData?.withdrawalFeeForTransfers || '');
+            setLockInFrequency(modifyData?.lockinPeriodFrequency || '');
+            setLockInType(modifyData?.lockinPeriodFrequencyType?.id || '');
+            setIsOverdraftAllowed(modifyData?.allowOverdraft || '');
+            setMinimumOverdraftForInterestCalculation(modifyData?.minOverdraftForInterestCalculation || '');
+            setNominalAnnualInterestForOverdraft(modifyData?.nominalAnnualInterestRateOverdraft || '');
+            setMaximumOverdraftAmountLimit(modifyData?.overdraftLimit || '');
+            setEnforceMinimumBalance(modifyData?.enforceMinRequiredBalance || '');
+            setMinimumBalance(modifyData?.minRequiredBalance || '');
+        }
+    }, [modifyData]);
+
+    const setDateForSubmittedOn = (submittedOnDate) => {
+        if (submittedOnDate && submittedOnDate.length === 3) {
+            const [year, month, day] = submittedOnDate;
+            setSubmittedOn(new Date(year, month - 1, day));
+        } else {
+            setSubmittedOn("");
+        }
+    };
+
+    useEffect(() => {
+        const fetchSavingsTemplateData = async () => {
+            if (!selectedProduct) return;
+            startLoading();
+
+            try {
+                const headers = {
+                    Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+                };
+
+                const response = await axios.get(
+                    `${API_CONFIG.baseURL}/savingsaccounts/template?clientId=${clientId}&productId=${selectedProduct}`,
+                    { headers }
+                );
+
+                setSavingsTemplate(response.data);
+                setChargeOptions(response.data?.chargeOptions);
+            } catch (error) {
+                console.error("Error fetching savings template data:", error);
+            } finally {
+                stopLoading();
+            }
+        };
+
+        fetchSavingsTemplateData();
+    }, [selectedProduct]);
+
+    useEffect(() => {
         fetchData();
     }, []);
+
+    useEffect(() => {
+        if (savingsTemplate) {
+            setInterestCompoundingPeriod(savingsTemplate?.interestCompoundingPeriodType?.id || '');
+            setInterestPostingPeriod(savingsTemplate?.interestPostingPeriodType?.id || '');
+            setInterestCalculatedUsing(savingsTemplate?.interestCalculationType?.id || '');
+            setDaysInYear(savingsTemplate?.interestCalculationDaysInYearType?.id || '');
+            setCurrency(`${savingsTemplate?.currency?.name || ''} - ${savingsTemplate?.currency?.code || ''}`);
+            setDecimalPlaces(savingsTemplate?.currency?.decimalPlaces || '');
+        }
+    }, [savingsTemplate]);
 
     const handleNext = () => {
         const currentIndex = stages.indexOf(currentStage);
         if (currentIndex < stages.length - 1) {
+            setCompletedStages((prev) => new Set([...prev, currentStage]));
             setCurrentStage(stages[currentIndex + 1]);
         }
     };
@@ -83,15 +188,27 @@ const SavingsAccount = () => {
     };
 
     const handleAddCharge = () => {
-        const chargeData = chargeOptions.find((charge) => charge.id === selectedCharge);
+        const chargeData = chargeOptions.find(
+            (charge) => charge.id === parseInt(selectedCharge, 10)
+        );
         if (chargeData) {
-            setAddedCharges((prev) => [...prev, chargeData]);
+            setAddedCharges((prev) => [
+                ...prev,
+                { ...chargeData, dueDate: '' },
+            ]);
+            setChargeOptions((prev) =>
+                prev.filter((charge) => charge.id !== chargeData.id)
+            );
             setSelectedCharge('');
+        } else {
+            alert('Please select a valid charge to add.');
         }
     };
 
     const handleRemoveCharge = (index) => {
+        const removedCharge = addedCharges[index];
         setAddedCharges((prev) => prev.filter((_, i) => i !== index));
+        setChargeOptions((prev) => [...prev, removedCharge]);
     };
 
     const renderStageContent = () => {
@@ -111,7 +228,7 @@ const SavingsAccount = () => {
                                     className="staged-form-select"
                                     required
                                 >
-                                    <option value="">-- Select Savings Product --</option>
+                                    <option value="">-- Select Product --</option>
                                     {savingsTemplate?.productOptions?.map((option) => (
                                         <option key={option.id} value={option.id}>
                                             {option.name}
@@ -119,16 +236,13 @@ const SavingsAccount = () => {
                                     ))}
                                 </select>
                             </div>
-                        </div>
-
-                        {selectedProduct && (
-                            <>
+                            {selectedProduct && (
                                 <div className="staged-form-field">
                                     <label htmlFor="submittedOn">Submitted On <span>*</span></label>
                                     <DatePicker
                                         id="submittedOn"
                                         selected={submittedOn ? new Date(submittedOn) : null}
-                                        onChange={(date) => setSubmittedOn(date.toISOString().split('T')[0])}
+                                        onChange={(date) => setSubmittedOn(date ? new Date(date) : "")}
                                         className="staged-form-input"
                                         placeholderText="Select Submission Date"
                                         dateFormat="MMMM d, yyyy"
@@ -136,8 +250,14 @@ const SavingsAccount = () => {
                                         showYearDropdown
                                         dropdownMode="select"
                                         showPopperArrow={false}
+                                        maxDate={new Date()}
                                     />
                                 </div>
+                            )}
+                        </div>
+
+                        {selectedProduct && (
+                            <>
                                 <div className="staged-form-row">
                                     <div className="staged-form-field">
                                         <label htmlFor="fieldOfficer">Field Officer</label>
@@ -160,8 +280,8 @@ const SavingsAccount = () => {
                                         <input
                                             type="text"
                                             id="externalId"
-                                            value={clientData?.externalId || ''}
-                                            readOnly
+                                            value={externalId}
+                                            onChange={(e) => setExternalId(e.target.value)}
                                             className="staged-form-input"
                                         />
                                     </div>
@@ -173,14 +293,13 @@ const SavingsAccount = () => {
             case 'Terms':
                 return (
                     <div className="stage-terms">
-                        {/* Currency and Decimal Places */}
                         <div className="staged-form-row">
                             <div className="staged-form-field">
                                 <label htmlFor="currency">Currency</label>
                                 <input
                                     type="text"
                                     id="currency"
-                                    value={savingsTemplate?.currency?.name || ''}
+                                    value={currency}
                                     readOnly
                                     className="staged-form-input muted"
                                 />
@@ -190,14 +309,13 @@ const SavingsAccount = () => {
                                 <input
                                     type="number"
                                     id="decimalPlaces"
-                                    value={savingsTemplate?.currency?.decimalPlaces || ''}
+                                    value={decimalPlaces}
                                     readOnly
                                     className="staged-form-input muted"
                                 />
                             </div>
                         </div>
 
-                        {/* Nominal Annual Interest and Interest Compounding Period */}
                         <div className="staged-form-row">
                             <div className="staged-form-field">
                                 <label htmlFor="nominalAnnualInterestRate">Nominal Annual Interest Rate (%) <span>*</span></label>
@@ -207,6 +325,7 @@ const SavingsAccount = () => {
                                     value={nominalAnnualInterestRate}
                                     onChange={(e) => setNominalAnnualInterestRate(e.target.value)}
                                     required
+                                    min={0}
                                     className="staged-form-input"
                                 />
                             </div>
@@ -219,7 +338,6 @@ const SavingsAccount = () => {
                                     required
                                     className="staged-form-select"
                                 >
-                                    <option value="">-- Select Period --</option>
                                     {savingsTemplate?.interestCompoundingPeriodTypeOptions?.map((option) => (
                                         <option key={option.id} value={option.id}>
                                             {option.value}
@@ -229,7 +347,6 @@ const SavingsAccount = () => {
                             </div>
                         </div>
 
-                        {/* Interest Posting Period and Interest Calculated Using */}
                         <div className="staged-form-row">
                             <div className="staged-form-field">
                                 <label htmlFor="interestPostingPeriod">Interest Posting Period <span>*</span></label>
@@ -240,7 +357,6 @@ const SavingsAccount = () => {
                                     required
                                     className="staged-form-select"
                                 >
-                                    <option value="">-- Select Posting Period --</option>
                                     {savingsTemplate?.interestPostingPeriodTypeOptions?.map((option) => (
                                         <option key={option.id} value={option.id}>
                                             {option.value}
@@ -257,7 +373,6 @@ const SavingsAccount = () => {
                                     required
                                     className="staged-form-select"
                                 >
-                                    <option value="">-- Select Calculation Method --</option>
                                     {savingsTemplate?.interestCalculationTypeOptions?.map((option) => (
                                         <option key={option.id} value={option.id}>
                                             {option.value}
@@ -267,7 +382,6 @@ const SavingsAccount = () => {
                             </div>
                         </div>
 
-                        {/* Days in Year and Minimum Opening Balance */}
                         <div className="staged-form-row">
                             <div className="staged-form-field">
                                 <label htmlFor="daysInYear">Days in Year <span>*</span></label>
@@ -278,8 +392,7 @@ const SavingsAccount = () => {
                                     required
                                     className="staged-form-select"
                                 >
-                                    <option value="">-- Select Days --</option>
-                                    {savingsTemplate?.daysInYearTypeOptions?.map((option) => (
+                                    {savingsTemplate?.interestCalculationDaysInYearTypeOptions?.map((option) => (
                                         <option key={option.id} value={option.id}>
                                             {option.value}
                                         </option>
@@ -298,7 +411,6 @@ const SavingsAccount = () => {
                             </div>
                         </div>
 
-                        {/* Apply Withdrawal Fee for Transfers */}
                         <div className="staged-form-row">
                             <label htmlFor="applyWithdrawalFee">
                                 <input
@@ -306,12 +418,10 @@ const SavingsAccount = () => {
                                     id="applyWithdrawalFee"
                                     checked={applyWithdrawalFee}
                                     onChange={(e) => setApplyWithdrawalFee(e.target.checked)}
-                                />{' '}
-                                Apply Withdrawal Fee for Transfers
+                                />{' '}Apply Withdrawal Fee for Transfers
                             </label>
                         </div>
 
-                        {/* Lock-in Period */}
                         <h4>Lock-in Period</h4>
                         <div className="staged-form-row">
                             <div className="staged-form-field">
@@ -332,7 +442,6 @@ const SavingsAccount = () => {
                                     onChange={(e) => setLockInType(e.target.value)}
                                     className="staged-form-select"
                                 >
-                                    <option value="">-- Select Type --</option>
                                     {savingsTemplate?.lockinPeriodFrequencyTypeOptions?.map((option) => (
                                         <option key={option.id} value={option.id}>
                                             {option.value}
@@ -343,7 +452,6 @@ const SavingsAccount = () => {
                         </div>
 
                         {/* Overdraft Section */}
-                        <h4>Overdraft</h4>
                         <div className="staged-form-row">
                             <label htmlFor="isOverdraftAllowed">
                                 <input
@@ -355,6 +463,53 @@ const SavingsAccount = () => {
                                 Is Overdraft Allowed
                             </label>
                         </div>
+
+                        {/* Conditional Fields for Overdraft */}
+                        {isOverdraftAllowed && (
+                            <div className="staged-form-row">
+                                <div className="staged-form-field">
+                                    <label htmlFor="minimumOverdraftForInterestCalculation">
+                                        Minimum Overdraft Required for Interest Calculation
+                                    </label>
+                                    <input
+                                        type="number"
+                                        id="minimumOverdraftForInterestCalculation"
+                                        value={minimumOverdraftForInterestCalculation}
+                                        onChange={(e) => setMinimumOverdraftForInterestCalculation(e.target.value)}
+                                        required
+                                        className="staged-form-input"
+                                    />
+                                </div>
+
+                                <div className="staged-form-field">
+                                    <label htmlFor="nominalAnnualInterestForOverdraft">
+                                        Nominal Annual Interest for Overdraft (%)
+                                    </label>
+                                    <input
+                                        type="number"
+                                        id="nominalAnnualInterestForOverdraft"
+                                        value={nominalAnnualInterestForOverdraft}
+                                        onChange={(e) => setNominalAnnualInterestForOverdraft(e.target.value)}
+                                        required
+                                        className="staged-form-input"
+                                    />
+                                </div>
+
+                                <div className="staged-form-field">
+                                    <label htmlFor="maximumOverdraftAmountLimit">
+                                        Maximum Overdraft Amount Limit
+                                    </label>
+                                    <input
+                                        type="number"
+                                        id="maximumOverdraftAmountLimit"
+                                        value={maximumOverdraftAmountLimit}
+                                        onChange={(e) => setMaximumOverdraftAmountLimit(e.target.value)}
+                                        required
+                                        className="staged-form-input"
+                                    />
+                                </div>
+                            </div>
+                        )}
 
                         {/* Enforce Minimum Balance */}
                         <div className="staged-form-row">
@@ -385,7 +540,6 @@ const SavingsAccount = () => {
             case 'Charges':
                 return (
                     <div className="stage-charges">
-                        {/* Charge Selection */}
                         <div className="staged-form-row">
                             <div className="staged-form-field">
                                 <label htmlFor="chargeSelect">Charge</label>
@@ -396,23 +550,24 @@ const SavingsAccount = () => {
                                     className="staged-form-select"
                                 >
                                     <option value="">-- Select a Charge --</option>
-                                    {chargeOptions?.map((charge) => (
-                                        <option key={charge.id} value={charge.id}>
-                                            {charge.name} - {charge.amount}
-                                        </option>
-                                    ))}
+                                    {chargeOptions
+                                        .filter((charge) => !addedCharges.some((added) => added.id === charge.id))
+                                        .map((charge) => (
+                                            <option key={charge.id} value={charge.id}>
+                                                {charge.name} - {charge.amount}
+                                            </option>
+                                        ))}
                                 </select>
                             </div>
                             <button
                                 onClick={handleAddCharge}
-                                className="add-charge-button"
+                                className="create-provisioning-criteria-confirm"
                                 disabled={!selectedCharge}
                             >
                                 Add
                             </button>
                         </div>
 
-                        {/* Table for Added Charges */}
                         {addedCharges.length > 0 && (
                             <div className="charges-table-section">
                                 <h4>Added Charges</h4>
@@ -432,17 +587,37 @@ const SavingsAccount = () => {
                                     {addedCharges.map((charge, index) => (
                                         <tr key={index}>
                                             <td>{charge.name}</td>
-                                            <td>{charge.type}</td>
+                                            <td>{charge.chargeCalculationType.value}</td>
                                             <td>{charge.amount}</td>
-                                            <td>{charge.collectedOn}</td>
-                                            <td>{charge.date}</td>
-                                            <td>{charge.repaymentsEvery}</td>
+                                            <td>{charge.chargeTimeType.value}</td>
+                                            <td>
+                                                {charge.chargeTimeType?.code === "chargeTimeType.specifiedDueDate" ? (
+                                                    <DatePicker
+                                                        selected={charge.dueDate ? new Date(charge.dueDate) : null}
+                                                        onChange={(date) => {
+                                                            const updatedCharges = [...addedCharges];
+                                                            updatedCharges[index].dueDate = date.toISOString().split('T')[0];
+                                                            setAddedCharges(updatedCharges);
+                                                        }}
+                                                        className="staged-form-input"
+                                                        placeholderText="Select Due Date"
+                                                        dateFormat="MMMM d, yyyy"
+                                                        showMonthDropdown
+                                                        showYearDropdown
+                                                        dropdownMode="select"
+                                                    />
+                                                ) : (
+                                                    <>{""}</>
+                                                )}
+                                            </td>
+                                            <td>{charge.repaymentsEvery || 'Not Provided'}</td>
                                             <td>
                                                 <button
                                                     className="delete-charge-button"
+                                                    style={{border: 'none', cursor: "pointer"}}
                                                     onClick={() => handleRemoveCharge(index)}
                                                 >
-                                                    <i className="fas fa-trash"></i>
+                                                    <FaTrash size={20} color={'#f00'}/>
                                                 </button>
                                             </td>
                                         </tr>
@@ -452,9 +627,8 @@ const SavingsAccount = () => {
                             </div>
                         )}
 
-                        {/* No Charges Placeholder */}
                         {addedCharges.length === 0 && (
-                            <p>No charges added yet. Select a charge and click 'Add' to include it.</p>
+                            <p className={'no-data'}>No charges added yet. Select a charge and click 'Add' to include it.</p>
                         )}
                     </div>
                 );
@@ -463,16 +637,26 @@ const SavingsAccount = () => {
         }
     };
 
+    const formatDateForPreview = (date) => {
+        return date
+            ? new Date(date).toLocaleDateString("en-GB", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+            })
+            : "";
+    };
+
     const renderPreviewSection = () => {
         const transformCharges = () =>
             addedCharges.length > 0
                 ? addedCharges.map((charge) => ({
-                    Name: charge.name || "N/A",
-                    Type: charge.type || "N/A",
-                    Amount: charge.amount || "N/A",
-                    "Collected On": charge.collectedOn || "N/A",
-                    Date: charge.date || "N/A",
-                    "Repayments Every": charge.repaymentsEvery || "N/A",
+                    Name: charge.name || "",
+                    Type: charge.chargeCalculationType.value || "",
+                    Amount: charge.amount || "",
+                    "Collected On": charge.chargeTimeType.value || "",
+                    Date: formatDateForPreview(charge.dueDate) || "",
+                    "Repayments Every": charge.repaymentsEvery || "",
                 }))
                 : null;
 
@@ -482,41 +666,48 @@ const SavingsAccount = () => {
                 data: {
                     "Product Name": savingsTemplate?.productOptions?.find(
                         (option) => option.id === parseInt(selectedProduct)
-                    )?.name || "N/A",
-                    "Submitted On": submittedOn || "N/A",
+                    )?.name || "",
+                    "Submitted On": formatDateForPreview(submittedOn) || "",
                     "Field Officer": savingsTemplate?.fieldOfficerOptions?.find(
                         (officer) => officer.id === parseInt(fieldOfficer)
-                    )?.displayName || "N/A",
-                    "External ID": clientData?.externalId || "N/A",
+                    )?.displayName || "",
+                    "External ID": externalId || "",
                 },
             },
             {
                 title: "Terms",
                 data: {
-                    "Currency": savingsTemplate?.currency?.name || "N/A",
-                    "Decimal Places": savingsTemplate?.currency?.decimalPlaces || "N/A",
-                    "Nominal Annual Interest Rate": nominalAnnualInterestRate || "N/A",
+                    "Currency": savingsTemplate?.currency?.name || "",
+                    "Decimal Places": savingsTemplate?.currency?.decimalPlaces || "",
+                    "Nominal Annual Interest Rate": nominalAnnualInterestRate,
                     "Interest Compounding Period": savingsTemplate?.interestCompoundingPeriodTypeOptions?.find(
                         (option) => option.id === parseInt(interestCompoundingPeriod)
-                    )?.value || "N/A",
+                    )?.value || "",
                     "Interest Posting Period": savingsTemplate?.interestPostingPeriodTypeOptions?.find(
                         (option) => option.id === parseInt(interestPostingPeriod)
-                    )?.value || "N/A",
+                    )?.value || "",
                     "Interest Calculated Using": savingsTemplate?.interestCalculationTypeOptions?.find(
                         (option) => option.id === parseInt(interestCalculatedUsing)
-                    )?.value || "N/A",
-                    "Days in Year": savingsTemplate?.daysInYearTypeOptions?.find(
+                    )?.value || "",
+                    "Days in Year": savingsTemplate?.interestCalculationDaysInYearTypeOptions?.find(
                         (option) => option.id === parseInt(daysInYear)
-                    )?.value || "N/A",
-                    "Minimum Opening Balance": minimumOpeningBalance || "N/A",
+                    )?.value || "",
+                    "Minimum Opening Balance": minimumOpeningBalance || "",
                     "Apply Withdrawal Fee for Transfers": applyWithdrawalFee ? "Yes" : "No",
-                    "Lock-in Period Frequency": lockInFrequency || "N/A",
+                    "Lock-in Period Frequency": lockInFrequency || "",
                     "Lock-in Period Type": savingsTemplate?.lockinPeriodFrequencyTypeOptions?.find(
                         (option) => option.id === parseInt(lockInType)
-                    )?.value || "N/A",
+                    )?.value || "",
                     "Is Overdraft Allowed": isOverdraftAllowed ? "Yes" : "No",
+                    ...(isOverdraftAllowed
+                        ? {
+                            "Minimum Overdraft For Interest Calculation": minimumOverdraftForInterestCalculation || "",
+                            "Nominal Annual Interest for Overdraft": nominalAnnualInterestForOverdraft || "",
+                            "Maximum Overdraft Amount Limit": maximumOverdraftAmountLimit || "",
+                        }
+                        : {}),
                     "Enforce Minimum Balance": enforceMinimumBalance ? "Yes" : "No",
-                    "Minimum Balance": minimumBalance || "N/A",
+                    "Minimum Balance": minimumBalance || "",
                 },
             },
             {
@@ -533,7 +724,7 @@ const SavingsAccount = () => {
                             <h4 className="preview-stage-title">{title}</h4>
                             <button
                                 className="staged-form-edit-button"
-                                onClick={() => setCurrentStage(index)}
+                                onClick={() => setCurrentStage(title)}
                             >
                                 Edit
                             </button>
@@ -551,7 +742,7 @@ const SavingsAccount = () => {
                                     {Object.entries(data).map(([key, value]) => (
                                         <tr key={key}>
                                             <td>{key}</td>
-                                            <td>{value || "N/A"}</td>
+                                            <td>{value || ""}</td>
                                         </tr>
                                     ))}
                                     </tbody>
@@ -570,7 +761,7 @@ const SavingsAccount = () => {
                                 {data.map((item, idx) => (
                                     <tr key={idx}>
                                         {Object.values(item).map((value, i) => (
-                                            <td key={i}>{value || "N/A"}</td>
+                                            <td key={i}>{value || ""}</td>
                                         ))}
                                     </tr>
                                 ))}
@@ -588,115 +779,130 @@ const SavingsAccount = () => {
     const renderStageTracker = () => {
         return (
             <div className="staged-form-stage-tracker">
-                {stages.map((stage, index) => (
+                {stages.map((stage) => (
                     <div
                         key={stage}
                         className={`staged-form-stage ${
-                            index === stages.indexOf(currentStage)
+                            currentStage === stage
                                 ? "staged-form-active"
-                                : index < stages.indexOf(currentStage)
+                                : completedStages.has(stage) || stage === "Preview"
                                     ? "staged-form-completed"
                                     : "staged-form-unvisited"
                         }`}
                         onClick={() => {
-                            if (index <= stages.indexOf(currentStage)) {
+                            if (completedStages.has(stage) || stage === currentStage || stage === "Preview") {
                                 setCurrentStage(stage);
                             }
                         }}
                     >
-                        <span className="staged-form-stage-circle">{index + 1}</span>
+                        <span className="staged-form-stage-circle">{stages.indexOf(stage) + 1}</span>
                         <span className="staged-form-stage-label">{stage}</span>
                     </div>
                 ))}
             </div>
         );
     };
-    const handleSubmit = () => {
-        const submissionData = {
-            details: {
-                productName: savingsTemplate?.productOptions?.find(
-                    (option) => option.id === parseInt(selectedProduct)
-                )?.name || "N/A",
-                submittedOn,
-                fieldOfficer: savingsTemplate?.fieldOfficerOptions?.find(
-                    (officer) => officer.id === parseInt(fieldOfficer)
-                )?.displayName || "N/A",
-                externalId: clientData?.externalId || "N/A",
-            },
-            terms: {
-                currency: savingsTemplate?.currency?.name || "N/A",
-                decimalPlaces: savingsTemplate?.currency?.decimalPlaces || "N/A",
-                nominalAnnualInterestRate,
-                interestCompoundingPeriod: savingsTemplate?.interestCompoundingPeriodTypeOptions?.find(
-                    (option) => option.id === parseInt(interestCompoundingPeriod)
-                )?.value || "N/A",
-                interestPostingPeriod: savingsTemplate?.interestPostingPeriodTypeOptions?.find(
-                    (option) => option.id === parseInt(interestPostingPeriod)
-                )?.value || "N/A",
-                interestCalculatedUsing: savingsTemplate?.interestCalculationTypeOptions?.find(
-                    (option) => option.id === parseInt(interestCalculatedUsing)
-                )?.value || "N/A",
-                daysInYear: savingsTemplate?.daysInYearTypeOptions?.find(
-                    (option) => option.id === parseInt(daysInYear)
-                )?.value || "N/A",
-                minimumOpeningBalance,
-                applyWithdrawalFee,
-                lockInFrequency,
-                lockInType: savingsTemplate?.lockinPeriodFrequencyTypeOptions?.find(
-                    (option) => option.id === parseInt(lockInType)
-                )?.value || "N/A",
-                isOverdraftAllowed,
-                enforceMinimumBalance,
-                minimumBalance,
-            },
-            charges: addedCharges.map((charge) => ({
-                name: charge.name || "N/A",
-                type: charge.type || "N/A",
-                amount: charge.amount || "N/A",
-                collectedOn: charge.collectedOn || "N/A",
-                date: charge.date || "N/A",
-                repaymentsEvery: charge.repaymentsEvery || "N/A",
-            })),
-        };
 
-        console.log("Submission Data:", submissionData);
+    const formatDateForPayload = (date) => {
+        return date.toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "long",
+                year: "numeric",
+            })
+            .replace(",", "");
     };
 
+    const handleSubmit = async () => {
+        try {
+            startLoading();
+
+            const payload = {
+                ...(isOverdraftAllowed ?? null) && { allowOverdraft: isOverdraftAllowed },
+                charges: addedCharges?.map(charge => ({
+                    chargeId: charge.id,
+                    amount: charge.amount ?? 0,
+                    ...(charge.dueDate ? { dueDate: formatDateForPayload(new Date(charge.dueDate)) } : {}),
+                })) ?? [],
+                ...(clientId ?? null) && { clientId: parseInt(clientId, 10) },
+                dateFormat: "dd MMMM yyyy",
+                ...(externalId?.trim() ?? "") && { externalId: externalId.trim() },
+                enforceMinRequiredBalance: enforceMinimumBalance ?? false,
+                ...(fieldOfficer ?? null) && { fieldOfficerId: parseInt(fieldOfficer, 10) },
+                ...(daysInYear ?? null) && { interestCalculationDaysInYearType: daysInYear },
+                ...(interestCalculatedUsing ?? null) && { interestCalculationType: parseInt(interestCalculatedUsing, 10) },
+                ...(interestCompoundingPeriod ?? null) && { interestCompoundingPeriodType: parseInt(interestCompoundingPeriod, 10) },
+                ...(interestPostingPeriod ?? null) && { interestPostingPeriodType: parseInt(interestPostingPeriod, 10) },
+                ...(lockInFrequency ?? null) && { lockinPeriodFrequency: parseInt(lockInFrequency, 10) },
+                ...(lockInType ?? null) && { lockinPeriodFrequencyType: lockInType },
+                ...(minimumOverdraftForInterestCalculation ?? null) && { minOverdraftForInterestCalculation: minimumOverdraftForInterestCalculation },
+                ...(minimumBalance ?? null) && { minRequiredBalance: minimumBalance },
+                ...(minimumOpeningBalance ?? null) && { minRequiredOpeningBalance: minimumOpeningBalance },
+                monthDayFormat: "dd MMMM",
+                nominalAnnualInterestRate: nominalAnnualInterestRate || 0,
+                ...(nominalAnnualInterestForOverdraft ?? null) && { nominalAnnualInterestRateOverdraft: nominalAnnualInterestForOverdraft },
+                ...(maximumOverdraftAmountLimit ?? null) && { overdraftLimit: maximumOverdraftAmountLimit },
+                ...(selectedProduct ?? null) && { productId: selectedProduct },
+                submittedOnDate: formatDateForPayload(submittedOn),
+                withdrawalFeeForTransfers: applyWithdrawalFee ?? null,
+                locale: "en",
+            };
+
+            const endpoint = isModifying
+                ? `${API_CONFIG.baseURL}/savingsaccounts/${account}`
+                : `${API_CONFIG.baseURL}/savingsaccounts`;
+
+            const method = isModifying ? "put" : "post";
+
+            const response = await axios({
+                method: method,
+                url: endpoint,
+                data: payload,
+                headers: {
+                    Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+                    "Content-Type": "application/json",
+                },
+            });
+
+            alert(isModifying ? "Saving Account modified successfully!" : "Saving Account created successfully!");
+            setIsModifying(false);
+            navigate(`/client/${clientId}/savings-account/${response.data.savingsId}`, { state: { account: payload } });
+        } catch (error) {
+            console.error("Error submitting loan:", error);
+            alert("Failed to submit the loan. Please try again.");
+        } finally {
+            stopLoading();
+        }
+    };
 
     return (
         <div className="staged-form-container">
-
             <div className="staged-form-add-client">
                 {renderStageTracker()}
                 <div className="staged-form-stage-content">
-                    {allStagesComplete && currentStage === stages.length
-                        ? renderPreviewSection()
-                        : renderStageContent()}
+                    {currentStage === "Preview" ? (
+                        renderPreviewSection()
+                    ) : (
+                        renderStageContent()
+                    )}
 
                     <div className="staged-form-stage-buttons">
                         <button
                             onClick={handlePrevious}
                             className="staged-form-button-previous"
-                            disabled={currentStage === 1}
+                            disabled={currentStage === "Details"}
                         >
                             Previous
                         </button>
-                        {currentStage === stages.length - 1 ? (
-                            <button onClick={handleSubmit} disabled={!allStagesComplete} className="staged-form-button-next">
-                                Submit
-                            </button>
-                        ) : (
-                            <button
-                                onClick={handleNext}
-                                className="staged-form-button-next"
-                            >
-                                Next
-                            </button>
-                        )}
+                        <button
+                            onClick={currentStage === "Preview" ? handleSubmit : handleNext}
+                            className="staged-form-button-next"
+                        >
+                            {currentStage === "Preview" ? "Submit" : "Next"}
+                        </button>
                     </div>
                 </div>
             </div>
-
         </div>
     );
 };

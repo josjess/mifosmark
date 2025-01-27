@@ -9,7 +9,7 @@ const JournalEntries = () => {
     const [activeTab, setActiveTab] = useState('add');
 
     return (
-        <div className="journal-entries-screen">
+        <div className="journal-entries-screen neighbor-element">
             <h2 className="journal-head">
                 <Link to="/accounting" className="breadcrumb-link">Accounting</Link> . Journal Entries
             </h2>

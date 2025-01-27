@@ -72,7 +72,7 @@ const CenterDetails = ({ centerId, onClose }) => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                'Fineract-Platform-TenantId': 'default',
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 'Content-Type': 'application/json',
             };
 
@@ -115,7 +115,7 @@ const CenterDetails = ({ centerId, onClose }) => {
             const fetchNotes = async () => {
                 const headers = {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 };
 
@@ -154,7 +154,7 @@ const CenterDetails = ({ centerId, onClose }) => {
     const handleSaveNote = async () => {
         const headers = {
             Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-            'Fineract-Platform-TenantId': 'default',
+            'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
             'Content-Type': 'application/json',
         };
 
@@ -191,7 +191,7 @@ const CenterDetails = ({ centerId, onClose }) => {
 
         const headers = {
             Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-            'Fineract-Platform-TenantId': 'default',
+            'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
             'Content-Type': 'application/json',
         };
 
@@ -225,7 +225,7 @@ const CenterDetails = ({ centerId, onClose }) => {
             startLoading();
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                'Fineract-Platform-TenantId': 'default',
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 'Content-Type': 'application/json',
             };
 
@@ -261,7 +261,7 @@ const CenterDetails = ({ centerId, onClose }) => {
             startLoading();
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                'Fineract-Platform-TenantId': 'default',
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 'Content-Type': 'application/json',
             };
 
@@ -289,7 +289,7 @@ const CenterDetails = ({ centerId, onClose }) => {
             startLoading();
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                'Fineract-Platform-TenantId': 'default',
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 'Content-Type': 'application/json',
             };
 
@@ -323,7 +323,7 @@ const CenterDetails = ({ centerId, onClose }) => {
             startLoading();
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                'Fineract-Platform-TenantId': 'default',
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 'Content-Type': 'application/json',
             };
 
@@ -353,7 +353,7 @@ const CenterDetails = ({ centerId, onClose }) => {
             startLoading();
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                'Fineract-Platform-TenantId': 'default',
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 'Content-Type': 'application/json',
             };
 
@@ -379,7 +379,7 @@ const CenterDetails = ({ centerId, onClose }) => {
             startLoading();
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                'Fineract-Platform-TenantId': 'default',
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
             };
 
             const response = await axios.get(
@@ -400,7 +400,7 @@ const CenterDetails = ({ centerId, onClose }) => {
             startLoading();
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                'Fineract-Platform-TenantId': 'default',
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
             };
             const response = await axios.get(
                 `${API_CONFIG.baseURL}/centers/${centerId}/calendars/template`,
@@ -419,7 +419,7 @@ const CenterDetails = ({ centerId, onClose }) => {
             startLoading();
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                'Fineract-Platform-TenantId': 'default',
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 'Content-Type': 'application/json',
             };
 
@@ -449,7 +449,7 @@ const CenterDetails = ({ centerId, onClose }) => {
             startLoading();
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                'Fineract-Platform-TenantId': 'default',
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 'Content-Type': 'application/json',
             };
 
@@ -487,7 +487,7 @@ const CenterDetails = ({ centerId, onClose }) => {
 
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                'Fineract-Platform-TenantId': 'default',
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 'Content-Type': 'application/json',
             };
 
@@ -532,7 +532,7 @@ const CenterDetails = ({ centerId, onClose }) => {
 
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                'Fineract-Platform-TenantId': 'default',
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 'Content-Type': 'application/json',
             };
 
@@ -565,7 +565,7 @@ const CenterDetails = ({ centerId, onClose }) => {
 
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                'Fineract-Platform-TenantId': 'default',
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
             };
 
             await axios.delete(`${API_CONFIG.baseURL}/centers/${centerId}`, { headers });

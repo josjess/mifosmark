@@ -27,7 +27,7 @@ const CreateCollateral = () => {
             const response = await axios.get(`${API_CONFIG.baseURL}/collateral-management/template`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    "Fineract-Platform-TenantId": "default",
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     "Content-Type": "application/json",
                 },
             });
@@ -57,7 +57,7 @@ const CreateCollateral = () => {
             await axios.post(`${API_CONFIG.baseURL}/collateral-management`, payload, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    "Fineract-Platform-TenantId": "default",
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     "Content-Type": "application/json",
                 },
             });

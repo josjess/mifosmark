@@ -36,7 +36,7 @@ const EntityMapping = () => {
             const response = await axios.get(`${API_CONFIG.baseURL}/entitytoentitymapping`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });
@@ -63,13 +63,13 @@ const EntityMapping = () => {
                 axios.get(`${API_CONFIG.baseURL}/${firstPart}s`, {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        'Fineract-Platform-TenantId': 'default',
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     },
                 }),
                 axios.get(`${API_CONFIG.baseURL}/${secondPart}`, {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        'Fineract-Platform-TenantId': 'default',
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     },
                 }),
             ]);
@@ -124,7 +124,7 @@ const EntityMapping = () => {
                 {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        'Fineract-Platform-TenantId': 'default',
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     },
                 }
             );
@@ -198,7 +198,7 @@ const EntityMapping = () => {
                 {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        'Fineract-Platform-TenantId': 'default',
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                         'Content-Type': 'application/json',
                     },
                 }
@@ -210,7 +210,7 @@ const EntityMapping = () => {
                 {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        'Fineract-Platform-TenantId': 'default',
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     },
                 }
             );
@@ -248,7 +248,7 @@ const EntityMapping = () => {
 
 
     return (
-        <div className="entity-mapping-page">
+        <div className="entity-mapping-page neighbor-element">
             <h2 className="page-heading">
                 <Link to="/system" className="breadcrumb-link">System</Link> . Entity to Entity Mapping
             </h2>

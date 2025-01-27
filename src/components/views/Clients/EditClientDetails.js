@@ -24,7 +24,7 @@ const EditClientDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                'Fineract-Platform-TenantId': 'default',
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 'Content-Type': 'application/json',
             };
 
@@ -77,7 +77,7 @@ const EditClientDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                'Fineract-Platform-TenantId': 'default',
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 'Content-Type': 'application/json',
             };
 
@@ -167,7 +167,7 @@ const EditClientDetails = () => {
     const { genderOptions, clientTypeOptions, clientClassificationOptions, staffOptions } = templateData;
 
     return (
-        <div className="users-page-screen">
+        <div className="users-page-screen neighbor-element">
             <h2 className="users-page-head">
                 <Link to="/dashboard" className="breadcrumb-link">Dashboard</Link>{' '}
                 <span

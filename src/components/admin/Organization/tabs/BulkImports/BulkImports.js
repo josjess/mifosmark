@@ -26,7 +26,7 @@ const BulkImports = () => {
     ];
 
     return (
-        <div className="organization-page">
+        <div className="organization-page neighbor-element">
             <h2 className="system-page-heading">
                 <Link to="/organization" className="breadcrumb-link">Organization</Link> . Bulk Imports
             </h2>

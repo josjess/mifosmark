@@ -44,7 +44,7 @@ const ViewTellers = ({onViewCashiers}) => {
             const response = await axios.get(`${API_CONFIG.baseURL}/tellers`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });
@@ -138,7 +138,7 @@ const ViewTellers = ({onViewCashiers}) => {
             await axios.put(`${API_CONFIG.baseURL}/tellers/${modalData.id}`, payload, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });
@@ -157,7 +157,7 @@ const ViewTellers = ({onViewCashiers}) => {
             await axios.delete(`${API_CONFIG.baseURL}/tellers/${modalData.id}`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });

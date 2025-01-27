@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, {useContext, useEffect, useRef, useState} from 'react';
 import {Link, useNavigate} from "react-router-dom";
 import { AuthContext } from '../context/AuthContext';
 import { NotificationContext } from '../context/NotificationContext';
@@ -12,6 +12,7 @@ import Insights from "../components/Insights";
 
 const Dashboard = () => {
     const { isAuthenticated, user } = useContext(AuthContext);
+    const { componentVisibility, toggleComponentVisibility } = useContext(AuthContext);
     const navigate = useNavigate();
     const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
@@ -20,11 +21,12 @@ const Dashboard = () => {
         principalOutstanding: 0, interestOutstanding: 0, totalOutstanding: 0, interestThisMonth: 0,
         principalOverdue: 0, interestOverdue: 0, totalOverdue: 0, nonPerformingAssets: 0,
         loansForApproval: 0, loansForDisapproval: 0, portfolioAtRisk: 0,
-        borrowersPerLoanOfficer: 0, averageLoanDisbursed: 0, clientsPerPersonnel: 0,
+        borrowersPerLoanOfficer: 0, averageLoanDisbursed: 0, clientsPerPersonnel: 0, todaysDisbursements: 0
     });
     const [selectedOffice, setSelectedOffice] = useState(user?.officeId || null);
     const [officeOptions, setOfficeOptions] = useState([]);
     const [activeTab, setActiveTab] = useState('metrics');
+    const activeClientsRef = useRef(0);
 
     useEffect(() => {
         if (!isAuthenticated) {
@@ -42,7 +44,7 @@ const Dashboard = () => {
                 const headers = {
                     'Authorization': `Basic ${AUTH_TOKEN}`,
                     'Content-Type': 'application/json',
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 };
 
                 const response = await axios.get(`${API_BASE_URL}/offices`, { headers });
@@ -59,10 +61,9 @@ const Dashboard = () => {
             }
         };
 
-        if (user?.officeId === 1) {
-            fetchOffices();
-        }
-    }, [user]);
+        fetchOffices();
+
+    }, [user, selectedOffice]);
 
     const formatCurrency = (value, currencyCode, currencySymbol, decimalPlaces) => {
         return new Intl.NumberFormat('en-US', {
@@ -81,13 +82,18 @@ const Dashboard = () => {
             const headers = {
                 'Authorization': `Basic ${AUTH_TOKEN}`,
                 'Content-Type': 'application/json',
-                'Fineract-Platform-TenantId': 'default',
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
             };
 
             const fetchClientData = async () => {
                 try {
                     const officeFilter = selectedOffice && selectedOffice !== "all" ? `&officeId=${selectedOffice}` : "";
                     const response = await axios.get(`${API_BASE_URL}/clients?${officeFilter}`, { headers });
+                    const staffResponse = await axios.get(`${API_BASE_URL}/staff`, { headers });
+                    const loansResponse = await axios.get(`${API_BASE_URL}/loans`, { headers });
+
+                    const staff = staffResponse.data;
+                    const loans = loansResponse.data.pageItems;
                     const clients = response.data.pageItems;
 
                     const filteredClients =
@@ -98,16 +104,64 @@ const Dashboard = () => {
                     const activeClients = filteredClients.filter(client => client.status.value === "Active").length;
                     const inactiveClients = filteredClients.filter(client => client.status.value === "Inactive").length;
                     const newClients = filteredClients.filter(client => client.status.value === "Pending").length;
+                    activeClientsRef.current = activeClients;
+
+                    const activeLoans = loans.filter(loan => loan.status.active).length;
+                    const loanOfficers = staff.filter(member => member.isLoanOfficer && member.isActive);
 
                     const borrowersPerLoanOfficer =
-                        officeOptions.length > 0
-                            ? Math.round(activeClients / officeOptions.length)
+                        loanOfficers.length > 0
+                            ? Math.round(activeLoans / loanOfficers.length)
                             : 'N/A';
 
                     const clientsPerPersonnel =
                         officeOptions.length > 0
                             ? Math.round(filteredClients.length / officeOptions.length)
                             : 'N/A';
+
+                    const averageClientsPerLoanOfficer =
+                        loanOfficers.length > 0
+                            ? Math.round(activeClients / loanOfficers.length)
+                            : 'N/A';
+
+                    const getTodaysDisbursements = (loans) => {
+                        const today = new Date();
+                        return loans.filter(loan => {
+                            const disbursementDateArray = loan.timeline?.actualDisbursementDate;
+                            if (!Array.isArray(disbursementDateArray) || disbursementDateArray.length < 3) {
+                                return false;
+                            }
+
+                            const [year, month, day] = disbursementDateArray;
+                            const disbursementDate = new Date(year, month - 1, day);
+                            return (
+                                disbursementDate.getFullYear() === today.getFullYear() &&
+                                disbursementDate.getMonth() === today.getMonth() &&
+                                disbursementDate.getDate() === today.getDate()
+                            );
+                        });
+                    };
+
+                    const getThisMonthsDisbursements = (loans) => {
+                        const today = new Date();
+                        return loans.filter(loan => {
+                            const disbursementDateArray = loan.timeline?.actualDisbursementDate;
+                            if (!Array.isArray(disbursementDateArray) || disbursementDateArray.length < 2) {
+                                return false;
+                            }
+
+                            const [year, month] = disbursementDateArray;
+                            return (
+                                year === today.getFullYear() &&
+                                month === today.getMonth() + 1
+                            );
+                        });
+                    };
+
+                    const todaysDisbursements = getTodaysDisbursements(loans).length;
+                    const thisMonthsDisbursements = getThisMonthsDisbursements(loans).length;
+
+                    const repaymentsToday = calculateRepaymentsToday(loans);
 
                     return {
                         totalClients: filteredClients.length,
@@ -116,6 +170,10 @@ const Dashboard = () => {
                         newClients,
                         borrowersPerLoanOfficer,
                         clientsPerPersonnel,
+                        averageClientsPerLoanOfficer,
+                        todaysDisbursements,
+                        thisMonthsDisbursements,
+                        repaymentsToday,
                     };
                 } catch (error) {
                     console.error("Error fetching client data:", error);
@@ -123,19 +181,121 @@ const Dashboard = () => {
                 }
             };
 
+            const calculateTotalSavings = (savingsResponse) => {
+                let total = 0;
+                if (Array.isArray(savingsResponse)) {
+                    savingsResponse.forEach((account, index) => {
+
+                        const accountBalance = account.summary?.accountBalance;
+
+                        if (accountBalance !== undefined) {
+                            const parsedBalance = parseInt(accountBalance, 10);
+
+                            if (!isNaN(parsedBalance)) {
+                                total += parsedBalance;
+                            } else {
+                            }
+                        } else {
+                        }
+                    });
+                }
+                return total;
+            };
+
+            const calculateSavingsMobilizedThisMonth = (savingsResponse) => {
+                const today = new Date();
+                const currentMonth = today.getMonth();
+                const currentYear = today.getFullYear();
+
+                return savingsResponse.filter((account) => {
+                    const [year, month] = account.timeline.submittedOnDate;
+                    return (
+                        year === currentYear && month - 1 === currentMonth
+                    );
+                }).length;
+            };
+
+            const calculateRepaymentsToday = (loans) => {
+                const today = new Date();
+                let repaymentCount = 0;
+
+                loans.forEach((loan) => {
+                    const {
+                        status,
+                        timeline,
+                        numberOfRepayments,
+                        repaymentEvery,
+                        repaymentFrequencyType,
+                    } = loan;
+
+                    if (
+                        status.active &&
+                        timeline.actualDisbursementDate &&
+                        Array.isArray(timeline.actualDisbursementDate)
+                    ) {
+                        const disbursementDate = new Date(
+                            timeline.actualDisbursementDate[0],
+                            timeline.actualDisbursementDate[1] - 1,
+                            timeline.actualDisbursementDate[2]
+                        );
+
+                        const repaymentDates = [];
+                        for (let i = 0; i < numberOfRepayments; i++) {
+                            const nextRepayment = new Date(disbursementDate);
+
+                            switch (repaymentFrequencyType.value) {
+                                case "Days":
+                                    nextRepayment.setDate(
+                                        disbursementDate.getDate() + i * repaymentEvery
+                                    );
+                                    break;
+                                case "Months":
+                                    nextRepayment.setMonth(
+                                        disbursementDate.getMonth() + i * repaymentEvery
+                                    );
+                                    break;
+                                case "Years":
+                                    nextRepayment.setFullYear(
+                                        disbursementDate.getFullYear() + i * repaymentEvery
+                                    );
+                                    break;
+                            }
+
+                            repaymentDates.push(nextRepayment);
+                        }
+
+                        repaymentDates.forEach((repaymentDate) => {
+                            if (
+                                repaymentDate.getDate() === today.getDate() &&
+                                repaymentDate.getMonth() === today.getMonth() &&
+                                repaymentDate.getFullYear() === today.getFullYear()
+                            ) {
+                                repaymentCount++;
+                            }
+                        });
+                    }
+                });
+
+                return repaymentCount;
+            };
+
             const fetchLoanData = async () => {
                 try {
                     const officeFilter = selectedOffice && selectedOffice !== "all" ? `&officeId=${selectedOffice}` : "";
                     const response = await axios.get(`${API_BASE_URL}/loans?${officeFilter}`, { headers });
+                    const currencyResponse = await axios.get(`${API_BASE_URL}/currencies`, { headers });
+                    const savingsResponse = await axios.get(`${API_BASE_URL}/savingsaccounts`, { headers });
+
+                    const defaultCurrency = currencyResponse.data.selectedCurrencyOptions[0] || {};
+                    const { code: currencyCode, code: currencySymbol, decimalPlaces } = defaultCurrency;
+
                     const loans = response.data.pageItems;
+                    const savings = savingsResponse.data.pageItems;
 
                     const filteredLoans =
                         selectedOffice && selectedOffice !== "all"
                             ? loans.filter(loan => loan.clientOfficeId === parseInt(selectedOffice))
                             : loans;
-
-                    const currency = loans[0].currency || {};
-                    const { code: currencyCode, displaySymbol: currencySymbol, decimalPlaces } = currency;
 
                     let portfolioAtRiskAmount = 0;
                     let totalDisbursedAmount = 0;
@@ -162,7 +322,7 @@ const Dashboard = () => {
 
                         if (loan.isNPA) nonPerformingAssets++;
                         if (loan.status.pendingApproval) loansForApproval++;
-                        if (loan.status.value === "Rejected") loansForDisapproval++;
+                        if (loan.status?.waitingForDisbursal ) loansForDisapproval++;
 
                         if (loan.isNPA) {
                             portfolioAtRiskAmount += summary.principalOutstanding || 0;
@@ -177,19 +337,29 @@ const Dashboard = () => {
                             ? ((portfolioAtRiskAmount / totalPrincipalOutstanding) * 100).toFixed(2) + '%'
                             : '';
 
+
+                    const totalOutstandingCalc = totalPrincipalOutstanding + totalInterestOutstanding;
+
+                    const totalSavings = calculateTotalSavings(savings);
+
+                    const totalSavingsMobilizedThisMonth = calculateSavingsMobilizedThisMonth(savings);
+
                     const averageLoanDisbursed =
-                        disbursedLoansCount > 0
-                            ? formatCurrency(totalDisbursedAmount / disbursedLoansCount, currencyCode, currencySymbol, decimalPlaces)
+                        activeClientsRef.current > 0
+                            ? formatCurrency(totalOutstandingCalc / parseInt(activeClientsRef.current), currencyCode, currencySymbol, decimalPlaces)
                             : formatCurrency(0, currencyCode, currencySymbol, decimalPlaces);
+
 
                     return {
                         principalOutstanding: formatCurrency(totalPrincipalOutstanding, currencyCode, currencySymbol, decimalPlaces),
                         interestOutstanding: formatCurrency(totalInterestOutstanding, currencyCode, currencySymbol, decimalPlaces),
-                        totalOutstanding: formatCurrency(totalPrincipalOutstanding + totalInterestOutstanding, currencyCode, currencySymbol, decimalPlaces),
+                        totalOutstanding: formatCurrency(totalOutstandingCalc, currencyCode, currencySymbol, decimalPlaces),
                         interestThisMonth: formatCurrency(totalInterestThisMonth, currencyCode, currencySymbol, decimalPlaces),
                         principalOverdue: formatCurrency(totalPrincipalOverdue, currencyCode, currencySymbol, decimalPlaces),
                         interestOverdue: formatCurrency(totalInterestOverdue, currencyCode, currencySymbol, decimalPlaces),
                         totalOverdue: formatCurrency(totalOverdue, currencyCode, currencySymbol, decimalPlaces),
+                        totalSavings: formatCurrency(totalSavings, currencyCode, currencySymbol, decimalPlaces),
+                        totalSavingsMobilizedThisMonth: totalSavingsMobilizedThisMonth,
                         nonPerformingAssets,
                         loansForApproval,
                         loansForDisapproval,
@@ -230,12 +400,12 @@ const Dashboard = () => {
         }
     }, [user, selectedOffice]);
 
-
     const {
         totalClients, activeClients, inactiveClients, newClients,
         principalOutstanding, interestOutstanding, totalOutstanding, interestThisMonth,
         principalOverdue, interestOverdue, totalOverdue, nonPerformingAssets, loansForApproval, loansForDisapproval,
-        portfolioAtRisk, borrowersPerLoanOfficer, averageLoanDisbursed, clientsPerPersonnel
+        portfolioAtRisk, borrowersPerLoanOfficer, averageLoanDisbursed, clientsPerPersonnel, averageClientsPerLoanOfficer,
+        todaysDisbursements, thisMonthsDisbursements, repaymentsToday, totalSavings, totalSavingsMobilizedThisMonth
     } = dashboardData;
 
     return (
@@ -244,8 +414,8 @@ const Dashboard = () => {
                 <Sidebar />
             </div>
 
-            <main className="main-content">
-                <header className="dashboard-header">
+            <main className="main-content neighbor-element">
+                <header className={`dashboard-header ${componentVisibility['dashboard-header'] ? '' : ''}`}>
                     <div className="header-content">
                         <h1 className="dashboard-title">Dashboard</h1>
                         <div className="title-section">
@@ -299,174 +469,234 @@ const Dashboard = () => {
                     </button>
                 </div>
                 {activeTab === 'metrics' ? (
-                    <section className="card-grid">
-                        <div className="card">
-                            <div className="card-header">
-                                <div className="icon-container">
-                                    <FaExclamationTriangle className="card-icon"/>
+                    <div className={"insights-container"}>
+                        <section className="card-grid">
+                            <div className="card">
+                                <div className="card-header">
+                                    <div className="icon-container">
+                                        <FaExclamationTriangle className="card-icon"/>
+                                    </div>
+                                    <h3>Portfolio at Risk</h3>
                                 </div>
-                                <h3>Portfolio at Risk</h3>
+                                <p>{portfolioAtRisk}</p>
                             </div>
-                            <p>{portfolioAtRisk}</p>
-                        </div>
 
-                        <div className="card">
-                            <div className="card-header">
-                                <div className="icon-container">
-                                    <FaUsers className="card-icon"/>
+                            <div className="card">
+                                <div className="card-header">
+                                    <div className="icon-container">
+                                        <FaUsers className="card-icon"/>
+                                    </div>
+                                    <h3>Borrowers Per Loan Officer</h3>
                                 </div>
-                                <h3>Borrowers Per Loan Officer</h3>
+                                <p>{borrowersPerLoanOfficer}</p>
                             </div>
-                            <p>{borrowersPerLoanOfficer}</p>
-                        </div>
 
-                        <div className="card">
-                            <div className="card-header">
-                                <div className="icon-container">
-                                    <FaHandHoldingUsd className="card-icon"/>
+                            <div className="card">
+                                <div className="card-header">
+                                    <div className="icon-container">
+                                        <FaHandHoldingUsd className="card-icon"/>
+                                    </div>
+                                    <h3>Average Loan Size</h3>
                                 </div>
-                                <h3>Average Loan Disbursed</h3>
+                                <p>{averageLoanDisbursed}</p>
                             </div>
-                            <p>{averageLoanDisbursed}</p>
-                        </div>
 
-                        <div className="card">
-                            <div className="card-header">
-                                <div className="icon-container">
-                                    <FaUser className="card-icon"/>
+                            <div className="card">
+                                <div className="card-header">
+                                    <div className="icon-container">
+                                        <FaHandHoldingUsd className="card-icon"/>
+                                    </div>
+                                    <h3>Today's Disbursements</h3>
                                 </div>
-                                <h3>Clients Per Personnel</h3>
+                                <p>{todaysDisbursements}</p>
                             </div>
-                            <p>{clientsPerPersonnel}</p>
-                        </div>
 
-                        <div className="card" onClick={() => navigate('/clients')}>
-                            <div className="card-header">
-                                <div className="icon-container">
-                                    <FaUser className="card-icon"/>
+                            <div className="card">
+                                <div className="card-header">
+                                    <div className="icon-container">
+                                        <FaHandHoldingUsd className="card-icon"/>
+                                    </div>
+                                    <h3>This Month's Disbursements</h3>
                                 </div>
-                                <h3>Total Clients</h3>
+                                <p>{thisMonthsDisbursements}</p>
                             </div>
-                            <p>{totalClients}</p>
-                        </div>
-                        <div className="card" onClick={() => navigate('/clients')}>
-                            <div className="card-header">
-                                <div className="icon-container">
-                                    <FaUser className="card-icon"/>
+
+                            <div className="card">
+                                <div className="card-header">
+                                    <div className="icon-container">
+                                        <FaUser className="card-icon"/>
+                                    </div>
+                                    <h3>Clients Per Personnel</h3>
                                 </div>
-                                <h3>Active Clients</h3>
+                                <p>{clientsPerPersonnel}</p>
                             </div>
-                            <p>{activeClients}</p>
-                        </div>
-                        <div className="card" onClick={() => navigate('/clients')}>
-                            <div className="card-header">
-                                <div className="icon-container">
-                                    <FaUser className="card-icon"/>
+
+                            <div className="card">
+                                <div className="card-header">
+                                    <div className="icon-container">
+                                        <FaUser className="card-icon"/>
+                                    </div>
+                                    <h3>Average Clients per Loan Officer</h3>
                                 </div>
-                                <h3>Inactive Clients</h3>
+                                <p>{averageClientsPerLoanOfficer}</p>
                             </div>
-                            <p>{inactiveClients}</p>
-                        </div>
-                        <div className="card" onClick={() => navigate('/clients')}>
-                            <div className="card-header">
-                                <div className="icon-container">
-                                    <FaUser className="card-icon"/>
+
+                            <div className="card" onClick={() => navigate('/clients')}>
+                                <div className="card-header">
+                                    <div className="icon-container">
+                                        <FaUser className="card-icon"/>
+                                    </div>
+                                    <h3>Total Clients</h3>
                                 </div>
-                                <h3>Pending Clients</h3>
+                                <p>{totalClients}</p>
                             </div>
-                            <p>{newClients}</p>
-                        </div>
-                        <div className="card">
-                            <div className="card-header">
-                                <div className="icon-container">
-                                    <FaMoneyCheckAlt className="card-icon"/>
+                            <div className="card" onClick={() => navigate('/clients')}>
+                                <div className="card-header">
+                                    <div className="icon-container">
+                                        <FaUser className="card-icon"/>
+                                    </div>
+                                    <h3>Active Clients</h3>
                                 </div>
-                                <h3>Principal Outstanding</h3>
+                                <p>{activeClients}</p>
                             </div>
-                            <p>{principalOutstanding}</p>
-                        </div>
-                        <div className="card">
-                            <div className="card-header">
-                                <div className="icon-container">
-                                    <FaHandHoldingUsd className="card-icon"/>
+                            <div className="card" onClick={() => navigate('/clients')}>
+                                <div className="card-header">
+                                    <div className="icon-container">
+                                        <FaUser className="card-icon"/>
+                                    </div>
+                                    <h3>Inactive Clients</h3>
                                 </div>
-                                <h3>Interest Outstanding</h3>
+                                <p>{inactiveClients}</p>
                             </div>
-                            <p>{interestOutstanding}</p>
-                        </div>
-                        <div className="card">
-                            <div className="card-header">
-                                <div className="icon-container">
-                                    <FaBalanceScale className="card-icon"/>
+                            <div className="card" onClick={() => navigate('/clients')}>
+                                <div className="card-header">
+                                    <div className="icon-container">
+                                        <FaUser className="card-icon"/>
+                                    </div>
+                                    <h3>Pending Clients</h3>
                                 </div>
-                                <h3>Total Outstanding</h3>
+                                <p>{newClients}</p>
                             </div>
-                            <p>{totalOutstanding}</p>
-                        </div>
-                        <div className="card">
-                            <div className="card-header">
-                                <div className="icon-container">
-                                    <FaChartLine className="card-icon"/>
+                            <div className="card">
+                                <div className="card-header">
+                                    <div className="icon-container">
+                                        <FaMoneyCheckAlt className="card-icon"/>
+                                    </div>
+                                    <h3>Principal Outstanding</h3>
                                 </div>
-                                <h3>Interest This Month</h3>
+                                <p>{principalOutstanding}</p>
                             </div>
-                            <p>{interestThisMonth}</p>
-                        </div>
-                        <div className="card">
-                            <div className="card-header">
-                                <div className="icon-container">
-                                    <FaExclamationTriangle className="card-icon"/>
+                            <div className="card">
+                                <div className="card-header">
+                                    <div className="icon-container">
+                                        <FaHandHoldingUsd className="card-icon"/>
+                                    </div>
+                                    <h3>Interest Outstanding</h3>
                                 </div>
-                                <h3>Principal Overdue</h3>
+                                <p>{interestOutstanding}</p>
                             </div>
-                            <p>{principalOverdue}</p>
-                        </div>
-                        <div className="card">
-                            <div className="card-header">
-                                <div className="icon-container">
-                                    <FaExclamationTriangle className="card-icon"/>
+                            <div className="card">
+                                <div className="card-header">
+                                    <div className="icon-container">
+                                        <FaBalanceScale className="card-icon"/>
+                                    </div>
+                                    <h3>Total Outstanding</h3>
                                 </div>
-                                <h3>Interest Overdue</h3>
+                                <p>{totalOutstanding}</p>
                             </div>
-                            <p>{interestOverdue}</p>
-                        </div>
-                        <div className="card">
-                            <div className="card-header">
-                                <div className="icon-container">
-                                    <FaBalanceScale className="card-icon"/>
+                            <div className="card">
+                                <div className="card-header">
+                                    <div className="icon-container">
+                                        <FaChartLine className="card-icon"/>
+                                    </div>
+                                    <h3>Interest This Month</h3>
                                 </div>
-                                <h3>Total Overdue</h3>
+                                <p>{interestThisMonth}</p>
                             </div>
-                            <p>{totalOverdue}</p>
-                        </div>
-                        <div className="card">
-                            <div className="card-header">
-                                <div className="icon-container">
-                                    <FaExclamationTriangle className="card-icon"/>
+                            <div className="card">
+                                <div className="card-header">
+                                    <div className="icon-container">
+                                        <FaExclamationTriangle className="card-icon"/>
+                                    </div>
+                                    <h3>Principal Overdue</h3>
                                 </div>
-                                <h3>Non-Performing Assets</h3>
+                                <p>{principalOverdue}</p>
                             </div>
-                            <p>{nonPerformingAssets}</p>
-                        </div>
-                        <div className="card">
-                            <div className="card-header">
-                                <div className="icon-container">
-                                    <FaBalanceScale className="card-icon"/>
+                            <div className="card">
+                                <div className="card-header">
+                                    <div className="icon-container">
+                                        <FaExclamationTriangle className="card-icon"/>
+                                    </div>
+                                    <h3>Interest Overdue</h3>
                                 </div>
-                                <h3>Loans for Approval</h3>
+                                <p>{interestOverdue}</p>
                             </div>
-                            <p>{loansForApproval}</p>
-                        </div>
-                        <div className="card">
-                            <div className="card-header">
-                                <div className="icon-container">
-                                    <FaBalanceScale className="card-icon"/>
+                            <div className="card">
+                                <div className="card-header">
+                                    <div className="icon-container">
+                                        <FaBalanceScale className="card-icon"/>
+                                    </div>
+                                    <h3>Total Overdue</h3>
                                 </div>
-                                <h3>Loans for Disapproval</h3>
+                                <p>{totalOverdue}</p>
                             </div>
-                            <p>{loansForDisapproval}</p>
-                        </div>
-                    </section>
+                            <div className="card">
+                                <div className="card-header">
+                                    <div className="icon-container">
+                                        <FaExclamationTriangle className="card-icon"/>
+                                    </div>
+                                    <h3>Non-Performing Assets</h3>
+                                </div>
+                                <p>{nonPerformingAssets}</p>
+                            </div>
+                            <div className="card">
+                                <div className="card-header">
+                                    <div className="icon-container">
+                                        <FaBalanceScale className="card-icon"/>
+                                    </div>
+                                    <h3>Pending Approval</h3>
+                                </div>
+                                <p>{loansForApproval}</p>
+                            </div>
+                            <div className="card">
+                                <div className="card-header">
+                                    <div className="icon-container">
+                                        <FaBalanceScale className="card-icon"/>
+                                    </div>
+                                    <h3>Pending Disbursements</h3>
+                                </div>
+                                <p>{loansForDisapproval}</p>
+                            </div>
+
+                            <div className="card">
+                                <div className="card-header">
+                                    <div className="icon-container">
+                                        <FaBalanceScale className="card-icon"/>
+                                    </div>
+                                    <h3>Today's Expected Payments</h3>
+                                </div>
+                                <p>{repaymentsToday}</p>
+                            </div>
+                            <div className="card">
+                                <div className="card-header">
+                                    <div className="icon-container">
+                                        <FaBalanceScale className="card-icon"/>
+                                    </div>
+                                    <h3>Total Savings</h3>
+                                </div>
+                                <p>{totalSavings}</p>
+                            </div>
+                            <div className="card">
+                                <div className="card-header">
+                                    <div className="icon-container">
+                                        <FaBalanceScale className="card-icon"/>
+                                    </div>
+                                    <h3>Saving Accounts' created this month</h3>
+                                </div>
+                                <p>{totalSavingsMobilizedThisMonth}</p>
+                            </div>
+                        </section>
+                    </div>
                 ) : (
                     <Insights selectedOffice={selectedOffice} officeOptions={officeOptions}/>
                 )}

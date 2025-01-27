@@ -22,7 +22,7 @@ const GroupApplications = () => {
             try {
                 const headers = {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 };
                 const response = await axios.get(`${API_CONFIG.baseURL}/groups/${groupId}`, { headers });
                 setGroupData(response.data);
@@ -66,7 +66,7 @@ const GroupApplications = () => {
     }
 
     return (
-        <div className="users-page-screen">
+        <div className="users-page-screen neighbor-element">
             <h2 className="users-page-head">
                 <Link to="/dashboard" className="breadcrumb-link">Dashboard</Link>{' '}
                 <span

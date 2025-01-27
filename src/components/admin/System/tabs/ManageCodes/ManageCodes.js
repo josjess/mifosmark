@@ -47,7 +47,7 @@ const ManageCodes = () => {
     };
 
     return (
-        <div className="manage-codes-page">
+        <div className="manage-codes-page neighbor-element">
             <h2 className="page-heading">
                 <Link to="/system" className="breadcrumb-link">
                     System

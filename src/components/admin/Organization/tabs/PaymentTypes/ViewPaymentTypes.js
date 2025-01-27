@@ -35,7 +35,7 @@ const ViewPaymentTypes = () => {
             const response = await axios.get(`${API_CONFIG.baseURL}/paymenttypes`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });
@@ -67,7 +67,7 @@ const ViewPaymentTypes = () => {
                 {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        'Fineract-Platform-TenantId': 'default',
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                         'Content-Type': 'application/json',
                     },
                 }
@@ -110,7 +110,7 @@ const ViewPaymentTypes = () => {
                 {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        'Fineract-Platform-TenantId': 'default',
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                         'Content-Type': 'application/json',
                     },
                 }
@@ -141,7 +141,7 @@ const ViewPaymentTypes = () => {
                 {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        'Fineract-Platform-TenantId': 'default',
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                         'Content-Type': 'application/json',
                     },
                 }
@@ -217,11 +217,16 @@ const ViewPaymentTypes = () => {
                             <td>{paymentType.position || ''}</td>
                             <td>
                                 <FaEdit
-                                    className="action-icon edit-icon"
+                                    size={20}
+                                    color={"#16730a"}
+                                    style={{ cursor: "pointer", marginRight: "10px" }}
+                                    // className="action-icon edit-icon"
                                     onClick={() => handleEdit(paymentType)}
                                 />
                                 <FaTrash
-                                    className="action-icon delete-icon"
+                                    size={20}
+                                    color={"#bc1111"}
+                                    style={{ cursor: "pointer"}}
                                     onClick={() => handleDelete(paymentType)}
                                 />
                             </td>

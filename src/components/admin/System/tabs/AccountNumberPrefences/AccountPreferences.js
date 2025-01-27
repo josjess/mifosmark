@@ -8,7 +8,7 @@ const AccountNumberPreferences = () => {
     const [activeTab, setActiveTab] = useState('viewPreferences');
 
     return (
-        <div className="account-number-preferences-page">
+        <div className="account-number-preferences-page neighbor-element">
             <h2 className="page-heading">
                 <Link to="/system" className="breadcrumb-link">System</Link> . Account Number Preferences
             </h2>

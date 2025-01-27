@@ -126,13 +126,20 @@ import LoanDetails from "./components/views/Clients/LoanDetails/LoanDetails";
 import SavingsDetails from "./components/views/Clients/SavingsDetails/SavingsDetails";
 import CollateralDetails from "./components/views/Clients/CollateralDetails/CollateralDetails";
 
+import SystemManagement from "./components/utilities/SystemManagement";
 
 const App = () => {
-    useEffect(() => {
-        loadConfig().then();
-    }, []);
+    const { redirectToLogin, authInitialized, baseURL } = useContext(AuthContext);
+    const [configLoaded, setConfigLoaded] = useState(false);
 
-    const { redirectToLogin } = useContext(AuthContext);
+    useEffect(() => {
+        const initializeConfig = async () => {
+            await loadConfig();
+            setConfigLoaded(true);
+        };
+
+        initializeConfig();
+    }, []);
 
     const location = useLocation();
     const [isLoginRendered, setIsLoginRendered] = useState(false);
@@ -143,6 +150,10 @@ const App = () => {
             setIsLoginRendered(true);
         }
     }, [location.pathname, isLoginRendered]);
+
+    if (!authInitialized || !configLoaded) {
+        return <div></div>;
+    }
 
     return (
         <AuthProvider>
@@ -279,6 +290,7 @@ const App = () => {
                             <Route path="/client/:clientId/loan-details/:loanId" element={<LoanDetails />} />
                             <Route path="/client/:clientId/savings-account/:savingsAccountId" element={<SavingsDetails/>} />
                             <Route path="/client/:clientId/collaterals/:collateralId" element={<CollateralDetails />} />
+                            <Route path="/System-Management" element={<SystemManagement />} />
 
                         </Route>
                     </Routes>

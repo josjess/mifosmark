@@ -8,7 +8,7 @@ const TemplatesPage = () => {
     const [activeTab, setActiveTab] = useState('viewTemplates');
 
     return (
-        <div className="templates-page-screen">
+        <div className="templates-page-screen neighbor-element">
             <h2 className="templates-page-head">
                 <Link to="/admin" className="breadcrumb-link">Admin</Link> . Templates
             </h2>

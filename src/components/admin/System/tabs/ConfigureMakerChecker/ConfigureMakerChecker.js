@@ -26,7 +26,7 @@ const ConfigureMakerChecker = () => {
             const response = await axios.get(`${API_CONFIG.baseURL}/permissions?makerCheckerable=true`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });
@@ -89,7 +89,7 @@ const ConfigureMakerChecker = () => {
             await axios.put(`${API_CONFIG.baseURL}/permissions`, updatedPermissions, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });
@@ -120,7 +120,7 @@ const ConfigureMakerChecker = () => {
     );
 
     return (
-        <div className="configure-maker-checker">
+        <div className="configure-maker-checker neighbor-element">
             <h2 className="page-heading">
                 <Link to="/system" className="breadcrumb-link">System</Link> . Configure Maker Checker Tasks
             </h2>

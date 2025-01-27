@@ -36,7 +36,7 @@ const ManageSchedulerJobs = () => {
     };
 
     return (
-        <div className="manage-scheduler-jobs-page">
+        <div className="manage-scheduler-jobs-page neighbor-element">
             <div className="page-header-container">
                 <h2 className="page-heading">
                     <Link to="/system" className="breadcrumb-link">System </Link>. Manage Scheduler and COB Jobs

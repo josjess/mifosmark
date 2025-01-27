@@ -7,7 +7,7 @@ const TaxGroups = () => {
     const [activeTab, setActiveTab] = useState("viewTaxGroups");
 
     return (
-        <div className="tab-products-page">
+        <div className="tab-products-page neighbor-element">
             <h2 className="page-heading">
                 <Link to="/manage-tax-configurations" className="breadcrumb-link">Manage Tax Configurations</Link> . Tax
                 Groups

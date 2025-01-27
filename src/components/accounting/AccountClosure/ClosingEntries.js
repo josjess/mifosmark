@@ -8,7 +8,7 @@ const ClosingEntries = () => {
     const [activeTab, setActiveTab] = useState('accountClosure');
 
     return (
-        <div className="closing-entries-screen">
+        <div className="closing-entries-screen neighbor-element">
             <h2 className="closing-entries-head">
                 <Link to="/accounting" className="breadcrumb-link">Accounting </Link> . Closing Entries
             </h2>

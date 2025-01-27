@@ -166,6 +166,294 @@ const SavingsAccounts = () => {
     const [journalEntries, setJournalEntries] = useState([]);
     const [isJournalEntriesModalOpen, setIsJournalEntriesModalOpen] = useState(false);
 
+    const [isUndoApprovalModalOpen, setIsUndoApprovalModalOpen] = useState(false);
+    const [undoApprovalNote, setUndoApprovalNote] = useState("");
+    const [isProcessingUndo, setIsProcessingUndo] = useState(false);
+
+    const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
+    const [approveForm, setApproveForm] = useState({
+        approvedOnDate: null,
+        note: "",
+    });
+    const [isProcessingApproval, setIsProcessingApproval] = useState(false);
+
+    const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+    const [rejectForm, setRejectForm] = useState({
+        rejectedOnDate: new Date(),
+        note: "",
+    });
+
+    const [isWithdrawnModalOpen, setIsWithdrawnModalOpen] = useState(false);
+    const [withdrawnForm, setWithdrawnForm] = useState({
+        withdrawnOnDate: new Date(),
+        note: "",
+    });
+
+    const [isActivateModalOpen, setIsActivateModalOpen] = useState(false);
+    const [activateForm, setActivateForm] = useState({
+        activatedOnDate: new Date(),
+    });
+
+    const handleOpenActivateModal = () => {
+        setActivateForm({
+            activatedOnDate: new Date(),
+        });
+        setIsActivateModalOpen(true);
+    };
+
+    const handleCloseActivateModal = () => {
+        setIsActivateModalOpen(false);
+    };
+
+    const handleActivateAccount = async () => {
+        try {
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+                "Content-Type": "application/json",
+            };
+
+            const payload = {
+                activatedOnDate: formatDateForPayload(activateForm.activatedOnDate),
+                dateFormat: "dd MMMM yyyy",
+                locale: "en",
+            };
+
+            await axios.post(
+                `${API_CONFIG.baseURL}/savingsaccounts/${savingsAccountId}?command=activate`,
+                payload,
+                { headers }
+            );
+
+            alert("Savings account activated successfully.");
+            fetchSavingsData();
+            handleCloseActivateModal();
+        } catch (error) {
+            console.error("Error activating savings account:", error);
+            alert("Failed to activate the savings account. Please try again.");
+        }
+    };
+
+    const handleDeleteSavingsAccount = async () => {
+        if (window.confirm("Are you sure you want to delete this savings account? This action cannot be undone.")) {
+            try {
+                const headers = {
+                    Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+                    "Content-Type": "application/json",
+                };
+
+                await axios.delete(
+                    `${API_CONFIG.baseURL}/savingsaccounts/${savingsAccountId}`,
+                    { headers }
+                );
+
+                alert("Savings account deleted successfully.");
+                navigate("/clients", {
+                    state: {
+                        clientId: clientId,
+                        clientName: clientDetails?.displayName || "Client Details",
+                        preventDuplicate: true,
+                    },
+                });
+            } catch (error) {
+                console.error("Error deleting savings account:", error);
+                alert("Failed to delete the savings account. Please try again.");
+            }
+        }
+    };
+
+    const handleOpenWithdrawnModal = () => {
+        setWithdrawnForm({
+            withdrawnOnDate: new Date(),
+            note: "",
+        });
+        setIsWithdrawnModalOpen(true);
+    };
+
+    const handleCloseWithdrawnModal = () => {
+        setIsWithdrawnModalOpen(false);
+    };
+
+    const handleWithdrawnByClient = async () => {
+        try {
+            if (!withdrawnForm.withdrawnOnDate) {
+                alert("Withdrawn On Date is required.");
+                return;
+            }
+
+            const payload = {
+                withdrawnOnDate: formatDateForPayload(withdrawnForm.withdrawnOnDate),
+                note: withdrawnForm.note,
+                dateFormat: "dd MMMM yyyy",
+                locale: "en",
+            };
+
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+                "Content-Type": "application/json",
+            };
+
+            await axios.post(
+                `${API_CONFIG.baseURL}/savingsaccounts/${savingsAccountId}?command=withdrawnByApplicant`,
+                payload,
+                { headers }
+            );
+
+            alert("Account marked as withdrawn successfully.");
+            handleCloseWithdrawnModal();
+            fetchSavingsData();
+        } catch (error) {
+            console.error("Error withdrawing account:", error);
+            alert("Failed to mark the account as withdrawn. Please try again.");
+        }
+    };
+
+    const handleOpenRejectModal = () => {
+        setRejectForm({
+            rejectedOnDate: new Date(),
+            note: "",
+        });
+        setIsRejectModalOpen(true);
+    };
+
+    const handleCloseRejectModal = () => {
+        setIsRejectModalOpen(false);
+    };
+
+    const handleRejectAccount = async () => {
+        try {
+            if (!rejectForm.rejectedOnDate) {
+                alert("Rejected On Date is required.");
+                return;
+            }
+
+            const payload = {
+                rejectedOnDate: formatDateForPayload(rejectForm.rejectedOnDate),
+                note: rejectForm.note,
+                dateFormat: "dd MMMM yyyy",
+                locale: "en",
+            };
+
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+                "Content-Type": "application/json",
+            };
+
+            await axios.post(
+                `${API_CONFIG.baseURL}/savingsaccounts/${savingsAccountId}?command=reject`,
+                payload,
+                { headers }
+            );
+
+            alert("Account rejected successfully.");
+            handleCloseRejectModal();
+            fetchSavingsData();
+        } catch (error) {
+            console.error("Error rejecting account:", error);
+            alert("Failed to reject the account. Please try again.");
+        }
+    };
+
+    const handleOpenApproveModal = () => {
+        setApproveForm({
+            approvedOnDate: new Date(),
+            note: "",
+        });
+        setIsApproveModalOpen(true);
+    };
+
+    const handleCloseApproveModal = () => {
+        setIsApproveModalOpen(false);
+        setApproveForm({
+            approvedOnDate: null,
+            note: "",
+        });
+    };
+
+    const handleApproveAccount = async () => {
+        if (!approveForm.approvedOnDate) {
+            alert("Please select an approval date.");
+            return;
+        }
+
+        setIsProcessingApproval(true);
+
+        try {
+            const endpoint = `${API_CONFIG.baseURL}/savingsaccounts/${savingsAccountId}?command=approve`;
+
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+                "Content-Type": "application/json",
+            };
+
+            const payload = {
+                approvedOnDate: formatDateForPayload(approveForm.approvedOnDate),
+                note: approveForm.note,
+                dateFormat: "dd MMMM yyyy",
+                locale: "en",
+            };
+
+            await axios.post(endpoint, payload, { headers });
+
+            alert("Account approved successfully.");
+            fetchSavingsData();
+            handleCloseApproveModal();
+        } catch (error) {
+            console.error("Error approving account:", error);
+            alert("Failed to approve account. Please try again.");
+        } finally {
+            setIsProcessingApproval(false);
+        }
+    };
+
+    const handleOpenUndoApprovalModal = () => {
+        setUndoApprovalNote("");
+        setIsUndoApprovalModalOpen(true);
+    };
+
+    const handleCloseUndoApprovalModal = () => {
+        setIsUndoApprovalModalOpen(false);
+        setUndoApprovalNote("");
+    };
+
+    const handleUndoApproval = async () => {
+        if (!undoApprovalNote.trim()) {
+            alert("Please provide a note for undo approval.");
+            return;
+        }
+
+        setIsProcessingUndo(true);
+
+        try {
+            const endpoint = `${API_CONFIG.baseURL}/savingsaccounts/${savingsAccountId}?command=undoapproval`;
+
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+                "Content-Type": "application/json",
+            };
+
+            const payload = {
+                note: undoApprovalNote,
+            };
+
+            await axios.post(endpoint, payload, { headers });
+
+            alert("Approval undone successfully.");
+            fetchSavingsData();
+            handleCloseUndoApprovalModal();
+        } catch (error) {
+            console.error("Error undoing approval:", error);
+            alert("Failed to undo approval. Please try again.");
+        } finally {
+            setIsProcessingUndo(false);
+        }
+    };
+
     const handleOpenExportModal = () => {
         setIsExportModalOpen(true);
     };
@@ -195,7 +483,7 @@ const SavingsAccounts = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -221,7 +509,7 @@ const SavingsAccounts = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -269,7 +557,7 @@ const SavingsAccounts = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -297,7 +585,7 @@ const SavingsAccounts = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -381,7 +669,7 @@ const SavingsAccounts = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -403,7 +691,7 @@ const SavingsAccounts = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -412,8 +700,14 @@ const SavingsAccounts = () => {
                 { headers }
             );
 
+            const accountResponse = await axios.get(
+                `${API_CONFIG.baseURL}/savingsaccounts/${savingsAccountId}?associations=all`,
+                { headers }
+            );
+
             const data = response.data || {};
-            setCloseTransactionAmount(data.accountBalance || 0);
+            const accountData = accountResponse.data || {};
+            setCloseTransactionAmount(accountData.summary.availableBalance || 0);
             setClosePaymentTypeOptions(data.paymentTypeOptions || []);
             setIsCloseModalOpen(true);
         } catch (error) {
@@ -447,18 +741,13 @@ const SavingsAccounts = () => {
         }
 
         const payload = {
-            transactionDate: closeTransactionDate.toLocaleDateString("en-GB", {
-                day: "2-digit",
-                month: "long",
-                year: "numeric",
-            }),
-            isWithdrawBalance,
-            isInterestPostingRequired,
+            closedOnDate: formatDateForPayload(closeTransactionDate),
+            withdrawBalance: isWithdrawBalance,
+            postInterestValidationOnClosure: isInterestPostingRequired,
             ...(isWithdrawBalance && {
-                transactionAmount: closeTransactionAmount,
                 paymentTypeId: closeSelectedPaymentType,
                 accountNumber: closeAccountNumber,
-                chequeNumber: closeChequeNumber,
+                checkNumber: closeChequeNumber,
                 routingCode: closeRoutingCode,
                 receiptNumber: closeReceiptNumber,
                 bankNumber: closeBankNumber,
@@ -472,7 +761,7 @@ const SavingsAccounts = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -498,7 +787,7 @@ const SavingsAccounts = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -547,7 +836,7 @@ const SavingsAccounts = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -581,7 +870,7 @@ const SavingsAccounts = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -632,7 +921,7 @@ const SavingsAccounts = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -666,7 +955,7 @@ const SavingsAccounts = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -692,7 +981,7 @@ const SavingsAccounts = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -729,6 +1018,16 @@ const SavingsAccounts = () => {
         setHoldTransactionAmount("");
     };
 
+    const formatDateForPayload = (date) => {
+        return date
+            .toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "long",
+                year: "numeric",
+            })
+            .replace(",", "");
+    };
+
     const handleSubmitHoldAmount = async () => {
         if (!holdAmountReason || !holdTransactionDate || !holdTransactionAmount) {
             alert("Please fill in all mandatory fields.");
@@ -736,12 +1035,8 @@ const SavingsAccounts = () => {
         }
 
         const payload = {
-            reason: holdAmountReason,
-            transactionDate: holdTransactionDate.toLocaleDateString("en-GB", {
-                day: "2-digit",
-                month: "long",
-                year: "numeric",
-            }),
+            reasonForBlock: holdAmountReason,
+            transactionDate: formatDateForPayload(holdTransactionDate),
             transactionAmount: holdTransactionAmount,
             dateFormat: "dd MMMM yyyy",
             locale: "en",
@@ -751,12 +1046,12 @@ const SavingsAccounts = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
             await axios.post(
-                `${API_CONFIG.baseURL}/savingsaccounts/${savingsAccountId}/hold-amount`,
+                `${API_CONFIG.baseURL}/savingsaccounts/${savingsAccountId}/transactions?command=holdAmount`,
                 payload,
                 { headers }
             );
@@ -777,7 +1072,7 @@ const SavingsAccounts = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -819,9 +1114,7 @@ const SavingsAccounts = () => {
         }
 
         const payload = {
-            reason: blockAccountReason,
-            dateFormat: "dd MMMM yyyy",
-            locale: "en",
+            reasonForBlock: blockAccountReason,
         };
 
         startLoading();
@@ -829,12 +1122,12 @@ const SavingsAccounts = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
             await axios.post(
-                `${API_CONFIG.baseURL}/savingsaccounts/${savingsAccountId}/block-account`,
+                `${API_CONFIG.baseURL}/savingsaccounts/${savingsAccountId}?command=block`,
                 payload,
                 { headers }
             );
@@ -855,7 +1148,7 @@ const SavingsAccounts = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -897,9 +1190,7 @@ const SavingsAccounts = () => {
         }
 
         const payload = {
-            reason: blockWithdrawalReason,
-            dateFormat: "dd MMMM yyyy",
-            locale: "en",
+            reasonForBlock: blockWithdrawalReason,
         };
 
         startLoading();
@@ -907,12 +1198,12 @@ const SavingsAccounts = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
             await axios.post(
-                `${API_CONFIG.baseURL}/savingsaccounts/${savingsAccountId}/block-withdrawal`,
+                `${API_CONFIG.baseURL}/savingsaccounts/${savingsAccountId}?command=blockWithdraw`,
                 payload,
                 { headers }
             );
@@ -933,7 +1224,7 @@ const SavingsAccounts = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -980,13 +1271,13 @@ const SavingsAccounts = () => {
                 year: "numeric",
             }),
             transactionAmount: parseFloat(withdrawTransactionAmount),
-            paymentTypeId: parseInt(withdrawSelectedPaymentType),
+            paymentTypeId: parseInt(withdrawSelectedPaymentType, 10),
             note: withdrawNote || "",
             dateFormat: "dd MMMM yyyy",
             locale: "en",
             ...(showWithdrawPaymentDetails && {
-                accountNumber: withdrawAccountNumber || "",
-                chequeNumber: withdrawChequeNumber || "",
+                accountNumber: withdrawAccountNumber ? parseInt(withdrawAccountNumber, 10) : 0,
+                checkNumber: withdrawChequeNumber ? parseInt(withdrawChequeNumber, 10) : 0,
                 routingCode: withdrawRoutingCode || "",
                 receiptNumber: withdrawReceiptNumber || "",
                 bankNumber: withdrawBankNumber || "",
@@ -999,7 +1290,7 @@ const SavingsAccounts = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -1038,7 +1329,7 @@ const SavingsAccounts = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -1074,23 +1365,22 @@ const SavingsAccounts = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
             const payload = {
-                locale: "en",
                 reasonId: selectedBlockDepositReason,
             };
 
             await axios.post(
-                `${API_CONFIG.baseURL}/savingsaccounts/${savingsAccountId}?command=block-deposit`,
+                `${API_CONFIG.baseURL}/savingsaccounts/${savingsAccountId}?command=blockdeposit`,
                 payload,
                 { headers }
             );
 
             alert("Deposit block submitted successfully.");
-            fetchSavingsData(); // Refresh page data
+            fetchSavingsData();
             handleCloseBlockDepositModal();
         } catch (error) {
             console.error("Error blocking deposit:", error);
@@ -1114,7 +1404,7 @@ const SavingsAccounts = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -1165,7 +1455,7 @@ const SavingsAccounts = () => {
             locale: "en",
             ...(showDepositPaymentDetails && {
                 accountNumber: depositAccountNumber || "",
-                chequeNumber: depositChequeNumber || "",
+                checkNumber: depositChequeNumber || "",
                 routingCode: depositRoutingCode || "",
                 receiptNumber: depositReceiptNumber || "",
                 bankNumber: depositBankNumber || "",
@@ -1178,7 +1468,7 @@ const SavingsAccounts = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -1217,7 +1507,7 @@ const SavingsAccounts = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
             const response = await axios.get(
@@ -1235,7 +1525,7 @@ const SavingsAccounts = () => {
     };
 
     const handleEditInstruction = (instruction) => {
-        console.log("Edit instruction", instruction);
+        // console.log("Edit instruction", instruction);
     };
 
     const handleDeleteInstruction = async (instructionId) => {
@@ -1243,7 +1533,7 @@ const SavingsAccounts = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
             await axios.delete(
@@ -1269,7 +1559,7 @@ const SavingsAccounts = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
             const response = await axios.get(
@@ -1289,7 +1579,7 @@ const SavingsAccounts = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
             if (editingNoteId) {
@@ -1321,7 +1611,7 @@ const SavingsAccounts = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
             await axios.delete(
@@ -1353,7 +1643,7 @@ const SavingsAccounts = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
             const response = await axios.get(
@@ -1383,7 +1673,7 @@ const SavingsAccounts = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
             };
             await axios.post(
                 `${API_CONFIG.baseURL}/savings/${savingsAccountId}/documents`,
@@ -1446,7 +1736,7 @@ const SavingsAccounts = () => {
 
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -1477,7 +1767,7 @@ const SavingsAccounts = () => {
 
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -1504,7 +1794,7 @@ const SavingsAccounts = () => {
 
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
             };
 
             const response = await axios.get(receiptURL, {
@@ -1533,14 +1823,19 @@ const SavingsAccounts = () => {
 
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
             const response = await axios.get(endpoint, { headers });
-            const data = response.data;
+            const data = response.data || {};
 
-            setJournalEntries(data);
+            if (data.totalFilteredRecords > 0 && Array.isArray(data.pageItems)) {
+                setJournalEntries(data.pageItems);
+            } else {
+                setJournalEntries([]);
+            }
+
             setIsJournalEntriesModalOpen(true);
         } catch (error) {
             console.error("Error fetching journal entries:", error);
@@ -1585,7 +1880,7 @@ const SavingsAccounts = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -1663,7 +1958,7 @@ const SavingsAccounts = () => {
                                 <tr>
                                     <td className="label">Total Deposits</td>
                                     <td className="value">
-                                        {savingsDetails?.currency?.displaySymbol}{" "}
+                                        {savingsDetails?.currency?.code}{" "}
                                         {savingsDetails?.summary?.totalDeposits?.toLocaleString("en-US", {
                                             minimumFractionDigits: 2,
                                             maximumFractionDigits: 2,
@@ -1682,7 +1977,7 @@ const SavingsAccounts = () => {
                                 <tr>
                                     <td className="label">Interest Earned Not Posted</td>
                                     <td className="value">
-                                        {savingsDetails?.currency?.displaySymbol}{" "}
+                                        {savingsDetails?.currency?.code}{" "}
                                         {savingsDetails?.summary?.interestNotPosted?.toLocaleString("en-US", {
                                             minimumFractionDigits: 2,
                                             maximumFractionDigits: 2,
@@ -1719,20 +2014,20 @@ const SavingsAccounts = () => {
                                 </tr>
                                 <tr>
                                     <td className="label">Days to Inactive</td>
-                                    <td className="value">{savingsDetails?.daysToInactive || "N/A"}</td>
+                                    <td className="value">{savingsDetails?.daysToInactive || ""}</td>
                                 </tr>
                                 <tr>
                                     <td className="label">Days to Dormancy</td>
-                                    <td className="value">{savingsDetails?.daysToDormancy || "N/A"}</td>
+                                    <td className="value">{savingsDetails?.daysToDormancy || ""}</td>
                                 </tr>
                                 <tr>
                                     <td className="label">Days to Escheat</td>
-                                    <td className="value">{savingsDetails?.daysToEscheat || "N/A"}</td>
+                                    <td className="value">{savingsDetails?.daysToEscheat || ""}</td>
                                 </tr>
                                 <tr>
                                     <td className="label">Overdraft Limit</td>
                                     <td className="value">
-                                        {savingsDetails?.currency?.displaySymbol}{" "}
+                                        {savingsDetails?.currency?.code}{" "}
                                         {savingsDetails?.overdraftLimit?.toLocaleString("en-US", {
                                             minimumFractionDigits: 2,
                                             maximumFractionDigits: 2,
@@ -1742,7 +2037,7 @@ const SavingsAccounts = () => {
                                 <tr>
                                     <td className="label">Minimum Overdraft Required for Interest Calculation</td>
                                     <td className="value">
-                                        {savingsDetails?.currency?.displaySymbol}{" "}
+                                        {savingsDetails?.currency?.code}{" "}
                                         {savingsDetails?.minRequiredOverdraftForInterestCalculation?.toLocaleString("en-US", {
                                             minimumFractionDigits: 2,
                                             maximumFractionDigits: 2,
@@ -1757,7 +2052,6 @@ const SavingsAccounts = () => {
             case "transactions":
                 return (
                     <div className="tab-content">
-                        {/* Toggle Buttons and Export */}
                         <div className="transactions-header">
                             <div className="actions">
                                 <label>
@@ -1816,7 +2110,13 @@ const SavingsAccounts = () => {
                             </thead>
                             <tbody>
                             {currentPageData.map((transaction, index) => (
-                                <tr key={transaction.id}>
+                                <tr
+                                    key={transaction.id}
+                                    style={{
+                                        textDecoration: transaction.reversed ? "line-through" : "none",
+                                        color: transaction.reversed ? "gray" : "inherit",
+                                    }}
+                                >
                                     <td>{(currentPage - 1) * pageSize + index + 1}</td>
                                     <td>{transaction.id}</td>
                                     <td>
@@ -1832,7 +2132,7 @@ const SavingsAccounts = () => {
                                     <td>{transaction.transactionType?.value || ""}</td>
                                     <td>
                                         {transaction.entryType === "DEBIT"
-                                            ? `${transaction.currency?.displaySymbol || ""} ${transaction.amount.toLocaleString(
+                                            ? `${transaction.currency?.code || ""} ${transaction.amount.toLocaleString(
                                                 undefined,
                                                 {minimumFractionDigits: 2}
                                             )}`
@@ -1840,13 +2140,13 @@ const SavingsAccounts = () => {
                                     </td>
                                     <td>
                                         {transaction.entryType === "CREDIT"
-                                            ? `${transaction.currency?.displaySymbol || ""} ${transaction.amount.toLocaleString(
+                                            ? `${transaction.currency?.code || ""} ${transaction.amount.toLocaleString(
                                                 undefined,
                                                 {minimumFractionDigits: 2}
                                             )}`
                                             : ""}
                                     </td>
-                                    <td>{`${transaction.currency?.displaySymbol || ""} ${transaction.runningBalance.toLocaleString(
+                                    <td>{`${transaction.currency?.code || ""} ${transaction.runningBalance.toLocaleString(
                                         undefined,
                                         {minimumFractionDigits: 2}
                                     )}`}</td>
@@ -1878,7 +2178,7 @@ const SavingsAccounts = () => {
                         </table>
                         {totalPages > 1 && (
                             <div className="pagination">
-                                <button
+                            <button
                                     className="pagination-button"
                                     onClick={() => setCurrentPage(1)}
                                     disabled={currentPage === 1}
@@ -1961,24 +2261,24 @@ const SavingsAccounts = () => {
                                     </td>
                                     <td>{charge.chargeCalculationType?.value || ""}</td>
                                     <td>
-                                        {`${charge.currency?.displaySymbol || ""} ${charge.amount.toLocaleString(undefined, {
+                                        {`${charge.currency?.code || ""} ${charge.amount.toLocaleString(undefined, {
                                             minimumFractionDigits: 2,
                                         })}`}
                                     </td>
                                     <td>
-                                        {`${charge.currency?.displaySymbol || ""} ${charge.amountPaid.toLocaleString(
+                                        {`${charge.currency?.code || ""} ${charge.amountPaid.toLocaleString(
                                             undefined,
                                             {minimumFractionDigits: 2}
                                         )}`}
                                     </td>
                                     <td>
-                                        {`${charge.currency?.displaySymbol || ""} ${charge.amountWaived.toLocaleString(
+                                        {`${charge.currency?.code || ""} ${charge.amountWaived.toLocaleString(
                                             undefined,
                                             {minimumFractionDigits: 2}
                                         )}`}
                                     </td>
                                     <td>
-                                        {`${charge.currency?.displaySymbol || ""} ${charge.amountOutstanding.toLocaleString(
+                                        {`${charge.currency?.code || ""} ${charge.amountOutstanding.toLocaleString(
                                             undefined,
                                             {minimumFractionDigits: 2}
                                         )}`}
@@ -2134,7 +2434,7 @@ const SavingsAccounts = () => {
                                         <div className="note-content">
                                             <p>{note.note}</p>
                                             <small>
-                                                Created By: {note.createdBy || "Unknown"} |{" "}
+                                                Created By: {note.createdByUsername || "Unknown"} |{" "}
                                                 {new Date(note.createdOn).toLocaleDateString(undefined, {
                                                     dateStyle: "long",
                                                 })}
@@ -2142,13 +2442,13 @@ const SavingsAccounts = () => {
                                         </div>
                                         <div className="note-actions">
                                             <button
-                                                className="note-general-action-button"
+                                                style={{border: "none"}}
                                                 onClick={() => handleEditNote(note)}
                                             >
                                                 <FaEdit color={"#56bc23"} size={20} />
                                             </button>
                                             <button
-                                                className="note-general-action-button"
+                                                style={{border: "none"}}
                                                 onClick={() => handleDeleteNote(note.id)}
                                             >
                                                 <FaTrash color={"#e13a3a"} size={20} />
@@ -2233,7 +2533,7 @@ const SavingsAccounts = () => {
                                         <td>{instruction.toAccountId || "N/A"}</td>
                                         <td>
                                             {instruction.amount
-                                                ? `${instruction.currency?.displaySymbol || ""} ${instruction.amount.toLocaleString()}`
+                                                ? `${instruction.currency?.code || ""} ${instruction.amount.toLocaleString()}`
                                                 : "N/A"}
                                         </td>
                                         <td>
@@ -2327,8 +2627,43 @@ const SavingsAccounts = () => {
         });
     };
 
+    const handleUnblockAccount = async () => {
+        const confirmUnblock = window.confirm("Are you sure you want to unblock this account?");
+
+        if (!confirmUnblock) return;
+
+        try {
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                "Content-Type": "application/json",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+            };
+
+            await axios.post(
+                `${API_CONFIG.baseURL}/savingsaccounts/${savingsDetails.id}?command=unblock`,
+                {
+                    dateFormat: "dd MMMM yyyy",
+                    locale: "en",
+                },
+                { headers }
+            );
+
+            alert("Account successfully unblocked.");
+            fetchSavingsData();
+        } catch (error) {
+            console.error("Error unblocking the account:", error);
+            alert("Failed to unblock the account. Please try again.");
+        }
+    };
+
+    const handleModifyApplication = () => {
+        navigate(`/client/${clientId}/applications/savings`, {
+            state: { isModification: true, accountId: savingsAccountId },
+        });
+    };
+
     return (
-        <div className="users-page-screen">
+        <div className="users-page-screen neighbor-element">
             <h2 className="users-page-head">
                 <Link to="/clients" className="breadcrumb-link">Clients</Link>{' '}
                 <span
@@ -2376,13 +2711,13 @@ const SavingsAccounts = () => {
                         <li>
                             <span className="client-info-label">Current Balance:</span>
                             <span className="client-info-value">
-                                {savingsDetails?.currency?.displaySymbol} {savingsDetails?.summary?.accountBalance || "0.00"}
+                                {savingsDetails?.currency?.code} {savingsDetails?.summary?.accountBalance || "0.00"}
                             </span>
                         </li>
                         <li>
                             <span className="client-info-label">Available Balance:</span>
                             <span className="client-info-value">
-                                {savingsDetails?.currency?.displaySymbol} {savingsDetails?.summary?.availableBalance || "0.00"}
+                                {savingsDetails?.currency?.code} {savingsDetails?.summary?.availableBalance || "0.00"}
                             </span>
                         </li>
                     </ul>
@@ -2394,57 +2729,176 @@ const SavingsAccounts = () => {
                     </button>
                     {isDropdownOpen && (
                         <div className="actions-dropdown-menu">
-                            <button className="dropdown-item" onClick={handleOpenDepositModal}>
-                                Deposit
-                            </button>
-                            <button className="dropdown-item" onClick={handleOpenBlockDepositModal}>
-                                Block Deposit
-                            </button>
-                            <button className="dropdown-item" onClick={handleOpenWithdrawModal}>
-                                Withdraw
-                            </button>
-                            <button className="dropdown-item" onClick={handleOpenBlockWithdrawalModal}>
-                                Block Withdrawal
-                            </button>
-                            <button className="dropdown-item" onClick={handleOpenBlockAccountModal}>
-                                Block Account
-                            </button>
-                            <button className="dropdown-item" onClick={handleOpenHoldAmountModal}>
-                                Hold Amount
-                            </button>
-                            <button className="dropdown-item" onClick={handleOpenCalculateInterestModal}>
-                                Calculate Interest
-                            </button>
-                            <button className="dropdown-item" onClick={handleOpenPostInterestAsOnModal}>
-                                Post Interest As On
-                            </button>
-                            <div className="dropdown-submenu">
+                            {savingsDetails?.subStatus?.block ? (
                                 <button
-                                    className="dropdown-item submenu-toggle"
-                                    onClick={() => handleSubmenuToggle("more")}
+                                    className="dropdown-item"
+                                    onClick={handleUnblockAccount}
                                 >
-                                    More <FaCaretRight className="submenu-icon"/>
+                                    Unblock Account
                                 </button>
-                                {activeSubmenu === "more" && (
-                                    <div className="submenu-content">
-                                        <button className="dropdown-item" onClick={handleOpenPostInterestModal}>
-                                            Post Interest
+                            ) : savingsDetails?.status?.approved && !savingsDetails?.status?.active ? (
+                                <>
+                                    <button className="dropdown-item" onClick={handleOpenUndoApprovalModal} >
+                                        Undo Approval
+                                    </button>
+                                    <button className="dropdown-item" onClick={handleOpenActivateModal}>
+                                        Activate
+                                    </button>
+                                    <button className="dropdown-item" onClick={handleOpenAddChargeModal}>
+                                        Add Charge
+                                    </button>
+                                    <div className="dropdown-submenu">
+                                        <button
+                                            className="dropdown-item submenu-toggle"
+                                            onClick={() => handleSubmenuToggle("more")}
+                                        >
+                                            More <FaCaretRight className="submenu-icon"/>
                                         </button>
-                                        <button className="dropdown-item" onClick={handleOpenAddChargeModal}>
-                                            Add Charge
+                                        {activeSubmenu === "more" && (
+                                            <div className="submenu-content">
+                                                <button className="dropdown-item" onClick={handleOpenTransferFundsModal}>
+                                                    Transfer Funds
+                                                </button>
+                                                {savingsDetails?.fieldOfficerId ? (
+                                                    <button className="dropdown-item" onClick={handleOpenAssignStaffModal}>
+                                                        Change Staff
+                                                    </button>
+                                                ) : (
+                                                    <button className="dropdown-item" onClick={handleOpenAssignStaffModal}>
+                                                        Assign Staff
+                                                    </button>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                </>
+                            ) : savingsDetails?.status?.submittedAndPendingApproval ? (
+                                <>
+                                    <button className="dropdown-item" onClick={handleModifyApplication} >
+                                        Modify Application
+                                    </button>
+                                    <button className="dropdown-item" onClick={handleOpenApproveModal} >
+                                        Approve
+                                    </button>
+                                    <div className="dropdown-submenu">
+                                        <button
+                                            className="dropdown-item submenu-toggle"
+                                            onClick={() => handleSubmenuToggle("more")}
+                                        >
+                                            More <FaCaretRight className="submenu-icon"/>
                                         </button>
-                                        <button className="dropdown-item" onClick={handleOpenCloseModal}>
-                                            Close
+                                        {activeSubmenu === "more" && (
+                                            <div className="submenu-content">
+                                                <button className="dropdown-item" onClick={handleOpenRejectModal}>
+                                                    Reject
+                                                </button>
+                                                <button className="dropdown-item" onClick={handleOpenWithdrawnModal}>
+                                                    Withdrawn by Client
+                                                </button>
+                                                <button className="dropdown-item" onClick={handleOpenAddChargeModal}>
+                                                    Add Charge
+                                                </button>
+                                                <button
+                                                    className="dropdown-item"
+                                                    onClick={handleDeleteSavingsAccount}
+                                                >
+                                                    Delete
+                                                </button>
+                                                <button className="dropdown-item"
+                                                        onClick={handleOpenTransferFundsModal}>
+                                                    Transfer Funds
+                                                </button>
+                                                {savingsDetails?.fieldOfficerId ? (
+                                                    <button className="dropdown-item"
+                                                            onClick={handleOpenAssignStaffModal}>
+                                                        Change Staff
+                                                    </button>
+                                                ) : (
+                                                    <button className="dropdown-item"
+                                                            onClick={handleOpenAssignStaffModal}>
+                                                        Assign Staff
+                                                    </button>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                </>
+                            ) : savingsDetails?.status?.active ? (
+                                <>
+                                    <button className="dropdown-item" onClick={handleOpenDepositModal}>
+                                        Deposit
+                                    </button>
+                                    <button className="dropdown-item" onClick={handleOpenBlockDepositModal}>
+                                        Block Deposit
+                                    </button>
+                                    <button className="dropdown-item" onClick={handleOpenWithdrawModal}>
+                                        Withdraw
+                                    </button>
+                                    <button className="dropdown-item" onClick={handleOpenBlockWithdrawalModal}>
+                                        Block Withdrawal
+                                    </button>
+                                    <button className="dropdown-item" onClick={handleOpenBlockAccountModal}>
+                                        Block Account
+                                    </button>
+                                    <button className="dropdown-item" onClick={handleOpenHoldAmountModal}>
+                                        Hold Amount
+                                    </button>
+                                    <button className="dropdown-item" onClick={handleOpenCalculateInterestModal}>
+                                        Calculate Interest
+                                    </button>
+                                    <button className="dropdown-item" onClick={handleOpenPostInterestAsOnModal}>
+                                        Post Interest As On
+                                    </button>
+                                    <div className="dropdown-submenu">
+                                        <button
+                                            className="dropdown-item submenu-toggle"
+                                            onClick={() => handleSubmenuToggle("more")}
+                                        >
+                                            More <FaCaretRight className="submenu-icon"/>
                                         </button>
-                                        <button className="dropdown-item" onClick={handleOpenTransferFundsModal}>
-                                            Transfer Funds
+                                        {activeSubmenu === "more" && (
+                                            <div className="submenu-content">
+                                                <button className="dropdown-item" onClick={handleOpenPostInterestModal}>
+                                                    Post Interest
+                                                </button>
+                                                <button className="dropdown-item" onClick={handleOpenAddChargeModal}>
+                                                    Add Charge
+                                                </button>
+                                                <button className="dropdown-item" onClick={handleOpenCloseModal}>
+                                                    Close
+                                                </button>
+                                                <button className="dropdown-item" onClick={handleOpenTransferFundsModal}>
+                                                    Transfer Funds
+                                                </button>
+                                                {savingsDetails?.fieldOfficerId ? (
+                                                    <button className="dropdown-item" onClick={handleOpenAssignStaffModal}>
+                                                        Change Staff
+                                                    </button>
+                                                ) : (
+                                                    <button className="dropdown-item" onClick={handleOpenAssignStaffModal}>
+                                                        Assign Staff
+                                                    </button>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <button className="dropdown-item" onClick={handleOpenTransferFundsModal}>
+                                        Transfer Funds
+                                    </button>
+                                    {savingsDetails?.fieldOfficerId ? (
+                                        <button className="dropdown-item" onClick={handleOpenAssignStaffModal}>
+                                            Change Staff
                                         </button>
+                                    ) : (
                                         <button className="dropdown-item" onClick={handleOpenAssignStaffModal}>
                                             Assign Staff
                                         </button>
-                                    </div>
-                                )}
-                            </div>
+                                    )}
+                                </>
+                            )}
                         </div>
                     )}
                 </div>
@@ -2456,33 +2910,39 @@ const SavingsAccounts = () => {
                         className="scroll-button scroll-left"
                         onClick={() => scrollTabs("left")}
                     >
-                        <FaCaretLeft />
+                        <FaCaretLeft/>
                     </button>
                 )}
                 <div className="client-details-tabs" ref={tabsContainerRef}>
-                    {[
-                        "general",
-                        "transactions",
-                        "charges",
-                        "documents",
-                        "notes",
-                        "standingInstructions",
-                    ].map((tab) => (
-                        <button
-                            key={tab}
-                            className={`loan-tab-button ${activeTab === tab ? "active" : ""}`}
-                            onClick={() => setActiveTab(tab)}
-                        >
-                            {tab.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase())}
-                        </button>
-                    ))}
+                    {savingsDetails?.status?.closed ||
+                    savingsDetails?.status?.withdrawnByApplicant ||
+                    savingsDetails?.status?.prematureClosed ? (
+                        <></>
+                    ) : (
+                        [
+                            "general",
+                            "transactions",
+                            "charges",
+                            "documents",
+                            "notes",
+                            "standingInstructions",
+                        ].map((tab) => (
+                            <button
+                                key={tab}
+                                className={`loan-tab-button ${activeTab === tab ? "active" : ""}`}
+                                onClick={() => setActiveTab(tab)}
+                            >
+                                {tab.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase())}
+                            </button>
+                        ))
+                    )}
                 </div>
                 {canScrollRight && (
                     <button
                         className="scroll-button scroll-right"
                         onClick={() => scrollTabs("right")}
                     >
-                        <FaCaretRight />
+                        <FaCaretRight/>
                     </button>
                 )}
             </div>
@@ -2832,7 +3292,7 @@ const SavingsAccounts = () => {
                             >
                                 <option value="">Select a reason</option>
                                 {blockWithdrawalReasons.map((reason) => (
-                                    <option key={reason.id} value={reason.name}>
+                                    <option key={reason.id} value={reason.id}>
                                         {reason.name}
                                     </option>
                                 ))}
@@ -2876,7 +3336,7 @@ const SavingsAccounts = () => {
                             >
                                 <option value="">Select a reason</option>
                                 {blockAccountReasons.map((reason) => (
-                                    <option key={reason.id} value={reason.name}>
+                                    <option key={reason.id} value={reason.id}>
                                         {reason.name}
                                     </option>
                                 ))}
@@ -2920,7 +3380,7 @@ const SavingsAccounts = () => {
                             >
                                 <option value="">Select a reason</option>
                                 {holdAmountReasons.map((reason) => (
-                                    <option key={reason.id} value={reason.name}>
+                                    <option key={reason.id} value={reason.id}>
                                         {reason.name}
                                     </option>
                                 ))}
@@ -3179,21 +3639,19 @@ const SavingsAccounts = () => {
 
                         {/* Checkboxes */}
                         <div className="create-provisioning-criteria-group">
-                            <label>
+                            <label className={"create-provisioning-criteria-label"}>
                                 <input
                                     type="checkbox"
                                     checked={isWithdrawBalance}
                                     onChange={(e) => setIsWithdrawBalance(e.target.checked)}
-                                />
-                                Withdraw Balance
+                                /> {" "}Withdraw Balance
                             </label>
-                            <label>
+                            <label className={"create-provisioning-criteria-label"}>
                                 <input
                                     type="checkbox"
                                     checked={isInterestPostingRequired}
                                     onChange={(e) => setIsInterestPostingRequired(e.target.checked)}
-                                />
-                                Is Interest Posting Required on Closure Date?
+                                />{" "} Is Interest Posting Required on Closure Date?
                             </label>
                         </div>
 
@@ -3232,52 +3690,63 @@ const SavingsAccounts = () => {
                                     </select>
                                 </div>
 
-                                <div className="create-provisioning-criteria-group">
-                                    <label>Show Payment Details</label>
-                                    <input
-                                        type="checkbox"
-                                        checked={showClosePaymentDetails}
-                                        onChange={(e) => setShowClosePaymentDetails(e.target.checked)}
-                                    />
+                                <div className="create-holiday-row">
+                                    <label className="create-provisioning-criteria-label">
+                                        Show Payment Details
+                                    </label>
+                                    <div className="switch-toggle">
+                                        <label className="switch">
+                                            <input
+                                                type="checkbox"
+                                                checked={showClosePaymentDetails}
+                                                onChange={(e) => setShowClosePaymentDetails(e.target.checked)}
+                                            />
+                                            <span className="slider round"></span>
+                                        </label>
+                                    </div>
                                 </div>
 
                                 {showClosePaymentDetails && (
                                     <>
-                                        <input
-                                            type="text"
-                                            placeholder="Account #"
-                                            value={closeAccountNumber}
-                                            onChange={(e) => setCloseAccountNumber(e.target.value)}
-                                            className="create-provisioning-criteria-input"
-                                        />
-                                        <input
-                                            type="text"
-                                            placeholder="Cheque #"
-                                            value={closeChequeNumber}
-                                            onChange={(e) => setCloseChequeNumber(e.target.value)}
-                                            className="create-provisioning-criteria-input"
-                                        />
-                                        <input
-                                            type="text"
-                                            placeholder="Routing Code"
-                                            value={closeRoutingCode}
-                                            onChange={(e) => setCloseRoutingCode(e.target.value)}
-                                            className="create-provisioning-criteria-input"
-                                        />
-                                        <input
-                                            type="text"
-                                            placeholder="Receipt #"
-                                            value={closeReceiptNumber}
-                                            onChange={(e) => setCloseReceiptNumber(e.target.value)}
-                                            className="create-provisioning-criteria-input"
-                                        />
-                                        <input
-                                            type="text"
-                                            placeholder="Bank #"
-                                            value={closeBankNumber}
-                                            onChange={(e) => setCloseBankNumber(e.target.value)}
-                                            className="create-provisioning-criteria-input"
-                                        />
+                                        <div className="create-holiday-row">
+                                            <input
+                                                type="text"
+                                                placeholder="Account #"
+                                                value={closeAccountNumber}
+                                                onChange={(e) => setCloseAccountNumber(e.target.value)}
+                                                className="create-provisioning-criteria-input"
+                                            />
+                                            <input
+                                                type="text"
+                                                placeholder="Cheque #"
+                                                value={closeChequeNumber}
+                                                onChange={(e) => setCloseChequeNumber(e.target.value)}
+                                                className="create-provisioning-criteria-input"
+                                            />
+                                            <input
+                                                type="text"
+                                                placeholder="Routing Code"
+                                                value={closeRoutingCode}
+                                                onChange={(e) => setCloseRoutingCode(e.target.value)}
+                                                className="create-provisioning-criteria-input"
+                                            />
+                                        </div>
+                                        <div className="create-holiday-row">
+                                            <input
+                                                type="text"
+                                                placeholder="Receipt #"
+                                                value={closeReceiptNumber}
+                                                onChange={(e) => setCloseReceiptNumber(e.target.value)}
+                                                className="create-provisioning-criteria-input"
+                                            />
+                                            <input
+                                                type="text"
+                                                placeholder="Bank #"
+                                                value={closeBankNumber}
+                                                onChange={(e) => setCloseBankNumber(e.target.value)}
+                                                className="create-provisioning-criteria-input"
+                                            />
+                                        </div>
                                     </>
                                 )}
                             </>
@@ -3550,7 +4019,7 @@ const SavingsAccounts = () => {
                                 <tr>
                                     <td className="create-provisioning-criteria-label">Transaction Amount</td>
                                     <td>
-                                        {`${transactionDetails.currency?.displaySymbol || ""} ${transactionDetails.transferAmount.toFixed(2)} (${transactionDetails.currency?.code || ""})`}
+                                        {`${transactionDetails.currency?.code || ""} ${transactionDetails.transferAmount.toFixed(2)} (${transactionDetails.currency?.code || ""})`}
                                     </td>
                                 </tr>
                                 <tr>
@@ -3622,7 +4091,7 @@ const SavingsAccounts = () => {
                                 </tr>
                                 <tr>
                                     <td className="create-provisioning-criteria-label">Amount</td>
-                                    <td>{`${transactionDetails.currency?.displaySymbol || ""} ${transactionDetails.amount.toFixed(2)}`}</td>
+                                    <td>{`${transactionDetails.currency?.code || ""} ${transactionDetails.amount.toFixed(2)}`}</td>
                                 </tr>
                                 <tr>
                                     <td className="create-provisioning-criteria-label">Note</td>
@@ -3673,23 +4142,29 @@ const SavingsAccounts = () => {
                             </tr>
                             </thead>
                             <tbody>
-                            {journalEntries.map((entry, index) => (
-                                <tr key={index}>
-                                    <td>{entry.glAccountName || "N/A"}</td>
-                                    <td>{entry.debitAmount || 0}</td>
-                                    <td>{entry.creditAmount || 0}</td>
-                                    <td>
-                                        {entry.transactionDate
-                                            ? new Date(entry.transactionDate).toLocaleDateString("en-GB", {
-                                                day: "2-digit",
-                                                month: "long",
-                                                year: "numeric",
-                                            })
-                                            : "N/A"}
-                                    </td>
-                                    <td>{entry.officeName || "N/A"}</td>
+                            {journalEntries && journalEntries.length > 0 ? (
+                                journalEntries.map((entry, index) => (
+                                    <tr key={index}>
+                                        <td>{entry.glAccountName || "N/A"}</td>
+                                        <td>{entry.debitAmount?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || "0.00"}</td>
+                                        <td>{entry.creditAmount?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || "0.00"}</td>
+                                        <td>
+                                            {entry.transactionDate
+                                                ? new Date(entry.transactionDate).toLocaleDateString("en-GB", {
+                                                    day: "2-digit",
+                                                    month: "long",
+                                                    year: "numeric",
+                                                })
+                                                : "N/A"}
+                                        </td>
+                                        <td>{entry.officeName || "N/A"}</td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td className={"no-data"} colSpan="5" style={{ textAlign: "center" }}>No journal entries available.</td>
                                 </tr>
-                            ))}
+                            )}
                             </tbody>
                         </table>
                         <div className="create-provisioning-criteria-modal-actions">
@@ -3698,6 +4173,198 @@ const SavingsAccounts = () => {
                                 className="create-provisioning-criteria-cancel"
                             >
                                 Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isUndoApprovalModalOpen && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">Undo Approval</h4>
+
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">Note <span>*</span></label>
+                            <textarea
+                                value={undoApprovalNote}
+                                onChange={(e) => setUndoApprovalNote(e.target.value)}
+                                className="create-provisioning-criteria-input"
+                                placeholder="Enter reason for undoing approval..."
+                            />
+                        </div>
+
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button
+                                onClick={handleCloseUndoApprovalModal}
+                                className="create-provisioning-criteria-cancel"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleUndoApproval}
+                                className="create-provisioning-criteria-confirm"
+                                disabled={isProcessingUndo}
+                            >
+                                {isProcessingUndo ? "Processing..." : "Submit"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isApproveModalOpen && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">Approve Savings Account</h4>
+
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">Approval Date <span>*</span></label>
+                            <DatePicker
+                                selected={approveForm.approvedOnDate}
+                                onChange={(date) => setApproveForm((prev) => ({ ...prev, approvedOnDate: date }))}
+                                className="create-provisioning-criteria-input"
+                                dateFormat="dd MMMM yyyy"
+                                maxDate={new Date()}
+                            />
+                        </div>
+
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">Note</label>
+                            <textarea
+                                value={approveForm.note}
+                                onChange={(e) => setApproveForm((prev) => ({ ...prev, note: e.target.value }))}
+                                className="create-provisioning-criteria-input"
+                                placeholder="Enter note..."
+                            />
+                        </div>
+
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button onClick={handleCloseApproveModal} className="create-provisioning-criteria-cancel">
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleApproveAccount}
+                                className="create-provisioning-criteria-confirm"
+                                disabled={!approveForm.approvedOnDate}
+                            >
+                                {isProcessingApproval ? "Processing..." : "Confirm"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isRejectModalOpen && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">Reject Account</h4>
+
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">
+                                Rejected On Date <span>*</span>
+                            </label>
+                            <DatePicker
+                                selected={rejectForm.rejectedOnDate}
+                                onChange={(date) => setRejectForm({ ...rejectForm, rejectedOnDate: date })}
+                                className="create-provisioning-criteria-input"
+                                dateFormat="dd MMMM yyyy"
+                                maxDate={new Date()}
+                            />
+                        </div>
+
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">Note</label>
+                            <textarea
+                                value={rejectForm.note}
+                                onChange={(e) => setRejectForm({ ...rejectForm, note: e.target.value })}
+                                className="create-provisioning-criteria-input"
+                                placeholder="Enter a reason for rejection"
+                            />
+                        </div>
+
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button onClick={handleCloseRejectModal} className="create-provisioning-criteria-cancel">
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => handleRejectAccount()}
+                                className="create-provisioning-criteria-confirm"
+                                disabled={!rejectForm.rejectedOnDate}
+                            >
+                                Submit
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isWithdrawnModalOpen && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">Withdrawn by Client</h4>
+
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">
+                                Withdrawn On Date <span>*</span>
+                            </label>
+                            <DatePicker
+                                selected={withdrawnForm.withdrawnOnDate}
+                                onChange={(date) => setWithdrawnForm({ ...withdrawnForm, withdrawnOnDate: date })}
+                                className="create-provisioning-criteria-input"
+                                dateFormat="dd MMMM yyyy"
+                                maxDate={new Date()}
+                            />
+                        </div>
+
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">Note</label>
+                            <textarea
+                                value={withdrawnForm.note}
+                                onChange={(e) => setWithdrawnForm({ ...withdrawnForm, note: e.target.value })}
+                                className="create-provisioning-criteria-input"
+                                placeholder="Enter a reason for withdrawal"
+                            />
+                        </div>
+
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button onClick={handleCloseWithdrawnModal} className="create-provisioning-criteria-cancel">
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => handleWithdrawnByClient()}
+                                className="create-provisioning-criteria-confirm"
+                                disabled={!withdrawnForm.withdrawnOnDate}
+                            >
+                                Confirm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isActivateModalOpen && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">Activate Savings Account</h4>
+
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">
+                                Activated On Date <span>*</span>
+                            </label>
+                            <DatePicker
+                                selected={activateForm.activatedOnDate}
+                                onChange={(date) => setActivateForm({ ...activateForm, activatedOnDate: date })}
+                                className="create-provisioning-criteria-input"
+                                dateFormat="dd MMMM yyyy"
+                                maxDate={new Date()}
+                            />
+                        </div>
+
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button onClick={handleCloseActivateModal} className="create-provisioning-criteria-cancel">
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleActivateAccount}
+                                className="create-provisioning-criteria-confirm"
+                            >
+                                Confirm
                             </button>
                         </div>
                     </div>

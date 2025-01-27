@@ -5,7 +5,7 @@ import './Accruals.css';
 
 const AccrualsPage = () => {
     return (
-        <div className="accruals-screen">
+        <div className="accruals-screen neighbor-element">
             <h2 className="accruals-head">
                 <Link to="/accounting" className="breadcrumb-link">Accounting </Link> . Periodic Accruals
             </h2>

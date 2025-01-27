@@ -13,7 +13,7 @@ const ManageEmployees = () => {
     };
 
     return (
-        <div className="tab-products-page">
+        <div className="tab-products-page neighbor-element">
             <h2 className="page-heading">
                 <Link to="/organization" className="breadcrumb-link">Organization</Link> . Manage Employees
             </h2>
@@ -30,12 +30,6 @@ const ManageEmployees = () => {
                 >
                     Create Employee
                 </button>
-                {/*<button*/}
-                {/*    className={`tab-button ${activeTab === 'importEmployees' ? 'active' : ''}`}*/}
-                {/*    onClick={() => setActiveTab('importEmployees')}*/}
-                {/*>*/}
-                {/*    Import Employees*/}
-                {/*</button>*/}
                 <button
                     className={`tab-button ${activeTab === 'importEmployees' ? 'active' : ''}`}
                     onClick={() => {

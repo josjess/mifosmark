@@ -59,7 +59,7 @@ const ReportFormPage = () => {
             const response = await axios.get(`${API_CONFIG.baseURL}/reports/${reportId}`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    "Fineract-Platform-TenantId": "default",
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 },
             });
             const { reportName } = response.data;
@@ -82,7 +82,7 @@ const ReportFormPage = () => {
                 {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        "Fineract-Platform-TenantId": "default",
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     },
                 }
             );
@@ -158,7 +158,7 @@ const ReportFormPage = () => {
             const response = await axios.get(`${API_CONFIG.baseURL}${endpoint}`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    "Fineract-Platform-TenantId": "default",
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 },
             });
 
@@ -316,7 +316,7 @@ const ReportFormPage = () => {
             const response = await axios.get(url, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    "Fineract-Platform-TenantId": "default",
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     "Content-Type": "application/json",
                 },
             });
@@ -353,7 +353,7 @@ const ReportFormPage = () => {
             const response = await axios.get(url, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    "Fineract-Platform-TenantId": "default",
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     "Content-Type": "application/json",
                 },
             });
@@ -525,7 +525,7 @@ const ReportFormPage = () => {
             const response = await axios.get(url, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    "Fineract-Platform-TenantId": "default",
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     "Content-Type": "application/json",
                 },
             });
@@ -577,7 +577,7 @@ const ReportFormPage = () => {
     };
 
     return (
-        <div className="custom-page-container">
+        <div className="custom-page-container neighbor-element">
             <h2 className="page-heading">
                 <Link to="/reports/all" className={"breadcrumb-link"}>Reports</Link> . {" "}
                 {reportDetails?.reportName || "Report Form"}

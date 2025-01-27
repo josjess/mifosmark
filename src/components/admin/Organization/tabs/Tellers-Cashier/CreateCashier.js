@@ -27,7 +27,7 @@ const CreateCashier = ({ teller, onFormSubmitSuccess }) => {
             const response = await axios.get(`${API_CONFIG.baseURL}/staff`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 },
             });
             setStaff(response.data || []);
@@ -44,7 +44,7 @@ const CreateCashier = ({ teller, onFormSubmitSuccess }) => {
             const response = await axios.get(`${API_CONFIG.baseURL}/tellers/${teller.id}/cashiers/template`, { // Fetch template data
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 },
             });
             const data = response.data || {};
@@ -84,7 +84,7 @@ const CreateCashier = ({ teller, onFormSubmitSuccess }) => {
             await axios.post(`${API_CONFIG.baseURL}/tellers/${teller.id}/cashiers`, payload, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });

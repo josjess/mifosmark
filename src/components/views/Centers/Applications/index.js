@@ -19,7 +19,7 @@ const CentersApplications = () => {
             try {
                 const headers = {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 };
                 const response = await axios.get(`${API_CONFIG.baseURL}/centers/${centerId}`, { headers });
                 setCenterData(response.data);
@@ -57,7 +57,7 @@ const CentersApplications = () => {
     }
 
     return (
-        <div className="users-page-screen">
+        <div className="users-page-screen neighbor-element">
             <h2 className="users-page-head">
                 <Link to="/dashboard" className="breadcrumb-link">Dashboard</Link>{' '}
                 <span

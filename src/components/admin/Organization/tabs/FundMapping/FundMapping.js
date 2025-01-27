@@ -41,7 +41,7 @@ const FundMapping = () => {
             const response = await axios.get(`${API_CONFIG.baseURL}/search/template`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    "Fineract-Platform-TenantId": "default",
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     "Content-Type": "application/json",
                 },
             });
@@ -117,7 +117,7 @@ const FundMapping = () => {
             const response = await axios.post(`${API_CONFIG.baseURL}/search/advance`, payload, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    "Fineract-Platform-TenantId": "default",
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     "Content-Type": "application/json",
                 },
             });
@@ -144,7 +144,7 @@ const FundMapping = () => {
     };
 
     return (
-        <div className="fund-mapping-container">
+        <div className="fund-mapping-container neighbor-element">
             <h2 className="page-heading">
                 <Link to="/organization" className="breadcrumb-link">Organization</Link>{" "}. Fund Mapping
             </h2>

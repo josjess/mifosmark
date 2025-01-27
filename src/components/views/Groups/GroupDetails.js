@@ -94,7 +94,7 @@ const GroupDetails = ({ groupId, onClose }) => {
                 try {
                     const headers = {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        'Fineract-Platform-TenantId': 'default',
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                         'Content-Type': 'application/json',
                     };
 
@@ -146,7 +146,7 @@ const GroupDetails = ({ groupId, onClose }) => {
             const fetchNotes = async () => {
                 const headers = {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 };
 
@@ -172,7 +172,7 @@ const GroupDetails = ({ groupId, onClose }) => {
                 try {
                     const headers = {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        'Fineract-Platform-TenantId': 'default',
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                         'Content-Type': 'application/json',
                     };
 
@@ -214,7 +214,7 @@ const GroupDetails = ({ groupId, onClose }) => {
     const handleSaveNote = async () => {
         const headers = {
             Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-            'Fineract-Platform-TenantId': 'default',
+            'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
             'Content-Type': 'application/json',
         };
 
@@ -251,7 +251,7 @@ const GroupDetails = ({ groupId, onClose }) => {
 
         const headers = {
             Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-            'Fineract-Platform-TenantId': 'default',
+            'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
             'Content-Type': 'application/json',
         };
 
@@ -285,7 +285,7 @@ const GroupDetails = ({ groupId, onClose }) => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                'Fineract-Platform-TenantId': 'default',
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 'Content-Type': 'application/json',
             };
 
@@ -322,7 +322,7 @@ const GroupDetails = ({ groupId, onClose }) => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                'Fineract-Platform-TenantId': 'default',
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 'Content-Type': 'application/json',
             };
 
@@ -692,7 +692,7 @@ const GroupDetails = ({ groupId, onClose }) => {
 
         const headers = {
             Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-            'Fineract-Platform-TenantId': 'default',
+            'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
             'Content-Type': 'application/json',
         };
 
@@ -737,7 +737,7 @@ const GroupDetails = ({ groupId, onClose }) => {
             startLoading();
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                'Fineract-Platform-TenantId': 'default',
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 'Content-Type': 'application/json',
             };
 
@@ -782,7 +782,7 @@ const GroupDetails = ({ groupId, onClose }) => {
 
         const headers = {
             Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-            'Fineract-Platform-TenantId': 'default',
+            'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
             'Content-Type': 'application/json',
         };
 
@@ -805,7 +805,7 @@ const GroupDetails = ({ groupId, onClose }) => {
             startLoading();
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                'Fineract-Platform-TenantId': 'default',
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 'Content-Type': 'application/json',
             };
 
@@ -843,7 +843,7 @@ const GroupDetails = ({ groupId, onClose }) => {
 
         const headers = {
             Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-            'Fineract-Platform-TenantId': 'default',
+            'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
             'Content-Type': 'application/json',
         };
 
@@ -872,7 +872,7 @@ const GroupDetails = ({ groupId, onClose }) => {
                     startLoading();
                     const headers = {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        'Fineract-Platform-TenantId': 'default',
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                         'Content-Type': 'application/json',
                     };
                     const response = await axios.get(
@@ -929,7 +929,7 @@ const GroupDetails = ({ groupId, onClose }) => {
             const payload = { clientMembers: selectedClientIds };
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -955,7 +955,7 @@ const GroupDetails = ({ groupId, onClose }) => {
             startLoading();
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                'Fineract-Platform-TenantId': 'default',
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 'Content-Type': 'application/json',
             };
 
@@ -976,7 +976,7 @@ const GroupDetails = ({ groupId, onClose }) => {
             const payload = { clientMembers: [clientId] };
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                'Fineract-Platform-TenantId': 'default',
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 'Content-Type': 'application/json',
             };
 
@@ -998,7 +998,7 @@ const GroupDetails = ({ groupId, onClose }) => {
             startLoading();
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                'Fineract-Platform-TenantId': 'default',
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 'Content-Type': 'application/json',
             };
 
@@ -1029,7 +1029,7 @@ const GroupDetails = ({ groupId, onClose }) => {
             startLoading();
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                'Fineract-Platform-TenantId': 'default',
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 'Content-Type': 'application/json',
             };
 
@@ -1058,7 +1058,7 @@ const GroupDetails = ({ groupId, onClose }) => {
             startLoading();
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                'Fineract-Platform-TenantId': 'default',
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 'Content-Type': 'application/json',
             };
 
@@ -1091,7 +1091,7 @@ const GroupDetails = ({ groupId, onClose }) => {
             startLoading();
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                'Fineract-Platform-TenantId': 'default',
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 'Content-Type': 'application/json',
             };
 
@@ -1120,7 +1120,7 @@ const GroupDetails = ({ groupId, onClose }) => {
             startLoading();
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                'Fineract-Platform-TenantId': 'default',
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 'Content-Type': 'application/json',
             };
 
@@ -1160,7 +1160,7 @@ const GroupDetails = ({ groupId, onClose }) => {
             startLoading();
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                'Fineract-Platform-TenantId': 'default',
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 'Content-Type': 'application/json',
             };
 
@@ -1189,7 +1189,7 @@ const GroupDetails = ({ groupId, onClose }) => {
             startLoading();
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                'Fineract-Platform-TenantId': 'default',
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 'Content-Type': 'application/json',
             };
 

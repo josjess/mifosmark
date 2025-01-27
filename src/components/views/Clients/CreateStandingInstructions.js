@@ -42,7 +42,7 @@ const CreateStandingInstructions = () => {
             try {
                 const headers = {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 };
 
                 const response = await axios.get(
@@ -73,7 +73,7 @@ const CreateStandingInstructions = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                'Fineract-Platform-TenantId': 'default',
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
             };
 
             const response = await axios.get(
@@ -100,7 +100,7 @@ const CreateStandingInstructions = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                'Fineract-Platform-TenantId': 'default',
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 'Content-Type': 'application/json',
             };
 
@@ -156,7 +156,7 @@ const CreateStandingInstructions = () => {
     };
 
     return (
-        <div className="users-page-screen">
+        <div className="users-page-screen neighbor-element">
             <h2 className="users-page-head">
                 <Link to="/dashboard" className="breadcrumb-link">Dashboard</Link>{' '}
                 <span

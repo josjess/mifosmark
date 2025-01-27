@@ -32,7 +32,7 @@ const CentersSavingsApplication = () => {
             try {
                 const headers = {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 };
                 const response = await axios.get(
                     `${API_CONFIG.baseURL}/savingsaccounts/template?groupId=${centerId}`,
@@ -54,7 +54,7 @@ const CentersSavingsApplication = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                'Fineract-Platform-TenantId': 'default',
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
             };
             const response = await axios.get(
                 `${API_CONFIG.baseURL}/savingsaccounts/template?groupId=${centerId}&productId=${productId}`,
@@ -129,7 +129,7 @@ const CentersSavingsApplication = () => {
 
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                'Fineract-Platform-TenantId': 'default',
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
             };
 
             await axios.post(`${API_CONFIG.baseURL}/savingsaccounts`, submissionData, { headers });

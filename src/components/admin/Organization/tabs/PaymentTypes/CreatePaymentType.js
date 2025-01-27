@@ -29,7 +29,7 @@ const CreatePaymentType = ({ onFormSubmitSuccess }) => {
             await axios.post(`${API_CONFIG.baseURL}/paymenttypes`, payload, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    "Fineract-Platform-TenantId": "default",
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     "Content-Type": "application/json",
                 },
             });

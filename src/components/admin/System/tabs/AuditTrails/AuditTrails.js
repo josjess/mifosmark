@@ -54,7 +54,7 @@ const AuditTrails = () => {
             const response = await axios.get(`${API_CONFIG.baseURL}/audits/searchtemplate`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    "Fineract-Platform-TenantId": "default",
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 },
             });
             setTemplateData(response.data || {});
@@ -82,7 +82,7 @@ const AuditTrails = () => {
                     },
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        "Fineract-Platform-TenantId": "default",
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     },
                 }
             );
@@ -119,7 +119,7 @@ const AuditTrails = () => {
                 {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        "Fineract-Platform-TenantId": "default",
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     },
                 }
             );
@@ -163,7 +163,7 @@ const AuditTrails = () => {
     };
 
     return (
-        <div className="audit-trails-page">
+        <div className="audit-trails-page neighbor-element">
             <div className="page-header-container">
                 <h2 className="page-heading">
                     <Link to="/system" className="breadcrumb-link">System </Link>. Audit Trails

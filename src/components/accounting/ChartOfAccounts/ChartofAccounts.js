@@ -8,7 +8,7 @@ const ChartOfAccounts = () => {
     const [activeTab, setActiveTab] = useState('table');
 
     return (
-        <div className="chart-accounts-container">
+        <div className="chart-accounts-container neighbor-element">
             <h2 className="chart-accounts-head">
                 <Link to="/accounting" className="breadcrumb-link">Accounting. </Link> Chart of Accounts
             </h2>

@@ -28,7 +28,7 @@ const XBRLReports = () => {
             const response = await axios.get(`${API_CONFIG.baseURL}/mixtaxonomy`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    "Fineract-Platform-TenantId": "default",
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     "Content-Type": "application/json",
                 },
             });
@@ -132,7 +132,7 @@ const XBRLReports = () => {
                     params: { startDate, endDate },
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        "Fineract-Platform-TenantId": "default",
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                         "Content-Type": "application/json",
                     },
                 }
@@ -163,7 +163,7 @@ const XBRLReports = () => {
                 {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        "Fineract-Platform-TenantId": "default",
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                         "Content-Type": "application/json",
                     },
                 }
@@ -195,7 +195,7 @@ const XBRLReports = () => {
     };
 
     return (
-        <div className="xbrl-page">
+        <div className="xbrl-page neighbor-element">
             <h2 className="page-heading">
                 <Link to="/reports" className="breadcrumb-link">Reports</Link> . XBRL
             </h2>

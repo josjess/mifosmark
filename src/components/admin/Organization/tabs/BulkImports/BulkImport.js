@@ -50,7 +50,7 @@ const BulkImport = () => {
                 const response = await axios.get(`${API_CONFIG.baseURL}/offices`, {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        'Fineract-Platform-TenantId': 'default',
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                         'Content-Type': 'application/json',
                     },
                 });
@@ -74,7 +74,7 @@ const BulkImport = () => {
                         {
                             headers: {
                                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                                'Fineract-Platform-TenantId': 'default',
+                                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                                 'Content-Type': 'application/json',
                             },
                         }
@@ -99,7 +99,7 @@ const BulkImport = () => {
                     {
                         headers: {
                             Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                            'Fineract-Platform-TenantId': 'default',
+                            'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                             'Content-Type': 'application/json',
                         },
                     }
@@ -130,7 +130,7 @@ const BulkImport = () => {
                 {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        'Fineract-Platform-TenantId': 'default',
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                         'Content-Type': 'multipart/form-data',
                     },
                 }
@@ -160,7 +160,7 @@ const BulkImport = () => {
                 params,
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
                 responseType: 'blob',
@@ -188,7 +188,7 @@ const BulkImport = () => {
     };
 
     return (
-        <div className="bulk-import-page">
+        <div className="bulk-import-page neighbor-element">
             <h2 className="page-heading">
                 <Link to="/organization" className="breadcrumb-link">Organization </Link><Link to="/bulk-imports" className="breadcrumb-link">. Bulk Imports </Link> . {config.title} Import
             </h2>

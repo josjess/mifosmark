@@ -5,7 +5,7 @@ import { API_CONFIG } from "../../config";
 import { AuthContext } from '../../context/AuthContext';
 import { NotificationContext } from '../../context/NotificationContext';
 import { useLoading } from '../../context/LoadingContext';
-import {FaEye, FaEyeSlash} from "react-icons/fa";
+import {FaCog, FaEye, FaEyeSlash} from "react-icons/fa";
 import bcrypt from "bcryptjs";
 
 const Login = () => {
@@ -25,7 +25,7 @@ const Login = () => {
         superAdmin,
         isSuperAdminFirstLogin
     } = useContext(AuthContext);
-    const { baseURL, isBaseURLChanged, updateBaseURL } = useContext(AuthContext);
+    const { baseURL, isBaseURLChanged, updateBaseURL, updateTenantId } = useContext(AuthContext);
     const { startLoading, stopLoading } = useLoading();
     const navigate = useNavigate();
 
@@ -49,8 +49,10 @@ const Login = () => {
             if (response.ok) {
                 const config = await response.json();
                 const defaultBaseURL = config.baseURL;
+                const defaultTenantId = config.tenantId;
 
                 updateBaseURL(defaultBaseURL);
+                updateTenantId(defaultTenantId);
                 showNotification("Base URL has been reset to the default.", "success");
                 window.location.reload();
             } else {
@@ -72,49 +74,46 @@ const Login = () => {
                 if (response?.firstLogin) {
                     setIsSettingUp(true);
                     stopLoading();
-                    return;
                 } else if (response?.success) {
                     showNotification("Super Admin logged in successfully!", "success");
                     stopLoading();
                     navigate("/");
-                    return;
                 } else {
-                    showNotification(response?.message || "Login failed for Super Admin.", "error");
+                    alert(response?.message || "Login failed for Super Admin.");
                     stopLoading();
-                    return;
                 }
-            }
-
-            const loginData = { username, password };
-            const response = await fetch(`${API_CONFIG.baseURL}/authentication`, {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                    "Fineract-Platform-TenantId": "default",
-                },
-                body: JSON.stringify(loginData),
-            });
-
-            const data = await response.json();
-            if (response.ok) {
-                showNotification("Login successful!", "success");
-
-                const userData = {
-                    username: data.username,
-                    userId: data.userId,
-                    base64EncodedAuthenticationKey: data.base64EncodedAuthenticationKey,
-                    authenticated: data.authenticated,
-                    officeId: data.officeId,
-                    officeName: data.officeName,
-                    roles: data.roles,
-                    permissions: data.permissions,
-                };
-
-                login(userData, rememberMe);
-                navigate("/");
             } else {
-                showNotification(data.message || "Login failed", "error");
+                const loginData = { username, password };
+                const response = await fetch(`${API_CONFIG.baseURL}/authentication`, {
+                    method: "POST",
+                    headers: {
+                        Accept: "application/json",
+                        "Content-Type": "application/json",
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+                    },
+                    body: JSON.stringify(loginData),
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    showNotification("Login successful!", "success");
+
+                    const userData = {
+                        username: data.username,
+                        userId: data.userId,
+                        base64EncodedAuthenticationKey: data.base64EncodedAuthenticationKey,
+                        authenticated: data.authenticated,
+                        officeId: data.officeId,
+                        officeName: data.officeName,
+                        roles: data.roles,
+                        permissions: data.permissions,
+                    };
+
+                    login(userData, rememberMe);
+                    navigate("/");
+                } else {
+                    showNotification(data.message || "Login failed", "error");
+                }
             }
         } catch (error) {
             console.error("Error during login:", error);
@@ -137,7 +136,7 @@ const Login = () => {
                     return;
                 }
 
-                await updateSuperAdminCredentials(newUsername, await bcrypt.hash(newPassword, 10));
+                await updateSuperAdminCredentials(newUsername, newPassword);
                 setSetupStep(2);
             } else if (setupStep === 2) {
                 if (!securityQuestion1 || !securityAnswer1 || !securityQuestion2 || !securityAnswer2) {
@@ -341,103 +340,116 @@ const Login = () => {
                                     id="username"
                                     placeholder="Enter your username"
                                     value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                                required
-                            />
-                        </div>
-
-                        <div className="form-group-login">
-                            <label htmlFor="password">Password</label>
-                            <div className="password-input-container">
-                                <input
-                                    type={showPassword ? "text" : "password"}
-                                    id="password"
-                                    placeholder="Enter your password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
+                                    onChange={(e) => setUsername(e.target.value)}
                                     required
                                 />
+                            </div>
+
+                            <div className="form-group-login">
+                                <label htmlFor="password">Password</label>
+                                <div className="password-input-container">
+                                    <input
+                                        type={showPassword ? "text" : "password"}
+                                        id="password"
+                                        placeholder="Enter your password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        required
+                                    />
+                                    <button
+                                        type="button"
+                                        className="toggle-password-visibility"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                    >
+                                        {showPassword ? (
+                                            <FaEyeSlash size={18}/>
+                                        ) : (
+                                            <FaEye size={18}/>
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="form-group-login remember-me">
+                                <label htmlFor="rememberMe">
+                                    <input
+                                        type="checkbox"
+                                        id="rememberMe"
+                                        checked={rememberMe}
+                                        onChange={(e) => setRememberMe(e.target.checked)}
+                                    />
+                                    Remember Me
+                                </label>
+                            </div>
+
+                            <button type="submit" className="login-btn">
+                                Login
+                            </button>
+                        </form>
+                        {isBaseURLChanged && (
+                            <button
+                                onClick={handleResetBaseURL}
+                                style={{
+                                    display: 'block',
+                                    margin: '20px auto',
+                                    padding: '10px 20px',
+                                    textAlign: 'center',
+                                    fontSize: '16px',
+                                    borderRadius: '20px',
+                                    border: 'none',
+                                    backgroundColor: '#d36565',
+                                    color: '#fff',
+                                    cursor: 'pointer',
+                                }}
+                            >
+                                Reset Base URL
+                            </button>
+                        )}
+
+                        <p className="forgot-password-link" onClick={toggleForgotPasswordModal}>
+                            Forgot Password?
+                        </p>
+                    </section>
+                </div>
+                {isForgotPasswordModalOpen && (
+                    <div className="forgot-password-modal">
+                        <div className="forgot-password-modal-content">
+                            <h2 className="forgot-password-title">Reset Password(Coming Soon!)</h2>
+                            <p className="forgot-password-instructions">
+                                Enter your email address below, and we will send you a link to reset your password.
+                            </p>
+                            <input
+                                type="email"
+                                className="forgot-password-input"
+                                placeholder="Enter your email address"
+                                disabled
+                            />
+                            <div className="forgot-password-actions">
                                 <button
-                                    type="button"
-                                    className="toggle-password-visibility"
-                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="forgot-password-cancel"
+                                    onClick={toggleForgotPasswordModal}
                                 >
-                                    {showPassword ? (
-                                        <FaEyeSlash size={18}/>
-                                    ) : (
-                                        <FaEye size={18}/>
-                                    )}
+                                    Cancel
                                 </button>
+                                {/*<button className="forgot-password-submit">Submit</button>*/}
                             </div>
                         </div>
-                        <div className="form-group-login remember-me">
-                            <label htmlFor="rememberMe">
-                                <input
-                                    type="checkbox"
-                                    id="rememberMe"
-                                    checked={rememberMe}
-                                    onChange={(e) => setRememberMe(e.target.checked)}
-                                />
-                                Remember Me
-                            </label>
-                        </div>
-
-                        <button type="submit" className="login-btn">
-                            Login
-                        </button>
-                    </form>
-                    {isBaseURLChanged && (
-                        <button
-                            onClick={handleResetBaseURL}
-                            style={{
-                                display: 'block',
-                                margin: '20px auto',
-                                padding: '10px 20px',
-                                textAlign: 'center',
-                                fontSize: '16px',
-                                borderRadius: '20px',
-                                border: 'none',
-                                backgroundColor: '#d36565',
-                                color: '#fff',
-                                cursor: 'pointer',
-                            }}
-                        >
-                            Reset Base URL
-                        </button>
-                    )}
-
-                    <p className="forgot-password-link" onClick={toggleForgotPasswordModal}>
-                        Forgot Password?
-                    </p>
-                </section>
-            </div>
-            {isForgotPasswordModalOpen && (
-                <div className="forgot-password-modal">
-                    <div className="forgot-password-modal-content">
-                        <h2 className="forgot-password-title">Reset Password(Coming Soon!)</h2>
-                        <p className="forgot-password-instructions">
-                            Enter your email address below, and we will send you a link to reset your password.
-                        </p>
-                        <input
-                            type="email"
-                            className="forgot-password-input"
-                            placeholder="Enter your email address"
-                            disabled
-                        />
-                        <div className="forgot-password-actions">
-                            <button
-                                className="forgot-password-cancel"
-                                onClick={toggleForgotPasswordModal}
-                            >
-                                Cancel
-                            </button>
-                            {/*<button className="forgot-password-submit">Submit</button>*/}
-                        </div>
                     </div>
-                </div>
-            )}
-        </div>
-    );
+                )}
+                {/*<button*/}
+                {/*    onClick={() => setIsSettingUp(true)}*/}
+                {/*    style={{*/}
+                {/*        position: 'fixed',*/}
+                {/*        bottom: '20px',*/}
+                {/*        right: '20px',*/}
+                {/*        background: 'none',*/}
+                {/*        border: 'none',*/}
+                {/*        cursor: 'pointer',*/}
+                {/*    }}*/}
+                {/*>*/}
+                {/*    <FaCog size={30} color={'#af2727'}/>*/}
+                {/*</button>*/}
+            </div>
+        );
 };
 
 export default memo(Login);

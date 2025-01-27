@@ -5,17 +5,17 @@ import { NotificationContext } from './context/NotificationContext';
 
 const ProtectedLayout = () => {
     const navigate = useNavigate();
-    const { isAuthenticated } = useContext(AuthContext);
+    const { isAuthenticated, authInitialized } = useContext(AuthContext);
     const { showNotification } = useContext(NotificationContext);
 
     useEffect(() => {
-        if (!isAuthenticated) {
-            showNotification('login to access our services!', 'error');
+        if (authInitialized && !isAuthenticated) {
+            showNotification('Kindly login to access our services!', 'error');
             navigate('/login');
         }
-    }, [isAuthenticated, navigate, showNotification]);
+    }, [isAuthenticated, authInitialized, navigate, showNotification]);
 
-    return isAuthenticated ? <Outlet /> : null;
+    return authInitialized && isAuthenticated ? <Outlet /> : null;
 };
 
 export default ProtectedLayout;

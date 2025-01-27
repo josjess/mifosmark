@@ -8,7 +8,7 @@ const ManageHooks = () => {
     const [activeTab, setActiveTab] = useState('viewHooks');
 
     return (
-        <div className="manage-hooks-page">
+        <div className="manage-hooks-page neighbor-element">
             <h2 className="page-heading">
                 <Link to="/system" className="breadcrumb-link">System </Link>. Manage Hooks
             </h2>

@@ -63,7 +63,7 @@ const BulkLoanReassignment = () => {
             const response = await axios.get(`${API_CONFIG.baseURL}/offices`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });
@@ -81,7 +81,7 @@ const BulkLoanReassignment = () => {
             const response = await axios.get(`${API_CONFIG.baseURL}/staff?officeId=${officeId}`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });
@@ -99,7 +99,7 @@ const BulkLoanReassignment = () => {
             const response = await axios.get(`${API_CONFIG.baseURL}/savingsaccounts?loanOfficerId=${officerId}`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });
@@ -122,14 +122,13 @@ const BulkLoanReassignment = () => {
             const response = await axios.get(`${API_CONFIG.baseURL}/loans?loanOfficerId=${officerId}`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });
 
             const loans = response.data.pageItems || [];
 
-            // Filter loans by type and ensure they belong to the selected loan officer
             const officerLoans = loans.filter((loan) => loan.loanOfficerId === officerId);
 
             setClientLoans(officerLoans.filter((loan) => loan.loanType?.code === 'loanType.individual'));
@@ -185,7 +184,6 @@ const BulkLoanReassignment = () => {
 
             console.log('Starting loan reassignment...');
 
-            // Reassign loans individually
             for (const loanId of [...selectedClientLoans, ...selectedGroupLoans]) {
                 const loanPayload = {
                     fromLoanOfficerId: fromLoanOfficer || null,
@@ -201,7 +199,7 @@ const BulkLoanReassignment = () => {
                     {
                         headers: {
                             Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                            'Fineract-Platform-TenantId': 'default',
+                            'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                             'Content-Type': 'application/json',
                         },
                     }
@@ -210,7 +208,6 @@ const BulkLoanReassignment = () => {
 
             console.log('Loan reassignment successful, proceeding with savings reassignment...');
 
-            // Reassign savings accounts individually
             for (const savingsId of selectedSavingsAccounts) {
                 const savingsPayload = {
                     fromSavingsOfficerId: fromLoanOfficer || null,
@@ -226,7 +223,7 @@ const BulkLoanReassignment = () => {
                     {
                         headers: {
                             Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                            'Fineract-Platform-TenantId': 'default',
+                            'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                             'Content-Type': 'application/json',
                         },
                     }
@@ -326,7 +323,7 @@ const BulkLoanReassignment = () => {
     }, [reassignmentType, clientLoans, groupLoans, savingsAccounts]);
 
     return (
-        <div className="bulk-loan-reassignment-page">
+        <div className="bulk-loan-reassignment-page neighbor-element">
             <h2 className="page-heading">
                 <Link to="/organization" className="breadcrumb-link">Organization</Link> . Bulk Loan Reassignment
             </h2>
@@ -605,7 +602,7 @@ const BulkLoanReassignment = () => {
                             )}
                             </tbody>
                         </table>
-                        <div className="pagination-controls">
+                        <div className="pagination">
                             <label>
                                 Items per page:
                                 <select
@@ -619,7 +616,7 @@ const BulkLoanReassignment = () => {
                                     <option value={100}>100</option>
                                 </select>
                             </label>
-                            <div className="pagination-buttons">
+                            <div className="pagination">
                                 <button
                                     onClick={() => setClientPage((prev) => Math.max(prev - 1, 1))}
                                     disabled={clientPage === 1}
@@ -696,7 +693,7 @@ const BulkLoanReassignment = () => {
                             )}
                             </tbody>
                         </table>
-                        <div className="pagination-controls">
+                        <div className="pagination">
                             <label>
                                 Items per page:
                                 <select
@@ -710,7 +707,7 @@ const BulkLoanReassignment = () => {
                                     <option value={100}>100</option>
                                 </select>
                             </label>
-                            <div className="pagination-buttons">
+                            <div className="pagination">
                                 <button
                                     onClick={() => setGroupPage((prev) => Math.max(prev - 1, 1))}
                                     disabled={groupPage === 1}
@@ -802,7 +799,7 @@ const BulkLoanReassignment = () => {
                             )}
                             </tbody>
                         </table>
-                        <div className="pagination-controls">
+                        <div className="pagination">
                             <label>
                                 Items per page:
                                 <select
@@ -815,7 +812,7 @@ const BulkLoanReassignment = () => {
                                     <option value={50}>50</option>
                                 </select>
                             </label>
-                            <div className="pagination-buttons">
+                            <div className="pagination">
                                 <button onClick={() => setSavingsPage((prev) => Math.max(prev - 1, 1))}
                                         disabled={savingsPage === 1}>
                                     Previous

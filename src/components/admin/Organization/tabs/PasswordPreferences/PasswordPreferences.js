@@ -26,7 +26,7 @@ const PasswordPreferences = () => {
                 {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        'Fineract-Platform-TenantId': 'default',
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                         'Content-Type': 'application/json',
                     },
                 }
@@ -60,7 +60,7 @@ const PasswordPreferences = () => {
             await axios.put(`${API_CONFIG.baseURL}/passwordpreferences`, payload, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });
@@ -74,7 +74,7 @@ const PasswordPreferences = () => {
     };
 
     return (
-        <div className="password-preferences-screen">
+        <div className="password-preferences-screen neighbor-element">
             <h2 className="page-heading">
                 <Link to="/organization" className="breadcrumb-link">Organization</Link> . Password Preferences
             </h2>

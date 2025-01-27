@@ -28,7 +28,7 @@ const ViewShareProducts = () => {
             const response = await axios.get(`${API_CONFIG.baseURL}/products/share`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });

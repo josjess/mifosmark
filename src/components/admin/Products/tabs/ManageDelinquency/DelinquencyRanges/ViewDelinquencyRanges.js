@@ -30,7 +30,7 @@ const ViewDelinquencyRanges = () => {
             const response = await axios.get(`${API_CONFIG.baseURL}/delinquency/ranges`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });
@@ -60,7 +60,7 @@ const ViewDelinquencyRanges = () => {
                 {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        'Fineract-Platform-TenantId': 'default',
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                         'Content-Type': 'application/json',
                     },
                 }
@@ -83,7 +83,7 @@ const ViewDelinquencyRanges = () => {
                 {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        'Fineract-Platform-TenantId': 'default',
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                         'Content-Type': 'application/json',
                     },
                 }
@@ -107,7 +107,7 @@ const ViewDelinquencyRanges = () => {
                     {
                         headers: {
                             Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                            'Fineract-Platform-TenantId': 'default',
+                            'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                             'Content-Type': 'application/json',
                         },
                     }

@@ -7,7 +7,7 @@ const LoanProvisioningCriteria = () => {
     const [activeTab, setActiveTab] = useState('viewProvisioningCriteria');
 
     return (
-        <div className="tab-products-page">
+        <div className="tab-products-page neighbor-element">
             <h2 className="page-heading">
                 <Link to="/organization" className="breadcrumb-link">Organization</Link> . Loan Provisioning Criteria
             </h2>

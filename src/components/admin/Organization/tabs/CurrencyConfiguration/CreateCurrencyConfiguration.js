@@ -25,7 +25,7 @@ const CreateEditCurrencies = ({ onSuccess }) => {
             const response = await axios.get(`${API_CONFIG.baseURL}/currencies`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    "Fineract-Platform-TenantId": "default",
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 },
             });
 
@@ -77,7 +77,7 @@ const CreateEditCurrencies = ({ onSuccess }) => {
             await axios.put(`${API_CONFIG.baseURL}/currencies`, payload, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    "Fineract-Platform-TenantId": "default",
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     "Content-Type": "application/json",
                 },
             });

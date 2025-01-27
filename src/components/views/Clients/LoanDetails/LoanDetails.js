@@ -8,6 +8,8 @@ import './LoanDetails.css'
 import {FaCaretLeft, FaCaretRight, FaEdit, FaExclamationTriangle, FaStickyNote, FaTrash} from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import {FaToolbox} from "react-icons/fa6";
+import Select from "react-select";
+import AsyncSelect from "react-select/async";
 
 const LoanDetails = () => {
     const { clientId, loanId } = useParams();
@@ -82,7 +84,7 @@ const LoanDetails = () => {
         paymentTypeId: "",
         note: "",
         accountNumber: "",
-        chequeNumber: "",
+        checkNumber: "",
         routingCode: "",
         receiptNumber: "",
         bankNumber: "",
@@ -323,6 +325,1043 @@ const LoanDetails = () => {
     const [isRecoverFromGuarantorModalOpen, setIsRecoverFromGuarantorModalOpen] = useState(false);
     const [isSubmittingRecoverFromGuarantor, setIsSubmittingRecoverFromGuarantor] = useState(false);
 
+    const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
+    const [approveForm, setApproveForm] = useState({
+        approvedOnDate: new Date(),
+        expectedDisbursementDate: null,
+        approvedLoanAmount: 0,
+        transactionAmount: 0,
+        note: "",
+    });
+    const [isSubmittingApproval, setIsSubmittingApproval] = useState(false);
+
+    const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+    const [isSubmittingRejection, setIsSubmittingRejection] = useState(false);
+    const [rejectForm, setRejectForm] = useState({
+        rejectedOnDate: new Date(),
+        note: "",
+    });
+
+    const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
+    const [isSubmittingWithdraw, setIsSubmittingWithdraw] = useState(false);
+    const [withdrawForm, setWithdrawForm] = useState({
+        withdrawnOnDate: new Date(),
+        note: "",
+    });
+
+    const [isAddCollateralModalOpen, setIsAddCollateralModalOpen] = useState(false);
+    const [collateralTypes, setCollateralTypes] = useState([]);
+    const [isSubmittingCollateral, setIsSubmittingCollateral] = useState(false);
+    const [collateralForm, setCollateralForm] = useState({
+        collateralType: "",
+        value: "",
+        description: "",
+    });
+
+    const [isChangeLoanOfficerModalOpen, setIsChangeLoanOfficerModalOpen] = useState(false);
+    const [loanOfficerOptions, setLoanOfficerOptions] = useState([]);
+    const [currentLoanOfficerId, setCurrentLoanOfficerId] = useState(null);
+    const [selectedLoanOfficerId, setSelectedLoanOfficerId] = useState("");
+    const [assignmentDate, setAssignmentDate] = useState(new Date());
+    const [isSubmittingLoanOfficerChange, setIsSubmittingLoanOfficerChange] = useState(false);
+
+    const [isLoanScreenReportsModalOpen, setIsLoanScreenReportsModalOpen] = useState(false);
+    const [loanScreenReports, setLoanScreenReports] = useState([]);
+    const [selectedReportId, setSelectedReportId] = useState("");
+    const [isSubmittingReport, setIsSubmittingReport] = useState(false);
+
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isDeletingLoan, setIsDeletingLoan] = useState(false);
+
+    const [isUndoApprovalModalOpen, setIsUndoApprovalModalOpen] = useState(false);
+    const [undoApprovalNote, setUndoApprovalNote] = useState("");
+    const [isSubmittingUndoApproval, setIsSubmittingUndoApproval] = useState(false);
+
+    const [isDisburseModalOpen, setIsDisburseModalOpen] = useState(false);
+    const [disburseForm, setDisburseForm] = useState({
+        disbursedOnDate: new Date(),
+        transactionAmount: 0,
+        externalId: "",
+        paymentType: "",
+        showPaymentDetails: false,
+        accountNumber: "",
+        chequeNumber: "",
+        routingCode: "",
+        receiptNumber: "",
+        bankNumber: "",
+        note: "",
+    });
+    const [isSubmittingDisbursement, setIsSubmittingDisbursement] = useState(false);
+
+    const [isDisburseToSavingsModalOpen, setIsDisburseToSavingsModalOpen] = useState(false);
+    const [disburseToSavingsForm, setDisburseToSavingsForm] = useState({
+        disbursedOnDate: new Date(),
+        transactionAmount: "",
+        note: "",
+    });
+    const [isSubmittingDisburseToSavings, setIsSubmittingDisburseToSavings] = useState(false);
+
+    const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+    const [transferForm, setTransferForm] = useState({
+        transactionDate: new Date(),
+        office: "",
+        client: "",
+        accountType: "",
+        account: "",
+        amount: "",
+        description: "",
+    });
+    const [officeOptions, setOfficeOptions] = useState([]);
+    const [clientOptions, setClientOptions] = useState([]);
+    const [accountTypeOptions, setAccountTypeOptions] = useState([]);
+    const [accountOptions, setAccountOptions] = useState([]);
+    const [transferData, setTransferData] = useState(null);
+
+    const [isCreditBalanceRefundModalOpen, setIsCreditBalanceRefundModalOpen] = useState(false);
+    const [creditBalanceForm, setCreditBalanceForm] = useState({
+        transactionDate: new Date(new Date().setDate(new Date().getDate() - 1)),
+        transactionAmount: "",
+        externalId: "",
+        note: "",
+    });
+    const [isSubmittingRefund, setIsSubmittingRefund] = useState(false);
+
+    const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+    const [exportForm, setExportForm] = useState({
+        fromDate: null,
+        toDate: null,
+    });
+    const [isSubmittingExport, setIsSubmittingExport] = useState(false);
+
+    const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
+    const [transactionDetails, setTransactionDetails] = useState(null);
+    const [isLoadingTransaction, setIsLoadingTransaction] = useState(false);
+
+    const [isUndoingTransaction, setIsUndoingTransaction] = useState(false);
+
+    const [isJournalModalOpen, setIsJournalModalOpen] = useState(false);
+    const [journalEntries, setJournalEntries] = useState([]);
+    const [isLoadingJournal, setIsLoadingJournal] = useState(false);
+
+    const fetchJournalEntries = async (transactionId) => {
+        try {
+            setIsLoadingJournal(true);
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+            };
+
+            const response = await axios.get(
+                `${API_CONFIG.baseURL}/journalentries?transactionId=L${transactionId}&transactionDetails=true`,
+                { headers }
+            );
+
+            setJournalEntries(response.data.pageItems || []);
+            setIsJournalModalOpen(true);
+        } catch (error) {
+            console.error("Error fetching journal entries:", error);
+            alert("Failed to fetch journal entries. Please try again.");
+        } finally {
+            setIsLoadingJournal(false);
+        }
+    };
+
+    const closeJournalModal = () => {
+        setIsJournalModalOpen(false);
+        setJournalEntries([]);
+    };
+
+    const handleUndoTransaction = (transactionId, transactionDate) => {
+        const userConfirmed = window.confirm("Are you sure you want to undo this transaction?");
+        if (!userConfirmed) return;
+
+        undoTransaction(transactionId, transactionDate);
+    };
+
+    const undoTransaction = async (transactionId, transactionDate) => {
+        try {
+            setIsUndoingTransaction(true);
+
+            const formatDateForPayload = (date) => {
+                return date
+                    .toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric",
+                    })
+                    .replace(",", "");
+            };
+
+            const payload = {
+                transactionDate: formatDateForPayload(new Date(transactionDate[0], transactionDate[1] - 1, transactionDate[2])),
+                transactionAmount: 0,
+                dateFormat: "dd MMMM yyyy",
+                locale: "en",
+            };
+
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                "Content-Type": "application/json",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+            };
+
+            await axios.post(
+                `${API_CONFIG.baseURL}/loans/${loanId}/transactions/${transactionId}?command=undo`,
+                payload,
+                { headers }
+            );
+
+            alert("Transaction undone successfully.");
+            fetchLoanData();
+        } catch (error) {
+            console.error("Error undoing transaction:", error);
+            alert("Failed to undo transaction. Please try again.");
+        } finally {
+            setIsUndoingTransaction(false);
+        }
+    };
+
+    const fetchTransactionDetails = async (loanId, transactionId) => {
+        try {
+            setIsLoadingTransaction(true);
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+            };
+
+            const loanResponse = await axios.get(
+                `${API_CONFIG.baseURL}/loans/${loanId}?associations=all&exclude=guarantors,futureSchedule`,
+                { headers }
+            );
+
+            const transactionResponse = await axios.get(
+                `${API_CONFIG.baseURL}/loans/${loanId}/transactions/${transactionId}`,
+                { headers }
+            );
+
+            setTransactionDetails({
+                id: transactionResponse.data.id,
+                type: transactionResponse.data.type.value,
+                transactionDate: formatDateForPayload(new Date(transactionResponse.data.date[0], transactionResponse.data.date[1] - 1, transactionResponse.data.date[2])),
+                currency: transactionResponse.data.currency.name,
+                amount: new Intl.NumberFormat("en-US", {
+                    style: "currency",
+                    currency: transactionResponse.data.currency.code,
+                    minimumFractionDigits: 2,
+                }).format(transactionResponse.data.amount),
+            });
+
+            setIsTransactionModalOpen(true);
+        } catch (error) {
+            console.error("Error fetching transaction details:", error);
+            alert("Failed to load transaction details. Please try again.");
+        } finally {
+            setIsLoadingTransaction(false);
+        }
+    };
+
+    const closeTransactionModal = () => {
+        setIsTransactionModalOpen(false);
+        setTransactionDetails(null);
+    };
+
+    const handleExportButtonClick = () => {
+        setIsExportModalOpen(true);
+    };
+
+    const handleGenerateReport = async () => {
+        if (!exportForm.fromDate || !exportForm.toDate) {
+            alert("Please select both dates.");
+            return;
+        }
+
+        try {
+            setIsSubmittingExport(true);
+
+            const formattedFromDate = formatDateForPayload(exportForm.fromDate);
+            const formattedToDate = formatDateForPayload(exportForm.toDate);
+
+            const response = await axios.get(
+                `${API_CONFIG.baseURL}/runreports/Client%20Loan%20Account%20Schedule`,
+                {
+                    params: {
+                        tenantIdentifier: "default",
+                        locale: "en",
+                        dateFormat: "dd MMMM yyyy",
+                        "output-type": "JSON",
+                        R_startDate: formattedFromDate,
+                        R_endDate: formattedToDate,
+                        R_selectLoan: loanId,
+                    },
+                    responseType: 'blob',
+                    headers: {
+                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+                    },
+                }
+            );
+
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", `Loan_Report_${formattedFromDate}_to_${formattedToDate}.json`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            alert("Report downloaded successfully.");
+            setIsExportModalOpen(false);
+        } catch (error) {
+            console.error("Error generating report:", error);
+            alert("Failed to generate report.");
+        } finally {
+            setIsSubmittingExport(false);
+        }
+    };
+
+    const fetchCreditBalanceRefundTemplate = async () => {
+        try {
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+            };
+
+            const response = await axios.get(
+                `${API_CONFIG.baseURL}/loans/${loanId}/transactions/template?command=creditBalanceRefund`,
+                { headers }
+            );
+
+            setCreditBalanceForm((prev) => ({
+                ...prev,
+                transactionAmount: response.data.amount,
+            }));
+
+            setIsCreditBalanceRefundModalOpen(true);
+        } catch (error) {
+            console.error("Error fetching credit balance refund template:", error);
+            alert("Failed to fetch credit balance refund details.");
+        }
+    };
+
+    const handleSubmitCreditBalanceRefund = async () => {
+        try {
+            setIsSubmittingRefund(true);
+
+            const formatDateForPayload = (date) => {
+                return date
+                    .toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric",
+                    })
+                    .replace(",", "");
+            };
+
+            const payload = {
+                transactionDate: formatDateForPayload(creditBalanceForm.transactionDate),
+                transactionAmount: creditBalanceForm.transactionAmount.toString(),
+                externalId: creditBalanceForm.externalId || "",
+                note: creditBalanceForm.note || "",
+                dateFormat: "dd MMMM yyyy",
+                locale: "en",
+            };
+
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                "Content-Type": "application/json",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+            };
+
+            await axios.post(
+                `${API_CONFIG.baseURL}/loans/${loanId}/transactions?command=creditBalanceRefund`,
+                payload,
+                { headers }
+            );
+
+            alert("Credit balance refund successful.");
+            setIsCreditBalanceRefundModalOpen(false);
+            fetchLoanData();
+        } catch (error) {
+            console.error("Error processing credit balance refund:", error);
+            alert("Failed to process credit balance refund.");
+        } finally {
+            setIsSubmittingRefund(false);
+        }
+    };
+
+    const fetchClientOptions = async (inputValue) => {
+        if (!inputValue || inputValue.length < 2) {
+            return [];
+        }
+
+        try {
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+            };
+
+            const response = await axios.get(
+                `${API_CONFIG.baseURL}/clients?displayName=${inputValue}&orphansOnly=true&sortOrder=ASC&orderBy=displayName`,
+                { headers }
+            );
+
+            return response.data.pageItems.map(client => ({
+                value: client.id,
+                label: client.displayName,
+            }));
+        } catch (error) {
+            console.error("Error fetching clients:", error);
+            return [];
+        }
+    };
+
+    const fetchTransferTemplate = async () => {
+        try {
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+            };
+
+            const response = await axios.get(
+                `${API_CONFIG.baseURL}/accounttransfers/template?fromAccountId=${loanId}&fromAccountType=${loanDetails.loanProductId}`,
+                { headers }
+            );
+
+            setTransferData(response.data);
+            setOfficeOptions(response.data.toOfficeOptions || []);
+            setAccountTypeOptions(response.data.toAccountTypeOptions || []);
+            setAccountOptions(response.data.fromAccountOptions || []);
+
+            setTransferForm((prev) => ({
+                ...prev,
+                amount: response.data.transferAmount,
+                transactionDate: new Date(response.data.transferDate[0], response.data.transferDate[1] - 1, response.data.transferDate[2]),
+            }));
+
+            setIsTransferModalOpen(true);
+        } catch (error) {
+            console.error("Error fetching transfer template:", error);
+        }
+    };
+
+    const fetchAccountOptionsForOffice = async (officeId) => {
+        try {
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+            };
+
+            const response = await axios.get(
+                `${API_CONFIG.baseURL}/accounttransfers/template?fromAccountId=${loanId}&fromAccountType=${loanDetails.loanProductId}&toOfficeId=${officeId}`,
+                { headers }
+            );
+
+            setClientOptions(response.data.toClientOptions || []);
+            setAccountOptions(response.data.fromAccountOptions || []);
+        } catch (error) {
+            console.error("Error fetching account options:", error);
+        }
+    };
+
+    const handleSubmitTransfer = async () => {
+        try {
+            const payload = {
+                transferDate: formatDateForPayload(transferForm.transactionDate),
+                fromOfficeId: clientId,
+                fromClientId: clientId,
+                fromAccountId: loanId,
+                fromAccountType: 1,
+                toOfficeId: parseInt(transferForm.toOffice, 10),
+                toClientId: parseInt(transferForm.toClient, 10),
+                toAccountId: parseInt(transferForm.toAccount, 10),
+                toAccountType: parseInt(transferForm.toAccountType, 10),
+                transferAmount: parseFloat(transferForm.amount),
+                transferDescription: transferForm.description || "",
+                dateFormat: "dd MMMM yyyy",
+                locale: "en",
+            };
+
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                "Content-Type": "application/json",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+            };
+
+            await axios.post(`${API_CONFIG.baseURL}/accounttransfers`, payload, { headers });
+
+            alert("Funds transferred successfully.");
+            setIsTransferModalOpen(false);
+            fetchLoanData();
+        } catch (error) {
+            console.error("Error transferring funds:", error);
+            alert("Failed to transfer funds. Please try again.");
+        }
+    };
+
+    const fetchDisburseToSavingsTemplate = async (loanId) => {
+        try {
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                "Content-Type": "application/json",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+            };
+
+            const response = await axios.get(
+                `${API_CONFIG.baseURL}/loans/${loanId}/transactions/template?command=disburseToSavings`,
+                { headers }
+            );
+
+            const data = response.data;
+            setDisburseToSavingsForm((prev) => ({
+                ...prev,
+                transactionAmount: data.amount || 0,
+                disbursedOnDate: new Date(data.date[0], data.date[1] - 1, data.date[2]),
+            }));
+
+            setIsDisburseToSavingsModalOpen(true);
+        } catch (error) {
+            console.error("Error fetching disbursement to savings template:", error);
+            alert("Failed to fetch disbursement details. Please try again.");
+        }
+    };
+
+    const formatDateForPayload = (date) => {
+        return date
+            .toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "long",
+                year: "numeric",
+            })
+            .replace(",", "");
+    };
+
+    const handleSubmitDisburseToSavings = async (loanId) => {
+        try {
+            setIsSubmittingDisburseToSavings(true);
+
+            const payload = {
+                actualDisbursementDate: formatDateForPayload(disburseToSavingsForm.disbursedOnDate),
+                dateFormat: "dd MMMM yyyy",
+                transactionAmount: parseFloat(disburseToSavingsForm.transactionAmount),
+                note: disburseToSavingsForm.note || "",
+                locale: "en",
+            };
+
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                "Content-Type": "application/json",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+            };
+
+            await axios.post(
+                `${API_CONFIG.baseURL}/loans/${loanId}?command=disburseToSavings`,
+                payload,
+                { headers }
+            );
+
+            alert("Loan successfully disbursed to savings.");
+            setIsDisburseToSavingsModalOpen(false);
+            fetchLoanData();
+        } catch (error) {
+            console.error("Error during disbursement to savings:", error);
+            alert("Failed to disburse loan to savings. Please try again.");
+        } finally {
+            setIsSubmittingDisburseToSavings(false);
+        }
+    };
+
+    const fetchDisbursementTemplate = async (loanId) => {
+        try {
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                "Content-Type": "application/json",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+            };
+
+            const response = await axios.get(
+                `${API_CONFIG.baseURL}/loans/${loanId}/transactions/template?command=disburse`,
+                { headers }
+            );
+
+            const { amount, paymentTypeOptions } = response.data;
+
+            setDisburseForm((prev) => ({
+                ...prev,
+                transactionAmount: amount,
+            }));
+            setPaymentTypeOptions(paymentTypeOptions || []);
+            setIsDisburseModalOpen(true);
+        } catch (error) {
+            console.error("Error fetching disbursement template:", error);
+            alert("Failed to fetch disbursement details.");
+        }
+    };
+
+    const handleSubmitDisbursement = async (loanId) => {
+        try {
+            setIsSubmittingDisbursement(true);
+
+            const formatDateForPayload = (date) => {
+                return date
+                    .toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric",
+                    })
+                    .replace(",", "");
+            };
+
+            const payload = {
+                actualDisbursementDate: formatDateForPayload(disburseForm.disbursedOnDate),
+                transactionAmount: parseFloat(disburseForm.transactionAmount),
+                externalId: disburseForm.externalId || "",
+                paymentTypeId: parseInt(disburseForm.paymentType, 10),
+                accountNumber: disburseForm.accountNumber || "",
+                checkNumber: disburseForm.chequeNumber || "",
+                routingCode: disburseForm.routingCode || "",
+                receiptNumber: disburseForm.receiptNumber || "",
+                bankNumber: disburseForm.bankNumber || "",
+                note: disburseForm.note || "",
+                dateFormat: "dd MMMM yyyy",
+                locale: "en",
+            };
+
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                "Content-Type": "application/json",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+            };
+
+            await axios.post(`${API_CONFIG.baseURL}/loans/${loanId}?command=disburse`, payload, { headers });
+
+            alert("Loan disbursed successfully.");
+            setIsDisburseModalOpen(false);
+            fetchLoanData();
+        } catch (error) {
+            console.error("Error disbursing loan:", error);
+            alert("Failed to disburse the loan.");
+        } finally {
+            setIsSubmittingDisbursement(false);
+        }
+    };
+
+    const handleSubmitUndoApproval = async (loanId) => {
+        try {
+            setIsSubmittingUndoApproval(true);
+
+            const payload = {
+                note: undoApprovalNote || "",
+            };
+
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                "Content-Type": "application/json",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+            };
+
+            await axios.post(`${API_CONFIG.baseURL}/loans/${loanId}?command=undoapproval`, payload, { headers });
+
+            alert("Loan approval undone successfully.");
+            setIsUndoApprovalModalOpen(false);
+            fetchLoanData();
+        } catch (error) {
+            console.error("Error undoing loan approval:", error);
+            alert("Failed to undo loan approval. Please try again.");
+        } finally {
+            setIsSubmittingUndoApproval(false);
+        }
+    };
+
+    const handleOpenDeleteModal = () => {
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleCloseDeleteModal = () => {
+        setIsDeleteModalOpen(false);
+    };
+
+    const handleDeleteLoan = async (loanId) => {
+        if (!loanId) {
+            alert("Loan ID is required.");
+            return;
+        }
+
+        try {
+            setIsDeletingLoan(true);
+
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                "Content-Type": "application/json",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+            };
+
+            await axios.delete(`${API_CONFIG.baseURL}/loans/${loanId}`, { headers });
+
+            alert("Loan deleted successfully.");
+            setIsDeleteModalOpen(false);
+
+            handleBreadcrumbNavigation();
+        } catch (error) {
+            console.error("Error deleting loan:", error);
+            alert("Failed to delete loan. Please try again.");
+        } finally {
+            setIsDeletingLoan(false);
+        }
+    };
+
+    const fetchLoanScreenReports = async () => {
+        try {
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                "Content-Type": "application/json",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+            };
+
+            const response = await axios.get(`${API_CONFIG.baseURL}/templates?entityId=1&typeId=0`, { headers });
+            setLoanScreenReports(response.data || []);
+        } catch (error) {
+            console.error("Error fetching loan screen reports:", error);
+            alert("Failed to fetch loan screen reports. Please try again.");
+        }
+    };
+
+    const handleGenerateLoanScreenReport = async (loanId) => {
+        if (!selectedReportId) {
+            alert("Please select a report to generate.");
+            return;
+        }
+
+        try {
+            setIsSubmittingReport(true);
+
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                "Content-Type": "application/json",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+            };
+
+            const payload = {
+                loanId: parseInt(loanId, 10),
+                templateId: parseInt(selectedReportId, 10),
+            };
+
+            await axios.post(`${API_CONFIG.baseURL}/templates/?loanId=${loanId}`, payload, { headers });
+
+            alert("Loan screen report generated successfully.");
+            setIsLoanScreenReportsModalOpen(false);
+        } catch (error) {
+            console.error("Error generating loan screen report:", error);
+            alert("Failed to generate loan screen report. Please try again.");
+        } finally {
+            setIsSubmittingReport(false);
+        }
+    };
+
+    const handleOpenLoanScreenReportsModal = async () => {
+        await fetchLoanScreenReports();
+        setIsLoanScreenReportsModalOpen(true);
+    };
+
+    const handleCloseLoanScreenReportsModal = () => {
+        setIsLoanScreenReportsModalOpen(false);
+        setSelectedReportId("");
+    };
+
+    const fetchLoanOfficerData = async (loanId) => {
+        try {
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                "Content-Type": "application/json",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+            };
+            const response = await axios.get(
+                `${API_CONFIG.baseURL}/loans/${loanId}?fields=id,loanOfficerId,loanOfficerOptions&staffInSelectedOfficeOnly=true&template=true`,
+                { headers }
+            );
+            const { loanOfficerId, loanOfficerOptions } = response.data;
+            setLoanOfficerOptions(loanOfficerOptions || []);
+            setCurrentLoanOfficerId(loanOfficerId);
+        } catch (error) {
+            console.error("Error fetching loan officer data:", error);
+        }
+    };
+
+    const handleSubmitLoanOfficerChange = async (loanId) => {
+        try {
+            setIsSubmittingLoanOfficerChange(true);
+            const formatDateForPayload = (date) =>
+                date
+                    .toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric",
+                    })
+                    .replace(/,/g, "");
+
+            const payload = {
+                assignmentDate: formatDateForPayload(assignmentDate),
+                dateFormat: "dd MMMM yyyy",
+                fromLoanOfficerId: parseInt(currentLoanOfficerId, 10),
+                toLoanOfficerId: parseInt(selectedLoanOfficerId, 10),
+                locale: "en",
+            };
+
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                "Content-Type": "application/json",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+            };
+
+            await axios.post(`${API_CONFIG.baseURL}/loans/${loanId}?command=assignLoanOfficer`, payload, { headers });
+
+            alert("Loan officer changed successfully.");
+            setIsChangeLoanOfficerModalOpen(false);
+            fetchLoanData();
+        } catch (error) {
+            console.error("Error changing loan officer:", error);
+            alert("Failed to change loan officer. Please try again.");
+        } finally {
+            setIsSubmittingLoanOfficerChange(false);
+        }
+    };
+
+    const fetchLoanCollateralTemplate = async (loanId) => {
+        try {
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                "Content-Type": "application/json",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+            };
+            const response = await axios.get(
+                `${API_CONFIG.baseURL}/loans/${loanId}/collaterals/template`,
+                { headers }
+            );
+            setCollateralTypes(response.data?.allowedCollateralTypes || []);
+            setIsAddCollateralModalOpen(true);
+        } catch (error) {
+            console.error("Error fetching collateral template:", error);
+            alert("Failed to fetch collateral template.");
+        }
+    };
+
+    const handleOpenAddCollateralModal = (loanId) => {
+        fetchLoanCollateralTemplate(loanId);
+    };
+
+    const handleCloseAddCollateralModal = () => {
+        setIsAddCollateralModalOpen(false);
+        setCollateralForm({ collateralType: "", value: "", description: "" });
+    };
+
+    const handleSubmitCollateral = async (loanId) => {
+        try {
+            setIsSubmittingCollateral(true);
+
+            const payload = {
+                collateralTypeId: collateralForm.collateralType,
+                value: parseFloat(collateralForm.value),
+                description: collateralForm.description,
+                locale: 'en',
+            };
+
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                "Content-Type": "application/json",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+            };
+
+            await axios.post(
+                `${API_CONFIG.baseURL}/loans/${loanId}/collaterals`,
+                payload,
+                { headers }
+            );
+
+            setIsAddCollateralModalOpen(false);
+            fetchLoanData();
+            alert("Collateral added successfully.");
+        } catch (error) {
+            console.error("Error adding collateral:", error);
+            alert("Failed to add collateral.");
+        } finally {
+            setIsSubmittingCollateral(false);
+        }
+    };
+
+    const handleOpenWithdrawModal = () => {
+        setIsWithdrawModalOpen(true);
+    };
+
+    const handleCloseWithdrawModal = () => {
+        setIsWithdrawModalOpen(false);
+        setWithdrawForm({ withdrawnOnDate: new Date(), note: "" });
+    };
+
+    const handleSubmitWithdrawLoan = async (loanId) => {
+        try {
+            setIsSubmittingWithdraw(true);
+
+            const formatDateForPayload = (date) => {
+                return date
+                    .toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric",
+                    })
+                    .replace(",", "");
+            };
+
+            const payload = {
+                withdrawnOnDate: formatDateForPayload(withdrawForm.withdrawnOnDate),
+                note: withdrawForm.note || "",
+                dateFormat: "dd MMMM yyyy",
+                locale: "en",
+            };
+
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                "Content-Type": "application/json",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+            };
+
+            await axios.post(`${API_CONFIG.baseURL}/loans/${loanId}?command=withdrawnByApplicant`, payload, { headers });
+            setIsWithdrawModalOpen(false);
+            fetchLoanData();
+            alert("Loan withdrawn successfully by the client");
+        } catch (error) {
+            console.error("Error withdrawing loan:", error);
+            alert("Error withdrawing loan: " + (error?.response?.data?.errors?.[0]?.defaultUserMessage || "Unknown error"));
+        } finally {
+            setIsSubmittingWithdraw(false);
+        }
+    };
+
+    const handleOpenRejectModal = () => {
+        setIsRejectModalOpen(true);
+    };
+
+    const handleCloseRejectModal = () => {
+        setIsRejectModalOpen(false);
+        setRejectForm({ rejectedOnDate: new Date(), note: "" });
+    };
+
+    const handleSubmitRejectLoan = async (loanId) => {
+        try {
+            setIsSubmittingRejection(true);
+
+            const formatDateForPayload = (date) => {
+                return date
+                    .toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric",
+                    })
+                    .replace(",", "");
+            };
+
+            const payload = {
+                rejectedOnDate: formatDateForPayload(rejectForm.rejectedOnDate),
+                note: rejectForm.note || "",
+                dateFormat: "dd MMMM yyyy",
+                locale: "en",
+            };
+
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                "Content-Type": "application/json",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+            };
+
+            await axios.post(`${API_CONFIG.baseURL}/loans/${loanId}?command=reject`, payload, { headers });
+            setIsRejectModalOpen(false);
+            fetchLoanData();
+            alert("Loan rejected successfully");
+        } catch (error) {
+            console.error("Error rejecting loan:", error);
+            alert("Error rejecting loan: " + (error?.response?.data?.errors?.[0]?.defaultUserMessage || "Unknown error"));
+        } finally {
+            setIsSubmittingRejection(false);
+        }
+    };
+
+    const handleOpenApproveModal = async () => {
+        try {
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                "Content-Type": "application/json",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+            };
+
+            const approvalTemplateResponse = await axios.get(
+                `${API_CONFIG.baseURL}/loans/${loanId}/template?templateType=approval`,
+                { headers }
+            );
+
+            const loanDetailsResponse = await axios.get(
+                `${API_CONFIG.baseURL}/loans/${loanId}?associations=multiDisburseDetails`,
+                { headers }
+            );
+
+            const { approvalAmount, approvalDate, netDisbursalAmount } = approvalTemplateResponse.data;
+            const { expectedDisbursementDate } = loanDetailsResponse.data.timeline;
+
+            setApproveForm({
+                approvedOnDate: new Date(approvalDate.join("-")),
+                expectedDisbursementDate: new Date(expectedDisbursementDate.join("-")),
+                approvedLoanAmount: approvalAmount,
+                transactionAmount: netDisbursalAmount,
+                note: "",
+            });
+
+            setIsApproveModalOpen(true);
+        } catch (error) {
+            console.error("Error fetching approval data:", error);
+        }
+    };
+
+    const handleCloseApproveModal = () => {
+        setIsApproveModalOpen(false);
+    };
+
+    const handleSubmitApproveLoan = async (loanId) => {
+        try {
+            setIsSubmittingApproval(true);
+
+            const formatDateForPayload = (date) => {
+                return date
+                    .toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric",
+                    })
+                    .replace(",", "");
+            };
+
+            const payload = {
+                approvedOnDate: formatDateForPayload(approveForm.approvedOnDate),
+                expectedDisbursementDate: formatDateForPayload(approveForm.expectedDisbursementDate),
+                approvedLoanAmount: approveForm.approvedLoanAmount,
+                note: approveForm.note || "",
+                dateFormat: "dd MMMM yyyy",
+                locale: "en",
+            };
+
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                "Content-Type": "application/json",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+            };
+
+            await axios.post(`${API_CONFIG.baseURL}/loans/${loanId}?command=approve`, payload, { headers });
+            setIsApproveModalOpen(false);
+            fetchLoanData();
+            alert('Loan approved successfully');
+        } catch (error) {
+            console.error("Error approving loan:", error);
+        } finally {
+            setIsSubmittingApproval(false);
+        }
+    };
+
     const handleOpenRecoverFromGuarantorModal = () => {
         setIsRecoverFromGuarantorModalOpen(true);
     };
@@ -338,7 +1377,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -365,7 +1404,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -447,7 +1486,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -470,7 +1509,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -512,7 +1551,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -538,7 +1577,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -578,7 +1617,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -614,7 +1653,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -654,7 +1693,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -690,7 +1729,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -734,7 +1773,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -771,7 +1810,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -850,7 +1889,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -871,7 +1910,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -920,7 +1959,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -945,7 +1984,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -1010,7 +2049,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -1035,7 +2074,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -1100,7 +2139,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -1125,7 +2164,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -1190,7 +2229,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -1240,7 +2279,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -1302,7 +2341,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -1329,7 +2368,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -1381,7 +2420,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -1408,7 +2447,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -1480,7 +2519,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -1527,18 +2566,19 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
             await axios.post(
-                `${API_CONFIG.baseURL}/loans/${loanId}/transactions?command=undodisbursal`,
+                `${API_CONFIG.baseURL}/loans/${loanId}?command=undodisbursal`,
                 payload,
                 { headers }
             );
 
-            alert("Undo Disbursal action submitted successfully.");
+            alert("Loan Disbursal undone successfully!");
             handleCloseUndoDisbursalModal();
+            fetchLoanData();
         } catch (error) {
             console.error("Error submitting undo disbursal:", error);
             alert("Failed to submit undo disbursal.");
@@ -1553,7 +2593,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -1638,7 +2678,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -1650,6 +2690,7 @@ const LoanDetails = () => {
 
             alert("Repayment submitted successfully!");
             handleCloseRepaymentModal();
+            fetchLoanData();
         } catch (error) {
             console.error("Error submitting repayment:", error);
             alert("Failed to submit repayment.");
@@ -1664,7 +2705,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -1721,7 +2762,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -1733,6 +2774,7 @@ const LoanDetails = () => {
 
             alert("Foreclosure transaction submitted successfully!");
             handleCloseForeclosureModal();
+            fetchLoanData();
         } catch (error) {
             console.error("Error submitting foreclosure transaction:", error);
             alert("Failed to submit foreclosure transaction.");
@@ -1747,7 +2789,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -1810,7 +2852,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -1822,6 +2864,7 @@ const LoanDetails = () => {
 
             alert("Loan charge added successfully!");
             handleCloseModal();
+            fetchLoanData();
         } catch (error) {
             console.error("Error adding loan charge:", error);
             alert("Failed to add loan charge.");
@@ -1842,7 +2885,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
             };
             const [activeResponse, transfersResponse] = await Promise.all([
                 axios.get(`${API_CONFIG.baseURL}/external-asset-owners/transfers/active-transfer?loanId=${loanId}`, { headers }),
@@ -1880,7 +2923,7 @@ const LoanDetails = () => {
                 {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        "Fineract-Platform-TenantId": "default",
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                         "Content-Type": "application/json",
                     },
                 }
@@ -1914,7 +2957,7 @@ const LoanDetails = () => {
                     {
                         headers: {
                             Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                            "Fineract-Platform-TenantId": "default",
+                            'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                             "Content-Type": "application/json",
                         },
                     }
@@ -1935,7 +2978,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -1967,7 +3010,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -1990,7 +3033,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -2034,7 +3077,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -2062,7 +3105,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
             const response = await axios.get(
@@ -2092,7 +3135,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "multipart/form-data",
             };
 
@@ -2109,6 +3152,7 @@ const LoanDetails = () => {
 
             setIsUploadModalOpen(false);
             fetchLoanDocuments();
+            fetchLoanData();
         } catch (error) {
             console.error("Error uploading document:", error);
         } finally {
@@ -2126,7 +3170,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
             };
 
             const response = await axios.get(
@@ -2144,7 +3188,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
             };
 
             const response = await axios.get(
@@ -2167,7 +3211,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -2206,6 +3250,7 @@ const LoanDetails = () => {
 
             setIsRescheduleModalOpen(false);
             await fetchLoanReschedules();
+            fetchLoanData();
         } catch (error) {
             console.error("Error submitting reschedule:", error);
         }
@@ -2219,7 +3264,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
             };
             const response = await axios.get(`${API_CONFIG.baseURL}/paymenttypes`, { headers });
             setPaymentTypeOptions(response.data);
@@ -2247,7 +3292,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
             };
             await axios.post(
                 `${API_CONFIG.baseURL}/loans/${loanId}/charges/${selectedCharge.id}?command=waive`,
@@ -2266,7 +3311,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
             const payload = {
@@ -2275,7 +3320,7 @@ const LoanDetails = () => {
             };
             if (!showPaymentDetails) {
                 delete payload.accountNumber;
-                delete payload.chequeNumber;
+                delete payload.checkNumber;
                 delete payload.routingCode;
                 delete payload.receiptNumber;
                 delete payload.bankNumber;
@@ -2298,7 +3343,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -2331,7 +3376,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -2352,7 +3397,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -2375,14 +3420,15 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
             const payload = {
-                type: collateralType,
-                value: collateralValue,
+                collateralTypeId: collateralType,
+                value: parseFloat(collateralValue),
                 description: collateralDescription,
+                locale: 'en',
             };
 
             await axios.post(
@@ -2414,7 +3460,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -2443,7 +3489,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -2513,7 +3559,7 @@ const LoanDetails = () => {
         try {
             const headers = {
                 Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                "Fineract-Platform-TenantId": "default",
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 "Content-Type": "application/json",
             };
 
@@ -2541,107 +3587,127 @@ const LoanDetails = () => {
                 return (
                     <div className="general-tab">
                         {/* Performance History Section */}
-                        {!loanDetails?.status?.value?.toLowerCase()?.includes("approved") && (
-                            <div className="general-section general-summary-details">
-                            <h3 className="general-section-title">Performance History</h3>
-                            <div className="general-details-columns">
-                                <div className="general-details-column">
-                                    <p>
-                                        <strong>Number of Repayments:</strong>{" "}
-                                        {loanDetails?.summary?.numberOfRepayments || "-"}
-                                    </p>
-                                    <p>
-                                        <strong>Maturity Date:</strong>{" "}
-                                        {loanDetails?.timeline?.expectedMaturityDate
-                                            ? new Date(loanDetails.timeline.expectedMaturityDate.join("-")).toLocaleDateString(undefined, {
-                                                year: "numeric",
-                                                month: "long",
-                                                day: "numeric",
-                                            })
-                                            : "-"}
-                                    </p>
+                        {!loanDetails?.status?.value?.toLowerCase()?.includes("approved") &&
+                            !loanDetails?.status?.pendingApproval && (
+                                <div className="general-section general-summary-details">
+                                    <h3 className="general-section-title">Performance History</h3>
+                                    <div className="general-details-columns">
+                                        <div className="general-details-column">
+                                            <p>
+                                                <strong>Number of Repayments:</strong>{" "}
+                                                {loanDetails?.summary?.numberOfRepayments || "Not Available"}
+                                            </p>
+                                            <p>
+                                                <strong>Maturity Date:</strong>{" "}
+                                                {loanDetails?.timeline?.expectedMaturityDate
+                                                    ? new Date(loanDetails.timeline.expectedMaturityDate.join("-")).toLocaleDateString(undefined, {
+                                                        year: "numeric",
+                                                        month: "long",
+                                                        day: "numeric",
+                                                    })
+                                                    : "Not Available"}
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                        )}
+                            )}
 
                         {/* Loan Summary Section */}
-                        {!loanDetails?.status?.value?.toLowerCase()?.includes("approved") && (
-                        <div className="general-section general-groups-section">
-                            <h3 className="general-section-title">Loan Summary</h3>
-                            <table className="general-charges-table">
-                                <thead>
-                                <tr>
-                                    <th></th>
-                                    <th>Original</th>
-                                    <th>Paid</th>
-                                    <th>Waived</th>
-                                    <th>Written Off</th>
-                                    <th>Outstanding</th>
-                                    <th>Overdue</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {[
-                                    {
-                                        label: "Principal",
-                                        original: "principalDisbursed",
-                                        paid: "principalPaid",
-                                        waived: "principalWaived",
-                                        writtenOff: "principalWrittenOff",
-                                        outstanding: "principalOutstanding",
-                                        overdue: "principalOverdue"
-                                    },
-                                    {
-                                        label: "Interest",
-                                        original: "interestCharged",
-                                        paid: "interestPaid",
-                                        waived: "interestWaived",
-                                        writtenOff: "interestWrittenOff",
-                                        outstanding: "interestOutstanding",
-                                        overdue: "interestOverdue"
-                                    },
-                                    {
-                                        label: "Fees",
-                                        original: "feeChargesCharged",
-                                        paid: "feeChargesPaid",
-                                        waived: "feeChargesWaived",
-                                        writtenOff: "feeChargesWrittenOff",
-                                        outstanding: "feeChargesOutstanding",
-                                        overdue: "feeChargesOverdue"
-                                    },
-                                    {
-                                        label: "Penalties",
-                                        original: "penaltyChargesCharged",
-                                        paid: "penaltyChargesPaid",
-                                        waived: "penaltyChargesWaived",
-                                        writtenOff: "penaltyChargesWrittenOff",
-                                        outstanding: "penaltyChargesOutstanding",
-                                        overdue: "penaltyChargesOverdue"
-                                    },
-                                    {
-                                        label: "Total",
-                                        original: "totalExpectedRepayment",
-                                        paid: "totalRepayment",
-                                        waived: "totalWaived",
-                                        writtenOff: "totalWrittenOff",
-                                        outstanding: "totalOutstanding",
-                                        overdue: "totalOverdue"
-                                    },
-                                ].map(({label, original, paid, waived, writtenOff, outstanding, overdue}) => (
-                                    <tr key={label}>
-                                        <td>{label}</td>
-                                        <td>{`${loanDetails?.currency?.displaySymbol || ""} ${loanDetails?.summary?.[original]?.toFixed(2) || "0.00"}`}</td>
-                                        <td>{`${loanDetails?.currency?.displaySymbol || ""} ${loanDetails?.summary?.[paid]?.toFixed(2) || "0.00"}`}</td>
-                                        <td>{`${loanDetails?.currency?.displaySymbol || ""} ${loanDetails?.summary?.[waived]?.toFixed(2) || "0.00"}`}</td>
-                                        <td>{`${loanDetails?.currency?.displaySymbol || ""} ${loanDetails?.summary?.[writtenOff]?.toFixed(2) || "0.00"}`}</td>
-                                        <td>{`${loanDetails?.currency?.displaySymbol || ""} ${loanDetails?.summary?.[outstanding]?.toFixed(2) || "0.00"}`}</td>
-                                        <td>{`${loanDetails?.currency?.displaySymbol || ""} ${loanDetails?.summary?.[overdue]?.toFixed(2) || "0.00"}`}</td>
+                        {!loanDetails?.status?.value?.toLowerCase()?.includes("approved") &&
+                            !loanDetails?.status?.pendingApproval && (
+                            <div className="general-section general-groups-section">
+                                <h3 className="general-section-title">Loan Summary</h3>
+                                <table className="general-charges-table">
+                                    <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>Original</th>
+                                        <th>Paid</th>
+                                        <th>Waived</th>
+                                        <th>Written Off</th>
+                                        <th>Outstanding</th>
+                                        <th>Overdue</th>
                                     </tr>
-                                ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                    </thead>
+                                    <tbody>
+                                    {[
+                                        {
+                                            label: "Principal",
+                                            original: "principalDisbursed",
+                                            paid: "principalPaid",
+                                            waived: "principalWaived",
+                                            writtenOff: "principalWrittenOff",
+                                            outstanding: "principalOutstanding",
+                                            overdue: "principalOverdue"
+                                        },
+                                        {
+                                            label: "Interest",
+                                            original: "interestCharged",
+                                            paid: "interestPaid",
+                                            waived: "interestWaived",
+                                            writtenOff: "interestWrittenOff",
+                                            outstanding: "interestOutstanding",
+                                            overdue: "interestOverdue"
+                                        },
+                                        {
+                                            label: "Fees",
+                                            original: "feeChargesCharged",
+                                            paid: "feeChargesPaid",
+                                            waived: "feeChargesWaived",
+                                            writtenOff: "feeChargesWrittenOff",
+                                            outstanding: "feeChargesOutstanding",
+                                            overdue: "feeChargesOverdue"
+                                        },
+                                        {
+                                            label: "Penalties",
+                                            original: "penaltyChargesCharged",
+                                            paid: "penaltyChargesPaid",
+                                            waived: "penaltyChargesWaived",
+                                            writtenOff: "penaltyChargesWrittenOff",
+                                            outstanding: "penaltyChargesOutstanding",
+                                            overdue: "penaltyChargesOverdue"
+                                        },
+                                        {
+                                            label: "Total",
+                                            original: "totalExpectedRepayment",
+                                            paid: "totalRepayment",
+                                            waived: "totalWaived",
+                                            writtenOff: "totalWrittenOff",
+                                            outstanding: "totalOutstanding",
+                                            overdue: "totalOverdue"
+                                        },
+                                    ].map(({label, original, paid, waived, writtenOff, outstanding, overdue}) => (
+                                        <tr key={label}>
+                                            <td>{label}</td>
+                                            <td>{`${loanDetails?.currency?.code || ""} ${(loanDetails?.summary?.[original] || 0).toLocaleString(undefined, {
+                                                minimumFractionDigits: 2,
+                                                maximumFractionDigits: 2
+                                            })}`}</td>
+                                            <td>{`${loanDetails?.currency?.code || ""} ${(loanDetails?.summary?.[paid] || 0).toLocaleString(undefined, {
+                                                minimumFractionDigits: 2,
+                                                maximumFractionDigits: 2
+                                            })}`}</td>
+                                            <td>{`${loanDetails?.currency?.code || ""} ${(loanDetails?.summary?.[waived] || 0).toLocaleString(undefined, {
+                                                minimumFractionDigits: 2,
+                                                maximumFractionDigits: 2
+                                            })}`}</td>
+                                            <td>{`${loanDetails?.currency?.code || ""} ${(loanDetails?.summary?.[writtenOff] || 0).toLocaleString(undefined, {
+                                                minimumFractionDigits: 2,
+                                                maximumFractionDigits: 2
+                                            })}`}</td>
+                                            <td>{`${loanDetails?.currency?.code || ""} ${(loanDetails?.summary?.[outstanding] || 0).toLocaleString(undefined, {
+                                                minimumFractionDigits: 2,
+                                                maximumFractionDigits: 2
+                                            })}`}</td>
+                                            <td>{`${loanDetails?.currency?.code || ""} ${(loanDetails?.summary?.[overdue] || 0).toLocaleString(undefined, {
+                                                minimumFractionDigits: 2,
+                                                maximumFractionDigits: 2
+                                            })}`}</td>
+                                        </tr>
+                                    ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         )}
 
                         {/* Loan Details Section */}
@@ -2649,85 +3715,158 @@ const LoanDetails = () => {
                             <h3 className="general-section-title">Loan Details</h3>
                             <table className="general-charges-table general-vertical-table">
                                 <tbody>
-                                <tr>
-                                    <td className="label">Disbursement Date</td>
-                                    <td className="value">
-                                        {loanDetails?.timeline?.actualDisbursementDate
-                                            ? new Date(loanDetails.timeline.actualDisbursementDate.join("-")).toLocaleDateString(undefined, {
-                                                year: "numeric",
-                                                month: "long",
-                                                day: "numeric",
-                                            })
-                                            : "-"}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td className="label">Loan Purpose</td>
-                                    <td className="value">{loanDetails?.purpose || "Not Available"}</td>
-                                </tr>
-                                <tr>
-                                    <td className="label">Loan Officer</td>
-                                    <td className="value">
-                                        {loanDetails?.loanOfficerName || "Unassigned"}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td className="label">Currency</td>
-                                    <td className="value">{loanDetails?.currency?.displaySymbol || "-"}</td>
-                                </tr>
-                                <tr>
-                                    <td className="label">External ID</td>
-                                    <td className="value">{loanDetails?.clientExternalId || "-"}</td>
-                                </tr>
-                                <tr>
-                                    <td className="label">Proposed Amount</td>
-                                    <td className="value">
-                                        {loanDetails?.proposedPrincipal
-                                            ? `${loanDetails.currency.displaySymbol} ${loanDetails.proposedPrincipal}`
-                                            : "-"}
-                                    </td>
-                                </tr>
-                                <tr>
-                                <td className="label">Approved Amount</td>
-                                    <td className="value">
-                                        {loanDetails?.approvedPrincipal
-                                            ? `${loanDetails.currency.displaySymbol} ${loanDetails.approvedPrincipal}`
-                                            : "-"}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td className="label">Disbursed Amount</td>
-                                    <td className="value">
-                                        {loanDetails?.netDisbursalAmount
-                                            ? `${loanDetails.currency.displaySymbol} ${loanDetails.netDisbursalAmount}`
-                                            : "-"}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td className="label">Term</td>
-                                    <td className="value">
-                                        {loanDetails?.termFrequency
-                                            ? `${loanDetails.termFrequency} ${loanDetails.termPeriodFrequencyType?.value}`
-                                            : "Not Available"}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td className="label">Interest Rate</td>
-                                    <td className="value">
-                                        {loanDetails?.annualInterestRate
-                                            ? `${loanDetails.annualInterestRate}%`
-                                            : "Not Available"}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td className="label">Amortization</td>
-                                    <td className="value">
-                                        {loanDetails?.amortizationType?.value || "Not Available"}
-                                    </td>
-                                </tr>
+                                {loanDetails?.status?.pendingApproval ? (
+                                    <>
+                                        <tr>
+                                            <td className="label">Disbursement Date</td>
+                                            <td className="value">
+                                                {loanDetails?.timeline?.actualDisbursementDate
+                                                    ? new Date(loanDetails.timeline.actualDisbursementDate.join("-")).toLocaleDateString(undefined, {
+                                                        year: "numeric",
+                                                        month: "long",
+                                                        day: "numeric",
+                                                    })
+                                                    : "Not Available"}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td className="label">Currency</td>
+                                            <td className="value">
+                                                {loanDetails?.currency?.name || "Not Available"}, {loanDetails?.currency?.code || "Not Available"}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td className="label">Loan Officer</td>
+                                            <td className="value">
+                                                {loanDetails?.loanOfficerName || "Not Available"}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td className="label">External ID</td>
+                                            <td className="value">{loanDetails?.clientExternalId || "Not Available"}</td>
+                                        </tr>
+                                    </>
+                                ) : (
+                                    <>
+                                    <tr>
+                                        <td className="label">Disbursement Date</td>
+                                        <td className="value">
+                                            {loanDetails?.timeline?.actualDisbursementDate
+                                                ? new Date(loanDetails.timeline.actualDisbursementDate.join("-")).toLocaleDateString(undefined, {
+                                                    year: "numeric",
+                                                    month: "long",
+                                                    day: "numeric",
+                                                })
+                                                : "-"}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td className="label">Loan Purpose</td>
+                                        <td className="value">{loanDetails?.purpose || "Not Available"}</td>
+                                    </tr>
+                                    <tr>
+                                        <td className="label">Loan Officer</td>
+                                        <td className="value">
+                                            {loanDetails?.loanOfficerName || "Unassigned"}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td className="label">Currency</td>
+                                        <td className="value">{loanDetails?.currency?.name || ''}, {loanDetails?.currency?.code || "-"}</td>
+                                    </tr>
+                                    <tr>
+                                        <td className="label">External ID</td>
+                                        <td className="value">{loanDetails?.clientExternalId || "-"}</td>
+                                    </tr>
+                                    <tr>
+                                        <td className="label">Proposed Amount</td>
+                                        <td className="value">
+                                            {loanDetails?.proposedPrincipal
+                                                ? `${loanDetails.currency.code} ${(loanDetails.proposedPrincipal || 0).toLocaleString()}`
+                                                : "-"}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                    <td className="label">Approved Amount</td>
+                                        <td className="value">
+                                            {loanDetails?.approvedPrincipal
+                                                ? `${loanDetails.currency.code} ${(loanDetails.approvedPrincipal || 0).toLocaleString()}`
+                                                : "-"}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td className="label">Disbursed Amount</td>
+                                        <td className="value">
+                                            {loanDetails?.netDisbursalAmount
+                                                ? `${loanDetails.currency.code} ${(loanDetails.netDisbursalAmount || 0).toLocaleString()}`
+                                                : "-"}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td className="label">Term</td>
+                                        <td className="value">
+                                            {loanDetails?.termFrequency
+                                                ? `${loanDetails.termFrequency} ${loanDetails.termPeriodFrequencyType?.value}`
+                                                : "Not Available"}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td className="label">Interest Rate</td>
+                                        <td className="value">
+                                            {loanDetails?.annualInterestRate
+                                                ? `${loanDetails.annualInterestRate}%`
+                                                : "Not Available"}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td className="label">Amortization</td>
+                                        <td className="value">
+                                            {loanDetails?.amortizationType?.value || "Not Available"}
+                                        </td>
+                                    </tr>
+                                    </>
+                                    )}
                                 </tbody>
                             </table>
                         </div>
+
+                        {loanDetails?.status?.pendingApproval && (
+                            <div className="general-section general-groups-section">
+                                <h3 className="general-section-title">Loan Purpose</h3>
+                                <table className="general-charges-table general-vertical-table">
+                                    <tbody>
+                                    <tr>
+                                        <td className="label">Loan Purpose</td>
+                                        <td className="value">{loanDetails?.purpose || "Not Available"}</td>
+                                    </tr>
+                                    <tr>
+                                        <td className="label">Proposed Amount</td>
+                                        <td className="value">
+                                            {loanDetails?.proposedPrincipal
+                                                ? `${loanDetails.currency.code} ${(loanDetails.proposedPrincipal || 0).toLocaleString()}`
+                                                : "Not Available"}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td className="label">Approved Amount</td>
+                                        <td className="value">
+                                            {loanDetails?.approvedPrincipal
+                                                ? `${loanDetails.currency.code} ${(loanDetails.approvedPrincipal || 0).toLocaleString()}`
+                                                : "Not Available"}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td className="label">Disburse Amount</td>
+                                        <td className="value">
+                                            {loanDetails?.netDisbursalAmount
+                                                ? `${loanDetails.currency.code} ${(loanDetails.netDisbursalAmount || 0).toLocaleString()}`
+                                                : "Not Available"}
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
                     </div>
                 );
             case "accountDetails":
@@ -2928,18 +4067,23 @@ const LoanDetails = () => {
                                                         day: "numeric",
                                                     }
                                                 )
-                                                : "N/A"}
+                                                : ""}
                                         </td>
-                                        <td>
-                                            {period.paidDate
-                                                ? new Date(
-                                                    period.paidDate.join("-")
-                                                ).toLocaleDateString(undefined, {
-                                                    year: "numeric",
-                                                    month: "long",
-                                                    day: "numeric",
-                                                })
-                                                : "N/A"}
+                                        <td
+                                            style={period.complete ? {color: "green", fontWeight: "bold"} : {}}
+                                            title={period.complete ? "Complete Payment" : ""}
+                                        >
+                                            {period.obligationsMetOnDate
+                                                ? new Date(period.obligationsMetOnDate.join("-")).toLocaleDateString(
+                                                    "en-GB",
+                                                    {
+                                                        year: "numeric",
+                                                        month: "long",
+                                                        day: "numeric",
+                                                    }
+                                                ).replace(",", "") +
+                                                (period.complete ? " ✔" : "")
+                                                : ""}
                                         </td>
                                         <td>
                                             {(period.principalLoanBalanceOutstanding || 0).toLocaleString(undefined, {
@@ -2978,13 +4122,13 @@ const LoanDetails = () => {
                                             })}
                                         </td>
                                         <td>
-                                            {(period.paidInAdvance || 0).toLocaleString(undefined, {
+                                            {(period.totalPaidInAdvanceForPeriod || 0).toLocaleString(undefined, {
                                                 minimumFractionDigits: 2,
                                                 maximumFractionDigits: 2,
                                             })}
                                         </td>
                                         <td>
-                                            {(period.latePayment || 0).toLocaleString(undefined, {
+                                            {(period.totalPaidLateForPeriod || 0).toLocaleString(undefined, {
                                                 minimumFractionDigits: 2,
                                                 maximumFractionDigits: 2,
                                             })}
@@ -3048,7 +4192,7 @@ const LoanDetails = () => {
                                 </td>
                                 <td>
                                     {loanDetails?.repaymentSchedule?.periods.reduce(
-                                        (total, period) => total + (period.paidInAdvance || 0),
+                                        (total, period) => total + (period.totalPaidInAdvanceForPeriod || 0),
                                         0
                                     ).toLocaleString(undefined, {
                                         minimumFractionDigits: 2,
@@ -3057,7 +4201,7 @@ const LoanDetails = () => {
                                 </td>
                                 <td>
                                     {loanDetails?.repaymentSchedule?.periods.reduce(
-                                        (total, period) => total + (period.latePayment || 0),
+                                        (total, period) => total + (period.totalPaidLateForPeriod || 0),
                                         0
                                     ).toLocaleString(undefined, {
                                         minimumFractionDigits: 2,
@@ -3086,7 +4230,6 @@ const LoanDetails = () => {
             case "transactions":
                 return (
                     <div className="tab-content">
-                        {/* Toggle Buttons and Export */}
                         <div className="transactions-header">
                             <div className="actions">
                                 <label>
@@ -3105,7 +4248,12 @@ const LoanDetails = () => {
                                     />
                                     Hide Accruals
                                 </label>
-                                <button className="export-btn">Export</button>
+                                <button
+                                    className="export-btn"
+                                    onClick={handleExportButtonClick}
+                                >
+                                    Export
+                                </button>
                             </div>
                             <div className="filter-group">
                                 <label htmlFor="pageSize" className="filter-label">
@@ -3150,7 +4298,10 @@ const LoanDetails = () => {
                             </thead>
                             <tbody>
                             {currentPageData.map((transaction, index) => (
-                                <tr key={transaction.id}>
+                                <tr
+                                    key={transaction.id}
+                                    style={transaction.manuallyReversed ? {textDecoration: "line-through", color: "gray"} : {}}
+                                >
                                     <td>{(currentPage - 1) * pageSize + index + 1}</td>
                                     <td>{transaction.id}</td>
                                     <td>{transaction.officeName}</td>
@@ -3164,12 +4315,30 @@ const LoanDetails = () => {
                                             : "N/A"}
                                     </td>
                                     <td>{transaction.type.value}</td>
-                                    <td>{transaction.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                                    <td>{transaction.principalPortion.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                                    <td>{transaction.interestPortion.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                                    <td>{transaction.feeChargesPortion.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                                    <td>{transaction.penaltyChargesPortion.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                                    <td>{transaction.outstandingLoanBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                    <td>{transaction.amount.toLocaleString(undefined, {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                    })}</td>
+                                    <td>{transaction.principalPortion.toLocaleString(undefined, {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                    })}</td>
+                                    <td>{transaction.interestPortion.toLocaleString(undefined, {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                    })}</td>
+                                    <td>{transaction.feeChargesPortion.toLocaleString(undefined, {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                    })}</td>
+                                    <td>{transaction.penaltyChargesPortion.toLocaleString(undefined, {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                    })}</td>
+                                    <td>{transaction.outstandingLoanBalance.toLocaleString(undefined, {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                    })}</td>
                                     <td>
                                         <div className="actions-dropdown">
                                             <div className="dropdown-btn">
@@ -3178,15 +4347,35 @@ const LoanDetails = () => {
                                                 <div className="dot"></div>
                                             </div>
                                             <div className="dropdown-menu">
-                                                <button>View Transaction</button>
-                                                {transaction.type.disbursement && <button>View Journal Entries</button>}
-                                                {transaction.type.accrual && (
+                                                <button
+                                                    onClick={() => fetchTransactionDetails(loanId, transaction.id)}
+                                                >
+                                                    View Transaction
+                                                </button>
+
+                                                {!transaction.manuallyReversed && (
                                                     <>
-                                                        <button>Undo Transaction</button>
-                                                        <button>View Receipts</button>
-                                                        <button>View Journal Entries</button>
+                                                        {(transaction.type.accrual ||
+                                                            transaction.type.repayment ||
+                                                            transaction.type.creditBalanceRefund) && (
+                                                            <>
+                                                                <button
+                                                                    onClick={() => handleUndoTransaction(transaction.id, transaction.date)}
+                                                                >
+                                                                    Undo Transaction
+                                                                </button>
+                                                                <button>View Receipts</button>
+                                                            </>
+                                                        )}
                                                     </>
                                                 )}
+
+                                                <button
+                                                    className="dropdown-item"
+                                                    onClick={() => fetchJournalEntries(transaction.id)}
+                                                >
+                                                    View Journal Entries
+                                                </button>
                                             </div>
                                         </div>
                                     </td>
@@ -3196,7 +4385,7 @@ const LoanDetails = () => {
                         </table>
                         {totalPages > 1 && (
                             <div className="pagination">
-                            <button
+                                <button
                                     className="pagination-button"
                                     onClick={() => setCurrentPage(1)}
                                     disabled={currentPage === 1}
@@ -3380,24 +4569,31 @@ const LoanDetails = () => {
                             </button>
                         </div>
                         {collaterals.length > 0 ? (
-                            <table className="collateral-table">
-                                <thead>
-                                <tr>
-                                    <th>Collateral Type</th>
-                                    <th>Value</th>
-                                    <th>Description</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {collaterals.map((collateral) => (
-                                    <tr key={collateral.id}>
-                                        <td>{collateral.type}</td>
-                                        <td>{collateral.value}</td>
-                                        <td>{collateral.description || "N/A"}</td>
+                            <div className={"client-table"}>
+                                <table className="">
+                                    <thead>
+                                    <tr>
+                                        <th>Collateral Type</th>
+                                        <th>Value</th>
+                                        <th>Description</th>
                                     </tr>
-                                ))}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                    {collaterals.map((collateral) => (
+                                        <tr key={collateral.id}>
+                                            <td>{collateral.type?.name || "N/A"}</td>
+                                            <td>
+                                                {`${collateral.currency?.code || ""} ${(collateral.value || 0).toLocaleString(undefined, {
+                                                    minimumFractionDigits: collateral.currency?.decimalPlaces || 2,
+                                                    maximumFractionDigits: collateral.currency?.decimalPlaces || 2,
+                                                })}`}
+                                            </td>
+                                            <td>{collateral.description || "N/A"}</td>
+                                        </tr>
+                                    ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         ) : (
                             <p></p>
                         )}
@@ -3517,29 +4713,29 @@ const LoanDetails = () => {
                                         </td>
                                         <td>{charge.chargeCalculationType?.value || "N/A"}</td>
                                         <td>
-                                            {loanDetails.currency?.displaySymbol &&
-                                                `${loanDetails.currency.displaySymbol} ${charge.amount.toLocaleString(undefined, {
+                                            {loanDetails.currency?.code &&
+                                                `${loanDetails.currency.code} ${charge.amount.toLocaleString(undefined, {
                                                     minimumFractionDigits: 2,
                                                     maximumFractionDigits: 2,
                                                 })}`}
                                         </td>
                                         <td>
-                                            {loanDetails.currency?.displaySymbol &&
-                                                `${loanDetails.currency.displaySymbol} ${charge.amountPaid.toLocaleString(undefined, {
+                                            {loanDetails.currency?.code &&
+                                                `${loanDetails.currency.code} ${charge.amountPaid.toLocaleString(undefined, {
                                                     minimumFractionDigits: 2,
                                                     maximumFractionDigits: 2,
                                                 })}`}
                                         </td>
                                         <td>
-                                            {loanDetails.currency?.displaySymbol &&
-                                                `${loanDetails.currency.displaySymbol} ${charge.amountWaived.toLocaleString(undefined, {
+                                            {loanDetails.currency?.code &&
+                                                `${loanDetails.currency.code} ${charge.amountWaived.toLocaleString(undefined, {
                                                     minimumFractionDigits: 2,
                                                     maximumFractionDigits: 2,
                                                 })}`}
                                         </td>
                                         <td>
-                                            {loanDetails.currency?.displaySymbol &&
-                                                `${loanDetails.currency.displaySymbol} ${charge.amountOutstanding.toLocaleString(undefined, {
+                                            {loanDetails.currency?.code &&
+                                                `${loanDetails.currency.code} ${charge.amountOutstanding.toLocaleString(undefined, {
                                                     minimumFractionDigits: 2,
                                                     maximumFractionDigits: 2,
                                                 })}`}
@@ -3697,7 +4893,7 @@ const LoanDetails = () => {
                                         <div className="note-content">
                                             <p>{note.note}</p>
                                             <small>
-                                                Created By: {note.createdBy || "Unknown"} |{" "}
+                                                Created By: {note.createdByUsername || "Unknown"} |{" "}
                                                 {new Date(note.createdOn).toLocaleDateString(undefined, {
                                                     dateStyle: "long",
                                                 })}
@@ -3792,7 +4988,7 @@ const LoanDetails = () => {
                                         <td>{instruction.toAccountId || "N/A"}</td>
                                         <td>
                                             {instruction.amount
-                                                ? `${instruction.currency?.displaySymbol || ""} ${instruction.amount.toLocaleString()}`
+                                                ? `${instruction.currency?.code || ""} ${instruction.amount.toLocaleString()}`
                                                 : "N/A"}
                                         </td>
                                         <td>
@@ -4077,8 +5273,14 @@ const LoanDetails = () => {
         };
     }, []);
 
+    const handleModifyApplication = () => {
+        navigate(`/client/${clientId}/applications/loan`, {
+            state: { isModification: true, accountId: loanId },
+        });
+    };
+
     return (
-        <div className="users-page-screen">
+        <div className="users-page-screen neighbor-element">
             <h2 className="users-page-head">
                 <Link to="/clients" className="breadcrumb-link">Clients</Link>{' '}
                 <span
@@ -4103,154 +5305,318 @@ const LoanDetails = () => {
                         <li>
                             <span className="client-info-label">Loan Product:</span>
                             <span className="client-info-value">
-                                    {loanDetails?.loanProductName || "N/A"} ({loanDetails?.status?.value || "Unknown"})
-                                </span>
+                                {loanDetails?.loanProductName || "N/A"} ({loanDetails?.status?.value || "Unknown"})
+                            </span>
                         </li>
                         <li>
                             <span className="client-info-label">Client Name:</span>
                             <span className="client-info-value">
-                                    {loanDetails?.clientName || "N/A"} ({loanDetails?.clientAccountNo || "N/A"})
-                                </span>
+                                {loanDetails?.clientName || "N/A"} ({loanDetails?.clientAccountNo || "N/A"})
+                            </span>
                         </li>
-                        {loanDetails?.inArrears && (
+                        {!loanDetails?.status?.pendingApproval && (
                             <>
-                                <li>
-                                    <span className="client-info-label">Past Due Days:</span>
-                                    <span className="client-info-value">
-                                            {loanDetails?.delinquent?.pastDueDays || "N/A"}
-                                        </span>
-                                </li>
-                                <li>
-                                    <span className="client-info-label">Delinquent Days:</span>
-                                    <span className="client-info-value">
-                                            {loanDetails?.delinquent?.pastDueDays || "N/A"}
-                                        </span>
-                                </li>
+                                {loanDetails?.inArrears && (
+                                    <>
+                                        <li>
+                                            <span className="client-info-label">Past Due Days:</span>
+                                            <span className="client-info-value">
+                                                {loanDetails?.delinquent?.pastDueDays || "N/A"}
+                                            </span>
+                                        </li>
+                                        <li>
+                                            <span className="client-info-label">Delinquent Days:</span>
+                                            <span className="client-info-value">
+                                                {loanDetails?.delinquent?.delinquentDays || "N/A"}
+                                            </span>
+                                        </li>
+                                    </>
+                                )}
                             </>
                         )}
                     </ul>
                 </div>
 
-                <div className="client-info-section">
-                    <ul className="client-info-list">
-                        <li>
-                            <span className="client-info-label">Current Balance:</span>
-                            <span className="client-info-value">
-                                    {loanDetails?.currency?.displaySymbol} {loanDetails?.summary?.totalOutstanding || ""}
-                                </span>
-                        </li>
-                        <li>
-                            <span className="client-info-label">Arrears By:</span>
-                            <span className="client-info-value">
-                                {loanDetails?.currency?.displaySymbol} {loanDetails?.delinquent?.availableDisbursementAmount || "0"}
-                            </span>
-                        </li>
-                        <li>
-                            <span className="client-info-label">Arrears Since:</span>
-                            <span className="client-info-value">
-                                {loanDetails?.delinquent?.nextPaymentDueDate
-                                    ? new Date(loanDetails.delinquent.nextPaymentDueDate.join("-")).toLocaleDateString(undefined, {
-                                        year: "numeric",
-                                        month: "long",
-                                        day: "numeric",
-                                    })
-                                    : "N/A"}
-                            </span>
-                        </li>
-                    </ul>
-                </div>
-
-                <div className="actions-dropdown" ref={dropdownRef}>
-                    <button className="actions-dropdown-toggle" onClick={handleToggleDropdown}>
-                        Actions
-                    </button>
-                    {isDropdownOpen && (
-                        <div className="actions-dropdown-menu">
-                            <button className="dropdown-item" onClick={handleOpenAddChargeModal}>
-                                Add Loan Charge
-                            </button>
-                            <button className="dropdown-item" onClick={handleOpenForeclosureModal}>
-                                ForeClosure
-                            </button>
-                            <button className="dropdown-item" onClick={handleOpenRepaymentModal}>
-                                Make Repayment
-                            </button>
-                            <button className="dropdown-item" onClick={handleOpenUndoDisbursalModal}>
-                                Undo Disbursal
-                            </button>
-                            <button className="dropdown-item" onClick={handleOpenPrepayLoanModal}>
-                                Prepay Loan
-                            </button>
-                            <button className="dropdown-item" onClick={handleOpenChargeOffModal}>
-                                Charge-Off
-                            </button>
-                            <button className="dropdown-item" onClick={handleOpenReAgeModal}>
-                                Re-Age
-                            </button>
-                            <button className="dropdown-item" onClick={handleOpenReAmortizeModal}>
-                                Re-Amortize
-                            </button>
-                            <div className="dropdown-submenu">
-                                <button
-                                    className="dropdown-item submenu-toggle"
-                                    onClick={() => handleSubmenuToggle("payments")}
-                                >
-                                    Payments <FaCaretRight className={'submenu-icon'}/>
-                                </button>
-                                {activeSubmenu === "payments" && (
-                                    <div className="submenu-content">
-                                        <button className="dropdown-item" onClick={handleOpenGoodwillCreditModal}>
-                                            Goodwill Credit
-                                        </button>
-                                        <button className="dropdown-item" onClick={handleOpenPayoutRefundModal}>
-                                            Payout Refund
-                                        </button>
-                                        <button className="dropdown-item" onClick={handleOpenMerchantRefundModal}>
-                                            Merchant Issued Refund
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="dropdown-submenu">
-                                <button
-                                    className="dropdown-item submenu-toggle"
-                                    onClick={() => handleSubmenuToggle("more")}
-                                >
-                                    More <FaCaretRight className={'submenu-icon'}/>
-                                </button>
-                                {activeSubmenu === "more" && (
-                                    <div className="submenu-content">
-                                        <button className="dropdown-item" onClick={handleOpenWaiveInterestModal}>
-                                            Waive Interest
-                                        </button>
-                                        <button className="dropdown-item" onClick={handleOpenLoanRescheduleModal}>
-                                            Reschedule
-                                        </button>
-                                        <button className="dropdown-item" onClick={openWriteOffModal}>
-                                            Write Off
-                                        </button>
-                                        <button className="dropdown-item" onClick={openCloseRescheduledModal}>
-                                            Close (as Rescheduled)
-                                        </button>
-                                        <button className="dropdown-item" onClick={openCloseModal}>
-                                            Close
-                                        </button>
-                                        <button className="dropdown-item" onClick={handleOpenGuarantorsModal}>
-                                            View Guarantors
-                                        </button>
-                                        <button className="dropdown-item" onClick={handleOpenCreateGuarantorModal}>
-                                            Create Guarantor
-                                        </button>
-                                        <button className="dropdown-item" onClick={handleOpenRecoverFromGuarantorModal}>
-                                            Recover From Guarantor
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
+                {!loanDetails?.status?.pendingApproval &&
+                    loanDetails?.status?.value?.toLowerCase() !== "approved" && (
+                        <div className="client-info-section">
+                            <ul className="client-info-list">
+                                <li>
+                                    <span className="client-info-label">Current Balance:</span>
+                                    <span className="client-info-value">
+                                        {loanDetails?.currency?.code} {(loanDetails?.summary?.totalOutstanding || "").toLocaleString()}
+                                    </span>
+                                </li>
+                                <li>
+                                    <span className="client-info-label">Arrears By:</span>
+                                    <span className="client-info-value">
+                                        {loanDetails?.currency?.code} {(loanDetails?.delinquent?.delinquentAmount || "0").toLocaleString()}
+                                    </span>
+                                </li>
+                                <li>
+                                    <span className="client-info-label">Arrears Since:</span>
+                                    <span className="client-info-value">
+                                        {loanDetails?.delinquent?.nextPaymentDueDate
+                                            ? new Date(loanDetails.delinquent.nextPaymentDueDate.join("-")).toLocaleDateString(undefined, {
+                                                year: "numeric",
+                                                month: "long",
+                                                day: "numeric",
+                                            })
+                                            : "N/A"}
+                                    </span>
+                                </li>
+                            </ul>
                         </div>
                     )}
-                </div>
+
+                {loanDetails?.status?.value?.toLowerCase() !== "rejected" && (
+                    <div className="actions-dropdown" ref={dropdownRef}>
+                        <button className="actions-dropdown-toggle" onClick={handleToggleDropdown}>
+                            Actions
+                        </button>
+                        {isDropdownOpen && (
+                            <div className="actions-dropdown-menu">
+                                {loanDetails?.status?.pendingApproval ? (
+                                    <>
+                                        <button className="dropdown-item" onClick={handleOpenAddChargeModal}>
+                                            Add Loan Charge
+                                        </button>
+                                        <button
+                                            className="dropdown-item"
+                                            onClick={() => handleOpenApproveModal(loanId)}
+                                        >
+                                            Approve
+                                        </button>
+                                        <button className="dropdown-item" onClick={handleModifyApplication}>
+                                            Modify Application
+                                        </button>
+                                        <button className="dropdown-item" onClick={handleOpenRejectModal}>
+                                            Reject
+                                        </button>
+                                        <div className="dropdown-submenu">
+                                            <button
+                                                className="dropdown-item submenu-toggle"
+                                                onClick={() => handleSubmenuToggle("pending-more")}
+                                            >
+                                                More <FaCaretRight className={'submenu-icon'}/>
+                                            </button>
+                                            {activeSubmenu === "pending-more" && (
+                                                <div className="submenu-content">
+                                                    <button className="dropdown-item" onClick={handleOpenWithdrawModal}>
+                                                        Withdrawn by Client
+                                                    </button>
+                                                    <button
+                                                        className="dropdown-item"
+                                                        onClick={handleOpenDeleteModal}
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                    <button className="dropdown-item"
+                                                            onClick={() => handleOpenAddCollateralModal(loanId)}>
+                                                        Add Collateral
+                                                    </button>
+                                                    <button className="dropdown-item" onClick={handleOpenGuarantorsModal}>
+                                                        View Guarantors
+                                                    </button>
+                                                    <button className="dropdown-item"
+                                                            onClick={handleOpenCreateGuarantorModal}>
+                                                        Create Guarantor
+                                                    </button>
+                                                    <button
+                                                        className="dropdown-item"
+                                                        onClick={handleOpenLoanScreenReportsModal}
+                                                    >
+                                                        Loan Screen Reports
+                                                    </button>
+                                                    <button
+                                                        className="dropdown-item"
+                                                        onClick={() => {
+                                                            fetchLoanOfficerData(loanId);
+                                                            setIsChangeLoanOfficerModalOpen(true);
+                                                        }}
+                                                    >
+                                                        Change Loan Officer
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </>
+                                ) : loanDetails?.status?.value?.toLowerCase() === "approved" ? (
+                                    <>
+                                        <button className="dropdown-item"
+                                                onClick={() => fetchDisbursementTemplate(loanId)}>
+                                            Disburse
+                                        </button>
+                                        <button
+                                            className="dropdown-item"
+                                            onClick={() => fetchDisburseToSavingsTemplate(loanId)}
+                                        >
+                                            Disburse to Savings
+                                        </button>
+                                        <button
+                                            className="dropdown-item"
+                                            onClick={() => setIsUndoApprovalModalOpen(true)}
+                                        >
+                                            Undo Approval
+                                        </button>
+                                        {loanDetails?.loanOfficerName ? (
+                                            <button
+                                                className="dropdown-item"
+                                                onClick={() => {
+                                                    fetchLoanOfficerData(loanId);
+                                                    setIsChangeLoanOfficerModalOpen(true);
+                                                }}
+                                            >
+                                                Change Loan Officer
+                                            </button>
+                                        ) : (
+                                            <button className="dropdown-item">
+                                                Assign Loan Officer
+                                            </button>
+                                        )}
+                                        <div className="dropdown-submenu">
+                                            <button
+                                                className="dropdown-item submenu-toggle"
+                                                onClick={() => handleSubmenuToggle("approved-more")}
+                                            >
+                                                More <FaCaretRight className={'submenu-icon'}/>
+                                            </button>
+                                            {activeSubmenu === "approved-more" && (
+                                                <div className="submenu-content">
+                                                    <button className="dropdown-item"
+                                                            onClick={handleOpenAddChargeModal}>
+                                                        Add Loan Charge
+                                                    </button>
+                                                    <button className="dropdown-item"
+                                                            onClick={handleOpenGuarantorsModal}>
+                                                        View Guarantors
+                                                    </button>
+                                                    <button className="dropdown-item"
+                                                            onClick={handleOpenCreateGuarantorModal}>
+                                                        Create Guarantor
+                                                    </button>
+                                                    <button
+                                                        className="dropdown-item"
+                                                        onClick={handleOpenLoanScreenReportsModal}
+                                                    >
+                                                        Loan Screen Reports
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </>
+                                ) : loanDetails?.status?.active ? (
+                                    <>
+                                        <button className="dropdown-item" onClick={handleOpenAddChargeModal}>
+                                            Add Loan Charge
+                                        </button>
+                                        <button className="dropdown-item" onClick={handleOpenForeclosureModal}>
+                                            ForeClosure
+                                        </button>
+                                        <button className="dropdown-item" onClick={handleOpenRepaymentModal}>
+                                            Make Repayment
+                                        </button>
+                                        <button className="dropdown-item" onClick={handleOpenUndoDisbursalModal}>
+                                            Undo Disbursal
+                                        </button>
+                                        <button className="dropdown-item" onClick={handleOpenPrepayLoanModal}>
+                                            Prepay Loan
+                                        </button>
+                                        <button className="dropdown-item" onClick={handleOpenChargeOffModal}>
+                                            Charge-Off
+                                        </button>
+                                        <button className="dropdown-item" onClick={handleOpenReAgeModal}>
+                                            Re-Age
+                                        </button>
+                                        <button className="dropdown-item" onClick={handleOpenReAmortizeModal}>
+                                            Re-Amortize
+                                        </button>
+                                        <div className="dropdown-submenu">
+                                            <button
+                                                className="dropdown-item submenu-toggle"
+                                                onClick={() => handleSubmenuToggle("payments")}
+                                            >
+                                                Payments <FaCaretRight className={'submenu-icon'}/>
+                                            </button>
+                                            {activeSubmenu === "payments" && (
+                                                <div className="submenu-content">
+                                                    <button className="dropdown-item"
+                                                            onClick={handleOpenGoodwillCreditModal}>
+                                                        Goodwill Credit
+                                                    </button>
+                                                    <button className="dropdown-item" onClick={handleOpenPayoutRefundModal}>
+                                                        Payout Refund
+                                                    </button>
+                                                    <button className="dropdown-item"
+                                                            onClick={handleOpenMerchantRefundModal}>
+                                                        Merchant Issued Refund
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="dropdown-submenu">
+                                            <button
+                                                className="dropdown-item submenu-toggle"
+                                                onClick={() => handleSubmenuToggle("more")}
+                                            >
+                                                More <FaCaretRight className={'submenu-icon'}/>
+                                            </button>
+                                            {activeSubmenu === "more" && (
+                                                <div className="submenu-content">
+                                                    <button className="dropdown-item"
+                                                            onClick={handleOpenWaiveInterestModal}>
+                                                        Waive Interest
+                                                    </button>
+                                                    <button className="dropdown-item"
+                                                            onClick={handleOpenLoanRescheduleModal}>
+                                                        Reschedule
+                                                    </button>
+                                                    <button className="dropdown-item" onClick={openWriteOffModal}>
+                                                        Write Off
+                                                    </button>
+                                                    <button className="dropdown-item" onClick={openCloseRescheduledModal}>
+                                                        Close (as Rescheduled)
+                                                    </button>
+                                                    <button className="dropdown-item" onClick={openCloseModal}>
+                                                        Close
+                                                    </button>
+                                                    <button className="dropdown-item" onClick={handleOpenGuarantorsModal}>
+                                                        View Guarantors
+                                                    </button>
+                                                    <button className="dropdown-item"
+                                                            onClick={handleOpenCreateGuarantorModal}>
+                                                        Create Guarantor
+                                                    </button>
+                                                    <button className="dropdown-item"
+                                                            onClick={handleOpenRecoverFromGuarantorModal}>
+                                                        Recover From Guarantor
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </>
+                                ) : loanDetails?.status?.overpaid ? (
+                                    <>
+                                        <button className="dropdown-item" onClick={fetchTransferTemplate}>
+                                            Transfer Funds
+                                        </button>
+                                        <button
+                                            className="dropdown-item"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                fetchCreditBalanceRefundTemplate();
+                                            }}
+                                        >
+                                            Credit Balance Refund
+                                        </button>
+                                    </>
+                                ) : (
+                                    <></>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
 
             <div className="loan-tabs-container-wrapper">
@@ -4275,20 +5641,31 @@ const LoanDetails = () => {
                                 "notes",
                                 "standingInstructions",
                             ]
-                            : [
-                                "general",
-                                "accountDetails",
-                                "repaymentSchedule",
-                                "transactions",
-                                "delinquencyTags",
-                                "loanCollateralDetails",
-                                "charges",
-                                "loanReschedules",
-                                "loanDocuments",
-                                "notes",
-                                "standingInstructions",
-                                "externalAssetOwner",
-                            ],
+                            : loanDetails?.status?.value?.toLowerCase() === "overpaid"
+                                ? [
+                                    "general",
+                                    "accountDetails",
+                                    "repaymentSchedule",
+                                    "transactions",
+                                    "loanCollateralDetails",
+                                    "loanDocuments",
+                                    "notes",
+                                    "standingInstructions",
+                                ]
+                                : [
+                                    "general",
+                                    "accountDetails",
+                                    "repaymentSchedule",
+                                    "transactions",
+                                    "delinquencyTags",
+                                    "loanCollateralDetails",
+                                    "charges",
+                                    "loanReschedules",
+                                    "loanDocuments",
+                                    "notes",
+                                    "standingInstructions",
+                                    "externalAssetOwner",
+                                ],
                     ]
                         .flat()
                         .map((tab) => (
@@ -4328,7 +5705,7 @@ const LoanDetails = () => {
                                 id="adjustmentAmount"
                                 value={adjustmentPayload.amount}
                                 onChange={(e) =>
-                                    setAdjustmentPayload((prev) => ({ ...prev, amount: e.target.value }))
+                                    setAdjustmentPayload((prev) => ({...prev, amount: e.target.value}))
                                 }
                                 className="create-provisioning-criteria-input"
                             />
@@ -4336,7 +5713,7 @@ const LoanDetails = () => {
 
                         {/* External ID */}
                         <div className="create-provisioning-criteria-group">
-                            <label htmlFor="externalId" className="create-provisioning-criteria-label">
+                        <label htmlFor="externalId" className="create-provisioning-criteria-label">
                                 External ID
                             </label>
                             <input
@@ -4344,7 +5721,7 @@ const LoanDetails = () => {
                                 id="externalId"
                                 value={adjustmentPayload.externalId}
                                 onChange={(e) =>
-                                    setAdjustmentPayload((prev) => ({ ...prev, externalId: e.target.value }))
+                                    setAdjustmentPayload((prev) => ({...prev, externalId: e.target.value}))
                                 }
                                 className="create-provisioning-criteria-input"
                             />
@@ -4359,7 +5736,7 @@ const LoanDetails = () => {
                                 id="paymentType"
                                 value={adjustmentPayload.paymentTypeId}
                                 onChange={(e) =>
-                                    setAdjustmentPayload((prev) => ({ ...prev, paymentTypeId: e.target.value }))
+                                    setAdjustmentPayload((prev) => ({...prev, paymentTypeId: e.target.value}))
                                 }
                                 className="create-provisioning-criteria-input"
                             >
@@ -4399,14 +5776,14 @@ const LoanDetails = () => {
                                         placeholder="Account #"
                                         value={adjustmentPayload.accountNumber}
                                         onChange={(e) =>
-                                            setAdjustmentPayload((prev) => ({ ...prev, accountNumber: e.target.value }))
+                                            setAdjustmentPayload((prev) => ({...prev, accountNumber: e.target.value}))
                                         }
                                         className="create-provisioning-criteria-input"
                                     />
                                     <input
                                         type="text"
                                         placeholder="Cheque #"
-                                        value={adjustmentPayload.chequeNumber}
+                                        value={adjustmentPayload.checkNumber}
                                         onChange={(e) =>
                                             setAdjustmentPayload((prev) => ({ ...prev, chequeNumber: e.target.value }))
                                         }
@@ -6656,7 +8033,7 @@ const LoanDetails = () => {
                                             <td>{guarantor.fullName || "N/A"}</td>
                                             <td>{guarantor.relationship || "N/A"}</td>
                                             <td>
-                                                {guarantor.amount || 0} {guarantor.currency?.displaySymbol || ""}
+                                                {guarantor.amount || 0} {guarantor.currency?.code || ""}
                                             </td>
                                             <td>{guarantor.contactNumber || "N/A"}</td>
                                         </tr>
@@ -6665,7 +8042,7 @@ const LoanDetails = () => {
                                 </table>
                             </div>
                         ) : (
-                            <p>No guarantors available.</p>
+                            <p className="create-provisioning-criteria-label">No guarantors available.</p>
                         )}
 
                         {/* Note Field */}
@@ -6976,7 +8353,1057 @@ const LoanDetails = () => {
                     </div>
                 </div>
             )}
+            {isApproveModalOpen && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">Approve Loan</h4>
 
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">
+                                Approved On <span>*</span>
+                            </label>
+                            <DatePicker
+                                selected={approveForm.approvedOnDate}
+                                onChange={(date) =>
+                                    setApproveForm((prev) => ({ ...prev, approvedOnDate: date }))
+                                }
+                                maxDate={new Date()}
+                                className="create-provisioning-criteria-input"
+                                dateFormat="dd MMMM yyyy"
+                            />
+                        </div>
+
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">
+                                Expected Disbursement On <span>*</span>
+                            </label>
+                            <DatePicker
+                                selected={approveForm.expectedDisbursementDate}
+                                onChange={(date) =>
+                                    setApproveForm((prev) => ({ ...prev, expectedDisbursementDate: date }))
+                                }
+                                minDate={approveForm.approvedOnDate}
+                                className="create-provisioning-criteria-input"
+                                dateFormat="dd MMMM yyyy"
+                            />
+                        </div>
+
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">
+                                Approved Amount <span>*</span>
+                            </label>
+                            <input
+                                type="number"
+                                value={approveForm.approvedLoanAmount}
+                                onChange={(e) =>
+                                    setApproveForm((prev) => ({ ...prev, approvedLoanAmount: e.target.value }))
+                                }
+                                className="create-provisioning-criteria-input"
+                            />
+                        </div>
+
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">
+                                Transaction Amount <span>*</span>
+                            </label>
+                            <input
+                                type="number"
+                                value={approveForm.transactionAmount}
+                                onChange={(e) =>
+                                    setApproveForm((prev) => ({ ...prev, transactionAmount: e.target.value }))
+                                }
+                                className="create-provisioning-criteria-input"
+                            />
+                        </div>
+
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">Note</label>
+                            <textarea
+                                value={approveForm.note}
+                                onChange={(e) =>
+                                    setApproveForm((prev) => ({ ...prev, note: e.target.value }))
+                                }
+                                className="create-provisioning-criteria-input"
+                            />
+                        </div>
+
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button
+                                className="create-provisioning-criteria-cancel"
+                                onClick={handleCloseApproveModal}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="create-provisioning-criteria-confirm"
+                                onClick={() => handleSubmitApproveLoan(loanId)}
+                                disabled={
+                                    !approveForm.approvedOnDate ||
+                                    !approveForm.expectedDisbursementDate ||
+                                    approveForm.expectedDisbursementDate < approveForm.approvedOnDate ||
+                                    !approveForm.approvedLoanAmount ||
+                                    !approveForm.transactionAmount
+                                }
+                            >
+                                {isSubmittingApproval ? "Submitting..." : "Submit"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isRejectModalOpen && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">Reject Loan</h4>
+
+                        {/* Rejected On Date */}
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">
+                                Rejected On <span>*</span>
+                            </label>
+                            <DatePicker
+                                selected={rejectForm.rejectedOnDate}
+                                onChange={(date) =>
+                                    setRejectForm((prev) => ({ ...prev, rejectedOnDate: date }))
+                                }
+                                maxDate={new Date()}
+                                className="create-provisioning-criteria-input"
+                                dateFormat="dd MMMM yyyy"
+                            />
+                        </div>
+
+                        {/* Note */}
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">Note</label>
+                            <textarea
+                                value={rejectForm.note}
+                                onChange={(e) =>
+                                    setRejectForm((prev) => ({ ...prev, note: e.target.value }))
+                                }
+                                className="create-provisioning-criteria-input"
+                            />
+                        </div>
+
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button
+                                className="create-provisioning-criteria-cancel"
+                                onClick={handleCloseRejectModal}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="create-provisioning-criteria-confirm"
+                                onClick={() => handleSubmitRejectLoan(loanId)}
+                                disabled={!rejectForm.rejectedOnDate || isSubmittingRejection}
+                            >
+                                {isSubmittingRejection ? "Submitting..." : "Submit"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isWithdrawModalOpen && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">Withdraw Loan</h4>
+
+                        {/* Withdrawn On Date */}
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">
+                                Withdrawn On <span>*</span>
+                            </label>
+                            <DatePicker
+                                selected={withdrawForm.withdrawnOnDate}
+                                onChange={(date) =>
+                                    setWithdrawForm((prev) => ({ ...prev, withdrawnOnDate: date }))
+                                }
+                                maxDate={new Date()}
+                                className="create-provisioning-criteria-input"
+                                dateFormat="dd MMMM yyyy"
+                            />
+                        </div>
+
+                        {/* Note */}
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">Note</label>
+                            <textarea
+                                value={withdrawForm.note}
+                                onChange={(e) =>
+                                    setWithdrawForm((prev) => ({ ...prev, note: e.target.value }))
+                                }
+                                className="create-provisioning-criteria-input"
+                            />
+                        </div>
+
+                        {/* Modal Actions */}
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button
+                                className="create-provisioning-criteria-cancel"
+                                onClick={handleCloseWithdrawModal}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="create-provisioning-criteria-confirm"
+                                onClick={() => handleSubmitWithdrawLoan(loanId)}
+                                disabled={!withdrawForm.withdrawnOnDate || isSubmittingWithdraw}
+                            >
+                                {isSubmittingWithdraw ? "Submitting..." : "Submit"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isAddCollateralModalOpen && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">Add Collateral</h4>
+
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">
+                                Collateral Type <span>*</span>
+                            </label>
+                            <select
+                                value={collateralForm.collateralType}
+                                onChange={(e) =>
+                                    setCollateralForm((prev) => ({
+                                        ...prev,
+                                        collateralType: e.target.value,
+                                    }))
+                                }
+                                className="create-provisioning-criteria-input"
+                            >
+                                <option value="">Select Collateral Type</option>
+                                {collateralTypes.map((type) => (
+                                    <option key={type.id} value={type.id}>
+                                        {type.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">
+                                Value <span>*</span>
+                            </label>
+                            <input
+                                type="number"
+                                value={collateralForm.value}
+                                onChange={(e) =>
+                                    setCollateralForm((prev) => ({
+                                        ...prev,
+                                        value: e.target.value,
+                                    }))
+                                }
+                                className="create-provisioning-criteria-input"
+                            />
+                        </div>
+
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">Description</label>
+                            <textarea
+                                value={collateralForm.description}
+                                onChange={(e) =>
+                                    setCollateralForm((prev) => ({
+                                        ...prev,
+                                        description: e.target.value,
+                                    }))
+                                }
+                                className="create-provisioning-criteria-input"
+                            />
+                        </div>
+
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button
+                                className="create-provisioning-criteria-cancel"
+                                onClick={handleCloseAddCollateralModal}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="create-provisioning-criteria-confirm"
+                                onClick={() => handleSubmitCollateral(loanId)}
+                                disabled={
+                                    !collateralForm.collateralType ||
+                                    !collateralForm.value ||
+                                    isSubmittingCollateral
+                                }
+                            >
+                                {isSubmittingCollateral ? "Submitting..." : "Submit"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isChangeLoanOfficerModalOpen && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">Change Loan Officer</h4>
+
+                        {/* To Loan Officer */}
+                        <div className="create-holiday-row">
+                            <div className="create-provisioning-criteria-group">
+                                <label htmlFor="toLoanOfficer" className="create-provisioning-criteria-label">
+                                    To Loan Officer <span>*</span>
+                                </label>
+                                <select
+                                    id="toLoanOfficer"
+                                    value={selectedLoanOfficerId}
+                                    onChange={(e) => setSelectedLoanOfficerId(e.target.value)}
+                                    className="create-provisioning-criteria-select"
+                                    required
+                                >
+                                    <option value="">-- Select Loan Officer --</option>
+                                    {loanOfficerOptions.map((officer) => (
+                                        <option key={officer.id} value={officer.id}>
+                                            {officer.displayName}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+
+                        {/* Assignment Date */}
+                        <div className="create-holiday-row">
+                            <div className="create-provisioning-criteria-group">
+                                <label htmlFor="assignmentDate" className="create-provisioning-criteria-label">
+                                    Assignment Date <span>*</span>
+                                </label>
+                                <DatePicker
+                                    selected={assignmentDate}
+                                    onChange={(date) => setAssignmentDate(date)}
+                                    className="create-provisioning-criteria-input"
+                                    dateFormat="dd MMMM yyyy"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Modal Actions */}
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button
+                                onClick={() => setIsChangeLoanOfficerModalOpen(false)}
+                                className="create-provisioning-criteria-cancel"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => handleSubmitLoanOfficerChange(loanId)}
+                                className="create-provisioning-criteria-confirm"
+                                disabled={!selectedLoanOfficerId || !assignmentDate || isSubmittingLoanOfficerChange}
+                            >
+                                {isSubmittingLoanOfficerChange ? "Submitting..." : "Submit"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isLoanScreenReportsModalOpen && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">Loan Screen Reports</h4>
+
+                        <div className="create-provisioning-criteria-group">
+                            <label htmlFor="loanScreenReport" className="create-provisioning-criteria-label">
+                                Loan Screen Report <span>*</span>
+                            </label>
+                            <select
+                                id="loanScreenReport"
+                                value={selectedReportId}
+                                onChange={(e) => setSelectedReportId(e.target.value)}
+                                className="create-provisioning-criteria-select"
+                                required
+                            >
+                                <option value="">-- Select Report --</option>
+                                {loanScreenReports.map((report) => (
+                                    <option key={report.id} value={report.id}>
+                                        {report.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button
+                                onClick={handleCloseLoanScreenReportsModal}
+                                className="create-provisioning-criteria-cancel"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => handleGenerateLoanScreenReport(loanId)}
+                                className="create-provisioning-criteria-confirm"
+                                disabled={!selectedReportId || isSubmittingReport}
+                            >
+                                {isSubmittingReport ? "Generating..." : "Generate Report"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isDeleteModalOpen && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">Confirm Delete</h4>
+                        <p className="create-provisioning-criteria-label">Are you sure you want to delete this loan? This action cannot be undone.</p>
+
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button
+                                onClick={handleCloseDeleteModal}
+                                className="create-provisioning-criteria-cancel"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => handleDeleteLoan(loanId)}
+                                className="create-provisioning-criteria-confirm"
+                                disabled={isDeletingLoan}
+                            >
+                                {isDeletingLoan ? "Deleting..." : "Confirm Delete"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isUndoApprovalModalOpen && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">Undo Loan Approval</h4>
+
+                        <div className="create-holiday-row">
+                            <div className="create-provisioning-criteria-group">
+                                <label htmlFor="undoApprovalNote" className="create-provisioning-criteria-label">
+                                    Note
+                                </label>
+                                <textarea
+                                    id="undoApprovalNote"
+                                    className="create-provisioning-criteria-textarea"
+                                    value={undoApprovalNote}
+                                    onChange={(e) => setUndoApprovalNote(e.target.value)}
+                                    placeholder="Enter a note (optional)"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button
+                                onClick={() => setIsUndoApprovalModalOpen(false)}
+                                className="create-provisioning-criteria-cancel"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => handleSubmitUndoApproval(loanId)}
+                                className="create-provisioning-criteria-confirm"
+                                disabled={isSubmittingUndoApproval}
+                            >
+                                {isSubmittingUndoApproval ? "Submitting..." : "Submit"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isDisburseModalOpen && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">Disburse Loan</h4>
+
+                        {/* Disbursed On Date */}
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">
+                                Disbursed On <span>*</span>
+                            </label>
+                            <DatePicker
+                                selected={disburseForm.disbursedOnDate}
+                                onChange={(date) => setDisburseForm((prev) => ({ ...prev, disbursedOnDate: date }))}
+                                className="create-provisioning-criteria-input"
+                                dateFormat="dd MMMM yyyy"
+                                maxDate={new Date()}
+                            />
+                        </div>
+
+                        {/* Transaction Amount */}
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">
+                                Transaction Amount <span>*</span>
+                            </label>
+                            <input
+                                type="number"
+                                value={disburseForm.transactionAmount}
+                                onChange={(e) => setDisburseForm((prev) => ({ ...prev, transactionAmount: e.target.value }))}
+                                className="create-provisioning-criteria-input"
+                            />
+                        </div>
+
+                        {/* External ID */}
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">External ID</label>
+                            <input
+                                type="text"
+                                value={disburseForm.externalId}
+                                onChange={(e) => setDisburseForm((prev) => ({ ...prev, externalId: e.target.value }))}
+                                className="create-provisioning-criteria-input"
+                            />
+                        </div>
+
+                        {/* Payment Type */}
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">
+                                Payment Type <span>*</span>
+                            </label>
+                            <select
+                                value={disburseForm.paymentType}
+                                onChange={(e) => setDisburseForm((prev) => ({ ...prev, paymentType: e.target.value }))}
+                                className="create-provisioning-criteria-input"
+                            >
+                                <option value="">-- Select Payment Type --</option>
+                                {paymentTypeOptions.map((option) => (
+                                    <option key={option.id} value={option.id}>
+                                        {option.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* Toggle Payment Details */}
+                        <div className="create-holiday-row">
+                            <label className="create-provisioning-criteria-label">
+                                Show Payment Details
+                            </label>
+                            <div className="switch-toggle">
+                                <label className="switch">
+                                    <input
+                                        type="checkbox"
+                                        checked={disburseForm.showPaymentDetails}
+                                        onChange={(e) => setDisburseForm((prev) => ({ ...prev, showPaymentDetails: e.target.checked }))}
+                                    />
+                                    <span className="slider round"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        {/* Payment Details Fields */}
+                        {disburseForm.showPaymentDetails && (
+                            <>
+                                <div className="create-holiday-row">
+                                    <input
+                                        type="text"
+                                        placeholder="Account Number"
+                                        value={disburseForm.accountNumber}
+                                        onChange={(e) => setDisburseForm((prev) => ({ ...prev, accountNumber: e.target.value }))}
+                                        className="create-provisioning-criteria-input"
+                                    />
+                                    <input
+                                        type="text"
+                                        placeholder="Cheque Number"
+                                        value={disburseForm.chequeNumber}
+                                        onChange={(e) => setDisburseForm((prev) => ({ ...prev, chequeNumber: e.target.value }))}
+                                        className="create-provisioning-criteria-input"
+                                    />
+                                    <input
+                                        type="text"
+                                        placeholder="Routing Code"
+                                        value={disburseForm.routingCode}
+                                        onChange={(e) => setDisburseForm((prev) => ({ ...prev, routingCode: e.target.value }))}
+                                        className="create-provisioning-criteria-input"
+                                    />
+                                </div>
+                                <div className="create-holiday-row">
+                                    <input
+                                        type="text"
+                                        placeholder="Receipt Number"
+                                        value={disburseForm.receiptNumber}
+                                        onChange={(e) => setDisburseForm((prev) => ({ ...prev, receiptNumber: e.target.value }))}
+                                        className="create-provisioning-criteria-input"
+                                    />
+                                    <input
+                                        type="text"
+                                        placeholder="Bank Number"
+                                        value={disburseForm.bankNumber}
+                                        onChange={(e) => setDisburseForm((prev) => ({ ...prev, bankNumber: e.target.value }))}
+                                        className="create-provisioning-criteria-input"
+                                    />
+                                </div>
+                            </>
+                        )}
+
+                        {/* Note */}
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">Note</label>
+                            <textarea
+                                value={disburseForm.note}
+                                onChange={(e) => setDisburseForm((prev) => ({ ...prev, note: e.target.value }))}
+                                className="create-provisioning-criteria-input"
+                            />
+                        </div>
+
+                        {/* Modal Actions */}
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button onClick={() => setIsDisburseModalOpen(false)} className="create-provisioning-criteria-cancel">
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => handleSubmitDisbursement(loanId)}
+                                className="create-provisioning-criteria-confirm"
+                                disabled={!disburseForm.disbursedOnDate || !disburseForm.transactionAmount || !disburseForm.paymentType}
+                            >
+                                {isSubmittingDisbursement ? "Submitting..." : "Submit"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isDisburseToSavingsModalOpen && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">Disburse Loan to Savings</h4>
+
+                        {/* Disbursed On Date */}
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">
+                                Disbursed On <span>*</span>
+                            </label>
+                            <DatePicker
+                                selected={disburseToSavingsForm.disbursedOnDate}
+                                onChange={(date) => setDisburseToSavingsForm((prev) => ({ ...prev, disbursedOnDate: date }))}
+                                className="create-provisioning-criteria-input"
+                                dateFormat="dd MMMM yyyy"
+                                maxDate={new Date()}
+                            />
+                        </div>
+
+                        {/* Transaction Amount */}
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">
+                                Transaction Amount <span>*</span>
+                            </label>
+                            <input
+                                type="number"
+                                value={disburseToSavingsForm.transactionAmount}
+                                onChange={(e) => setDisburseToSavingsForm((prev) => ({ ...prev, transactionAmount: e.target.value }))}
+                                className="create-provisioning-criteria-input"
+                            />
+                        </div>
+
+                        {/* Note */}
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">Note</label>
+                            <textarea
+                                value={disburseToSavingsForm.note}
+                                onChange={(e) => setDisburseToSavingsForm((prev) => ({ ...prev, note: e.target.value }))}
+                                className="create-provisioning-criteria-input"
+                            />
+                        </div>
+
+                        {/* Modal Actions */}
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button
+                                onClick={() => setIsDisburseToSavingsModalOpen(false)}
+                                className="create-provisioning-criteria-cancel"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => handleSubmitDisburseToSavings(loanId)}
+                                className="create-provisioning-criteria-confirm"
+                                disabled={!disburseToSavingsForm.disbursedOnDate || !disburseToSavingsForm.transactionAmount}
+                            >
+                                {isSubmittingDisburseToSavings ? "Submitting..." : "Submit"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isTransferModalOpen && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">Transfer Funds</h4>
+
+                        {/* Transferring From Details */}
+                        <table className="create-provisioning-criteria-table">
+                            <thead>
+                            <tr>
+                                <th colSpan="2">Transferring From Details</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>Applicant:</td>
+                                <td>{transferData?.fromAccount?.clientName}</td>
+                            </tr>
+                            <tr>
+                                <td>Office:</td>
+                                <td>{transferData?.fromOffice?.name}</td>
+                            </tr>
+                            <tr>
+                                <td>From Account:</td>
+                                <td>{`${transferData?.fromAccount?.productName} - ${transferData?.fromAccount?.accountNo}`}</td>
+                            </tr>
+                            <tr>
+                                <td>Currency:</td>
+                                <td>{transferData?.currency?.name}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+
+                        <h3 className={"create-modal-title"}> Transferring To</h3>
+                        <div className="create-holiday-row">
+                            <div className="create-provisioning-criteria-group">
+                                <label className={"create-provisioning-criteria-label"}>Transaction
+                                    Date <span>*</span></label>
+                                <DatePicker
+                                    selected={transferForm.transactionDate}
+                                    onChange={(date) => setTransferForm({...transferForm, transactionDate: date})}
+                                    className="create-provisioning-criteria-input"
+                                    dateFormat="dd MMMM yyyy"
+                                    maxDate={new Date()}
+                                />
+                            </div>
+                            <div className="create-provisioning-criteria-group">
+                                <label className={"create-provisioning-criteria-label"}>Office <span>*</span></label>
+                                <select
+                                    value={transferForm.toOffice}
+                                    onChange={(e) => {
+                                        setTransferForm({...transferForm, toOffice: e.target.value});
+                                        fetchAccountOptionsForOffice(e.target.value);
+                                    }}
+                                    className="create-provisioning-criteria-input"
+                                >
+                                    <option value="">-- Select Office --</option>
+                                    {officeOptions.map((office) => (
+                                        <option key={office.id} value={office.id}>{office.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">
+                                Client <span>*</span>
+                            </label>
+                            <AsyncSelect
+                                cacheOptions
+                                defaultOptions
+                                loadOptions={fetchClientOptions}
+                                onChange={(selectedOption) =>
+                                    setTransferForm({
+                                        ...transferForm,
+                                        toClient: selectedOption ? selectedOption.value : ""
+                                    })
+                                }
+                                className="create-provisioning-criteria-input"
+                                placeholder="-- Select Client --"
+                                isSearchable
+                            />
+                        </div>
+                        <div className="create-holiday-row">
+                            <div className="create-provisioning-criteria-group">
+                                <label className={"create-provisioning-criteria-label"}>Account
+                                    Type <span>*</span></label>
+                                <select
+                                    value={transferForm.toAccountType}
+                                    onChange={(e) => setTransferForm({...transferForm, toAccountType: e.target.value})}
+                                    className="create-provisioning-criteria-input"
+                                >
+                                    <option value="">-- Select Account Type --</option>
+                                    {accountTypeOptions.map((type) => (
+                                        <option key={type.id} value={type.id}>{type.value}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="create-provisioning-criteria-group">
+                                <label className={"create-provisioning-criteria-label"}>Account <span>*</span></label>
+                                <select
+                                    value={transferForm.toAccount}
+                                    onChange={(e) => setTransferForm({...transferForm, toAccount: e.target.value})}
+                                    className="create-provisioning-criteria-input"
+                                >
+                                    <option value="">-- Select Account --</option>
+                                    {accountOptions.map((account) => (
+                                        <option key={account.id} value={account.id}>{account.productName}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="create-provisioning-criteria-group">
+                            <label className={"create-provisioning-criteria-label"}>Amount <span>*</span></label>
+                            <input
+                                type="number"
+                                value={transferForm.amount}
+                                className="create-provisioning-criteria-input"
+                                onChange={(e) => setTransferForm({...transferForm, amount: e.target.value})}
+                            />
+                        </div>
+
+                        <div className="create-provisioning-criteria-group">
+                            <label className={"create-provisioning-criteria-label"}>Description <span>*</span></label>
+                            <textarea
+                                value={transferForm.description}
+                                onChange={(e) => setTransferForm({...transferForm, description: e.target.value})}
+                                className="create-provisioning-criteria-input"
+                            />
+                        </div>
+
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button onClick={() => setIsTransferModalOpen(false)}
+                                    className="create-provisioning-criteria-cancel">
+                                Cancel
+                            </button>
+                            <button onClick={handleSubmitTransfer} className="create-provisioning-criteria-confirm">
+                                Submit
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isCreditBalanceRefundModalOpen && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">Credit Balance Refund</h4>
+
+                        {/* Transaction Date */}
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">
+                                Transaction Date <span>*</span>
+                            </label>
+                            <DatePicker
+                                selected={creditBalanceForm.transactionDate}
+                                onChange={(date) =>
+                                    setCreditBalanceForm((prev) => ({ ...prev, transactionDate: date }))
+                                }
+                                className="create-provisioning-criteria-input"
+                                dateFormat="dd MMMM yyyy"
+                                maxDate={new Date()}
+                            />
+                        </div>
+
+                        {/* Transaction Amount */}
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">
+                                Transaction Amount <span>*</span>
+                            </label>
+                            <input
+                                type="number"
+                                value={creditBalanceForm.transactionAmount}
+                                onChange={(e) =>
+                                    setCreditBalanceForm((prev) => ({ ...prev, transactionAmount: e.target.value }))
+                                }
+                                className="create-provisioning-criteria-input"
+                            />
+                        </div>
+
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">External ID</label>
+                            <input
+                                type="text"
+                                value={creditBalanceForm.externalId}
+                                onChange={(e) =>
+                                    setCreditBalanceForm((prev) => ({ ...prev, externalId: e.target.value }))
+                                }
+                                className="create-provisioning-criteria-input"
+                            />
+                        </div>
+
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">Note</label>
+                            <textarea
+                                value={creditBalanceForm.note}
+                                onChange={(e) =>
+                                    setCreditBalanceForm((prev) => ({ ...prev, note: e.target.value }))
+                                }
+                                className="create-provisioning-criteria-input"
+                            />
+                        </div>
+
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button
+                                onClick={() => setIsCreditBalanceRefundModalOpen(false)}
+                                className="create-provisioning-criteria-cancel"
+                                disabled={isSubmittingRefund}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleSubmitCreditBalanceRefund}
+                                className="create-provisioning-criteria-confirm"
+                                disabled={isSubmittingRefund}
+                            >
+                                {isSubmittingRefund ? "Submitting..." : "Submit"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isExportModalOpen && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">Export Report</h4>
+
+                        {/* From Date */}
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">
+                                From Date <span>*</span>
+                            </label>
+                            <DatePicker
+                                selected={exportForm.fromDate}
+                                onChange={(date) => setExportForm((prev) => ({ ...prev, fromDate: date, toDate: null }))}
+                                className="create-provisioning-criteria-input"
+                                dateFormat="dd MMMM yyyy"
+                                maxDate={new Date()}
+                            />
+                        </div>
+
+                        {/* To Date */}
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">
+                                To Date <span>*</span>
+                            </label>
+                            <DatePicker
+                                selected={exportForm.toDate}
+                                onChange={(date) => setExportForm((prev) => ({ ...prev, toDate: date }))}
+                                className="create-provisioning-criteria-input"
+                                dateFormat="dd MMMM yyyy"
+                                minDate={exportForm.fromDate}
+                                maxDate={new Date()}
+                                disabled={!exportForm.fromDate}
+                            />
+                        </div>
+
+                        {/* Modal Actions */}
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button
+                                onClick={() => setIsExportModalOpen(false)}
+                                className="create-provisioning-criteria-cancel"
+                                disabled={isSubmittingExport}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleGenerateReport}
+                                className="create-provisioning-criteria-confirm"
+                                disabled={isSubmittingExport || !exportForm.fromDate || !exportForm.toDate}
+                            >
+                                {isSubmittingExport ? "Generating..." : "Generate Report"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isTransactionModalOpen && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">View Transaction</h4>
+
+                        {/* Action Buttons */}
+                        <div className="modal-actions">
+                            <button
+                                className="create-provisioning-criteria-confirm"
+                                disabled={transactionDetails?.manuallyReversed || transactionDetails?.type?.toLowerCase() === "disbursement"}
+                            >
+                                Edit
+                            </button>
+                            <button
+                                className="create-provisioning-criteria-confirm"
+                                disabled={transactionDetails?.manuallyReversed || transactionDetails?.type?.toLowerCase() === "disbursement"}
+                            >
+                                Chargeback
+                            </button>
+                            <button
+                                className="create-provisioning-criteria-confirm"
+                                style={{backgroundColor: "#d9534f"}}
+                                onClick={() => handleUndoTransaction(transactionDetails.id, transactionDetails.date)}
+                                disabled={transactionDetails?.manuallyReversed || isUndoingTransaction}
+                            >
+                                {isUndoingTransaction ? "Processing..." : "Undo"}
+                            </button>
+                        </div>
+
+                        {/* Transaction Details */}
+                        <table className="create-provisioning-criteria-table">
+                            <tbody>
+                            <tr>
+                                <td><strong>Transaction ID:</strong></td>
+                                <td>{transactionDetails?.id || "N/A"}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Type:</strong></td>
+                                <td>{transactionDetails?.type || "N/A"}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Transaction Date:</strong></td>
+                                <td>{transactionDetails?.transactionDate || "N/A"}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Currency:</strong></td>
+                                <td>{transactionDetails?.currency || "N/A"}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Amount:</strong></td>
+                                <td>{transactionDetails?.amount || "N/A"}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+
+                        {/* Close Button */}
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button onClick={closeTransactionModal} className="create-provisioning-criteria-cancel">
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isJournalModalOpen && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">Journal Entries</h4>
+
+                        {isLoadingJournal ? (
+                            <p>Loading...</p>
+                        ) : journalEntries.length > 0 ? (
+                            <table className="create-provisioning-criteria-table">
+                                <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Account</th>
+                                    <th>Office</th>
+                                    <th>Transaction Date</th>
+                                    <th>Amount</th>
+                                    <th>Type</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {journalEntries.map((entry) => (
+                                    <tr key={entry.id}>
+                                        <td>{entry.id}</td>
+                                        <td>{entry.accountName || "N/A"}</td>
+                                        <td>{entry.officeName || "N/A"}</td>
+                                        <td>{new Date(entry.transactionDate).toLocaleDateString("en-GB", {
+                                            day: "2-digit",
+                                            month: "long",
+                                            year: "numeric"
+                                        }).replace(",", "")}</td>
+                                        <td>{`${entry.currency.code} ${entry.amount.toLocaleString(undefined, {
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2
+                                        })}`}</td>
+                                        <td>{entry.entryType || "N/A"}</td>
+                                    </tr>
+                                ))}
+                                </tbody>
+                            </table>
+                        ) : (
+                            <p className={"no-data"}>No journal entries found.</p>
+                        )}
+
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button onClick={closeJournalModal} className="create-provisioning-criteria-cancel">
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

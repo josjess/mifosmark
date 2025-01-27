@@ -5,7 +5,7 @@ import { FaShieldAlt } from "react-icons/fa";
 
 const TwoFactorAuthentication = () => {
     return (
-        <div className="two-factor-page">
+        <div className="two-factor-page neighbor-element">
             <nav className="page-title">
                 <Link to="/system" className="breadcrumb-link">System</Link>
                 <span className="breadcrumb-separator">.</span>

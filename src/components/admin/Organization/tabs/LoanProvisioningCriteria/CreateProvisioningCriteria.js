@@ -35,7 +35,7 @@ const CreateProvisioningCriteria = () => {
             const response = await axios.get(`${API_CONFIG.baseURL}/provisioningcriteria/template`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    "Fineract-Platform-TenantId": "default",
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     "Content-Type": "application/json",
                 },
             });
@@ -103,7 +103,7 @@ const CreateProvisioningCriteria = () => {
             await axios.post(`${API_CONFIG.baseURL}/provisioningcriteria`, payload, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    "Fineract-Platform-TenantId": "default",
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     "Content-Type": "application/json",
                 },
             });

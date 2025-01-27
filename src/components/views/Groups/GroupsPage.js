@@ -96,7 +96,7 @@ const GroupsPage = () => {
     };
 
     return (
-        <div className="users-page-screen">
+        <div className="users-page-screen neighbor-element">
             <h2 className="users-page-head">
                 <Link to="/dashboard" className="breadcrumb-link">Dashboard </Link> . Groups
             </h2>

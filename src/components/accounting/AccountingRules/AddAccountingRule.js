@@ -44,7 +44,7 @@ const AddAccountingRule = () => {
             try {
                 const headers = {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 };
                 const [officesResponse, accountsResponse] = await Promise.all([
@@ -92,7 +92,7 @@ const AddAccountingRule = () => {
             const response = await axios.post(`${API_CONFIG.baseURL}/accountingrules`, payload, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });
@@ -101,7 +101,7 @@ const AddAccountingRule = () => {
             const ruleDetailsResponse = await axios.get(`${API_CONFIG.baseURL}/accountingrules/${ruleId}`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });
@@ -128,7 +128,7 @@ const AddAccountingRule = () => {
                 await axios.delete(`${API_CONFIG.baseURL}/accountingrules/${ruleDetails.id}`, {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        'Fineract-Platform-TenantId': 'default',
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     },
                 });
                 handleCloseModal();
@@ -624,7 +624,7 @@ const AddAccountingRule = () => {
             await axios.put(`${API_CONFIG.baseURL}/accountingrules/${ruleDetails.id}`, updatedPayload, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });
@@ -634,7 +634,7 @@ const AddAccountingRule = () => {
                 {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        'Fineract-Platform-TenantId': 'default',
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     },
                 }
             );

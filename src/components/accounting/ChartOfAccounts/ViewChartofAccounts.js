@@ -34,7 +34,7 @@ const ChartOfAccountsTable = () => {
                 params: filters,
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });
@@ -76,7 +76,7 @@ const ChartOfAccountsTable = () => {
                 {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        'Fineract-Platform-TenantId': 'default',
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     },
                 }
             );
@@ -108,7 +108,7 @@ const ChartOfAccountsTable = () => {
             await axios.put(`${API_CONFIG.baseURL}/glaccounts/${accountDetails.id}`, payload, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     'Content-Type': 'application/json',
                 },
             });
@@ -127,7 +127,7 @@ const ChartOfAccountsTable = () => {
                 await axios.delete(`${API_CONFIG.baseURL}/glaccounts/${accountDetails.id}`, {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                        'Fineract-Platform-TenantId': 'default',
+                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                     },
                 });
                 setShowAccountModal(false);

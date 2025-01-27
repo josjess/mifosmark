@@ -31,7 +31,7 @@ const ViewStandingInstructions = () => {
             try {
                 const headers = {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 };
                 const response = await axios.get(`${API_CONFIG.baseURL}/clients/${clientId}`, { headers });
                 setClientData(response.data);
@@ -51,7 +51,7 @@ const ViewStandingInstructions = () => {
             try {
                 const headers = {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 };
                 const response = await axios.get(
                     `${API_CONFIG.baseURL}/standinginstructions/template?fromAccountType=2&fromClientId=${clientId}&fromOfficeId=${user.officeId}`,
@@ -75,7 +75,7 @@ const ViewStandingInstructions = () => {
             try {
                 const headers = {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': 'default',
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
                 };
                 const response = await axios.get(
                     `${API_CONFIG.baseURL}/standinginstructions?clientId=${clientId}`,
@@ -138,7 +138,7 @@ const ViewStandingInstructions = () => {
     };
 
     return (
-        <div className="users-page-screen">
+        <div className="users-page-screen neighbor-element">
             <h2 className="users-page-head">
                 <Link to="/dashboard" className="breadcrumb-link">Dashboard</Link>{' '}
                 <span

@@ -8,7 +8,7 @@ const AccountingRulesTabs = () => {
     const [activeTab, setActiveTab] = useState('viewRules');
 
     return (
-        <div className="accounting-rules-screen">
+        <div className="accounting-rules-screen neighbor-element">
             <h2 className="accounting-rules-head">
                 <Link to="/accounting" className="breadcrumb-link">Accounting </Link> . Accounting Rules
             </h2>

@@ -368,7 +368,8 @@
 }
 
 .transactions-table .actions-dropdown .dropdown-menu button:hover {
-    background-color: #f0f0f0;
+    background-color: #1e50b8;
+    color: #fff;
 }
 
 .transactions-table .actions-dropdown:hover .dropdown-menu {
