@@ -8,6 +8,8 @@
     background-color: #2c3e50;
     position: fixed;
     transition: width 0.3s;
+    display: flex;
+    flex-direction: column;
 }
 .sidebar.collapsed {
     width: 0;
@@ -86,8 +88,19 @@
     padding: 0;
     margin: 0;
     overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #888 transparent;
 }
-
+.side-nav-links::-webkit-scrollbar {
+    width: 5px;
+}
+.side-nav-links::-webkit-scrollbar-track {
+    background: transparent;
+}
+.side-nav-links::-webkit-scrollbar-thumb {
+    background-color: #888;
+    border-radius: 5px;
+}
 .side-nav-item {
     display: block;
     padding: 15px 20px;
@@ -149,6 +162,7 @@
 .logout-item {
     background-color: #e74c3c;
     margin-top: auto;
+    margin-bottom: 40px;
 }
 
 .logout-item:hover {
