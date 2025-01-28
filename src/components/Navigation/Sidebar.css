@@ -27,7 +27,7 @@
     font-weight: bold;
     cursor: pointer;
     transition: all 0.3s ease;
-    z-index: 1000;
+    z-index: 100000000000000000000000000;
 }
 
 .toggle-sidebar-btn:hover {

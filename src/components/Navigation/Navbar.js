@@ -26,6 +26,10 @@ const Navbar = () => {
         navigate('/login');
     };
 
+    const handleManagement = () => {
+        navigate('/management');
+    }
+
     const toggleDropdown = () => {
         setIsDropdownOpen(!isDropdownOpen);
     };
@@ -44,7 +48,7 @@ const Navbar = () => {
                     </div>
                     <div className="navbar-right">
                         {hasPermission && (
-                            <button className="icon-button" aria-label="System-Management" onClick={() => navigateTo('/System-Management')}>
+                            <button className="icon-button" aria-label="management" onClick={handleManagement}>
                                 <FaWrench style={{color: '#d3e6f5', fontSize: '24px', cursor: 'pointer'}}/>
                             </button>
                         )}

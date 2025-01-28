@@ -5,7 +5,7 @@
     padding: 20px;
     background-color: #f5f7fa;
     min-height: 100vh;
-    position: relative;
+    /*position: relative;*/
 }
 .view-header .view-title {
     font-size: 32px;
