@@ -43,7 +43,7 @@ const Navbar = () => {
         <>
             <nav className="navbar">
                 <div className="navbar-content">
-                    <Link to={'/'} className="navbar-left">
+                    <div onClick={ () => navigate('/')} className="navbar-left">
                         <img
                             src={`${process.env.PUBLIC_URL}/Images/fincore.jpg`}
                             alt="Fincore Logo"
@@ -53,7 +53,7 @@ const Navbar = () => {
                         <h2 className="nav-company-name">
                             Fincore
                         </h2>
-                    </Link>
+                    </div>
 
                     <div className="navbar-right">
                         {hasPermission && (
