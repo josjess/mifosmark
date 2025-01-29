@@ -8,6 +8,7 @@ import { NotificationProvider } from './context/NotificationContext';
 import { LoadingProvider } from './context/LoadingContext';
 import Notification from './components/utilities/Notification';
 import './App.css';
+import './index.css';
 import Navbar from "./components/Navigation/Navbar";
 import LoadingOverlay from "./components/utilities/LoadingOverlay";
 import Sidebar from "./components/Navigation/Sidebar";
