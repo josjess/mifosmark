@@ -4,8 +4,7 @@ import {loadConfig} from "../config";
 
 export const AuthContext = createContext();
 
-// const AUTH_DURATION_SHORT = 3 * 60 * 60 * 1000;
-const AUTH_DURATION_SHORT = 10 * 1000;
+const AUTH_DURATION_SHORT = 3 * 60 * 60 * 1000;
 const AUTH_DURATION_LONG = 10 * 24 * 60 * 60 * 1000;
 const ALL_COMPONENTS = {
     "accounting-frequent-postings": true,
