@@ -36,12 +36,12 @@ const LoanDetails = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const [totalPages, setTotalPages] = useState(1);
-    const currentPageData = loanDetails?.transactions
-        ?.filter((transaction) =>
+    const currentPageData = (loanDetails?.transactions || [])
+        .filter((transaction) =>
             (!hideReversed || !transaction.manuallyReversed) &&
             (!hideAccruals || !transaction.type.accrual)
         )
-        ?.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+        .slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
     useEffect(() => {
         const filteredTransactions = loanDetails?.transactions?.filter(
@@ -3140,7 +3140,7 @@ const LoanDetails = () => {
             };
 
             const formData = new FormData();
-            formData.append("fileName", uploadPayload.fileName);
+            formData.append("name", uploadPayload.fileName);
             formData.append("description", uploadPayload.description);
             formData.append("file", uploadPayload.file);
 
@@ -4852,7 +4852,7 @@ const LoanDetails = () => {
                                         <td>{doc.fileName}</td>
                                         <td>
                                             <button
-                                                className="charges-action-button"
+                                                className="create-provisioning-criteria-cancel"
                                                 onClick={() => window.open(doc.fileUrl, "_blank")}
                                             >
                                                 View

@@ -1666,7 +1666,7 @@ const SavingsAccounts = () => {
     const handleSubmitUpload = async () => {
         startLoading();
         const formData = new FormData();
-        formData.append("fileName", uploadPayload.fileName);
+        formData.append("name", uploadPayload.fileName);
         formData.append("description", uploadPayload.description || "");
         formData.append("file", uploadPayload.file);
 

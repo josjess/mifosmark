@@ -4,7 +4,8 @@ import {loadConfig} from "../config";
 
 export const AuthContext = createContext();
 
-const AUTH_DURATION_SHORT = 3 * 60 * 60 * 1000;
+// const AUTH_DURATION_SHORT = 3 * 60 * 60 * 1000;
+const AUTH_DURATION_SHORT = 10 * 1000;
 const AUTH_DURATION_LONG = 10 * 24 * 60 * 60 * 1000;
 const ALL_COMPONENTS = {
     "accounting-frequent-postings": true,
@@ -261,8 +262,53 @@ export const AuthProvider = ({ children }) => {
         setRedirectToLogin(true);
         localStorage.removeItem('user');
         localStorage.removeItem('loginTimestamp');
+
         if (notify) {
-            alert('Your session has expired. Please log in again.');
+            const overlay = document.createElement('div');
+            overlay.style.position = 'fixed';
+            overlay.style.top = '0';
+            overlay.style.left = '0';
+            overlay.style.width = '100%';
+            overlay.style.height = '100%';
+            overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
+            overlay.style.zIndex = '999';
+
+            const modal = document.createElement('div');
+            modal.style.position = 'fixed';
+            modal.style.top = '50%';
+            modal.style.left = '50%';
+            modal.style.transform = 'translate(-50%, -50%)';
+            modal.style.padding = '20px';
+            modal.style.backgroundColor = '#fff';
+            modal.style.border = '1px solid #ccc';
+            modal.style.borderRadius = '20px';
+            modal.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.2)';
+            modal.style.zIndex = '1000';
+            modal.style.textAlign = 'center';
+
+            const message = document.createElement('p');
+            message.textContent = 'Your session has expired. Please log in again. If you don\'t want to be logged out next time, check the "Remember Me" option when logging in.';
+            modal.appendChild(message);
+
+            const closeButton = document.createElement('button');
+            closeButton.textContent = 'Close';
+            closeButton.style.marginTop = '15px';
+            closeButton.style.padding = '8px 16px';
+            closeButton.style.backgroundColor = '#f44336';
+            closeButton.style.color = 'white';
+            closeButton.style.border = 'none';
+            closeButton.style.cursor = 'pointer';
+            closeButton.style.borderRadius = '4px';
+
+            closeButton.addEventListener('click', () => {
+                modal.remove();
+                overlay.remove();
+            });
+
+            modal.appendChild(closeButton);
+
+            document.body.appendChild(overlay);
+            document.body.appendChild(modal);
         }
     };
 

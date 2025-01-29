@@ -2630,7 +2630,7 @@ const ClientDetails = ({ clientId, onClose }) => {
                                         <td>{identity.status || 'N/A'}</td>
                                         <td>
                                             <button className="general-action-button">Edit</button>
-                                            <button className="general-action-button">Delete</button>
+                                            <button className="create-provisioning-criteria-cancel">Delete</button>
                                         </td>
                                     </tr>
                                 ))}
@@ -2779,19 +2779,20 @@ const ClientDetails = ({ clientId, onClose }) => {
                                         <td>{doc.name}</td>
                                         <td>{doc.description || ''}</td>
                                         <td>{doc.fileName}</td>
-                                        <td>
-                                            {/*<button*/}
-                                            {/*    className="general-action-button"*/}
-                                            {/*    onClick={() => handleViewDocument(doc.id)}*/}
-                                            {/*>*/}
-                                            {/*    View*/}
-                                            {/*</button>*/}
-                                            {/*<button*/}
-                                            {/*    className="general-action-button"*/}
-                                            {/*    onClick={() => handleDeleteDocument(doc.id)}*/}
-                                            {/*>*/}
-                                            {/*    Delete*/}
-                                            {/*</button>*/}
+                                        <td className={"create-provisioning-criteria-actions"}>
+                                            <button
+                                                className="create-adhoc-query-submit"
+                                                style={{marginRight: '10px'}}
+                                                // onClick={() => handleViewDocument(doc.id)}
+                                            >
+                                                View
+                                            </button>
+                                            <button
+                                                className="create-provisioning-criteria-cancel"
+                                                // onClick={() => handleDeleteDocument(doc.id)}
+                                            >
+                                                Delete
+                                            </button>
                                         </td>
                                     </tr>
                                 ))}
