@@ -172,3 +172,11 @@
     display: none;
     margin: 0;
 }
+
+.neighbor-element {
+    margin-left: 0 !important;
+}
+
+.sidebar-expanded .neighbor-element {
+    margin-left: 250px !important;
+}

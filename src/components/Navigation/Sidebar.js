@@ -44,14 +44,13 @@ const Sidebar = () => {
         neighboringElements.forEach((element) => {
             element.style.marginLeft = marginValue;
         });
-    };
 
-    useEffect(() => {
-        if (window.performance && window.performance.navigation.type === 1) {
-            setReloadDetected(true);
-            setIsSidebarExpanded(true);
+        if (newSidebarState) {
+            document.body.classList.add('sidebar-expanded');
+        } else {
+            document.body.classList.remove('sidebar-expanded');
         }
-    }, []);
+    };
 
     useEffect(() => {
         const marginValue = isSidebarExpanded ? '250px' : '0';
@@ -59,7 +58,18 @@ const Sidebar = () => {
         neighboringElements.forEach((element) => {
             element.style.marginLeft = marginValue;
         });
-    }, [isSidebarExpanded, location, reloadDetected]);
+    }, [isSidebarExpanded, location]);
+
+    useEffect(() => {
+        const savedState = localStorage.getItem('isSidebarExpanded') === 'true';
+        setIsSidebarExpanded(savedState);
+
+        if (savedState) {
+            document.body.classList.add('sidebar-expanded');
+        } else {
+            document.body.classList.remove('sidebar-expanded');
+        }
+    }, []);
 
     return (
         <aside className={`sidebar ${isSidebarExpanded ? '' : 'collapsed'}`}>
