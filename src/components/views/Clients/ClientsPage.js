@@ -87,7 +87,7 @@ const ClientsPage = () => {
     };
 
     return (
-        <div className="users-page-screen neighbor-element">
+        <div className="neighbor-element users-page-screen ">
             <h2 className="users-page-head">
                 <Link to="/dashboard" className="breadcrumb-link">Dashboard </Link> . Clients
             </h2>
