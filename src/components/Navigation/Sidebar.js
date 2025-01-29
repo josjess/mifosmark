@@ -16,6 +16,7 @@ const Sidebar = () => {
     const [isSidebarExpanded, setIsSidebarExpanded] = useState(() => {
         return localStorage.getItem('isSidebarExpanded') === 'true';
     });
+    const [reloadDetected, setReloadDetected] = useState(false);
 
     const handleLogout = () => {
         logout();
@@ -46,12 +47,19 @@ const Sidebar = () => {
     };
 
     useEffect(() => {
+        if (window.performance && window.performance.navigation.type === 1) {
+            setReloadDetected(true);
+            setIsSidebarExpanded(true);
+        }
+    }, []);
+
+    useEffect(() => {
         const marginValue = isSidebarExpanded ? '250px' : '0';
         const neighboringElements = document.querySelectorAll('.neighbor-element');
         neighboringElements.forEach((element) => {
             element.style.marginLeft = marginValue;
         });
-    }, [isSidebarExpanded, location]);
+    }, [isSidebarExpanded, location, reloadDetected]);
 
     return (
         <aside className={`sidebar ${isSidebarExpanded ? '' : 'collapsed'}`}>
