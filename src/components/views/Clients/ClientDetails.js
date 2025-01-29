@@ -3334,7 +3334,7 @@ const ClientDetails = ({ clientId, onClose }) => {
 
             // Fetch closure reasons
             const templateResponse = await axios.get(`${API_CONFIG.baseURL}/clients/template?commandParam=close`, { headers });
-            setClosureReasonOptions(templateResponse.data.narrations || []);
+            setClosureReasonOptions(templateResponse.data?.narrations || []);
 
             setIsCloseClientModalOpen(true);
         } catch (error) {
@@ -3359,15 +3359,23 @@ const ClientDetails = ({ clientId, onClose }) => {
             };
 
             const payload = {
-                dateFormat: 'yyyy-MM-dd',
-                locale: 'en',
-                closureDate: closeOnDate,
-                closureReason: closureReason,
+                dateFormat: "dd MMMM yyyy",
+                locale: "en",
+                closureDate: closeOnDate
+                    ? new Date(closeOnDate).toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric",
+                    }).replace(",", "")
+                    : null,
+                closureReasonId: parseInt(closureReason, 10),
             };
+
 
             await axios.post(`${API_CONFIG.baseURL}/clients/${clientId}?command=close`, payload, { headers });
 
             alert('Client successfully closed.');
+            fetchGeneralTabData();
             setIsCloseClientModalOpen(false);
         } catch (error) {
             console.error('Error closing client:', error);
@@ -4677,7 +4685,15 @@ const ClientDetails = ({ clientId, onClose }) => {
                                 <DatePicker
                                     id="closeOnDate"
                                     selected={closeOnDate ? new Date(closeOnDate) : null}
-                                    onChange={(date) => setCloseOnDate(date.toISOString().split('T')[0])}
+                                    onChange={(date) =>
+                                        setCloseOnDate(
+                                            date.toLocaleDateString("en-GB", {
+                                                day: "2-digit",
+                                                month: "long",
+                                                year: "numeric",
+                                            }).replace(",", "")
+                                        )
+                                    }
                                     className="create-provisioning-criteria-input"
                                     placeholderText="Select Closed On Date"
                                     dateFormat="MMMM d, yyyy"
@@ -4701,9 +4717,9 @@ const ClientDetails = ({ clientId, onClose }) => {
                                     required
                                 >
                                     <option value="">-- Select Reason --</option>
-                                    {closureReasonOptions.map((option, index) => (
-                                        <option key={index} value={option}>
-                                            {option}
+                                    {closureReasonOptions.map((option) => (
+                                        <option key={option.id} value={option.id}>
+                                            {option.name}
                                         </option>
                                     ))}
                                 </select>

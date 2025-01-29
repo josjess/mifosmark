@@ -12,7 +12,7 @@ import Insights from "../components/Insights";
 
 const Dashboard = () => {
     const { isAuthenticated, user } = useContext(AuthContext);
-    const { componentVisibility, toggleComponentVisibility } = useContext(AuthContext);
+    const { componentVisibility } = useContext(AuthContext);
     const navigate = useNavigate();
     const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
@@ -23,7 +23,7 @@ const Dashboard = () => {
         loansForApproval: 0, loansForDisapproval: 0, portfolioAtRisk: 0,
         borrowersPerLoanOfficer: 0, averageLoanDisbursed: 0, clientsPerPersonnel: 0, todaysDisbursements: 0
     });
-    const [selectedOffice, setSelectedOffice] = useState(user?.officeId || null);
+    const [selectedOffice, setSelectedOffice] = useState(user?.officeId);
     const [officeOptions, setOfficeOptions] = useState([]);
     const [activeTab, setActiveTab] = useState('metrics');
     const activeClientsRef = useRef(0);
@@ -63,7 +63,7 @@ const Dashboard = () => {
 
         fetchOffices();
 
-    }, [user, selectedOffice]);
+    }, []);
 
     const formatCurrency = (value, currencyCode, currencySymbol, decimalPlaces) => {
         return new Intl.NumberFormat('en-US', {
@@ -91,6 +91,10 @@ const Dashboard = () => {
                     const response = await axios.get(`${API_BASE_URL}/clients?${officeFilter}`, { headers });
                     const staffResponse = await axios.get(`${API_BASE_URL}/staff`, { headers });
                     const loansResponse = await axios.get(`${API_BASE_URL}/loans`, { headers });
+                    const currencyResponse = await axios.get(`${API_BASE_URL}/currencies`, { headers });
+
+                    const defaultCurrency = currencyResponse.data.selectedCurrencyOptions[0] || {};
+                    const { code: currencyCode, code: currencySymbol, decimalPlaces } = defaultCurrency;
 
                     const staff = staffResponse.data;
                     const loans = loansResponse.data.pageItems;
@@ -126,40 +130,44 @@ const Dashboard = () => {
 
                     const getTodaysDisbursements = (loans) => {
                         const today = new Date();
-                        return loans.filter(loan => {
-                            const disbursementDateArray = loan.timeline?.actualDisbursementDate;
-                            if (!Array.isArray(disbursementDateArray) || disbursementDateArray.length < 3) {
-                                return false;
-                            }
+                        return loans
+                            .filter((loan) => {
+                                const disbursementDateArray = loan.timeline?.actualDisbursementDate;
+                                if (!Array.isArray(disbursementDateArray) || disbursementDateArray.length < 3) {
+                                    return false;
+                                }
 
-                            const [year, month, day] = disbursementDateArray;
-                            const disbursementDate = new Date(year, month - 1, day);
-                            return (
-                                disbursementDate.getFullYear() === today.getFullYear() &&
-                                disbursementDate.getMonth() === today.getMonth() &&
-                                disbursementDate.getDate() === today.getDate()
-                            );
-                        });
+                                const [year, month, day] = disbursementDateArray;
+                                const disbursementDate = new Date(year, month - 1, day);
+                                return (
+                                    disbursementDate.getFullYear() === today.getFullYear() &&
+                                    disbursementDate.getMonth() === today.getMonth() &&
+                                    disbursementDate.getDate() === today.getDate()
+                                );
+                            })
+                            .reduce((sum, loan) => sum + loan.principal, 0);
                     };
 
                     const getThisMonthsDisbursements = (loans) => {
                         const today = new Date();
-                        return loans.filter(loan => {
-                            const disbursementDateArray = loan.timeline?.actualDisbursementDate;
-                            if (!Array.isArray(disbursementDateArray) || disbursementDateArray.length < 2) {
-                                return false;
-                            }
+                        return loans
+                            .filter(loan => {
+                                const disbursementDateArray = loan.timeline?.actualDisbursementDate;
+                                if (!Array.isArray(disbursementDateArray) || disbursementDateArray.length < 2) {
+                                    return false;
+                                }
 
-                            const [year, month] = disbursementDateArray;
-                            return (
-                                year === today.getFullYear() &&
-                                month === today.getMonth() + 1
-                            );
-                        });
+                                const [year, month] = disbursementDateArray;
+                                return (
+                                    year === today.getFullYear() &&
+                                    month === today.getMonth() + 1
+                                );
+                            })
+                            .reduce((sum, loan) => sum + loan.principal, 0);
                     };
 
-                    const todaysDisbursements = getTodaysDisbursements(loans).length;
-                    const thisMonthsDisbursements = getThisMonthsDisbursements(loans).length;
+                    const todaysDisbursements = formatCurrency(getTodaysDisbursements(loans), currencyCode, currencySymbol, decimalPlaces);
+                    const thisMonthsDisbursements = formatCurrency(getThisMonthsDisbursements(loans), currencyCode, currencySymbol, decimalPlaces);
 
                     const repaymentsToday = calculateRepaymentsToday(loans);
 
@@ -321,8 +329,8 @@ const Dashboard = () => {
                         totalOverdue += summary.principalOverdue || 0 + summary.interestOverdue || 0;
 
                         if (loan.isNPA) nonPerformingAssets++;
-                        if (loan.status.pendingApproval) loansForApproval++;
-                        if (loan.status?.waitingForDisbursal ) loansForDisapproval++;
+                        if (loan.status.pendingApproval) loansForApproval += loan.principal;
+                        if (loan.status?.waitingForDisbursal) loansForDisapproval += loan.principal;
 
                         if (loan.isNPA) {
                             portfolioAtRiskAmount += summary.principalOutstanding || 0;
@@ -361,8 +369,8 @@ const Dashboard = () => {
                         totalSavings: formatCurrency(totalSavings, currencyCode, currencySymbol, decimalPlaces),
                         totalSavingsMobilizedThisMonth: totalSavingsMobilizedThisMonth,
                         nonPerformingAssets,
-                        loansForApproval,
-                        loansForDisapproval,
+                        loansForApproval: formatCurrency(loansForApproval, currencyCode, currencySymbol, decimalPlaces),
+                        loansForDisapproval: formatCurrency(loansForDisapproval, currencyCode, currencySymbol, decimalPlaces),
                         portfolioAtRisk,
                         averageLoanDisbursed,
                     };

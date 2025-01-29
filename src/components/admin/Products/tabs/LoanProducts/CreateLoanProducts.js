@@ -6,6 +6,7 @@ import { API_CONFIG } from "../../../../../config";
 import "./CreateLoanProducts.css";
 import {FaEdit, FaTrash} from "react-icons/fa";
 import DatePicker from "react-datepicker";
+import Select from "react-select";
 
 const stages = [
     "Details",
@@ -162,14 +163,22 @@ const CreateLoanProducts = () => {
                 Settings = {},
                 Terms = {},
                 Charges = [],
+                Accounting = {},
             } = formData;
+
+            const accountingRuleOption = formData?.loanProductTemplate?.accountingRuleOptions?.find(
+                (f) => f.value === Accounting.selectedOption?.toUpperCase()
+            );
+
+            const accountingRuleId = accountingRuleOption?.id;
 
             const payload = {
                 name: Details.name,
                 shortName: Details.shortName,
                 description: Details.description,
-                includeInBorrowerCycle: Settings.includeInBorrowerCycle || true,
+                includeInBorrowerCycle: Settings.includeInBorrowerCycle || false,
                 currencyCode: Currency.currencyCode,
+                digitsAfterDecimal: Currency.decimalPlaces,
                 dateFormat: "dd MMMM yyyy",
                 locale: "en",
                 principal: Terms.principalDefault || 0,
@@ -208,8 +217,34 @@ const CreateLoanProducts = () => {
                     ? loanCycleData.interest
                     : [],
                 repaymentStartDateType: Terms.installmentDayCalcFrom || 1,
-                startDate: Details.startDate || "",
-                closeDate: Details.closeDate || "",
+                startDate: formatDateForPreview(Details.startDate) || "",
+                closeDate: formatDateForPreview(Details.closeDate) || "",
+                accountingRule: accountingRuleId,
+                chargeOffExpenseAccountId: Accounting.chargeOffExpense,
+                chargeOffFraudExpenseAccountId: Accounting.charge,
+                fundId: Details.fund,
+                fundSourceAccountId: Accounting.fundSourceAccountId,
+                goodwillCreditAccountId: Accounting.goodwillCreditAccountId,
+                inMultiplesOf: Currency.inMultiplesOf,
+                includeBorrowerCycle: Terms.includeBorrowerCycle,
+                incomeFromChargeOffFeesAccountId: Accounting.incomeFromChargeOffFeesAccountId,
+                incomeFromChargeOffInterestAccountId: 21,
+                incomeFromChargeOffPenaltyAccountId: 23,
+                incomeFromFeeAccountId: 21,
+                incomeFromGoodwillCreditFeesAccountId: 19,
+                incomeFromGoodwillCreditInterestAccountId: 28,
+                incomeFromGoodwillCreditPenaltyAccountId: 27,
+                incomeFromPenaltyAccountId: 22,
+                incomeFromRecoveryAccountId: 21,
+                interestOnLoanAccountId: 22,
+                isLinkedToFloatingInterestRates: false,
+                loanPortfolioAccountId: 7,
+                maxInterestRatePerPeriod: 18,
+                minInterestRatePerPeriod: 10,
+                overpaymentLiabilityAccountId: 15,
+                transfersInSuspenseAccountId: 7,
+                useBorrowerCycle: false,
+                writeOffAccountId: 29,
             };
 
             const response = await axios.post(
@@ -2210,6 +2245,10 @@ const CreateLoanProducts = () => {
                                 <thead>
                                 <tr>
                                     <th>Charge</th>
+                                    <th>Calculation Type</th>
+                                    <th>Payment Mode</th>
+                                    <th>Charge Time Type</th>
+                                    <th>Currency</th>
                                     <th>Actions</th>
                                 </tr>
                                 </thead>
@@ -2218,10 +2257,26 @@ const CreateLoanProducts = () => {
                                     const chargeValue = formData.loanProductTemplate?.chargeOptions?.find(
                                         (option) => option.id === parseInt(item.charge)
                                     )?.name || item.charge;
+                                    const calculationType = formData.loanProductTemplate?.chargeOptions?.find(
+                                        (option) => option.id === parseInt(item.charge)
+                                    )?.chargeCalculationType.value || item.charge;
+                                    const paymentMode = formData.loanProductTemplate?.chargeOptions?.find(
+                                        (option) => option.id === parseInt(item.charge)
+                                    )?.chargePaymentMode.value || item.charge;
+                                    const chargeTimeType = formData.loanProductTemplate?.chargeOptions?.find(
+                                        (option) => option.id === parseInt(item.charge)
+                                    )?.chargeTimeType.value || item.charge;
+                                    const currency = formData.loanProductTemplate?.chargeOptions?.find(
+                                        (option) => option.id === parseInt(item.charge)
+                                    )?.currency.name || item.charge;
 
                                     return (
                                         <tr key={item.id}>
                                             <td>{chargeValue}</td>
+                                            <td>{calculationType}</td>
+                                            <td>{paymentMode}</td>
+                                            <td>{chargeTimeType}</td>
+                                            <td>{currency}</td>
                                             <td>
                                                 <button
                                                     className="staged-form-icon-button-delete"
@@ -2368,12 +2423,18 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Fund Source</option>
-                                            {Array.isArray(formData.loanProductTemplate?.fundOptions) &&
-                                                formData.loanProductTemplate?.fundOptions.map((option) => (
-                                                    <option key={option.id} value={option.id}>
-                                                        {option.name}
-                                                    </option>
-                                                ))}
+                                            {[
+                                                ...(Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.assetAccountOptions)
+                                                    ? formData.loanProductTemplate.accountingMappingOptions.assetAccountOptions
+                                                    : []),
+                                                ...(Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.liabilityAccountOptions)
+                                                    ? formData.loanProductTemplate.accountingMappingOptions.liabilityAccountOptions
+                                                    : [])
+                                            ].map((option) => (
+                                                <option key={option.id} value={option.id}>
+                                                    ({option.glCode})---{option.name}
+                                                </option>
+                                            ))}
                                         </select>
                                     </div>
                                 </div>
@@ -2393,10 +2454,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Loan Portfolio</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.assetAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.assetAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -2413,10 +2474,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Transfer in Suspense</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.assetAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.assetAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -2438,10 +2499,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Income from Interest</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -2458,10 +2519,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Income from Fees</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -2480,10 +2541,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Income from Penalties</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -2500,10 +2561,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Income from Recovery Repayments</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -2522,10 +2583,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Income from Charge-Off Interest</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -2542,10 +2603,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Income from Charge-Off Fees</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -2564,10 +2625,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Income from Charge-Off Penalty</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -2590,10 +2651,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Income from Goodwill Credit Interest</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -2613,10 +2674,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Income from Goodwill Credit Fees</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -2639,10 +2700,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Income from Goodwill Credit Penalty</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -2664,10 +2725,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Losses Written Off</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.expenseAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.expenseAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -2684,10 +2745,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Goodwill Credit Expenses</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.expenseAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.expenseAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -2706,10 +2767,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Charge-Off Expense</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.expenseAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.expenseAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -2726,10 +2787,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Charge-Off Fraud Expense</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.expenseAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.expenseAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -2750,10 +2811,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Overpayment Liability</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.liabilityAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.liabilityAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -2809,8 +2870,6 @@ const CreateLoanProducts = () => {
                                 )}
                             </>
                         )}
-
-
                         {/* Accrual (periodic) */}
                         {formData.Accounting?.selectedOption === "Accrual (periodic)" && (
                             <>
@@ -2829,9 +2888,16 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Fund Source</option>
-                                            {formData.loanProductTemplate?.fundOptions?.map((option) => (
+                                            {[
+                                                ...(Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.assetAccountOptions)
+                                                    ? formData.loanProductTemplate.accountingMappingOptions.assetAccountOptions
+                                                    : []),
+                                                ...(Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.liabilityAccountOptions)
+                                                    ? formData.loanProductTemplate.accountingMappingOptions.liabilityAccountOptions
+                                                    : [])
+                                            ].map((option) => (
                                                 <option key={option.id} value={option.id}>
-                                                    {option.name}
+                                                    ({option.glCode})---{option.name}
                                                 </option>
                                             ))}
                                         </select>
@@ -2852,10 +2918,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Loan Portfolio</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.assetAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.assetAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -2872,10 +2938,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Transfer in Suspense</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.assetAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.assetAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -2894,10 +2960,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Interest Receivable</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.assetAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.assetAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -2914,10 +2980,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Fees Receivable</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.assetAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.assetAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -2936,10 +3002,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Penalties Receivable</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.assetAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.assetAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -2961,10 +3027,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Income from Interest</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -2981,10 +3047,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Income from Fees</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -3003,10 +3069,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Income from Penalties</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -3023,10 +3089,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Income from Recovery Repayments</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -3045,10 +3111,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Income from Charge-Off Interest</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -3065,10 +3131,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Income from Charge-Off Fees</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -3087,10 +3153,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Income from Charge-Off Penalty</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -3113,10 +3179,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Income from Goodwill Credit Interest</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -3135,10 +3201,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Income from Goodwill Credit Fees</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -3161,10 +3227,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Income from Goodwill Credit Penalty</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -3186,10 +3252,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Losses Written Off</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.expenseAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.expenseAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -3206,10 +3272,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Goodwill Credit Expenses</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.expenseAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.expenseAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -3228,10 +3294,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Charge-Off Expense</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.expenseAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.expenseAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -3248,10 +3314,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Charge-Off Fraud Expense</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.expenseAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.expenseAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -3272,10 +3338,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Overpayment Liability</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.liabilityAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.liabilityAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -3331,7 +3397,6 @@ const CreateLoanProducts = () => {
                                 )}
                             </>
                         )}
-
                         {/* Accrual (upfront) */}
                         {formData.Accounting?.selectedOption === "Accrual (upfront)" && (
                             <>
@@ -3349,12 +3414,19 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Fund Source</option>
-                                            {formData.loanProductTemplate?.fundOptions?.map((option) => (
+                                            <option value="">Select Fund Source</option>
+                                            {[
+                                                ...(Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.assetAccountOptions)
+                                                    ? formData.loanProductTemplate.accountingMappingOptions.assetAccountOptions
+                                                    : []),
+                                                ...(Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.liabilityAccountOptions)
+                                                    ? formData.loanProductTemplate.accountingMappingOptions.liabilityAccountOptions
+                                                    : [])
+                                            ].map((option) => (
                                                 <option key={option.id} value={option.id}>
-                                                    {option.name}
+                                                    ({option.glCode})---{option.name}
                                                 </option>
                                             ))}
-
                                         </select>
                                     </div>
                                 </div>
@@ -3373,10 +3445,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Loan Portfolio</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.assetAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.assetAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -3393,10 +3465,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Transfer in Suspense</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.assetAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.assetAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -3415,10 +3487,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Interest Receivable</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.assetAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.assetAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -3435,10 +3507,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Fees Receivable</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.assetAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.assetAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -3457,10 +3529,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Penalties Receivable</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.assetAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.assetAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -3482,10 +3554,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Income from Interest</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -3502,10 +3574,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Income from Fees</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -3524,10 +3596,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Income from Penalties</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -3544,10 +3616,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Income from Recovery Repayments</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -3566,10 +3638,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Income from Charge-Off Interest</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -3586,10 +3658,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Income from Charge-Off Fees</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -3608,10 +3680,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Income from Charge-Off Penalty</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -3634,10 +3706,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Income from Goodwill Credit Interest</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -3656,10 +3728,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Income from Goodwill Credit Fees</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -3682,10 +3754,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Income from Goodwill Credit Penalty</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -3707,10 +3779,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Losses Written Off</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.expenseAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.expenseAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -3727,10 +3799,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Goodwill Credit Expenses</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.expenseAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.expenseAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -3749,10 +3821,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Charge-Off Expense</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.expenseAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.expenseAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -3769,10 +3841,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Charge-Off Fraud Expense</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.expenseAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.expenseAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -3794,10 +3866,10 @@ const CreateLoanProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Overpayment Liability</option>
-                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions) &&
-                                                formData.loanProductTemplate?.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.loanProductTemplate?.accountingMappingOptions?.liabilityAccountOptions) &&
+                                                formData.loanProductTemplate?.accountingMappingOptions?.liabilityAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -3893,10 +3965,41 @@ const CreateLoanProducts = () => {
         );
     };
 
+    const formatDateForPreview = (date) => {
+        return date
+            ? new Date(date).toLocaleDateString("en-GB", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+            })
+            : "";
+    };
+
     const renderPreviewSection = () => {
         const stageData = [
-            { title: "Details", data: formData.Details },
-            { title: "Currency", data: formData.Currency },
+            { title: "Details", data: {
+                "Product Name": formData?.Details?.productName,
+                "Short Name": formData.Details.shortName,
+                "Fund": formData.Details.fund
+                    ? formData?.loanProductTemplate?.fundOptions?.find(f => f.id === parseInt(formData.Details.fund, 10))?.name
+                    : '',
+                "Include In Customer Loan Counter": formData.Details.includeInCustomerLoanCounter
+                    ? 'Yes'
+                    : 'No',
+                "Start Date": formatDateForPreview(formData.Details.startDate),
+                "Close Date": formatDateForPreview(formData.Details.closeDate),
+                "Description": formData.Details.description
+                },
+            },
+            { title: "Currency", data: {
+                    "Currency": formData.Currency.currency
+                        ? formData?.loanProductTemplate?.currencyOptions.find(f => f.code === formData.Currency.currency)?.name
+                        : '',
+                    "Currency In Multiples Of": formData.Currency.currencyMultiples,
+                    "Decimal Place": formData.Currency.decimalPlaces,
+                    "Installment In Multiples Of": formData.Currency.installmentMultiples,
+                },
+            },
             {
                 title: "Settings",
                 data: {
@@ -4062,7 +4165,71 @@ const CreateLoanProducts = () => {
                     }) || [],
                 },
             },
-            { title: "Accounting", data: formData.Accounting },
+            { title: "Accounting", data: {
+                "Selected Option": formData.Accounting.selectedOption,
+                "Fund Source" : formData.Accounting.fundSource,
+                "Loan Portfolio": formData.Accounting.loanPortfolio
+                    ? formData?.loanProductTemplate?.accountingMappingOptions?.assetAccountOptions.find(f => f.id === parseInt(formData.Accounting.loanPortfolio, 10))?.name
+                    : '',
+                "Transfer Suspense": formData.Accounting.transferSuspense
+                    ? formData?.loanProductTemplate?.accountingMappingOptions?.assetAccountOptions.find(f => f.id === parseInt(formData.Accounting.transferSuspense, 10))?.name
+                    : '',
+                "Penalties Receivable": formData.Accounting.penaltiesReceivable
+                    ? formData?.loanProductTemplate?.accountingMappingOptions?.assetAccountOptions.find(f => f.id === parseInt(formData.Accounting.penaltiesReceivable, 10))?.name
+                    : '',
+                "Interest Receivable": formData.Accounting.interestReceivable
+                    ? formData?.loanProductTemplate?.accountingMappingOptions?.assetAccountOptions.find(f => f.id === parseInt(formData.Accounting.interestReceivable, 10))?.name
+                    : '',
+                "Fees Receivable": formData.Accounting.feesReceivable
+                    ? formData?.loanProductTemplate?.accountingMappingOptions?.assetAccountOptions.find(f => f.id === parseInt(formData.Accounting.feesReceivable, 10))?.name
+                    : '',
+                "Income Charge Off Fees": formData.Accounting.incomeChargeOffFees
+                    ? formData?.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions.find(f => f.id === parseInt(formData.Accounting.incomeChargeOffFees, 10))?.name
+                    : '',
+                "Income Charge off Interest": formData.Accounting.incomeChargeOffInterest
+                    ? formData?.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions.find(f => f.id === parseInt(formData.Accounting.incomeChargeOffInterest, 10))?.name
+                    : '',
+                "Income Charge Off Penalty": formData.Accounting.incomeChargeOffPenalty
+                    ? formData?.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions.find(f => f.id === parseInt(formData.Accounting.incomeChargeOffPenalty, 10))?.name
+                    : '',
+                "Income Fees": formData.Accounting.incomeFees
+                    ? formData?.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions.find(f => f.id === parseInt(formData.Accounting.incomeFees, 10))?.name
+                    : '',
+                "Income Goodwill Credit Fees": formData.Accounting.incomeGoodwillCreditFees
+                    ? formData?.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions.find(f => f.id === parseInt(formData.Accounting.incomeGoodwillCreditFees, 10))?.name
+                    : '',
+                "Income Goodwill Credit Interest": formData.Accounting.incomeGoodwillCreditInterest
+                    ? formData?.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions.find(f => f.id === parseInt(formData.Accounting.incomeGoodwillCreditInterest, 10))?.name
+                    : '',
+                "Income Goodwill Credit Penalty": formData.Accounting.incomeGoodwillCreditPenalty
+                    ? formData?.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions.find(f => f.id === parseInt(formData.Accounting.incomeGoodwillCreditPenalty, 10))?.name
+                    : '',
+                "Income Interest": formData.Accounting.incomeInterest
+                    ? formData?.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions.find(f => f.id === parseInt(formData.Accounting.incomeInterest, 10))?.name
+                    : '',
+                "Income Penalties": formData.Accounting.incomePenalties
+                    ? formData?.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions.find(f => f.id === parseInt(formData.Accounting.incomePenalties, 10))?.name
+                    : '',
+                "Income Recovery": formData.Accounting.incomeRecovery
+                    ? formData?.loanProductTemplate?.accountingMappingOptions?.incomeAccountOptions.find(f => f.id === parseInt(formData.Accounting.incomeRecovery, 10))?.name
+                    : '',
+                "Charge Off Expense": formData.Accounting.chargeOffExpense
+                    ? formData?.loanProductTemplate?.accountingMappingOptions?.expenseAccountOptions.find(f => f.id === parseInt(formData.Accounting.chargeOffExpense, 10))?.name
+                    : '',
+                "Charge Off Fraud Expense": formData.Accounting.chargeOffFraudExpense
+                    ? formData?.loanProductTemplate?.accountingMappingOptions?.expenseAccountOptions.find(f => f.id === parseInt(formData.Accounting.chargeOffFraudExpense, 10))?.name
+                    : '',
+                "Goodwill Credit Expenses": formData.Accounting.goodwillCreditExpenses
+                    ? formData?.loanProductTemplate?.accountingMappingOptions?.expenseAccountOptions.find(f => f.id === parseInt(formData.Accounting.goodwillCreditExpenses, 10))?.name
+                    : '',
+                "OverPayment Liability": formData.Accounting.overpaymentLiability
+                    ? formData?.loanProductTemplate?.accountingMappingOptions?.liabilityAccountOptions.find(f => f.id === parseInt(formData.Accounting.overpaymentLiability, 10))?.name
+                    : '',
+                "Advanced Accounting Rules": formData.Accounting.advancedAccountingRules
+                    ? "Yes"
+                    : "No",
+                },
+            },
         ];
 
         return (
@@ -4117,38 +4284,39 @@ const CreateLoanProducts = () => {
 
     return (
         <div className="staged-form-create-loan-product">
-            {renderStageTracker()}
+
             <div className="staged-form-stage-content">
+                {renderStageTracker()}
                 {currentStage === stages.length && allStagesComplete ? (
                     renderPreviewSection()
                 ) : (
                     renderStageContent()
                 )}
-            </div>
-            <div className="staged-form-stage-buttons">
-                <button onClick={handlePrevious}
-                        disabled={currentStage === 0}
-                        className="staged-form-button-previous">
-                    Previous
-                </button>
-                {currentStage < stages.length && (
-                    <button
-                        onClick={handleNext}
-                        className="staged-form-button-next"
-                        disabled={!isNextDisabled}
-                    >
-                        Next
+                <div className="staged-form-stage-buttons">
+                    <button onClick={handlePrevious}
+                            disabled={currentStage === 0}
+                            className="staged-form-button-previous">
+                        Previous
                     </button>
-                )}
-                {currentStage === stages.length && (
-                    <button
-                        onClick={handleSubmit}
-                        className="staged-form-button-preview"
-                        disabled={!allStagesComplete}
-                    >
-                        Submit
-                    </button>
-                )}
+                    {currentStage < stages.length && (
+                        <button
+                            onClick={handleNext}
+                            className="staged-form-button-next"
+                            disabled={!isNextDisabled}
+                        >
+                            Next
+                        </button>
+                    )}
+                    {currentStage === stages.length && (
+                        <button
+                            onClick={handleSubmit}
+                            className="staged-form-button-preview"
+                            disabled={!allStagesComplete}
+                        >
+                            Submit
+                        </button>
+                    )}
+                </div>
             </div>
             {modalState.isOpen && (
                 <div className="staged-modal-container">

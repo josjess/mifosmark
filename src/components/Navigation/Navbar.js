@@ -2,7 +2,7 @@ import React, {useContext, useState} from 'react';
 import {FaBell, FaCog, FaWrench} from 'react-icons/fa';
 import './Navbar.css';
 import { AuthContext } from '../../context/AuthContext';
-import {useNavigate} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import {NotificationContext} from "../../context/NotificationContext";
 import EditBaseURLModal from "../utilities/EditBaseURLModal";
 
@@ -43,9 +43,18 @@ const Navbar = () => {
         <>
             <nav className="navbar">
                 <div className="navbar-content">
-                    <div className="navbar-left">
-                        <h2 className="nav-company-name" onClick={() => navigateTo('/')}>Fineract</h2>
-                    </div>
+                    <Link to={'/'} className="navbar-left">
+                        <img
+                            src={`${process.env.PUBLIC_URL}/Images/fincore.jpg`}
+                            alt="Fincore Logo"
+                            className="nav-logo"
+
+                        />
+                        <h2 className="nav-company-name">
+                            Fincore
+                        </h2>
+                    </Link>
+
                     <div className="navbar-right">
                         {hasPermission && (
                             <button className="icon-button" aria-label="management" onClick={handleManagement}>

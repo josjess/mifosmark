@@ -40,7 +40,7 @@ const AuditTrails = () => {
     useEffect(() => {
         fetchTemplateData();
         fetchAuditData();
-    }, []);
+    }, [filters]);
 
     useEffect(() => {
         if (auditData.length) {
@@ -74,8 +74,8 @@ const AuditTrails = () => {
                     params: {
                         offset: 0,
                         limit: -1,
-                        sortOrder: "asc",
-                        orderBy: "madeOnDate",
+                        sortOrder: "",
+                        orderBy: "",
                         paged: true,
                         dateFormat: "dd MMMM yyyy",
                         locale: "en",
