@@ -6,7 +6,7 @@ import Dashboard from './components/Dashboard';
 import {AuthContext, AuthProvider} from './context/AuthContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { LoadingProvider } from './context/LoadingContext';
-import Notification from './components/utilities/Notification';
+// import Notification from './components/utilities/Notification';
 import './App.css';
 import './index.css';
 import Navbar from "./components/Navigation/Navbar";
@@ -161,7 +161,7 @@ const App = () => {
             <LoadingProvider>
                 <NotificationProvider>
                     <LoadingOverlay />
-                    <Notification />
+                    {/*<Notification />*/}
                     {/*<Navbar />*/}
                     {!isLoginPage && <Navbar />}
                     {!isLoginPage && <Sidebar className="sidebar" />}

@@ -180,7 +180,8 @@ body {
     padding: 20px;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    height: 150px;
+    min-height: 160px;
+    max-height: 180px;
     width: auto;
     display: flex;
     flex-direction: column;
@@ -228,13 +229,25 @@ body {
     margin-top: 10px;
     text-align: center;
     margin-left: auto;
-    margin-right: auto;
+    /*margin-right: auto;*/
 }
 
 .card:hover {
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
     cursor: pointer;
 }
+
+.card-footer {
+    width: 100%;
+    border-top: 1px solid #ccc;
+    margin-top: 0.5rem;
+    /*margin-bottom: 10.5rem;*/
+    padding-top: 0.5rem;
+    font-size: 0.85rem;
+    color: #4c4c5c;
+    text-align: left;
+}
+
 .dashboard-tabs {
     display: flex;
     justify-content: center;

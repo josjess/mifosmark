@@ -3,7 +3,7 @@ import axios from 'axios';
 import { API_CONFIG } from '../../../config';
 import {AuthContext} from "../../../context/AuthContext";
 import {useLoading} from "../../../context/LoadingContext";
-import {FaUpload, FaCamera, FaTrash, FaSignature, FaEdit, FaStickyNote, FaMoneyBill} from 'react-icons/fa';
+import {FaUpload, FaCamera, FaTrash, FaSignature, FaEdit, FaStickyNote} from 'react-icons/fa';
 import './ClientDetails.css'
 import {useNavigate} from "react-router-dom";
 import DatePicker from "react-datepicker";
@@ -173,7 +173,7 @@ const ClientDetails = ({ clientId, onClose }) => {
     // Modal visibility
     const [isRepaymentModalOpen, setIsRepaymentModalOpen] = useState(false);
 
-// Loan repayment details
+    // Loan repayment details
     const [transactionDate, setTransactionDate] = useState(new Date());
     const [principal, setPrincipal] = useState(0);
     const [interest, setInterest] = useState(0);
@@ -282,6 +282,189 @@ const ClientDetails = ({ clientId, onClose }) => {
         note: "",
     });
     const [isLoanSubmittingApproval, setIsLoanSubmittingApproval] = useState(false);
+
+    const [withdrawalDate, setWithdrawalDate] = useState(null);
+    const [withdrawalReasonId, setWithdrawalReasonId] = useState('');
+    const [narrations, setNarrations] = useState([]);
+    const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+
+    const [showRejectModal, setShowRejectModal] = useState(false);
+    const [rejectionDate, setRejectionDate] = useState(null);
+    const [rejectionReasonId, setRejectionReasonId] = useState("");
+    const [rejectionNarrations, setRejectionNarrations] = useState([]);
+
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+    const [showActivateModal, setShowActivateModal] = useState(false);
+    const [activationDate, setActivationDate] = useState(null);
+
+    const handleOpenActivateClientModal = () => {
+        setShowActivateModal(true);
+    };
+
+    const handleCloseActivateClientModal = () => {
+        setShowActivateModal(false);
+        setActivationDate(null);
+    };
+
+    const handleConfirmActivate = async (clientId) => {
+        try {
+            const payload = {
+                activationDate: activationDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' }).replace(',', ''),
+                dateFormat: 'dd MMMM yyyy',
+                locale: 'en',
+            };
+
+            await axios.post(`${API_CONFIG.baseURL}/clients/${clientId}?command=activate`, payload, {
+                headers: {
+                    Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            fetchGeneralTabData();
+            handleCloseActivateClientModal();
+        } catch (error) {
+            console.error("Failed to activate client:", error);
+        }
+    };
+
+    const handleOpenDeleteModal = () => {
+        setShowDeleteModal(true);
+    };
+
+    const handleCloseDeleteModal = () => {
+        setShowDeleteModal(false);
+    };
+
+    const handleConfirmDelete = async (clientId) => {
+        try {
+            await axios.delete(`${API_CONFIG.baseURL}/clients/${clientId}`, {
+                headers: {
+                    Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            onClose();
+        } catch (error) {
+            console.error("Failed to delete client:", error);
+        } finally {
+            handleCloseDeleteModal();
+        }
+    };
+
+    const fetchRejectionTemplate = async () => {
+        try {
+            const response = await axios.get(`${API_CONFIG.baseURL}/clients/template?commandParam=reject`, {
+                headers: {
+                    Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            setRejectionNarrations(response.data.narrations || []);
+        } catch (error) {
+            console.error("Failed to fetch rejection reasons:", error);
+        }
+    };
+
+    const handleOpenRejectModal = () => {
+        fetchRejectionTemplate();
+        setShowRejectModal(true);
+    };
+
+    const handleCloseRejectModal = () => {
+        setShowRejectModal(false);
+        setRejectionDate(null);
+        setRejectionReasonId("");
+    };
+
+    const handleConfirmRejection = async (clientId) => {
+        if (!rejectionDate || !rejectionReasonId) return;
+
+        const payload = {
+            dateFormat: "dd MMMM yyyy",
+            locale: "en",
+            rejectionDate: formatDateForPayload(rejectionDate),
+            rejectionReasonId,
+        };
+
+        try {
+            await axios.post(`${API_CONFIG.baseURL}/clients/${clientId}?command=reject`, payload, {
+                headers: {
+                    Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            fetchGeneralTabData();
+            handleCloseRejectModal();
+        } catch (error) {
+            console.error("Rejection failed:", error);
+        }
+    };
+
+    const fetchWithdrawalNarrations = async () => {
+        try {
+            const response = await axios.get(
+                `${API_CONFIG.baseURL}/clients/template?commandParam=withdraw`,
+                {
+                    headers: {
+                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                        'Fineract-Platform-TenantId': API_CONFIG.tenantId,
+                    },
+                }
+            );
+            setNarrations(response.data.narrations);
+            setShowWithdrawModal(true);
+        } catch (error) {
+            console.error('Failed to fetch withdrawal narrations:', error);
+        }
+    };
+
+    const handleCloseWithdrawModal = () => {
+        setShowWithdrawModal(false);
+        setWithdrawalDate(null);
+        setWithdrawalReasonId('');
+    };
+
+    const handleConfirmWithdrawal = async (clientId) => {
+        if (!withdrawalDate || !withdrawalReasonId) {
+            alert('Please fill in all mandatory fields.');
+            return;
+        }
+
+        const payload = {
+            dateFormat: 'dd MMMM yyyy',
+            locale: 'en',
+            withdrawalDate: withdrawalDate.toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric'
+            }).replace(',', ''),
+            withdrawalReasonId,
+        };
+
+        try {
+            await axios.post(
+                `${API_CONFIG.baseURL}/clients/${clientId}?command=withdraw`,
+                payload,
+                {
+                    headers: {
+                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                        'Fineract-Platform-TenantId': API_CONFIG.tenantId,
+                        'Content-Type': 'application/json',
+                    },
+                }
+            );
+            handleCloseWithdrawModal();
+            fetchGeneralTabData();
+        } catch (error) {
+            console.error('Failed to withdraw client approval:', error);
+        }
+    };
 
     const handleOpenActivateModal = (accountId) => {
         setSelectedSavingsId(accountId);
@@ -4374,6 +4557,8 @@ const ClientDetails = ({ clientId, onClose }) => {
 
                     {!clientDetails?.status?.code.includes('transfer.in.progress') &&
                         !clientDetails?.status?.code.includes('pending') &&
+                        !clientDetails?.status?.code.includes('withdraw') &&
+                        !clientDetails?.status?.code.includes('rejected') &&
                         !clientDetails?.status?.code.includes('transfer.on.hold') && (
                             <div className="client-dropdown">
                                 <button className="client-action-button">Applications</button>
@@ -4408,10 +4593,10 @@ const ClientDetails = ({ clientId, onClose }) => {
                                 <>
                                     <button onClick={fetchCloseClientData}>Close</button>
                                     <button onClick={handleOpenTransferModal}>Transfer Client</button>
-                                    <button >Activate</button>
-                                    <button >Withdraw</button>
-                                    <button >Reject</button>
-                                    <button >Delete</button>
+                                    <button onClick={handleOpenActivateClientModal}>Activate</button>
+                                    <button onClick={fetchWithdrawalNarrations}>Withdraw</button>
+                                    <button onClick={handleOpenRejectModal}>Reject</button>
+                                    <button onClick={handleOpenDeleteModal}>Delete</button>
                                 </>
                             ) : (
                                 <>
@@ -6399,6 +6584,152 @@ const ClientDetails = ({ clientId, onClose }) => {
                                 }
                             >
                                 {isLoanSubmittingApproval ? "Submitting..." : "Submit"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {showWithdrawModal && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h2 className="create-modal-title">Withdraw Client Approval</h2>
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">Withdrawal Date<span className="required">*</span></label>
+                            <DatePicker
+                                selected={withdrawalDate}
+                                onChange={(date) => setWithdrawalDate(date)}
+                                dateFormat="dd MMMM yyyy"
+                                maxDate={new Date()}
+                                className="create-provisioning-criteria-input"
+                            />
+                        </div>
+
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">Withdrawal Reason<span className="required">*</span></label>
+                            <select
+                                value={withdrawalReasonId}
+                                onChange={(e) => setWithdrawalReasonId(Number(e.target.value))}
+                                className="create-provisioning-criteria-input"
+                            >
+                                <option value="">Select Reason</option>
+                                {narrations.map((reason) => (
+                                    <option key={reason.id} value={reason.id}>
+                                        {reason.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button onClick={handleCloseWithdrawModal} className="create-provisioning-criteria-cancel">
+                                Cancel
+                            </button>
+                            <button onClick={() => handleConfirmWithdrawal(clientId)}
+                                    disabled={!withdrawalDate || !withdrawalReasonId}
+                                    className="create-provisioning-criteria-confirm">
+                                Confirm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {showRejectModal && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h2 className="create-modal-title">Reject Client Approval</h2>
+
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">
+                                Rejection Date<span className="required">*</span>
+                            </label>
+                            <DatePicker
+                                selected={rejectionDate}
+                                onChange={(date) => setRejectionDate(date)}
+                                dateFormat="dd MMMM yyyy"
+                                maxDate={new Date()}
+                                className="create-provisioning-criteria-input"
+                            />
+                        </div>
+
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">
+                                Rejection Reason<span className="required">*</span>
+                            </label>
+                            <select
+                                value={rejectionReasonId}
+                                onChange={(e) => setRejectionReasonId(Number(e.target.value))}
+                                className="create-provisioning-criteria-input"
+                            >
+                                <option value="">Select Reason</option>
+                                {rejectionNarrations.map((reason) => (
+                                    <option key={reason.id} value={reason.id}>{reason.name}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button onClick={handleCloseRejectModal} className="create-provisioning-criteria-cancel">
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => handleConfirmRejection(clientId)}
+                                className="create-provisioning-criteria-confirm"
+                                disabled={!rejectionDate || !rejectionReasonId}
+                            >
+                                Confirm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {showDeleteModal && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h2 className="create-modal-title">Delete Client</h2>
+                        <p className="create-provisioning-criteria-label">Are you sure you want to delete this client? This action cannot be undone.</p>
+
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button onClick={handleCloseDeleteModal} className="create-provisioning-criteria-cancel">
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => handleConfirmDelete(clientId)}
+                                className="create-provisioning-criteria-confirm"
+                            >
+                                Confirm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {showActivateModal && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h2 className="create-modal-title">Activate Client</h2>
+
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">
+                                Activated On Date <span className="required">*</span>
+                            </label>
+                            <DatePicker
+                                selected={activationDate}
+                                onChange={(date) => setActivationDate(date)}
+                                dateFormat="dd MMMM yyyy"
+                                maxDate={new Date()}
+                                className="create-provisioning-criteria-input"
+                            />
+                        </div>
+
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button onClick={handleCloseActivateClientModal} className="create-provisioning-criteria-cancel">
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => handleConfirmActivate(clientId)}
+                                className="create-provisioning-criteria-confirm"
+                                disabled={!activationDate}
+                            >
+                                Confirm
                             </button>
                         </div>
                     </div>

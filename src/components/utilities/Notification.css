@@ -1,39 +1,85 @@
-.notification {
+/* Modal Overlay */
+.notification-modal-overlay {
     position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 20px;
-    border-radius: 5px;
-    background-color: #03f1e9;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    z-index: 10000000000;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
     display: flex;
+    justify-content: center;
     align-items: center;
-    justify-content: space-between;
-    min-width: 300px;
+    z-index: 1000;
 }
 
-.notification p {
-    margin: 0;
+/* Modal Content */
+.notification-modal-content {
+    background: #fff;
+    max-width: 600px;
+    min-width: 400px;
+    max-height: 500px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    padding: 20px;
+    overflow-y: auto;
+    position: relative;
+}
+
+/* Title */
+.notification-modal-title {
     font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
 }
 
-.notification.success {
-    background-color: #73d577;
-    color: white;
-}
-
-.notification.error {
-    background-color: #b33b36;
-    color: white;
-}
-
-.notification button {
+/* Close Button */
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 15px;
     background: none;
     border: none;
-    color: #000000;
-    font-size: 16px;
+    font-size: 40px;
     cursor: pointer;
-    margin-left: 20px;
+    color: #555;
+}
+
+.close-button:hover {
+    color: #000;
+}
+
+/* Notification List */
+.notification-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Notification Item */
+.notification-item {
+    background: #f9f9f9;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: background 0.3s;
+}
+
+.notification-item:hover {
+    background: #eef;
+}
+
+/* Timestamp */
+.notification-item small {
+    display: block;
+    color: #666;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+/* Error & Loading */
+.error {
+    color: red;
+    font-size: 14px;
+    text-align: center;
 }

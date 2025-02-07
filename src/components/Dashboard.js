@@ -19,9 +19,9 @@ const Dashboard = () => {
     const [dashboardData, setDashboardData] = useState({
         totalClients: 0, activeClients: 0, inactiveClients: 0, newClients: 0,
         principalOutstanding: 0, interestOutstanding: 0, totalOutstanding: 0, interestThisMonth: 0,
-        principalOverdue: 0, interestOverdue: 0, totalOverdue: 0, nonPerformingAssets: 0,
-        loansForApproval: 0, loansForDisapproval: 0, portfolioAtRisk: 0,
-        borrowersPerLoanOfficer: 0, averageLoanDisbursed: 0, clientsPerPersonnel: 0, todaysDisbursements: 0
+        principalOverdue: 0, interestOverdue: 0, totalOverdue: 0, nonPerformingAssets: 0, savingsCount: 0,
+        loansForApproval: 0, loansForDisapproval: 0, portfolioAtRisk: 0, todaysDisbursementsCount: 0,
+        borrowersPerLoanOfficer: 0, averageLoanDisbursed: 0, clientsPerPersonnel: 0, todaysDisbursements: 0, thisMonthDisbursementsCount: 0,
     });
     const [selectedOffice, setSelectedOffice] = useState(user?.officeId);
     const [officeOptions, setOfficeOptions] = useState([]);
@@ -130,44 +130,56 @@ const Dashboard = () => {
 
                     const getTodaysDisbursements = (loans) => {
                         const today = new Date();
-                        return loans
-                            .filter((loan) => {
-                                const disbursementDateArray = loan.timeline?.actualDisbursementDate;
-                                if (!Array.isArray(disbursementDateArray) || disbursementDateArray.length < 3) {
-                                    return false;
-                                }
+                        const filteredLoans = loans.filter((loan) => {
+                            const disbursementDateArray = loan.timeline?.actualDisbursementDate;
+                            if (!Array.isArray(disbursementDateArray) || disbursementDateArray.length < 3) {
+                                return false;
+                            }
 
-                                const [year, month, day] = disbursementDateArray;
-                                const disbursementDate = new Date(year, month - 1, day);
-                                return (
-                                    disbursementDate.getFullYear() === today.getFullYear() &&
-                                    disbursementDate.getMonth() === today.getMonth() &&
-                                    disbursementDate.getDate() === today.getDate()
-                                );
-                            })
-                            .reduce((sum, loan) => sum + loan.principal, 0);
+                            const [year, month, day] = disbursementDateArray;
+                            const disbursementDate = new Date(year, month - 1, day);
+                            return (
+                                disbursementDate.getFullYear() === today.getFullYear() &&
+                                disbursementDate.getMonth() === today.getMonth() &&
+                                disbursementDate.getDate() === today.getDate()
+                            );
+                        });
+
+                        return {
+                            total: filteredLoans.reduce((sum, loan) => sum + loan.principal, 0),
+                            count: filteredLoans.length,
+                        };
                     };
 
                     const getThisMonthsDisbursements = (loans) => {
                         const today = new Date();
-                        return loans
-                            .filter(loan => {
-                                const disbursementDateArray = loan.timeline?.actualDisbursementDate;
-                                if (!Array.isArray(disbursementDateArray) || disbursementDateArray.length < 2) {
-                                    return false;
-                                }
+                        const filteredLoans = loans.filter(loan => {
+                            const disbursementDateArray = loan.timeline?.actualDisbursementDate;
+                            if (!Array.isArray(disbursementDateArray) || disbursementDateArray.length < 2) {
+                                return false;
+                            }
 
-                                const [year, month] = disbursementDateArray;
-                                return (
-                                    year === today.getFullYear() &&
-                                    month === today.getMonth() + 1
-                                );
-                            })
-                            .reduce((sum, loan) => sum + loan.principal, 0);
+                            const [year, month] = disbursementDateArray;
+                            return (
+                                year === today.getFullYear() &&
+                                month === today.getMonth() + 1
+                            );
+                        });
+
+                        return {
+                            total: filteredLoans.reduce((sum, loan) => sum + loan.principal, 0),
+                            count: filteredLoans.length,
+                        };
                     };
 
-                    const todaysDisbursements = formatCurrency(getTodaysDisbursements(loans), currencyCode, currencySymbol, decimalPlaces);
-                    const thisMonthsDisbursements = formatCurrency(getThisMonthsDisbursements(loans), currencyCode, currencySymbol, decimalPlaces);
+                    const todaysDisbursementData = getTodaysDisbursements(loans);
+                    const thisMonthsDisbursementData = getThisMonthsDisbursements(loans);
+
+                    const todaysDisbursements = formatCurrency(todaysDisbursementData.total, currencyCode, currencySymbol, decimalPlaces);
+                    const todaysDisbursementsCount = todaysDisbursementData.count;
+
+                    const thisMonthsDisbursements = formatCurrency(thisMonthsDisbursementData.total, currencyCode, currencySymbol, decimalPlaces);
+                    const thisMonthsDisbursementsCount = thisMonthsDisbursementData.count;
 
                     const repaymentsToday = calculateRepaymentsToday(loans);
 
@@ -180,7 +192,9 @@ const Dashboard = () => {
                         clientsPerPersonnel,
                         averageClientsPerLoanOfficer,
                         todaysDisbursements,
+                        todaysDisbursementsCount,
                         thisMonthsDisbursements,
+                        thisMonthsDisbursementsCount,
                         repaymentsToday,
                     };
                 } catch (error) {
@@ -191,9 +205,10 @@ const Dashboard = () => {
 
             const calculateTotalSavings = (savingsResponse) => {
                 let total = 0;
-                if (Array.isArray(savingsResponse)) {
-                    savingsResponse.forEach((account, index) => {
+                let savingsCount = 0;
 
+                if (Array.isArray(savingsResponse)) {
+                    savingsResponse.forEach((account) => {
                         const accountBalance = account.summary?.accountBalance;
 
                         if (accountBalance !== undefined) {
@@ -201,13 +216,13 @@ const Dashboard = () => {
 
                             if (!isNaN(parsedBalance)) {
                                 total += parsedBalance;
-                            } else {
+                                savingsCount++;
                             }
-                        } else {
                         }
                     });
                 }
-                return total;
+
+                return { total, savingsCount };
             };
 
             const calculateSavingsMobilizedThisMonth = (savingsResponse) => {
@@ -348,7 +363,7 @@ const Dashboard = () => {
 
                     const totalOutstandingCalc = totalPrincipalOutstanding + totalInterestOutstanding;
 
-                    const totalSavings = calculateTotalSavings(savings);
+                    const { total: totalSavings, savingsCount } = calculateTotalSavings(savings);
 
                     const totalSavingsMobilizedThisMonth = calculateSavingsMobilizedThisMonth(savings);
 
@@ -373,6 +388,7 @@ const Dashboard = () => {
                         loansForDisapproval: formatCurrency(loansForDisapproval, currencyCode, currencySymbol, decimalPlaces),
                         portfolioAtRisk,
                         averageLoanDisbursed,
+                        savingsCount,
                     };
                 } catch (error) {
                     console.error("Error fetching loan data:", error);
@@ -409,11 +425,11 @@ const Dashboard = () => {
     }, [user, selectedOffice]);
 
     const {
-        totalClients, activeClients, inactiveClients, newClients,
+        totalClients, activeClients, inactiveClients, newClients, savingsCount,
         principalOutstanding, interestOutstanding, totalOutstanding, interestThisMonth,
         principalOverdue, interestOverdue, totalOverdue, nonPerformingAssets, loansForApproval, loansForDisapproval,
         portfolioAtRisk, borrowersPerLoanOfficer, averageLoanDisbursed, clientsPerPersonnel, averageClientsPerLoanOfficer,
-        todaysDisbursements, thisMonthsDisbursements, repaymentsToday, totalSavings, totalSavingsMobilizedThisMonth
+        todaysDisbursements, thisMonthsDisbursements, repaymentsToday, totalSavings, totalSavingsMobilizedThisMonth, todaysDisbursementsCount, thisMonthDisbursementsCount
     } = dashboardData;
 
     return (
@@ -487,6 +503,7 @@ const Dashboard = () => {
                                     <h3>Portfolio at Risk</h3>
                                 </div>
                                 <p>{portfolioAtRisk}</p>
+                                <div className="card-footer">Percentage of risky loans</div>
                             </div>
 
                             <div className="card">
@@ -497,6 +514,7 @@ const Dashboard = () => {
                                     <h3>Borrowers Per Loan Officer</h3>
                                 </div>
                                 <p>{borrowersPerLoanOfficer}</p>
+                                <div className="card-footer">Average clients' loans per officer</div>
                             </div>
 
                             <div className="card">
@@ -507,6 +525,7 @@ const Dashboard = () => {
                                     <h3>Average Loan Size</h3>
                                 </div>
                                 <p>{averageLoanDisbursed}</p>
+                                <div className="card-footer">Average distributed Loan size</div>
                             </div>
 
                             <div className="card">
@@ -517,6 +536,7 @@ const Dashboard = () => {
                                     <h3>Today's Disbursements</h3>
                                 </div>
                                 <p>{todaysDisbursements}</p>
+                                <div className="card-footer">{todaysDisbursementsCount} loans disbursed today</div>
                             </div>
 
                             <div className="card">
@@ -527,6 +547,7 @@ const Dashboard = () => {
                                     <h3>This Month's Disbursements</h3>
                                 </div>
                                 <p>{thisMonthsDisbursements}</p>
+                                <div className="card-footer">{thisMonthDisbursementsCount} loans disbursed this month</div>
                             </div>
 
                             <div className="card">
@@ -537,6 +558,7 @@ const Dashboard = () => {
                                     <h3>Clients Per Personnel</h3>
                                 </div>
                                 <p>{clientsPerPersonnel}</p>
+                                <div className="card-footer">Average clients per staff</div>
                             </div>
 
                             <div className="card">
@@ -547,6 +569,7 @@ const Dashboard = () => {
                                     <h3>Average Clients per Loan Officer</h3>
                                 </div>
                                 <p>{averageClientsPerLoanOfficer}</p>
+                                <div className="card-footer">Clients managed per officer</div>
                             </div>
 
                             <div className="card" onClick={() => navigate('/clients')}>
@@ -557,6 +580,7 @@ const Dashboard = () => {
                                     <h3>Total Clients</h3>
                                 </div>
                                 <p>{totalClients}</p>
+                                <div className="card-footer">{totalClients} clients in system</div>
                             </div>
                             <div className="card" onClick={() => navigate('/clients')}>
                                 <div className="card-header">
@@ -566,6 +590,7 @@ const Dashboard = () => {
                                     <h3>Active Clients</h3>
                                 </div>
                                 <p>{activeClients}</p>
+                                <div className="card-footer">{activeClients} currently active clients</div>
                             </div>
                             <div className="card" onClick={() => navigate('/clients')}>
                                 <div className="card-header">
@@ -575,6 +600,7 @@ const Dashboard = () => {
                                     <h3>Inactive Clients</h3>
                                 </div>
                                 <p>{inactiveClients}</p>
+                                <div className="card-footer">{inactiveClients} clients not active</div>
                             </div>
                             <div className="card" onClick={() => navigate('/clients')}>
                                 <div className="card-header">
@@ -584,6 +610,7 @@ const Dashboard = () => {
                                     <h3>Pending Clients</h3>
                                 </div>
                                 <p>{newClients}</p>
+                                <div className="card-footer">{newClients} clients pending approval</div>
                             </div>
                             <div className="card">
                                 <div className="card-header">
@@ -593,6 +620,7 @@ const Dashboard = () => {
                                     <h3>Principal Outstanding</h3>
                                 </div>
                                 <p>{principalOutstanding}</p>
+                                <div className="card-footer">Total unpaid principal</div>
                             </div>
                             <div className="card">
                                 <div className="card-header">
@@ -602,6 +630,7 @@ const Dashboard = () => {
                                     <h3>Interest Outstanding</h3>
                                 </div>
                                 <p>{interestOutstanding}</p>
+                                <div className="card-footer">Interest yet to be paid</div>
                             </div>
                             <div className="card">
                                 <div className="card-header">
@@ -611,6 +640,7 @@ const Dashboard = () => {
                                     <h3>Total Outstanding</h3>
                                 </div>
                                 <p>{totalOutstanding}</p>
+                                <div className="card-footer">Total dues (principal + interest)</div>
                             </div>
                             <div className="card">
                                 <div className="card-header">
@@ -620,6 +650,7 @@ const Dashboard = () => {
                                     <h3>Interest This Month</h3>
                                 </div>
                                 <p>{interestThisMonth}</p>
+                                <div className="card-footer">Interest earned this month</div>
                             </div>
                             <div className="card">
                                 <div className="card-header">
@@ -629,6 +660,7 @@ const Dashboard = () => {
                                     <h3>Principal Overdue</h3>
                                 </div>
                                 <p>{principalOverdue}</p>
+                                <div className="card-footer">Principal payments overdue</div>
                             </div>
                             <div className="card">
                                 <div className="card-header">
@@ -638,6 +670,7 @@ const Dashboard = () => {
                                     <h3>Interest Overdue</h3>
                                 </div>
                                 <p>{interestOverdue}</p>
+                                <div className="card-footer">Interest payments overdue</div>
                             </div>
                             <div className="card">
                                 <div className="card-header">
@@ -647,6 +680,7 @@ const Dashboard = () => {
                                     <h3>Total Overdue</h3>
                                 </div>
                                 <p>{totalOverdue}</p>
+                                <div className="card-footer">Total overdue amount</div>
                             </div>
                             <div className="card">
                                 <div className="card-header">
@@ -656,6 +690,7 @@ const Dashboard = () => {
                                     <h3>Non-Performing Assets</h3>
                                 </div>
                                 <p>{nonPerformingAssets}</p>
+                                <div className="card-footer">Loans not generating income</div>
                             </div>
                             <div className="card">
                                 <div className="card-header">
@@ -665,6 +700,7 @@ const Dashboard = () => {
                                     <h3>Pending Approval</h3>
                                 </div>
                                 <p>{loansForApproval}</p>
+                                <div className="card-footer">total loan amount awaiting approval</div>
                             </div>
                             <div className="card">
                                 <div className="card-header">
@@ -674,6 +710,7 @@ const Dashboard = () => {
                                     <h3>Pending Disbursements</h3>
                                 </div>
                                 <p>{loansForDisapproval}</p>
+                                <div className="card-footer">Total loan amount pending disbursements</div>
                             </div>
 
                             <div className="card">
@@ -684,6 +721,7 @@ const Dashboard = () => {
                                     <h3>Today's Expected Payments</h3>
                                 </div>
                                 <p>{repaymentsToday}</p>
+                                <div className="card-footer">{repaymentsToday} payments due today</div>
                             </div>
                             <div className="card">
                                 <div className="card-header">
@@ -693,6 +731,7 @@ const Dashboard = () => {
                                     <h3>Total Savings</h3>
                                 </div>
                                 <p>{totalSavings}</p>
+                                <div className="card-footer">{savingsCount} savings accounts</div>
                             </div>
                             <div className="card">
                                 <div className="card-header">
@@ -702,6 +741,7 @@ const Dashboard = () => {
                                     <h3>Saving Accounts' created this month</h3>
                                 </div>
                                 <p>{totalSavingsMobilizedThisMonth}</p>
+                                <div className="card-footer">{totalSavingsMobilizedThisMonth} new accounts this month</div>
                             </div>
                         </section>
                     </div>

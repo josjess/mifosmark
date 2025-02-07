@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react';
 import bcrypt from "bcryptjs";
-import {loadConfig} from "../config";
+import {API_CONFIG, loadConfig} from "../config";
 
 export const AuthContext = createContext();
 
@@ -100,6 +100,47 @@ export const AuthProvider = ({ children }) => {
     const [authInitialized, setAuthInitialized] = useState(false);
     const [isBaseURLChanged, setIsBaseURLChanged] = useState(false);
     const [redirectToLogin, setRedirectToLogin] = useState(false);
+    const [notifications, setNotifications] = useState([]);
+    const [unreadCount, setUnreadCount] = useState(0);
+
+    const fetchNotifications = async (savedUser) => {
+        if (!savedUser || !savedUser.base64EncodedAuthenticationKey) {
+            console.log("User not found or missing authentication key");
+            return;
+        }
+
+        const AUTH_TOKEN = savedUser.base64EncodedAuthenticationKey;
+        const headers = {
+            'Authorization': `Basic ${AUTH_TOKEN}`,
+            'Content-Type': 'application/json',
+            'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+        };
+        try {
+            const response = await fetch(`${API_CONFIG.baseURL}/notifications?isRead=false`, { headers });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error(`Failed to fetch notifications (${response.status}):`, errorText);
+                return;
+            }
+
+            const data = await response.json();
+            setNotifications(data.pageItems || []);
+            setUnreadCount(data.totalFilteredRecords || 0);
+        } catch (err) {
+            console.error("Error fetching notifications:", err);
+        }
+    };
+
+    useEffect(() => {
+        const savedUser = JSON.parse(localStorage.getItem("user"));
+
+        if (savedUser) {
+            fetchNotifications(savedUser);
+            const interval = setInterval(() => fetchNotifications(savedUser), 30000);
+            return () => clearInterval(interval);
+        }
+    }, []);
 
     const [superAdmin, setSuperAdmin] = useState(() => {
         const storedAdmin = JSON.parse(localStorage.getItem("superAdmin"));
@@ -337,6 +378,8 @@ export const AuthProvider = ({ children }) => {
             login,
             logout,
             baseURL,
+            notifications,
+            unreadCount,
             updateBaseURL,
             tenantId,
             updateTenantId,

@@ -108,3 +108,23 @@
 .nav-dropdown-item:hover {
     color: #dfa72f;
 }
+
+.notification-icon {
+    position: relative;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.notification-badge {
+    background: red;
+    color: white;
+    font-size: 12px;
+    border-radius: 50%;
+    padding: 1px 5px;
+    position: absolute;
+    top: -5px;
+    right: 85px;
+}
+
