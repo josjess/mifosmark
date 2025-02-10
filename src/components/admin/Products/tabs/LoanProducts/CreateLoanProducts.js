@@ -1163,7 +1163,7 @@ const CreateLoanProducts = ({ onSuccess, productToEdit }) => {
                             </div>
                             <div className="staged-form-field">
                                 <label htmlFor="principalThreshold">
-                                    Principal Threshold (%) for Last Installment
+                                    Principal Threshold (%) for Last Installment <span>*</span>
                                 </label>
                                 <input
                                     id="principalThreshold"

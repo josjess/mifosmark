@@ -320,7 +320,6 @@ const Dashboard = () => {
                             ? loans.filter(loan => loan.clientOfficeId === parseInt(selectedOffice))
                             : loans;
 
-                    let portfolioAtRiskAmount = 0;
                     let totalDisbursedAmount = 0;
                     let disbursedLoansCount = 0;
 
@@ -341,23 +340,19 @@ const Dashboard = () => {
                         totalPrincipalOverdue += summary.principalOverdue || 0;
                         totalInterestOverdue += summary.interestOverdue || 0;
                         totalInterestThisMonth += summary.interestCharged || 0;
-                        totalOverdue += summary.principalOverdue || 0 + summary.interestOverdue || 0;
+                        totalOverdue += summary.totalOverdue || 0;
 
                         if (loan.isNPA) nonPerformingAssets++;
                         if (loan.status.pendingApproval) loansForApproval += loan.principal;
                         if (loan.status?.waitingForDisbursal) loansForDisapproval += loan.principal;
-
-                        if (loan.isNPA) {
-                            portfolioAtRiskAmount += summary.principalOutstanding || 0;
-                        }
 
                         totalDisbursedAmount += loan.principal || 0;
                         disbursedLoansCount++;
                     });
 
                     const portfolioAtRisk =
-                        totalPrincipalOutstanding > 0
-                            ? ((portfolioAtRiskAmount / totalPrincipalOutstanding) * 100).toFixed(2) + '%'
+                        totalOverdue > 0
+                            ? ((totalPrincipalOutstanding / totalOverdue) * 100).toFixed(2) + '%'
                             : '';
 
 

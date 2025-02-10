@@ -170,7 +170,8 @@ const ReportFormPage = () => {
                 return { id: row[idIndex] || "", name: row[nameIndex] || "-" };
             });
 
-            if (parsedOptions.some(option => option.id === -10)) {
+            const hasAllOption = parsedOptions.some(option => option.id === -1);
+            if (!hasAllOption) {
                 parsedOptions.unshift({ id: -1, name: "All" });
             }
 
@@ -183,7 +184,7 @@ const ReportFormPage = () => {
             console.error(`Error fetching options for ${parameterName}:`, err);
             setOptions((prev) => ({
                 ...prev,
-                [parameterName]: [],
+                [parameterName]: [{ id: -1, name: "All" }],
             }));
         } finally {
             stopLoading();

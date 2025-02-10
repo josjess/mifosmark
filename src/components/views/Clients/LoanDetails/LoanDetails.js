@@ -3593,9 +3593,16 @@ const LoanDetails = () => {
                                     <h3 className="general-section-title">Performance History</h3>
                                     <div className="general-details-columns">
                                         <div className="general-details-column">
+
                                             <p>
-                                                <strong>Number of Repayments:</strong>{" "}
-                                                {loanDetails?.summary?.numberOfRepayments || "Not Available"}
+                                                <strong>Disbursement Date:</strong>{" "}
+                                                {loanDetails?.timeline?.actualDisbursementDate
+                                                    ? new Date(loanDetails.timeline.actualDisbursementDate.join("-")).toLocaleDateString(undefined, {
+                                                        year: "numeric",
+                                                        month: "long",
+                                                        day: "numeric",
+                                                    })
+                                                    : "Not Available"}
                                             </p>
                                             <p>
                                                 <strong>Maturity Date:</strong>{" "}
@@ -3607,6 +3614,17 @@ const LoanDetails = () => {
                                                     })
                                                     : "Not Available"}
                                             </p>
+                                            <p>
+                                                <strong>Loan Term:</strong>{" "}
+                                                {loanDetails?.termFrequency
+                                                    ? `${loanDetails.termFrequency} ${loanDetails.termPeriodFrequencyType?.value}`
+                                                    : "Not Available"}
+
+                                            </p>
+                                            <p>
+                                                <strong>Number of Repayments:</strong>{" "}
+                                                {loanDetails?.summary?.numberOfRepayments || "Not Available"}
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
@@ -3615,15 +3633,15 @@ const LoanDetails = () => {
                         {/* Loan Summary Section */}
                         {!loanDetails?.status?.value?.toLowerCase()?.includes("approved") &&
                             !loanDetails?.status?.pendingApproval && (
-                            <div className="general-section general-groups-section">
-                                <h3 className="general-section-title">Loan Summary</h3>
-                                <table className="general-charges-table">
-                                    <thead>
-                                    <tr>
+                                <div className="general-section general-groups-section">
+                                    <h3 className="general-section-title">Loan Summary</h3>
+                                    <table className="general-charges-table">
+                                        <thead>
+                                        <tr>
                                         <th></th>
-                                        <th>Original</th>
-                                        <th>Paid</th>
-                                        <th>Waived</th>
+                                            <th>Original</th>
+                                            <th>Paid</th>
+                                            <th>Waived</th>
                                         <th>Written Off</th>
                                         <th>Outstanding</th>
                                         <th>Overdue</th>
@@ -3718,18 +3736,6 @@ const LoanDetails = () => {
                                 {loanDetails?.status?.pendingApproval ? (
                                     <>
                                         <tr>
-                                            <td className="label">Disbursement Date</td>
-                                            <td className="value">
-                                                {loanDetails?.timeline?.actualDisbursementDate
-                                                    ? new Date(loanDetails.timeline.actualDisbursementDate.join("-")).toLocaleDateString(undefined, {
-                                                        year: "numeric",
-                                                        month: "long",
-                                                        day: "numeric",
-                                                    })
-                                                    : "Not Available"}
-                                            </td>
-                                        </tr>
-                                        <tr>
                                             <td className="label">Currency</td>
                                             <td className="value">
                                                 {loanDetails?.currency?.name || "Not Available"}, {loanDetails?.currency?.code || "Not Available"}
@@ -3748,84 +3754,88 @@ const LoanDetails = () => {
                                     </>
                                 ) : (
                                     <>
-                                    <tr>
-                                        <td className="label">Disbursement Date</td>
-                                        <td className="value">
-                                            {loanDetails?.timeline?.actualDisbursementDate
-                                                ? new Date(loanDetails.timeline.actualDisbursementDate.join("-")).toLocaleDateString(undefined, {
-                                                    year: "numeric",
-                                                    month: "long",
-                                                    day: "numeric",
-                                                })
-                                                : "-"}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td className="label">Loan Purpose</td>
-                                        <td className="value">{loanDetails?.purpose || "Not Available"}</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="label">Loan Officer</td>
-                                        <td className="value">
-                                            {loanDetails?.loanOfficerName || "Unassigned"}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td className="label">Currency</td>
-                                        <td className="value">{loanDetails?.currency?.name || ''}, {loanDetails?.currency?.code || "-"}</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="label">External ID</td>
-                                        <td className="value">{loanDetails?.clientExternalId || "-"}</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="label">Proposed Amount</td>
-                                        <td className="value">
-                                            {loanDetails?.proposedPrincipal
-                                                ? `${loanDetails.currency.code} ${(loanDetails.proposedPrincipal || 0).toLocaleString()}`
-                                                : "-"}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                    <td className="label">Approved Amount</td>
-                                        <td className="value">
-                                            {loanDetails?.approvedPrincipal
-                                                ? `${loanDetails.currency.code} ${(loanDetails.approvedPrincipal || 0).toLocaleString()}`
-                                                : "-"}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td className="label">Disbursed Amount</td>
-                                        <td className="value">
-                                            {loanDetails?.netDisbursalAmount
-                                                ? `${loanDetails.currency.code} ${(loanDetails.netDisbursalAmount || 0).toLocaleString()}`
-                                                : "-"}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td className="label">Term</td>
-                                        <td className="value">
-                                            {loanDetails?.termFrequency
-                                                ? `${loanDetails.termFrequency} ${loanDetails.termPeriodFrequencyType?.value}`
-                                                : "Not Available"}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td className="label">Interest Rate</td>
-                                        <td className="value">
-                                            {loanDetails?.annualInterestRate
-                                                ? `${loanDetails.annualInterestRate}%`
-                                                : "Not Available"}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td className="label">Amortization</td>
-                                        <td className="value">
-                                            {loanDetails?.amortizationType?.value || "Not Available"}
-                                        </td>
-                                    </tr>
+                                        <tr>
+                                            <td className="label">Disbursed Amount</td>
+                                            <td className="value">
+                                                {loanDetails?.netDisbursalAmount
+                                                    ? `${loanDetails.currency.code} ${(loanDetails.netDisbursalAmount || 0).toLocaleString()}`
+                                                    : "-"}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td className="label">Loan Purpose</td>
+                                            <td className="value">{loanDetails?.purpose || "Not Available"}</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="label">Loan Officer</td>
+                                            <td className="value">
+                                                {loanDetails?.loanOfficerName || "Unassigned"}
+                                            </td>
+                                        </tr>
+                                        {/*<tr>*/}
+                                        {/*    <td className="label">Currency</td>*/}
+                                        {/*    <td className="value">{loanDetails?.currency?.name || ''}, {loanDetails?.currency?.code || "-"}</td>*/}
+                                        {/*</tr>*/}
+                                        {/*<tr>*/}
+                                        {/*    <td className="label">External ID</td>*/}
+                                        {/*    <td className="value">{loanDetails?.clientExternalId || "-"}</td>*/}
+                                        {/*</tr>*/}
+                                        {/*<tr>*/}
+                                        {/*    <td className="label">Proposed Amount</td>*/}
+                                        {/*    <td className="value">*/}
+                                        {/*        {loanDetails?.proposedPrincipal*/}
+                                        {/*            ? `${loanDetails.currency.code} ${(loanDetails.proposedPrincipal || 0).toLocaleString()}`*/}
+                                        {/*            : "-"}*/}
+                                        {/*    </td>*/}
+                                        {/*</tr>*/}
+                                        {/*<tr>*/}
+                                        {/*<td className="label">Approved Amount</td>*/}
+                                        {/*    <td className="value">*/}
+                                        {/*        {loanDetails?.approvedPrincipal*/}
+                                        {/*            ? `${loanDetails.currency.code} ${(loanDetails.approvedPrincipal || 0).toLocaleString()}`*/}
+                                        {/*            : "-"}*/}
+                                        {/*    </td>*/}
+                                        {/*</tr>*/}
+                                        {/*<tr>*/}
+                                        {/*    <td className="label">Interest Rate</td>*/}
+                                        {/*    <td className="value">*/}
+                                        {/*        {loanDetails?.annualInterestRate*/}
+                                        {/*            ? `${loanDetails.annualInterestRate}%`*/}
+                                        {/*            : "Not Available"}*/}
+                                        {/*    </td>*/}
+                                        {/*</tr>*/}
+                                        {/*<tr>*/}
+                                        {/*    <td className="label">Amortization</td>*/}
+                                        {/*    <td className="value">*/}
+                                        {/*        {loanDetails?.amortizationType?.value || "Not Available"}*/}
+                                        {/*    </td>*/}
+                                        {/*</tr>*/}
+                                        <tr>
+                                            <td className="label">Notes</td>
+                                            <td className="value">
+                                                {notes.length > 0 ? (
+                                                    <div className="notes-list">
+                                                        {notes.map((note) => (
+                                                            <div key={note.id} className="note-item">
+                                                                <div className="note-content">
+                                                                    <p>{note.note}</p>
+                                                                    <small>
+                                                                        Created By: {note.createdByUsername || "Unknown"} |{" "}
+                                                                        {new Date(note.createdOn).toLocaleDateString(undefined, {
+                                                                            dateStyle: "long",
+                                                                        })}
+                                                                    </small>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                ) : (
+                                                    <p className="no-data">No notes available</p>
+                                                )}
+                                            </td>
+                                        </tr>
                                     </>
-                                    )}
+                                )}
                                 </tbody>
                             </table>
                         </div>
@@ -3834,7 +3844,7 @@ const LoanDetails = () => {
                             <div className="general-section general-groups-section">
                                 <h3 className="general-section-title">Loan Purpose</h3>
                                 <table className="general-charges-table general-vertical-table">
-                                    <tbody>
+                                <tbody>
                                     <tr>
                                         <td className="label">Loan Purpose</td>
                                         <td className="value">{loanDetails?.purpose || "Not Available"}</td>
