@@ -108,8 +108,8 @@ const ViewLoanProducts = ({ onRowClick }) => {
                                 </span>
                             </td>
                             <td>
-                                {product.expiryDate
-                                    ? new Date(product.expiryDate).toLocaleDateString('en-US', {
+                                {product.closeDate
+                                    ? new Date(product.closeDate).toLocaleDateString('en-US', {
                                         year: 'numeric',
                                         month: 'short',
                                         day: '2-digit',

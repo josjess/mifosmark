@@ -7,6 +7,12 @@ import { Link } from 'react-router-dom';
 const SavingsProducts = () => {
     const [activeTab, setActiveTab] = useState('viewSavingsProducts');
     const [dynamicTabs, setDynamicTabs] = useState([]);
+    const [selectedProduct, setSelectedProduct] = useState(null);
+
+    const handleEditSavingsProduct = (product) => {
+        setSelectedProduct(product);
+        setActiveTab('createSavingsProducts');
+    };
 
     const handleOpenSavingsProductDetails = (product) => {
         const tabId = `SavingsProductDetail-${product.id}`;
@@ -20,6 +26,7 @@ const SavingsProducts = () => {
                     <SavingsProductDetails
                         savingsProductId={product.id}
                         onClose={() => handleCloseTab(tabId)}
+                        onEdit={handleEditSavingsProduct}
                     />
                 ),
             },
@@ -38,7 +45,10 @@ const SavingsProducts = () => {
         if (activeTab === 'viewSavingsProducts') {
             return <ViewSavingsProducts onRowClick={handleOpenSavingsProductDetails} />;
         } else if (activeTab === 'createSavingsProducts') {
-            return <CreateSavingsProducts />;
+            return <CreateSavingsProducts
+                onSuccess={handleOpenSavingsProductDetails}
+                productToEdit={selectedProduct}
+            />;
         } else {
             const activeDynamicTab = dynamicTabs.find((tab) => tab.id === activeTab);
             return activeDynamicTab ? activeDynamicTab.component : null;

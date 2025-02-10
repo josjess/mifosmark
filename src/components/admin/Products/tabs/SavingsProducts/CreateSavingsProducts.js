@@ -14,7 +14,7 @@ const stages = [
     "Accounting",
 ];
 
-const CreateSavingsProducts = () => {
+const CreateSavingsProducts = ({ onSuccess, productToEdit}) => {
     const [currentStage, setCurrentStage] = useState(0);
     const [formData, setFormData] = useState({});
     const [completedStages, setCompletedStages] = useState(new Set());
@@ -22,6 +22,58 @@ const CreateSavingsProducts = () => {
     const [isNextDisabled, setIsNextDisabled] = useState(true);
     const { user } = useContext(AuthContext);
     const { startLoading, stopLoading } = useLoading();
+
+    useEffect( () => {
+        if (productToEdit) {
+            console.log(productToEdit);
+            setFormData({
+                Details: {
+                    productName: productToEdit.name,
+                    shortName: productToEdit.shortName,
+                    description: productToEdit.description,
+                },
+                Currency: {
+                    currency: productToEdit.currency?.code,
+                    currencyMultiple: productToEdit.currency?.inMultiplesOf,
+                    decimalPlaces: productToEdit.currency?.decimalPlaces,
+                },
+                Terms: {
+                    nominalAnnualInterest: productToEdit.nominalAnnualInterestRate,
+                    interestCompoundingPeriod: productToEdit.interestCompoundingPeriodType?.id,
+                    interestPostingPeriod: productToEdit.interestPostingPeriodType?.id,
+                    interestCalculationType: productToEdit.interestCalculationType?.id,
+                    daysInYear: productToEdit.interestCalculationDaysInYearType?.id,
+                },
+                Settings: {
+                    minimumOpeningBalance: productToEdit.minBalance,
+                    lockInPeriod: productToEdit.lockInPeriod,
+                    enforceMinimumBalance: productToEdit.enforceMinRequiredBalance,
+                    minimumBalance: productToEdit.minRequiredBalance,
+                    isWithholdTaxApplicable: productToEdit.withHoldTax,
+                    applyWithdrawalFeeForTransfers: productToEdit.withdrawalFeeForTransfers,
+                    isOverdraftAllowed: productToEdit.allowOverdraft,
+                    minimumOverdraftRequiredForInterestCalculation: productToEdit.minOverdraftForInterestCalculation,
+                    nominalAnnualInterestForOverdraft: productToEdit.nominalAnnualInterestRateOverdraft,
+                    maximumOverdraftAmountLimit: productToEdit.overdraftLimit,
+                    enableDormancyTracking: productToEdit.isDormancyTrackingActive,
+
+                },
+                Charges: productToEdit.charges || [],
+                Accounting: {
+                    selectedOption: productToEdit.accountingRule?.id,
+                    savingsReference: productToEdit.accountingMappings?.savingsReferenceAccount?.id,
+                    overdraftPortfolio: productToEdit.accountingMappings?.overdraftPortfolioControl?.id,
+                    feesReceivable: productToEdit.accountingMappings?.feesReceivable?.id,
+                    savingsControl: productToEdit.accountingMappings?.savingsControlAccount?.id,
+                    savingsTransferInSuspense: productToEdit.accountingMappings?.transfersInSuspenseAccount?.id,
+                    interestOnSavings: productToEdit.accountingMappings?.interestOnSavingsAccount?.id,
+                    writeOff: productToEdit.accountingMappings?.writeOffAccount?.id,
+                    incomeFromFees: productToEdit.accountingMappings?.incomeFromFeeAccount?.id,
+                    incomeFromPenalties: productToEdit.accountingMappings?.incomeFromPenaltyAccount?.id,
+                }
+            });
+        }
+    }, [productToEdit]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -115,14 +167,23 @@ const CreateSavingsProducts = () => {
                                 ? 3
                                 : null,
                 locale: "en",
+                savingsControlAccountId: parseInt(formData.Accounting?.savingsControl, 10),
+                savingsReferenceAccountId: parseInt(formData.Accounting?.savingsReference, 10),
+                transfersInSuspenseAccountId: parseInt(formData.Accounting?.savingsTransferInSuspense, 10),
+                interestOnSavingsAccountId: parseInt(formData.Accounting?.interestOnSavings, 10),
+                incomeFromFeeAccountId: parseInt(formData.Accounting?.incomeFromFees, 10),
+                incomeFromPenaltyAccountId: parseInt(formData.Accounting?.incomeFromPenalties, 10),
+                overdraftPortfolioControlId: parseInt(formData.Accounting?.overdraftPortfolio, 10),
+                incomeFromInterestId: parseInt(formData.Accounting?.interestPayable, 10),
+                writeOffAccountId: parseInt(formData.Accounting?.writeOff, 10),
             };
 
-            console.log("Submitting Payload:", payload);
+            const method = productToEdit ? 'put' : 'post';
+            const url = productToEdit
+                ? `${API_CONFIG.baseURL}/savingsproducts/${productToEdit.id}`
+                : `${API_CONFIG.baseURL}/savingsproducts`;
 
-            const response = await axios.post(
-                `${API_CONFIG.baseURL}/savingsproducts`,
-                payload,
-                {
+            const response = await axios[method](url, payload, {
                     headers: {
                         Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
                         'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
@@ -132,10 +193,20 @@ const CreateSavingsProducts = () => {
             );
 
             if (response.status === 200 || response.status === 201) {
-                alert("Savings Product Created Successfully!");
+                alert(`Savings Product ${productToEdit ? 'Updated' : 'Created'} Successfully!`);
+
+                const productName = formData?.Details?.productName || 'Savings Product';
+
+                setFormData({});
+
+                const {resourceId} = response.data;
+                onSuccess({
+                    id: resourceId,
+                    name: productName,
+                });
             } else {
-                console.error("Error Creating Savings Product:", response.data);
-                alert("Error Creating Savings Product.");
+                console.error(`Error ${productToEdit ? 'Updating' : 'Creating'} Savings Product:`, response.data);
+                alert(`Error ${productToEdit ? 'Updating' : 'Creating'} Savings Product.`);
             }
         } catch (error) {
             console.error("Error in handlePreview:", error.response?.data || error.message);
@@ -883,10 +954,10 @@ const CreateSavingsProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Savings Reference</option>
-                                            {Array.isArray(formData.savingsProductTemplate?.accountingMappingOptions) &&
-                                                formData.savingsProductTemplate.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.savingsProductTemplate?.accountingMappingOptions?.assetAccountOptions) &&
+                                                formData.savingsProductTemplate.accountingMappingOptions?.assetAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -905,10 +976,10 @@ const CreateSavingsProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Overdraft Portfolio</option>
-                                            {Array.isArray(formData.savingsProductTemplate?.accountingMappingOptions) &&
-                                                formData.savingsProductTemplate.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.savingsProductTemplate?.accountingMappingOptions?.assetAccountOptions) &&
+                                                formData.savingsProductTemplate.accountingMappingOptions?.assetAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -932,10 +1003,10 @@ const CreateSavingsProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Savings Control</option>
-                                            {Array.isArray(formData.savingsProductTemplate?.accountingMappingOptions) &&
-                                                formData.savingsProductTemplate.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.savingsProductTemplate?.accountingMappingOptions?.liabilityAccountOptions) &&
+                                                formData.savingsProductTemplate.accountingMappingOptions?.liabilityAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -954,36 +1025,38 @@ const CreateSavingsProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Savings Transfer in Suspense</option>
-                                            {Array.isArray(formData.savingsProductTemplate?.accountingMappingOptions) &&
-                                                formData.savingsProductTemplate.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.savingsProductTemplate?.accountingMappingOptions?.liabilityAccountOptions) &&
+                                                formData.savingsProductTemplate.accountingMappingOptions?.liabilityAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
                                     </div>
                                 </div>
-                                <div className="staged-form-field">
-                                    <label htmlFor="escheatLiability">
-                                        Escheat Liability <span className="staged-form-required">*</span>
-                                    </label>
-                                    <select
-                                        id="escheatLiability"
-                                        value={formData.Accounting?.escheatLiability || ""}
-                                        onChange={(e) =>
-                                            handleFieldChange("Accounting", "escheatLiability", e.target.value)
-                                        }
-                                        required
-                                        className="staged-form-select"
-                                    >
-                                        <option value="">Select Escheat Liability</option>
-                                        {Array.isArray(formData.savingsProductTemplate?.accountingMappingOptions) &&
-                                            formData.savingsProductTemplate.accountingMappingOptions.map((option) => (
-                                                <option key={option.id} value={option.id}>
-                                                    {option.value}
-                                                </option>
-                                            ))}
-                                    </select>
+                                <div className="staged-form-row">
+                                    <div className="staged-form-field">
+                                        <label htmlFor="escheatLiability">
+                                            Escheat Liability <span className="staged-form-required">*</span>
+                                        </label>
+                                        <select
+                                            id="escheatLiability"
+                                            value={formData.Accounting?.escheatLiability || ""}
+                                            onChange={(e) =>
+                                                handleFieldChange("Accounting", "escheatLiability", e.target.value)
+                                            }
+                                            required
+                                            className="staged-form-select"
+                                        >
+                                            <option value="">Select Escheat Liability</option>
+                                            {Array.isArray(formData.savingsProductTemplate?.accountingMappingOptions?.liabilityAccountOptions) &&
+                                                formData.savingsProductTemplate.accountingMappingOptions?.liabilityAccountOptions.map((option) => (
+                                                    <option key={option.id} value={option.id}>
+                                                        ({option.glCode})---{option.name}
+                                                    </option>
+                                                ))}
+                                        </select>
+                                    </div>
                                 </div>
 
                                 {/* Expenses Section */}
@@ -1003,10 +1076,10 @@ const CreateSavingsProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Interest on Savings</option>
-                                            {Array.isArray(formData.savingsProductTemplate?.accountingMappingOptions) &&
-                                                formData.savingsProductTemplate.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.savingsProductTemplate?.accountingMappingOptions?.expenseAccountOptions) &&
+                                                formData.savingsProductTemplate.accountingMappingOptions?.expenseAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -1025,10 +1098,10 @@ const CreateSavingsProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Write-off</option>
-                                            {Array.isArray(formData.savingsProductTemplate?.accountingMappingOptions) &&
-                                                formData.savingsProductTemplate.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.savingsProductTemplate?.accountingMappingOptions?.expenseAccountOptions) &&
+                                                formData.savingsProductTemplate.accountingMappingOptions?.expenseAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -1052,10 +1125,10 @@ const CreateSavingsProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Income from Fees</option>
-                                            {Array.isArray(formData.savingsProductTemplate?.accountingMappingOptions) &&
-                                                formData.savingsProductTemplate.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.savingsProductTemplate?.accountingMappingOptions?.incomeAccountOptions) &&
+                                                formData.savingsProductTemplate.accountingMappingOptions?.incomeAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -1074,36 +1147,60 @@ const CreateSavingsProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Income from Penalties</option>
-                                            {Array.isArray(formData.savingsProductTemplate?.accountingMappingOptions) &&
-                                                formData.savingsProductTemplate.accountingMappingOptions.map((option) => (
+                                            {Array.isArray(formData.savingsProductTemplate?.accountingMappingOptions?.incomeAccountOptions) &&
+                                                formData.savingsProductTemplate.accountingMappingOptions?.incomeAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.value}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
                                     </div>
                                 </div>
-                                <div className="staged-form-field">
-                                    <label htmlFor="overdraftInterestIncome">
-                                        Overdraft Interest Income <span className="staged-form-required">*</span>
-                                    </label>
-                                    <select
-                                        id="overdraftInterestIncome"
-                                        value={formData.Accounting?.overdraftInterestIncome || ""}
-                                        onChange={(e) =>
-                                            handleFieldChange("Accounting", "overdraftInterestIncome", e.target.value)
-                                        }
-                                        required
-                                        className="staged-form-select"
-                                    >
-                                        <option value="">Select Overdraft Interest Income</option>
-                                        {Array.isArray(formData.savingsProductTemplate?.accountingMappingOptions) &&
-                                            formData.savingsProductTemplate.accountingMappingOptions.map((option) => (
-                                                <option key={option.id} value={option.id}>
-                                                    {option.value}
-                                                </option>
-                                            ))}
-                                    </select>
+                                <div className="staged-form-row">
+                                    <div className="staged-form-field">
+                                        <label htmlFor="interestPayable">
+                                            Interest Payable <span className="staged-form-required">*</span>
+                                        </label>
+                                        <select
+                                            id="interestPayable"
+                                            value={formData.Accounting?.interestPayable || ""}
+                                            onChange={(e) =>
+                                                handleFieldChange("Accounting", "interestPayable", e.target.value)
+                                            }
+                                            required
+                                            className="staged-form-select"
+                                        >
+                                            <option value="">Select Interest Payable</option>
+                                            {Array.isArray(formData.savingsProductTemplate?.accountingMappingOptions?.incomeAccountOptions) &&
+                                                formData.savingsProductTemplate?.accountingMappingOptions?.incomeAccountOptions.map((option) => (
+                                                    <option key={option.id} value={option.id}>
+                                                        ({option.glCode})---{option.name}
+                                                    </option>
+                                                ))}
+                                        </select>
+                                    </div>
+                                    <div className="staged-form-field">
+                                        <label htmlFor="overdraftInterestIncome">
+                                            Overdraft Interest Income <span className="staged-form-required">*</span>
+                                        </label>
+                                        <select
+                                            id="overdraftInterestIncome"
+                                            value={formData.Accounting?.overdraftInterestIncome || ""}
+                                            onChange={(e) =>
+                                                handleFieldChange("Accounting", "overdraftInterestIncome", e.target.value)
+                                            }
+                                            required
+                                            className="staged-form-select"
+                                        >
+                                            <option value="">Select Overdraft Interest Income</option>
+                                            {Array.isArray(formData.savingsProductTemplate?.accountingMappingOptions?.incomeAccountOptions) &&
+                                                formData.savingsProductTemplate.accountingMappingOptions?.incomeAccountOptions.map((option) => (
+                                                    <option key={option.id} value={option.id}>
+                                                        ({option.glCode})---{option.name}
+                                                    </option>
+                                                ))}
+                                        </select>
+                                    </div>
                                 </div>
 
                                 {/* Advanced Accounting Rules */}
@@ -1176,10 +1273,10 @@ const CreateSavingsProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Savings Reference</option>
-                                            {Array.isArray(formData.savingsProductTemplate?.chargeOptions) &&
-                                                formData.savingsProductTemplate.chargeOptions.map((option) => (
+                                            {Array.isArray(formData.savingsProductTemplate?.accountingMappingOptions?.assetAccountOptions) &&
+                                                formData.savingsProductTemplate?.accountingMappingOptions?.assetAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.name}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -1198,10 +1295,10 @@ const CreateSavingsProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Overdraft Portfolio</option>
-                                            {Array.isArray(formData.savingsProductTemplate?.chargeOptions) &&
-                                                formData.savingsProductTemplate.chargeOptions.map((option) => (
+                                            {Array.isArray(formData.savingsProductTemplate?.accountingMappingOptions?.assetAccountOptions) &&
+                                                formData.savingsProductTemplate?.accountingMappingOptions?.assetAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.name}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -1222,10 +1319,10 @@ const CreateSavingsProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Fees Receivable</option>
-                                            {Array.isArray(formData.savingsProductTemplate?.chargeOptions) &&
-                                                formData.savingsProductTemplate.chargeOptions.map((option) => (
+                                            {Array.isArray(formData.savingsProductTemplate?.accountingMappingOptions?.assetAccountOptions) &&
+                                                formData.savingsProductTemplate?.accountingMappingOptions?.assetAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.name}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -1244,10 +1341,10 @@ const CreateSavingsProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Penalties Receivable</option>
-                                            {Array.isArray(formData.savingsProductTemplate?.chargeOptions) &&
-                                                formData.savingsProductTemplate.chargeOptions.map((option) => (
+                                            {Array.isArray(formData.savingsProductTemplate?.accountingMappingOptions?.assetAccountOptions) &&
+                                                formData.savingsProductTemplate?.accountingMappingOptions?.assetAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.name}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -1271,10 +1368,10 @@ const CreateSavingsProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Savings Control</option>
-                                            {Array.isArray(formData.savingsProductTemplate?.chargeOptions) &&
-                                                formData.savingsProductTemplate.chargeOptions.map((option) => (
+                                            {Array.isArray(formData.savingsProductTemplate?.accountingMappingOptions?.liabilityAccountOptions) &&
+                                                formData.savingsProductTemplate?.accountingMappingOptions?.liabilityAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.name}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -1293,38 +1390,16 @@ const CreateSavingsProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Savings Transfer in Suspense</option>
-                                            {Array.isArray(formData.savingsProductTemplate?.chargeOptions) &&
-                                                formData.savingsProductTemplate.chargeOptions.map((option) => (
+                                            {Array.isArray(formData.savingsProductTemplate?.accountingMappingOptions?.liabilityAccountOptions) &&
+                                                formData.savingsProductTemplate?.accountingMappingOptions?.liabilityAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.name}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
                                     </div>
                                 </div>
                                 <div className="staged-form-row">
-                                    <div className="staged-form-field">
-                                        <label htmlFor="interestPayable">
-                                            Interest Payable <span className="staged-form-required">*</span>
-                                        </label>
-                                        <select
-                                            id="interestPayable"
-                                            value={formData.Accounting?.interestPayable || ""}
-                                            onChange={(e) =>
-                                                handleFieldChange("Accounting", "interestPayable", e.target.value)
-                                            }
-                                            required
-                                            className="staged-form-select"
-                                        >
-                                            <option value="">Select Interest Payable</option>
-                                            {Array.isArray(formData.savingsProductTemplate?.chargeOptions) &&
-                                                formData.savingsProductTemplate.chargeOptions.map((option) => (
-                                                    <option key={option.id} value={option.id}>
-                                                        {option.name}
-                                                    </option>
-                                                ))}
-                                        </select>
-                                    </div>
                                     <div className="staged-form-field">
                                         <label htmlFor="escheatLiability">
                                             Escheat Liability <span className="staged-form-required">*</span>
@@ -1339,10 +1414,10 @@ const CreateSavingsProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Escheat Liability</option>
-                                            {Array.isArray(formData.savingsProductTemplate?.chargeOptions) &&
-                                                formData.savingsProductTemplate.chargeOptions.map((option) => (
+                                            {Array.isArray(formData.savingsProductTemplate?.accountingMappingOptions?.liabilityAccountOptions) &&
+                                                formData.savingsProductTemplate?.accountingMappingOptions?.liabilityAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.name}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -1366,10 +1441,10 @@ const CreateSavingsProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Interest on Savings</option>
-                                            {Array.isArray(formData.savingsProductTemplate?.chargeOptions) &&
-                                                formData.savingsProductTemplate.chargeOptions.map((option) => (
+                                            {Array.isArray(formData.savingsProductTemplate?.accountingMappingOptions?.expenseAccountOptions) &&
+                                                formData.savingsProductTemplate?.accountingMappingOptions?.expenseAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.name}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -1388,10 +1463,10 @@ const CreateSavingsProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Write-off</option>
-                                            {Array.isArray(formData.savingsProductTemplate?.chargeOptions) &&
-                                                formData.savingsProductTemplate.chargeOptions.map((option) => (
+                                            {Array.isArray(formData.savingsProductTemplate?.accountingMappingOptions?.expenseAccountOptions) &&
+                                                formData.savingsProductTemplate?.accountingMappingOptions?.expenseAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.name}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -1415,10 +1490,10 @@ const CreateSavingsProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Income from Fees</option>
-                                            {Array.isArray(formData.savingsProductTemplate?.chargeOptions) &&
-                                                formData.savingsProductTemplate.chargeOptions.map((option) => (
+                                            {Array.isArray(formData.savingsProductTemplate?.accountingMappingOptions?.incomeAccountOptions) &&
+                                                formData.savingsProductTemplate?.accountingMappingOptions?.incomeAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.name}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
@@ -1437,36 +1512,60 @@ const CreateSavingsProducts = () => {
                                             className="staged-form-select"
                                         >
                                             <option value="">Select Income from Penalties</option>
-                                            {Array.isArray(formData.savingsProductTemplate?.chargeOptions) &&
-                                                formData.savingsProductTemplate.chargeOptions.map((option) => (
+                                            {Array.isArray(formData.savingsProductTemplate?.accountingMappingOptions?.incomeAccountOptions) &&
+                                                formData.savingsProductTemplate?.accountingMappingOptions?.incomeAccountOptions.map((option) => (
                                                     <option key={option.id} value={option.id}>
-                                                        {option.name}
+                                                        ({option.glCode})---{option.name}
                                                     </option>
                                                 ))}
                                         </select>
                                     </div>
                                 </div>
-                                <div className="staged-form-field">
-                                    <label htmlFor="overdraftInterestIncome">
-                                        Overdraft Interest Income <span className="staged-form-required">*</span>
-                                    </label>
-                                    <select
-                                        id="overdraftInterestIncome"
-                                        value={formData.Accounting?.overdraftInterestIncome || ""}
-                                        onChange={(e) =>
-                                            handleFieldChange("Accounting", "overdraftInterestIncome", e.target.value)
-                                        }
-                                        required
-                                        className="staged-form-select"
-                                    >
-                                        <option value="">Select Overdraft Interest Income</option>
-                                        {Array.isArray(formData.savingsProductTemplate?.chargeOptions) &&
-                                            formData.savingsProductTemplate.chargeOptions.map((option) => (
-                                                <option key={option.id} value={option.id}>
-                                                    {option.name}
-                                                </option>
-                                            ))}
-                                    </select>
+                                <div className="staged-form-row">
+                                    <div className="staged-form-field">
+                                        <label htmlFor="interestPayable">
+                                            Interest Payable <span className="staged-form-required">*</span>
+                                        </label>
+                                        <select
+                                            id="interestPayable"
+                                            value={formData.Accounting?.interestPayable || ""}
+                                            onChange={(e) =>
+                                                handleFieldChange("Accounting", "interestPayable", e.target.value)
+                                            }
+                                            required
+                                            className="staged-form-select"
+                                        >
+                                            <option value="">Select Interest Payable</option>
+                                            {Array.isArray(formData.savingsProductTemplate?.accountingMappingOptions?.incomeAccountOptions) &&
+                                                formData.savingsProductTemplate?.accountingMappingOptions?.incomeAccountOptions.map((option) => (
+                                                    <option key={option.id} value={option.id}>
+                                                        ({option.glCode})---{option.name}
+                                                    </option>
+                                                ))}
+                                        </select>
+                                    </div>
+                                    <div className="staged-form-field">
+                                        <label htmlFor="overdraftInterestIncome">
+                                            Overdraft Interest Income <span className="staged-form-required">*</span>
+                                        </label>
+                                        <select
+                                            id="overdraftInterestIncome"
+                                            value={formData.Accounting?.overdraftInterestIncome || ""}
+                                            onChange={(e) =>
+                                                handleFieldChange("Accounting", "overdraftInterestIncome", e.target.value)
+                                            }
+                                            required
+                                            className="staged-form-select"
+                                        >
+                                            <option value="">Select Overdraft Interest Income</option>
+                                            {Array.isArray(formData.savingsProductTemplate?.accountingMappingOptions?.incomeAccountOptions) &&
+                                                formData.savingsProductTemplate?.accountingMappingOptions?.incomeAccountOptions.map((option) => (
+                                                    <option key={option.id} value={option.id}>
+                                                        ({option.glCode})---{option.name}
+                                                    </option>
+                                                ))}
+                                        </select>
+                                    </div>
                                 </div>
 
                                 {/* Advanced Accounting Rules */}
@@ -1520,8 +1619,6 @@ const CreateSavingsProducts = () => {
                                 )}
                             </>
                         )}
-
-
                     </div>
                 );
 
@@ -1564,12 +1661,144 @@ const CreateSavingsProducts = () => {
 
     const renderPreviewSection = () => {
         const stageData = [
-            { title: "Details", data: formData.Details },
-            { title: "Currency", data: formData.Currency },
-            { title: "Terms", data: formData.Terms },
-            { title: "Settings", data: formData.Settings },
-            { title: "Charges", data: formData.Charges },
-            { title: "Accounting", data: formData.Accounting },
+            {
+                title: "Details", data: {
+                    "Product Name": formData?.Details?.productName,
+                    "Short Name": formData?.Details?.shortName,
+                    "Description": formData?.Details?.description
+                },
+            },
+            { title: "Currency", data: {
+                    "Currency": formData?.Currency?.currency
+                        ? formData?.savingsProductTemplate?.currencyOptions.find(f => f.code === formData?.Currency?.currency)?.name
+                        : '',
+                    "Currency In Multiples Of": formData?.Currency?.currencyMultiples,
+                    "Decimal Place": formData?.Currency?.decimalPlaces
+                },
+            },
+            {
+                title: "Terms",
+                data: {
+                    "Nominal Annual Interest": formData?.Terms?.nominalAnnualInterest || "",
+                    "Interest Compounding Period":
+                        formData?.savingsProductTemplate?.interestCompoundingPeriodTypeOptions?.find(
+                            (option) => option.id === parseInt(formData?.Terms?.interestCompoundingPeriod)
+                        )?.value || "",
+                    "Interest Posting Period":
+                        formData?.savingsProductTemplate?.interestPostingPeriodTypeOptions?.find(
+                            (option) => option.id === parseInt(formData?.Terms?.interestPostingPeriod)
+                        )?.value || "",
+                    "Interest Calculated Using":
+                        formData?.savingsProductTemplate?.interestCalculationTypeOptions?.find(
+                            (option) => option.id === parseInt(formData?.Terms?.interestCalculationType)
+                        )?.value || "",
+                    "Days In Year":
+                        formData?.savingsProductTemplate?.interestCalculationDaysInYearTypeOptions?.find(
+                            (option) => option.id === parseInt(formData?.Terms?.daysInYear)
+                        )?.value || "",
+                },
+            },
+            {
+                title: "Settings",
+                data: {
+                    "Minimum Opening Balance": formData.Settings?.minimumOpeningBalance || "",
+                    "Lock-in Period": formData.Settings?.lockInPeriod || "",
+                    "Lock-in Period Unit":
+                        formData?.savingsProductTemplate?.lockinPeriodFrequencyTypeOptions?.find(
+                            (option) => option.id === parseInt(formData?.Settings?.lockInPeriodUnit)
+                        )?.value || "",
+                    "Apply Withdrawal Fees for Transfers": formData?.Settings?.applyWithdrawalFeesForTransfers
+                        ? "Yes"
+                        : "No",
+                    "Balance Required for Interest Calculation": formData.Settings?.balanceRequiredForInterestCalculation || "",
+                    "Enforce Minimum Balance": formData?.Settings?.enforceMinimumBalance ? "Yes" : "No",
+                    "Minimum Balance": formData?.Settings?.minimumBalance || "",
+                    "Is Withhold Tax Applicable": formData?.Settings?.isWithholdTaxApplicable
+                        ? "Yes"
+                        : "No",
+                    ...(formData?.Settings?.isWithholdTaxApplicable
+                        ? {
+                            "Tax Group":
+                                formData?.savingsProductTemplate?.taxGroupOptions?.find(
+                                    (option) => option.id === parseInt(formData?.Settings?.taxGroup)
+                                )?.value || "",
+                        }
+                        : {}),
+                    "Is Overdraft Allowed": formData?.Settings?.isOverdraftAllowed ? "Yes" : "No",
+                    ...(formData?.Settings?.isOverdraftAllowed
+                        ? {
+                            "Minimum Overdraft Required for Interest Calculation": formData.Settings?.minimumOverdraftRequiredForInterestCalculation || "",
+                            "Nominal Annual Interest for Overdraft": formData.Settings?.nominalAnnualInterestForOverdraft || "",
+                            "Maximum Overdraft Amount Limit": formData.Settings?.maximumOverdraftAmountLimit || "",
+                        }
+                        : {}),
+                    "Enable Dormancy Tracking": formData?.Settings?.enableDormancyTracking
+                        ? "Yes"
+                        : "No",
+                    ...(formData?.Settings?.enableDormancyTracking
+                        ? {
+                            "Number of Days to Inactive Sub-status": formData.Settings?.numberOfDaysToInactiveSubStatus || "",
+                            "Number of Days to Dormant Sub-status": formData.Settings?.numberOfDaysToDormantSubStatus || "",
+                            "Number of Days to Escheat": formData.Settings?.numberOfDaysToEscheat || "",
+                        }
+                        : {}),
+                },
+            },
+            {
+                title: "Charges",
+                data: {
+                    Charges: formData?.Charges?.selectedCharges?.map((item) => {
+                        const chargeOption = formData?.savingsProductTemplate?.chargeOptions?.find(
+                            (option) => option.id === parseInt(item.id)
+                        );
+                        return chargeOption ? chargeOption.name : "";
+                    }) || [],
+                },
+            },
+            {
+                title: "Accounting", data: {
+                    "Selected Option": formData?.Accounting?.selectedOption,
+                    "Savings Reference": formData?.Accounting?.savingsReference
+                        ? formData?.savingsProductTemplate?.accountingMappingOptions?.assetAccountOptions.find(f => f.id === parseInt(formData.Accounting.savingsReference, 10))?.name
+                        : '',
+                    "Overdraft Portfolio": formData?.Accounting?.overdraftPortfolio
+                        ? formData?.savingsProductTemplate?.accountingMappingOptions?.assetAccountOptions.find(f => f.id === parseInt(formData.Accounting.overdraftPortfolio, 10))?.name
+                        : '',
+                    "Fees Receivable": formData?.Accounting?.feesReceivable
+                        ? formData?.savingsProductTemplate?.accountingMappingOptions?.assetAccountOptions.find(f => f.id === parseInt(formData.Accounting.feesReceivable, 10))?.name
+                        : '',
+                    "Penalties Receivable": formData?.Accounting?.penaltiesReceivable
+                        ? formData?.savingsProductTemplate?.accountingMappingOptions?.assetAccountOptions.find(f => f.id === parseInt(formData.Accounting.penaltiesReceivable, 10))?.name
+                        : '',
+                    "Savings Control": formData?.Accounting?.savingsControl
+                        ? formData?.savingsProductTemplate?.accountingMappingOptions?.liabilityAccountOptions.find(f => f.id === parseInt(formData.Accounting.savingsControl, 10))?.name
+                        : '',
+                    "Savings Transfer in Suspense": formData?.Accounting?.savingsTransferInSuspense
+                        ? formData?.savingsProductTemplate?.accountingMappingOptions?.liabilityAccountOptions.find(f => f.id === parseInt(formData.Accounting.savingsTransferInSuspense, 10))?.name
+                        : '',
+                    "Escheat Liability": formData?.Accounting?.escheatLiability
+                        ? formData?.savingsProductTemplate?.accountingMappingOptions?.liabilityAccountOptions.find(f => f.id === parseInt(formData.Accounting.escheatLiability, 10))?.name
+                        : '',
+                    "Interest Payable": formData?.Accounting?.interestPayable
+                        ? formData?.savingsProductTemplate?.accountingMappingOptions?.liabilityAccountOptions.find(f => f.id === parseInt(formData.Accounting.interestPayable, 10))?.name
+                        : '',
+                    "Interest on Savings": formData?.Accounting?.interestOnSavings
+                        ? formData?.savingsProductTemplate?.accountingMappingOptions?.expenseAccountOptions.find(f => f.id === parseInt(formData.Accounting.interestOnSavings, 10))?.name
+                        : '',
+                    "Write-off": formData?.Accounting?.writeOff
+                        ? formData?.savingsProductTemplate?.accountingMappingOptions?.expenseAccountOptions.find(f => f.id === parseInt(formData.Accounting.writeOff, 10))?.name
+                        : '',
+                    "Income from Fees": formData?.Accounting?.incomeFromFees
+                        ? formData?.savingsProductTemplate?.accountingMappingOptions?.incomeAccountOptions.find(f => f.id === parseInt(formData.Accounting.incomeFromFees, 10))?.name
+                        : '',
+                    "Income from Penalties": formData?.Accounting?.incomeFromPenalties
+                        ? formData?.savingsProductTemplate?.accountingMappingOptions?.incomeAccountOptions.find(f => f.id === parseInt(formData.Accounting.incomeFromPenalties, 10))?.name
+                        : '',
+                    "Overdraft Interest Income": formData?.Accounting?.overdraftInterestIncome
+                        ? formData?.savingsProductTemplate?.accountingMappingOptions?.incomeAccountOptions.find(f => f.id === parseInt(formData.Accounting.overdraftInterestIncome, 10))?.name
+                        : '',
+                },
+            },
         ];
 
         return (
@@ -1607,7 +1836,7 @@ const CreateSavingsProducts = () => {
                                                             : item
                                                     )
                                                     .join(", ")
-                                                : value || "N/A"}
+                                                : value || ""}
                                         </td>
                                     </tr>
                                 ))}
@@ -1653,7 +1882,7 @@ const CreateSavingsProducts = () => {
                         className="staged-form-button-preview"
                         disabled={!allStagesComplete}
                     >
-                        Submit
+                        {productToEdit ? 'Update' : 'Submit'}
                     </button>
                 )}
             </div>

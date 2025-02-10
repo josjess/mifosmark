@@ -6,10 +6,9 @@ import { AuthContext } from '../../../../../context/AuthContext';
 import { useLoading } from '../../../../../context/LoadingContext';
 import './LoanProductDetails.css';
 
-const LoanProductDetails = ({ loanProductId, onClose }) => {
+const LoanProductDetails = ({ loanProductId, onClose, onEdit }) => {
     const { user } = useContext(AuthContext);
     const { startLoading, stopLoading } = useLoading();
-
     const [loanProductDetails, setLoanProductDetails] = useState(null);
 
     useEffect(() => {
@@ -42,6 +41,11 @@ const LoanProductDetails = ({ loanProductId, onClose }) => {
         link.click();
     };
 
+    const handleEdit = () => {
+        onEdit(loanProductDetails);
+        onClose();
+    }
+
     if (!loanProductDetails) {
         return <div className="loan-product-details-container">Loading...</div>;
     }
@@ -51,8 +55,11 @@ const LoanProductDetails = ({ loanProductId, onClose }) => {
             <div className="loan-product-details-header">
                 <h1 className="loan-product-details-title">{loanProductDetails.name}</h1>
                 <div className="loan-product-details-actions">
-                    <button className="loan-product-details-export" onClick={handleExport}><FaDownload /> Export</button>
-                    <button className="loan-product-details-edit"><FaEdit /> Edit</button>
+                    <button className="loan-product-details-export"
+                            onClick={handleExport}><FaDownload /> Export</button>
+                    <button className="loan-product-details-edit"
+                            onClick={handleEdit}
+                    ><FaEdit /> Edit</button>
                 </div>
             </div>
             <div className="loan-product-details-content">

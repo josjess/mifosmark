@@ -34,6 +34,7 @@ const BulkLoanReassignment = () => {
     const [selectedClientLoans, setSelectedClientLoans] = useState([]);
     const [selectedGroupLoans, setSelectedGroupLoans] = useState([]);
     const [selectedSavingsAccounts, setSelectedSavingsAccounts] = useState([]);
+    const [selectedClientIds, setSelectedClientIds] = useState([]);
 
     const [reassignmentType, setReassignmentType] = useState('client');
     const [selectAllClients, setSelectAllClients] = useState(false);
@@ -108,7 +109,7 @@ const BulkLoanReassignment = () => {
             });
 
             const allSavingsAccounts = response.data.pageItems || [];
-            console.log(`Total savings accounts fetched:`, allSavingsAccounts.length);
+            // console.log(`Total savings accounts fetched:`, allSavingsAccounts.length);
 
             setSavingsAccounts(allSavingsAccounts);
             return allSavingsAccounts;
@@ -132,7 +133,7 @@ const BulkLoanReassignment = () => {
             });
 
             const allLoans = response.data.pageItems || [];
-            console.log(`Total loans fetched:`, allLoans.length);
+            // console.log(`Total loans fetched:`, allLoans.length);
 
             setClientLoans(allLoans.filter(loan => loan.loanType?.value === 'Individual'));
             setGroupLoans(allLoans.filter(loan => loan.loanType?.value === 'Group'));
@@ -261,7 +262,20 @@ const BulkLoanReassignment = () => {
                 year: 'numeric',
             });
 
-            console.log('Starting loan reassignment...');
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+                'Content-Type': 'application/json',
+            };
+
+            for (const clientId of selectedClientIds) {
+                const clientPayload = { staffId: toLoanOfficer };
+                await axios.post(
+                    `${API_CONFIG.baseURL}/clients/${clientId}?command=assignStaff`,
+                    clientPayload,
+                    {headers}
+                );
+            }
 
             for (const loanId of [...selectedClientLoans, ...selectedGroupLoans]) {
                 const loanPayload = {
@@ -275,17 +289,9 @@ const BulkLoanReassignment = () => {
                 await axios.post(
                     `${API_CONFIG.baseURL}/loans/${loanId}?command=assignLoanOfficer`,
                     loanPayload,
-                    {
-                        headers: {
-                            Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                            'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
-                            'Content-Type': 'application/json',
-                        },
-                    }
+                    {headers}
                 );
             }
-
-            console.log('Loan reassignment successful, proceeding with savings reassignment...');
 
             for (const savingsId of selectedSavingsAccounts) {
                 const savingsPayload = {
@@ -308,26 +314,14 @@ const BulkLoanReassignment = () => {
                     await axios.post(
                         `${API_CONFIG.baseURL}/savingsaccounts/${savingsId}?command=assignSavingsOfficer`,
                         savingsPayload,
-                        {
-                            headers: {
-                                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
-                                'Content-Type': 'application/json',
-                            },
-                        }
+                        {headers}
                     );
                 } catch (error) {
                     console.warn(`Failed to assign savings account ${savingsId}. Checking if unassigned...`);
 
                     const { data: account } = await axios.get(
                         `${API_CONFIG.baseURL}/savingsaccounts/${savingsId}`,
-                        {
-                            headers: {
-                                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
-                                'Content-Type': 'application/json',
-                            },
-                        }
+                        {headers}
                     );
 
                     if (!account.fieldOfficerId) {
@@ -336,15 +330,9 @@ const BulkLoanReassignment = () => {
                             await axios.post(
                                 `${API_CONFIG.baseURL}/savingsaccounts/${savingsId}?command=assignSavingsOfficer`,
                                 unassignedSavingsPayload,
-                                {
-                                    headers: {
-                                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
-                                        'Content-Type': 'application/json',
-                                    },
-                                }
+                                {headers}
                             );
-                            console.log(`Direct assignment successful for savings account ${savingsId}`);
+                            // console.log(`Direct assignment successful for savings account ${savingsId}`);
                         } catch (directAssignError) {
                             console.error(`Direct assignment failed for unassigned savings account ${savingsId}:`, directAssignError);
                         }
@@ -360,28 +348,16 @@ const BulkLoanReassignment = () => {
                             await axios.post(
                                 `${API_CONFIG.baseURL}/savingsaccounts/${savingsId}?command=unassignSavingsOfficer`,
                                 unassignPayload,
-                                {
-                                    headers: {
-                                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
-                                        'Content-Type': 'application/json',
-                                    },
-                                }
+                                {headers}
                             );
 
                             await axios.post(
                                 `${API_CONFIG.baseURL}/savingsaccounts/${savingsId}?command=assignSavingsOfficer`,
                                 unassignedSavingsPayload,
-                                {
-                                    headers: {
-                                        Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                                        'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
-                                        'Content-Type': 'application/json',
-                                    },
-                                }
+                                {headers}
                             );
 
-                            console.log(`Successfully unassigned and reassigned savings account ${savingsId}`);
+                            // console.log(`Successfully unassigned and reassigned savings account ${savingsId}`);
                         } catch (unassignError) {
                             console.error(`Failed to unassign and reassign savings account ${savingsId}:`, unassignError);
                         }
@@ -437,26 +413,41 @@ const BulkLoanReassignment = () => {
         if (e.target.checked) {
             setSelectedClientLoans(groupedClientAccounts.flatMap(client => client.loanAccountIds));
             setSelectedSavingsAccounts(groupedClientAccounts.flatMap(client => client.savingsAccountIds));
+            setSelectedClientIds(groupedClientAccounts.map(client => client.clientId));
         } else {
             setSelectedClientLoans([]);
             setSelectedSavingsAccounts([]);
+            setSelectedClientIds([]);
         }
     };
 
     const handleClientSelect = (clientId) => {
         const client = groupedClientAccounts.find(client => client.clientId === clientId);
+        const isSelected = selectedClientIds.includes(clientId);
 
-        setSelectedClientLoans(prevLoans =>
-            prevLoans.some(id => client.loanAccountIds.includes(id))
-                ? prevLoans.filter(id => !client.loanAccountIds.includes(id))
-                : [...prevLoans, ...client.loanAccountIds]
-        );
-
-        setSelectedSavingsAccounts(prevSavings =>
-            prevSavings.some(id => client.savingsAccountIds.includes(id))
-                ? prevSavings.filter(id => !client.savingsAccountIds.includes(id))
-                : [...prevSavings, ...client.savingsAccountIds]
-        );
+        if (isSelected) {
+            // Deselect client and their accounts
+            setSelectedClientLoans(prevLoans =>
+                prevLoans.filter(id => !client.loanAccountIds.includes(id))
+            );
+            setSelectedSavingsAccounts(prevSavings =>
+                prevSavings.filter(id => !client.savingsAccountIds.includes(id))
+            );
+            setSelectedClientIds(prevClientIds =>
+                prevClientIds.filter(id => id !== clientId)
+            );
+        } else {
+            // Select client and their accounts
+            setSelectedClientLoans(prevLoans =>
+                [...prevLoans, ...client.loanAccountIds]
+            );
+            setSelectedSavingsAccounts(prevSavings =>
+                [...prevSavings, ...client.savingsAccountIds]
+            );
+            setSelectedClientIds(prevClientIds =>
+                [...prevClientIds, clientId]
+            );
+        }
     };
 
     useEffect(() => {
@@ -475,6 +466,7 @@ const BulkLoanReassignment = () => {
         if (reassignmentType === 'client') {
             setSelectAllClients(true);
             setActiveTab('clientLoansSavings');
+            setSelectedClientIds(groupedClientAccounts.map(client => client.clientId));
             setSelectedClientLoans(groupedClientAccounts.flatMap(client => client.loanAccountIds));
             setSelectedSavingsAccounts(groupedClientAccounts.flatMap(client => client.savingsAccountIds));
         } else if (reassignmentType === 'group') {
@@ -704,7 +696,7 @@ const BulkLoanReassignment = () => {
                                 ))
                             ) : (
                                 <tr>
-                                    <td className={'no-data'} colSpan="6" style={{textAlign: 'center'}}>No data
+                                    <td className={'no-data'} colSpan="8" style={{textAlign: 'center'}}>No data
                                         available
                                     </td>
                                 </tr>

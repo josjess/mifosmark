@@ -8,6 +8,12 @@ import {Link} from "react-router-dom";
 const LoanProducts = () => {
     const [activeTab, setActiveTab] = useState('viewLoanProducts');
     const [dynamicTabs, setDynamicTabs] = useState([]);
+    const [selectedProduct, setSelectedProduct] = useState(null);
+
+    const handleEditLoanProduct = (product) => {
+        setSelectedProduct(product);
+        setActiveTab('createLoanProducts');
+    };
 
     const handleOpenLoanProductDetails = (product) => {
         const tabId = `LoanProductDetail-${product.id}`;
@@ -21,6 +27,7 @@ const LoanProducts = () => {
                     <LoanProductDetails
                         loanProductId={product.id}
                         onClose={() => handleCloseTab(tabId)}
+                        onEdit={handleEditLoanProduct}
                     />
                 ),
             },
@@ -39,7 +46,9 @@ const LoanProducts = () => {
         if (activeTab === 'viewLoanProducts') {
             return <ViewLoanProducts onRowClick={handleOpenLoanProductDetails} />;
         } else if (activeTab === 'createLoanProducts') {
-            return <CreateLoanProducts />;
+            return <CreateLoanProducts
+                productToEdit={selectedProduct}
+                onSuccess={handleOpenLoanProductDetails}  />;
         } else {
             const activeDynamicTab = dynamicTabs.find((tab) => tab.id === activeTab);
             return activeDynamicTab ? activeDynamicTab.component : null;

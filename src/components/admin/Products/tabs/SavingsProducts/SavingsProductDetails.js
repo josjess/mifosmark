@@ -6,10 +6,9 @@ import { AuthContext } from '../../../../../context/AuthContext';
 import { useLoading } from '../../../../../context/LoadingContext';
 import './SavingsProductDetails.css';
 
-const SavingsProductDetails = ({ savingsProductId, onClose }) => {
+const SavingsProductDetails = ({ savingsProductId, onClose, onEdit }) => {
     const { user } = useContext(AuthContext);
     const { startLoading, stopLoading } = useLoading();
-
     const [savingsProductDetails, setSavingsProductDetails] = useState(null);
 
     useEffect(() => {
@@ -34,6 +33,11 @@ const SavingsProductDetails = ({ savingsProductId, onClose }) => {
         fetchSavingsProductDetails();
     }, [savingsProductId, user]);
 
+    const handleEdit = () => {
+        onEdit(savingsProductDetails);
+        onClose();
+    }
+
     if (!savingsProductDetails) {
         return <div className="savings-product-details-container">Loading...</div>;
     }
@@ -43,12 +47,16 @@ const SavingsProductDetails = ({ savingsProductId, onClose }) => {
             <div className="savings-product-details-header">
                 <h1 className="savings-product-details-title">{savingsProductDetails.name}</h1>
                 <button className="savings-product-details-edit">
-                    <FaEdit /> Edit
+                    <FaEdit onClick={handleEdit} /> Edit
                 </button>
             </div>
             <div className="savings-product-details-content">
                 <div className="savings-product-details-section">
                     <h2 className="savings-product-details-section-title">Details</h2>
+                    <div className="savings-product-details-row">
+                        <strong>Name:</strong>
+                        <p>{savingsProductDetails.name}</p>
+                    </div>
                     <div className="savings-product-details-row">
                         <strong>Short Name:</strong>
                         <p>{savingsProductDetails.shortName}</p>
