@@ -5,7 +5,7 @@ import {AuthContext} from "../../../context/AuthContext";
 import {useLoading} from "../../../context/LoadingContext";
 import {FaUpload, FaCamera, FaTrash, FaSignature, FaEdit, FaStickyNote} from 'react-icons/fa';
 import './ClientDetails.css'
-import {useNavigate} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 import DatePicker from "react-datepicker";
 import {format} from "date-fns";
 import AsyncSelect from "react-select/async";
@@ -297,6 +297,17 @@ const ClientDetails = ({ clientId, onClose }) => {
 
     const [showActivateModal, setShowActivateModal] = useState(false);
     const [activationDate, setActivationDate] = useState(null);
+
+    const [loanBalance, setLoanBalance] = useState(0);
+
+    const location = useLocation();
+
+    useEffect(() => {
+        if (location.state?.activeTab === 'loan-accounts') {
+            setActiveSection('loan-accounts');
+            setIsSidebarHidden(true);
+        }
+    }, [location]);
 
     const handleOpenActivateClientModal = () => {
         setShowActivateModal(true);
@@ -1763,7 +1774,7 @@ const ClientDetails = ({ clientId, onClose }) => {
                                                                                 e.stopPropagation();
                                                                                 setSelectedLoan(account);
                                                                                 setIsRepaymentModalOpen(true);
-                                                                                fetchLoanRepaymentDetails(account.id);
+                                                                                fetchLoanRepaymentDetails(account.id, account.loanBalance);
                                                                             }}
                                                                         >
                                                                             Repay
@@ -4196,7 +4207,7 @@ const ClientDetails = ({ clientId, onClose }) => {
         printWindow.print();
     };
 
-    const fetchLoanRepaymentDetails = async (loanId) => {
+    const fetchLoanRepaymentDetails = async (loanId, loanBalance) => {
         try {
             startLoading();
 
@@ -4217,12 +4228,16 @@ const ClientDetails = ({ clientId, onClose }) => {
             setInterest(data.interestPortion || 0);
             setFees(data.feeChargesPortion || 0);
             setPenalties(data.penaltyChargesPortion || 0);
-            setTransactionAmount(
+            const totalRepaymentAmount =
                 (data.principalPortion || 0) +
                 (data.interestPortion || 0) +
                 (data.feeChargesPortion || 0) +
-                (data.penaltyChargesPortion || 0)
-            );
+                (data.penaltyChargesPortion || 0);
+
+            setTransactionAmount(totalRepaymentAmount);
+
+            setLoanBalance(loanBalance);
+
             setPaymentTypeOptions(data.paymentTypeOptions || []);
         } catch (error) {
             console.error("Error fetching loan repayment details:", error);
@@ -4277,6 +4292,7 @@ const ClientDetails = ({ clientId, onClose }) => {
 
             alert("Loan repayment successful.");
             setIsRepaymentModalOpen(false);
+            setReceiptNumber('');
             fetchGeneralTabData();
         } catch (error) {
             console.error("Error processing loan repayment:", error);
@@ -5627,14 +5643,19 @@ const ClientDetails = ({ clientId, onClose }) => {
                         </div>
 
                         {/* Principal, Interest, Fees, Penalties */}
-                        <div className="create-holiday-row">
-                            <ul className="repayment-summary-list">
-                                <li className="create-provisioning-criteria-label">Principal: {principal.toLocaleString()}</li>
-                                <li className="create-provisioning-criteria-label">Interest: {interest.toLocaleString()}</li>
-                                <li className="create-provisioning-criteria-label">Fees: {fees.toLocaleString()}</li>
-                                <li className="create-provisioning-criteria-label">Penalties: {penalties.toLocaleString()}</li>
-                            </ul>
+                        {/*<div className="create-holiday-row">*/}
+                        {/*    <ul className="repayment-summary-list">*/}
+                        {/*        <li className="create-provisioning-criteria-label">Principal: {principal.toLocaleString()}</li>*/}
+                        {/*        <li className="create-provisioning-criteria-label">Interest: {interest.toLocaleString()}</li>*/}
+                        {/*        <li className="create-provisioning-criteria-label">Fees: {fees.toLocaleString()}</li>*/}
+                        {/*        <li className="create-provisioning-criteria-label">Penalties: {penalties.toLocaleString()}</li>*/}
+                        {/*    </ul>*/}
+                        {/*</div>*/}
+
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">Loan Balance: {loanBalance.toLocaleString()}</label>
                         </div>
+
 
                         {/* Transaction Amount */}
                         <div className="create-provisioning-criteria-group">
@@ -5645,24 +5666,32 @@ const ClientDetails = ({ clientId, onClose }) => {
                                 type="number"
                                 id="transactionAmount"
                                 value={transactionAmount}
-                                onChange={(e) => setTransactionAmount(e.target.value)}
+                                onChange={(e) => {
+                                    const value = parseFloat(e.target.value);
+                                    if (value <= loanBalance) {
+                                        setTransactionAmount(value);
+                                    } else {
+                                        alert(`Transaction amount cannot exceed the loan balance of ${loanBalance.toLocaleString()}`);
+                                    }
+                                }}
+                                max={loanBalance}
                                 className="create-provisioning-criteria-input"
                             />
                         </div>
                         <div className="create-holiday-row">
                             {/* External ID */}
-                            <div className="create-provisioning-criteria-group">
-                                <label htmlFor="externalId" className="create-provisioning-criteria-label">
-                                    External ID
-                                </label>
-                                <input
-                                    type="text"
-                                    id="externalId"
-                                    value={externalId}
-                                    onChange={(e) => setExternalId(e.target.value)}
-                                    className="create-provisioning-criteria-input"
-                                />
-                            </div>
+                            {/*<div className="create-provisioning-criteria-group">*/}
+                            {/*    <label htmlFor="externalId" className="create-provisioning-criteria-label">*/}
+                            {/*        External ID*/}
+                            {/*    </label>*/}
+                            {/*    <input*/}
+                            {/*        type="text"*/}
+                            {/*        id="externalId"*/}
+                            {/*        value={externalId}*/}
+                            {/*        onChange={(e) => setExternalId(e.target.value)}*/}
+                            {/*        className="create-provisioning-criteria-input"*/}
+                            {/*    />*/}
+                            {/*</div>*/}
 
                             {/* Payment Type */}
                             <div className="create-provisioning-criteria-group">
@@ -5686,67 +5715,80 @@ const ClientDetails = ({ clientId, onClose }) => {
                         </div>
 
                         {/* Payment Details Toggle */}
-                        <div className="create-provisioning-criteria-group">
-                            <label className="create-provisioning-criteria-label" htmlFor="showPaymentDetails">
-                                Show Payment Details
-                            </label>
-                            <div className="switch-toggle">
-                                <label className="switch">
-                                    <input
-                                        type="checkbox"
-                                        id="showPaymentDetails"
-                                        checked={showPaymentDetails}
-                                        onChange={(e) => setShowPaymentDetails(e.target.checked)}
-                                    />
-                                    <span className="slider round"></span>
-                                </label>
-                            </div>
-                        </div>
+                        {/*<div className="create-provisioning-criteria-group">*/}
+                        {/*    <label className="create-provisioning-criteria-label" htmlFor="showPaymentDetails">*/}
+                        {/*        Show Payment Details*/}
+                        {/*    </label>*/}
+                        {/*    <div className="switch-toggle">*/}
+                        {/*        <label className="switch">*/}
+                        {/*            <input*/}
+                        {/*                type="checkbox"*/}
+                        {/*                id="showPaymentDetails"*/}
+                        {/*                checked={showPaymentDetails}*/}
+                        {/*                onChange={(e) => setShowPaymentDetails(e.target.checked)}*/}
+                        {/*            />*/}
+                        {/*            <span className="slider round"></span>*/}
+                        {/*        </label>*/}
+                        {/*    </div>*/}
+                        {/*</div>*/}
 
                         {/* Payment Details Fields */}
-                        {showPaymentDetails && (
-                            <>
-                                <div className="create-holiday-row">
-                                    <input
-                                        type="text"
-                                        placeholder="Account #"
-                                        value={accountNumber}
-                                        onChange={(e) => setAccountNumber(e.target.value)}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Cheque #"
-                                        value={chequeNumber}
-                                        onChange={(e) => setChequeNumber(e.target.value)}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Routing Code"
-                                        value={routingCode}
-                                        onChange={(e) => setRoutingCode(e.target.value)}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                </div>
-                                <div className="create-holiday-row">
-                                    <input
-                                        type="text"
-                                        placeholder="Receipt #"
-                                        value={receiptNumber}
-                                        onChange={(e) => setReceiptNumber(e.target.value)}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Bank #"
-                                        value={bankNumber}
-                                        onChange={(e) => setBankNumber(e.target.value)}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                </div>
-                            </>
-                        )}
+                        {/*{showPaymentDetails && (*/}
+                        {/*    <>*/}
+                        {/*        <div className="create-holiday-row">*/}
+                        {/*            <input*/}
+                        {/*                type="text"*/}
+                        {/*                placeholder="Account #"*/}
+                        {/*                value={accountNumber}*/}
+                        {/*                onChange={(e) => setAccountNumber(e.target.value)}*/}
+                        {/*                className="create-provisioning-criteria-input"*/}
+                        {/*            />*/}
+                        {/*            <input*/}
+                        {/*                type="text"*/}
+                        {/*                placeholder="Cheque #"*/}
+                        {/*                value={chequeNumber}*/}
+                        {/*                onChange={(e) => setChequeNumber(e.target.value)}*/}
+                        {/*                className="create-provisioning-criteria-input"*/}
+                        {/*            />*/}
+                        {/*            <input*/}
+                        {/*                type="text"*/}
+                        {/*                placeholder="Routing Code"*/}
+                        {/*                value={routingCode}*/}
+                        {/*                onChange={(e) => setRoutingCode(e.target.value)}*/}
+                        {/*                className="create-provisioning-criteria-input"*/}
+                        {/*            />*/}
+                        {/*        </div>*/}
+                        {/*        <div className="create-holiday-row">*/}
+                        {/*            <input*/}
+                        {/*                type="text"*/}
+                        {/*                placeholder="Receipt #"*/}
+                        {/*                value={receiptNumber}*/}
+                        {/*                onChange={(e) => setReceiptNumber(e.target.value)}*/}
+                        {/*                className="create-provisioning-criteria-input"*/}
+                        {/*            />*/}
+                        {/*            <input*/}
+                        {/*                type="text"*/}
+                        {/*                placeholder="Bank #"*/}
+                        {/*                value={bankNumber}*/}
+                        {/*                onChange={(e) => setBankNumber(e.target.value)}*/}
+                        {/*                className="create-provisioning-criteria-input"*/}
+                        {/*            />*/}
+                        {/*        </div>*/}
+                        {/*    </>*/}
+                        {/*)}*/}
+
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label" htmlFor="receipt">Receipt
+                                Number</label>
+                            <input
+                                type="text"
+                                id='receipt'
+                                placeholder="Receipt #"
+                                value={receiptNumber}
+                                onChange={(e) => setReceiptNumber(e.target.value)}
+                                className="create-provisioning-criteria-input"
+                            />
+                        </div>
 
                         {/* Note */}
                         <div className="create-provisioning-criteria-group">
@@ -5754,6 +5796,7 @@ const ClientDetails = ({ clientId, onClose }) => {
                             <textarea
                                 id="note"
                                 value={note}
+                                placeholder={"Narration...(MPesa/Bank Transaction Number) etc."}
                                 onChange={(e) => setNote(e.target.value)}
                                 className="create-provisioning-criteria-input"
                             />
@@ -5770,7 +5813,7 @@ const ClientDetails = ({ clientId, onClose }) => {
                             <button
                                 onClick={handleLoanRepayment}
                                 className="create-provisioning-criteria-confirm"
-                                disabled={!transactionDate || !transactionAmount || !selectedPaymentType}
+                                disabled={!transactionDate || !transactionAmount || !selectedPaymentType || transactionAmount > loanBalance}
                             >
                                 Submit
                             </button>
@@ -5833,67 +5876,79 @@ const ClientDetails = ({ clientId, onClose }) => {
                         </div>
 
                         {/* Toggle Payment Details */}
-                        <div className="create-holiday-row">
-                            <label className="create-provisioning-criteria-label" htmlFor="showPaymentDetails">
-                                Show Payment Details
-                            </label>
-                            <div className="switch-toggle">
-                                <label className="switch">
-                                    <input
-                                        type="checkbox"
-                                        id="showPaymentDetails"
-                                        checked={depositPaymentDetailsVisible}
-                                        onChange={(e) => setDepositPaymentDetailsVisible(e.target.checked)}
-                                    />
-                                    <span className="slider round"></span>
-                                </label>
-                            </div>
-                        </div>
+                        {/*<div className="create-holiday-row">*/}
+                        {/*    <label className="create-provisioning-criteria-label" htmlFor="showPaymentDetails">*/}
+                        {/*        Show Payment Details*/}
+                        {/*    </label>*/}
+                        {/*    <div className="switch-toggle">*/}
+                        {/*        <label className="switch">*/}
+                        {/*            <input*/}
+                        {/*                type="checkbox"*/}
+                        {/*                id="showPaymentDetails"*/}
+                        {/*                checked={depositPaymentDetailsVisible}*/}
+                        {/*                onChange={(e) => setDepositPaymentDetailsVisible(e.target.checked)}*/}
+                        {/*            />*/}
+                        {/*            <span className="slider round"></span>*/}
+                        {/*        </label>*/}
+                        {/*    </div>*/}
+                        {/*</div>*/}
 
                         {/* Payment Details Fields */}
-                        {depositPaymentDetailsVisible && (
-                            <>
-                                <div className="create-holiday-row">
-                                    <input
-                                        type="text"
-                                        placeholder="Account Number"
-                                        value={depositAccountNumber}
-                                        onChange={(e) => setDepositAccountNumber(e.target.value)}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Cheque Number"
-                                        value={depositChequeNumber}
-                                        onChange={(e) => setDepositChequeNumber(e.target.value)}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Routing Code"
-                                        value={depositRoutingCode}
-                                        onChange={(e) => setDepositRoutingCode(e.target.value)}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                </div>
-                                <div className="create-holiday-row">
-                                    <input
-                                        type="text"
-                                        placeholder="Receipt Number"
-                                        value={depositReceiptNumber}
-                                        onChange={(e) => setDepositReceiptNumber(e.target.value)}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Bank"
-                                        value={depositBankNumber}
-                                        onChange={(e) => setDepositBankNumber(e.target.value)}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                </div>
-                            </>
-                        )}
+                        {/*{depositPaymentDetailsVisible && (*/}
+                        {/*    <>*/}
+                        {/*        <div className="create-holiday-row">*/}
+                        {/*            <input*/}
+                        {/*                type="text"*/}
+                        {/*                placeholder="Account Number"*/}
+                        {/*                value={depositAccountNumber}*/}
+                        {/*                onChange={(e) => setDepositAccountNumber(e.target.value)}*/}
+                        {/*                className="create-provisioning-criteria-input"*/}
+                        {/*            />*/}
+                        {/*            <input*/}
+                        {/*                type="text"*/}
+                        {/*                placeholder="Cheque Number"*/}
+                        {/*                value={depositChequeNumber}*/}
+                        {/*                onChange={(e) => setDepositChequeNumber(e.target.value)}*/}
+                        {/*                className="create-provisioning-criteria-input"*/}
+                        {/*            />*/}
+                        {/*            <input*/}
+                        {/*                type="text"*/}
+                        {/*                placeholder="Routing Code"*/}
+                        {/*                value={depositRoutingCode}*/}
+                        {/*                onChange={(e) => setDepositRoutingCode(e.target.value)}*/}
+                        {/*                className="create-provisioning-criteria-input"*/}
+                        {/*            />*/}
+                        {/*        </div>*/}
+                        {/*        <div className="create-holiday-row">*/}
+                        {/*            <input*/}
+                        {/*                type="text"*/}
+                        {/*                placeholder="Receipt Number"*/}
+                        {/*                value={depositReceiptNumber}*/}
+                        {/*                onChange={(e) => setDepositReceiptNumber(e.target.value)}*/}
+                        {/*                className="create-provisioning-criteria-input"*/}
+                        {/*            />*/}
+                        {/*            <input*/}
+                        {/*                type="text"*/}
+                        {/*                placeholder="Bank"*/}
+                        {/*                value={depositBankNumber}*/}
+                        {/*                onChange={(e) => setDepositBankNumber(e.target.value)}*/}
+                        {/*                className="create-provisioning-criteria-input"*/}
+                        {/*            />*/}
+                        {/*        </div>*/}
+                        {/*    </>*/}
+                        {/*)}*/}
+
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label" htmlFor="receipt">Receipt
+                                Number</label>
+                            <input
+                                type="text"
+                                placeholder="Receipt Number"
+                                value={depositReceiptNumber}
+                                onChange={(e) => setDepositReceiptNumber(e.target.value)}
+                                className="create-provisioning-criteria-input"
+                            />
+                        </div>
 
                         {/* Notes */}
                         <div className="create-provisioning-criteria-group">
@@ -5903,6 +5958,7 @@ const ClientDetails = ({ clientId, onClose }) => {
                             <textarea
                                 id="depositNote"
                                 value={depositNote}
+                                placeholder={"Narration...(MPesa/Bank Transaction Number) etc."}
                                 onChange={(e) => setDepositNote(e.target.value)}
                                 className="create-provisioning-criteria-input"
                             ></textarea>
@@ -5982,67 +6038,80 @@ const ClientDetails = ({ clientId, onClose }) => {
                         </div>
 
                         {/* Toggle Payment Details */}
-                        <div className="create-provisioning-criteria-group">
-                            <label className="create-provisioning-criteria-label" htmlFor="showWithdrawPaymentDetails">
-                                Show Payment Details
-                            </label>
-                            <div className="switch-toggle">
-                                <label className="switch">
-                                    <input
-                                        type="checkbox"
-                                        id="showWithdrawPaymentDetails"
-                                        checked={withdrawPaymentDetailsVisible}
-                                        onChange={(e) => setWithdrawPaymentDetailsVisible(e.target.checked)}
-                                    />
-                                    <span className="slider round"></span>
-                                </label>
-                            </div>
-                        </div>
+                        {/*<div className="create-provisioning-criteria-group">*/}
+                        {/*    <label className="create-provisioning-criteria-label" htmlFor="showWithdrawPaymentDetails">*/}
+                        {/*        Show Payment Details*/}
+                        {/*    </label>*/}
+                        {/*    <div className="switch-toggle">*/}
+                        {/*        <label className="switch">*/}
+                        {/*            <input*/}
+                        {/*                type="checkbox"*/}
+                        {/*                id="showWithdrawPaymentDetails"*/}
+                        {/*                checked={withdrawPaymentDetailsVisible}*/}
+                        {/*                onChange={(e) => setWithdrawPaymentDetailsVisible(e.target.checked)}*/}
+                        {/*            />*/}
+                        {/*            <span className="slider round"></span>*/}
+                        {/*        </label>*/}
+                        {/*    </div>*/}
+                        {/*</div>*/}
 
                         {/* Payment Details Fields */}
-                        {withdrawPaymentDetailsVisible && (
-                            <>
-                                <div className="create-holiday-row">
-                                    <input
-                                        type="text"
-                                        placeholder="Account Number"
-                                        value={withdrawAccountNumber}
-                                        onChange={(e) => setWithdrawAccountNumber(e.target.value)}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Cheque"
-                                        value={withdrawChequeNumber}
-                                        onChange={(e) => setWithdrawChequeNumber(e.target.value)}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Routing Code"
-                                        value={withdrawRoutingCode}
-                                        onChange={(e) => setWithdrawRoutingCode(e.target.value)}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                </div>
-                                <div className="create-holiday-row">
-                                    <input
-                                        type="text"
-                                        placeholder="Receipt Number"
-                                        value={withdrawReceiptNumber}
-                                        onChange={(e) => setWithdrawReceiptNumber(e.target.value)}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Bank"
-                                        value={withdrawBankNumber}
-                                        onChange={(e) => setWithdrawBankNumber(e.target.value)}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                </div>
-                            </>
-                        )}
+                        {/*{withdrawPaymentDetailsVisible && (*/}
+                        {/*    <>*/}
+                        {/*        <div className="create-holiday-row">*/}
+                        {/*            <input*/}
+                        {/*                type="text"*/}
+                        {/*                placeholder="Account Number"*/}
+                        {/*                value={withdrawAccountNumber}*/}
+                        {/*                onChange={(e) => setWithdrawAccountNumber(e.target.value)}*/}
+                        {/*                className="create-provisioning-criteria-input"*/}
+                        {/*            />*/}
+                        {/*            <input*/}
+                        {/*                type="text"*/}
+                        {/*                placeholder="Cheque"*/}
+                        {/*                value={withdrawChequeNumber}*/}
+                        {/*                onChange={(e) => setWithdrawChequeNumber(e.target.value)}*/}
+                        {/*                className="create-provisioning-criteria-input"*/}
+                        {/*            />*/}
+                        {/*            <input*/}
+                        {/*                type="text"*/}
+                        {/*                placeholder="Routing Code"*/}
+                        {/*                value={withdrawRoutingCode}*/}
+                        {/*                onChange={(e) => setWithdrawRoutingCode(e.target.value)}*/}
+                        {/*                className="create-provisioning-criteria-input"*/}
+                        {/*            />*/}
+                        {/*        </div>*/}
+                        {/*        <div className="create-holiday-row">*/}
+                        {/*            <input*/}
+                        {/*                type="text"*/}
+                        {/*                placeholder="Receipt Number"*/}
+                        {/*                value={withdrawReceiptNumber}*/}
+                        {/*                onChange={(e) => setWithdrawReceiptNumber(e.target.value)}*/}
+                        {/*                className="create-provisioning-criteria-input"*/}
+                        {/*            />*/}
+                        {/*            <input*/}
+                        {/*                type="text"*/}
+                        {/*                placeholder="Bank"*/}
+                        {/*                value={withdrawBankNumber}*/}
+                        {/*                onChange={(e) => setWithdrawBankNumber(e.target.value)}*/}
+                        {/*                className="create-provisioning-criteria-input"*/}
+                        {/*            />*/}
+                        {/*        </div>*/}
+                        {/*    </>*/}
+                        {/*)}*/}
+
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label" htmlFor="receipt">Receipt
+                                Number</label>
+                            <input
+                                type="text"
+                                placeholder="Receipt Number"
+                                value={withdrawReceiptNumber}
+                                onChange={(e) => setWithdrawReceiptNumber(e.target.value)}
+                                className="create-provisioning-criteria-input"
+                            />
+                        </div>
+
                         {/* Notes */}
                         <div className="create-provisioning-criteria-group">
                             <label htmlFor="withdrawNote" className="create-provisioning-criteria-label">
@@ -6051,6 +6120,7 @@ const ClientDetails = ({ clientId, onClose }) => {
                             <textarea
                                 id="withdrawNote"
                                 value={withdrawNote}
+                                placeholder={"Narration...(MPesa/Bank Transaction Number) etc."}
                                 onChange={(e) => setWithdrawNote(e.target.value)}
                                 className="create-provisioning-criteria-input"
                             ></textarea>
@@ -6111,15 +6181,15 @@ const ClientDetails = ({ clientId, onClose }) => {
                         </div>
 
                         {/* External ID */}
-                        <div className="create-provisioning-criteria-group">
-                            <label className="create-provisioning-criteria-label">External ID</label>
-                            <input
-                                type="text"
-                                value={disburseForm.externalId}
-                                onChange={(e) => setDisburseForm((prev) => ({...prev, externalId: e.target.value}))}
-                                className="create-provisioning-criteria-input"
-                            />
-                        </div>
+                        {/*<div className="create-provisioning-criteria-group">*/}
+                        {/*    <label className="create-provisioning-criteria-label">External ID</label>*/}
+                        {/*    <input*/}
+                        {/*        type="text"*/}
+                        {/*        value={disburseForm.externalId}*/}
+                        {/*        onChange={(e) => setDisburseForm((prev) => ({...prev, externalId: e.target.value}))}*/}
+                        {/*        className="create-provisioning-criteria-input"*/}
+                        {/*    />*/}
+                        {/*</div>*/}
 
                         {/* Payment Type */}
                         <div className="create-provisioning-criteria-group">
@@ -6141,88 +6211,103 @@ const ClientDetails = ({ clientId, onClose }) => {
                         </div>
 
                         {/* Toggle Payment Details */}
-                        <div className="create-holiday-row">
-                            <label className="create-provisioning-criteria-label">Show Payment Details</label>
-                            <div className="switch-toggle">
-                                <label className="switch">
-                                    <input
-                                        type="checkbox"
-                                        checked={disburseForm.showPaymentDetails}
-                                        onChange={(e) => setDisburseForm((prev) => ({
-                                            ...prev,
-                                            showPaymentDetails: e.target.checked
-                                        }))}
-                                    />
-                                    <span className="slider round"></span>
-                                </label>
-                            </div>
-                        </div>
+                        {/*<div className="create-holiday-row">*/}
+                        {/*    <label className="create-provisioning-criteria-label">Show Payment Details</label>*/}
+                        {/*    <div className="switch-toggle">*/}
+                        {/*        <label className="switch">*/}
+                        {/*            <input*/}
+                        {/*                type="checkbox"*/}
+                        {/*                checked={disburseForm.showPaymentDetails}*/}
+                        {/*                onChange={(e) => setDisburseForm((prev) => ({*/}
+                        {/*                    ...prev,*/}
+                        {/*                    showPaymentDetails: e.target.checked*/}
+                        {/*                }))}*/}
+                        {/*            />*/}
+                        {/*            <span className="slider round"></span>*/}
+                        {/*        </label>*/}
+                        {/*    </div>*/}
+                        {/*</div>*/}
 
                         {/* Payment Details Fields */}
-                        {disburseForm.showPaymentDetails && (
-                            <>
-                                <div className="create-holiday-row">
-                                    <input
-                                        type="text"
-                                        placeholder="Account Number"
-                                        value={disburseForm.accountNumber}
-                                        onChange={(e) => setDisburseForm((prev) => ({
-                                            ...prev,
-                                            accountNumber: e.target.value
-                                        }))}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Cheque Number"
-                                        value={disburseForm.chequeNumber}
-                                        onChange={(e) => setDisburseForm((prev) => ({
-                                            ...prev,
-                                            chequeNumber: e.target.value
-                                        }))}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Routing Code"
-                                        value={disburseForm.routingCode}
-                                        onChange={(e) => setDisburseForm((prev) => ({
-                                            ...prev,
-                                            routingCode: e.target.value
-                                        }))}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                </div>
-                                <div className="create-holiday-row">
-                                    <input
-                                        type="text"
-                                        placeholder="Receipt Number"
-                                        value={disburseForm.receiptNumber}
-                                        onChange={(e) => setDisburseForm((prev) => ({
-                                            ...prev,
-                                            receiptNumber: e.target.value
-                                        }))}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Bank"
-                                        value={disburseForm.bankNumber}
-                                        onChange={(e) => setDisburseForm((prev) => ({
-                                            ...prev,
-                                            bankNumber: e.target.value
-                                        }))}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                </div>
-                            </>
-                        )}
+                        {/*{disburseForm.showPaymentDetails && (*/}
+                        {/*    <>*/}
+                        {/*        <div className="create-holiday-row">*/}
+                        {/*            <input*/}
+                        {/*                type="text"*/}
+                        {/*                placeholder="Account Number"*/}
+                        {/*                value={disburseForm.accountNumber}*/}
+                        {/*                onChange={(e) => setDisburseForm((prev) => ({*/}
+                        {/*                    ...prev,*/}
+                        {/*                    accountNumber: e.target.value*/}
+                        {/*                }))}*/}
+                        {/*                className="create-provisioning-criteria-input"*/}
+                        {/*            />*/}
+                        {/*            <input*/}
+                        {/*                type="text"*/}
+                        {/*                placeholder="Cheque Number"*/}
+                        {/*                value={disburseForm.chequeNumber}*/}
+                        {/*                onChange={(e) => setDisburseForm((prev) => ({*/}
+                        {/*                    ...prev,*/}
+                        {/*                    chequeNumber: e.target.value*/}
+                        {/*                }))}*/}
+                        {/*                className="create-provisioning-criteria-input"*/}
+                        {/*            />*/}
+                        {/*            <input*/}
+                        {/*                type="text"*/}
+                        {/*                placeholder="Routing Code"*/}
+                        {/*                value={disburseForm.routingCode}*/}
+                        {/*                onChange={(e) => setDisburseForm((prev) => ({*/}
+                        {/*                    ...prev,*/}
+                        {/*                    routingCode: e.target.value*/}
+                        {/*                }))}*/}
+                        {/*                className="create-provisioning-criteria-input"*/}
+                        {/*            />*/}
+                        {/*        </div>*/}
+                        {/*        <div className="create-holiday-row">*/}
+                        {/*            <input*/}
+                        {/*                type="text"*/}
+                        {/*                placeholder="Receipt Number"*/}
+                        {/*                value={disburseForm.receiptNumber}*/}
+                        {/*                onChange={(e) => setDisburseForm((prev) => ({*/}
+                        {/*                    ...prev,*/}
+                        {/*                    receiptNumber: e.target.value*/}
+                        {/*                }))}*/}
+                        {/*                className="create-provisioning-criteria-input"*/}
+                        {/*            />*/}
+                        {/*            <input*/}
+                        {/*                type="text"*/}
+                        {/*                placeholder="Bank"*/}
+                        {/*                value={disburseForm.bankNumber}*/}
+                        {/*                onChange={(e) => setDisburseForm((prev) => ({*/}
+                        {/*                    ...prev,*/}
+                        {/*                    bankNumber: e.target.value*/}
+                        {/*                }))}*/}
+                        {/*                className="create-provisioning-criteria-input"*/}
+                        {/*            />*/}
+                        {/*        </div>*/}
+                        {/*    </>*/}
+                        {/*)}*/}
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label" htmlFor="receipt">Receipt
+                                Number</label>
+                            <input
+                                type="text"
+                                placeholder="Receipt Number"
+                                value={disburseForm.receiptNumber}
+                                onChange={(e) => setDisburseForm((prev) => ({
+                                    ...prev,
+                                    receiptNumber: e.target.value
+                                }))}
+                                className="create-provisioning-criteria-input"
+                            />
+                        </div>
 
                         {/* Note Field */}
                         <div className="create-provisioning-criteria-group">
                             <label className="create-provisioning-criteria-label">Note</label>
                             <textarea
                                 value={disburseForm.note}
+                                placeholder={"Narration...(MPesa/Bank Transaction Number) etc."}
                                 onChange={(e) => setDisburseForm((prev) => ({...prev, note: e.target.value}))}
                                 className="create-provisioning-criteria-input"
                             ></textarea>
@@ -6251,7 +6336,7 @@ const ClientDetails = ({ clientId, onClose }) => {
                         <table className="create-provisioning-criteria-table">
                             <thead>
                             <tr>
-                                <th colSpan="2">Transferring From Details</th>
+                            <th colSpan="2">Transferring From Details</th>
                             </tr>
                             </thead>
                             <tbody>

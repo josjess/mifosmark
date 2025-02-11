@@ -2640,11 +2640,7 @@ const LoanDetails = () => {
             transactionAmount,
             externalId,
             selectedPaymentType,
-            accountNumber,
-            chequeNumber,
-            routingCode,
             receiptNumber,
-            bankNumber,
             note,
         } = repaymentForm;
 
@@ -2663,11 +2659,7 @@ const LoanDetails = () => {
             externalId,
             paymentTypeId: selectedPaymentType,
             note,
-            accountNumber,
-            chequeNumber,
-            routingCode,
             receiptNumber,
-            bankNumber,
             dateFormat: "dd MMMM yyyy",
             locale: "en",
         };
@@ -3810,41 +3802,75 @@ const LoanDetails = () => {
                                         {/*        {loanDetails?.amortizationType?.value || "Not Available"}*/}
                                         {/*    </td>*/}
                                         {/*</tr>*/}
-                                        <tr>
-                                            <td className="label">Notes</td>
-                                            <td className="value">
-                                                {notes.length > 0 ? (
-                                                    <div className="notes-list">
-                                                        {notes.map((note) => (
-                                                            <div key={note.id} className="note-item">
-                                                                <div className="note-content">
-                                                                    <p>{note.note}</p>
-                                                                    <small>
-                                                                        Created By: {note.createdByUsername || "Unknown"} |{" "}
-                                                                        {new Date(note.createdOn).toLocaleDateString(undefined, {
-                                                                            dateStyle: "long",
-                                                                        })}
-                                                                    </small>
-                                                                </div>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                ) : (
-                                                    <p className="no-data">No notes available</p>
-                                                )}
-                                            </td>
-                                        </tr>
                                     </>
                                 )}
                                 </tbody>
                             </table>
+                            <>
+                                <div className="general-section-title">Notes</div>
+
+                                <div className="general-section general-notes-section">
+                                    <div className="general-section-header">
+                                        <button
+                                            className="create-provisioning-criteria-submit"
+                                            onClick={() => {
+                                                setIsNotesModalOpen(true);
+                                                setEditingNoteId(null);
+                                                setNewNote("");
+                                            }}
+                                        >
+                                            Add Note
+                                        </button>
+                                    </div>
+
+                                    {notes.length > 0 ? (
+                                        <div className="notes-list">
+                                            {notes.map((note) => (
+                                                <div key={note.id} className="note-item">
+                                                    <div className="note-icon">
+                                                        <FaStickyNote/>
+                                                    </div>
+                                                    <div className="note-content">
+                                                        <p>{note.note}</p>
+                                                        <small>
+                                                            Created
+                                                            By: {note.createdByUsername || "Unknown"} |{" "}
+                                                            {new Date(note.createdOn).toLocaleDateString(undefined, {
+                                                                dateStyle: "long",
+                                                            })}
+                                                        </small>
+                                                    </div>
+                                                    <div className="note-actions">
+                                                        <button
+                                                            className="note-general-action-button"
+                                                            onClick={() => handleEditNote(note)}
+                                                        >
+                                                            <FaEdit color={"#56bc23"} size={20}/>
+                                                        </button>
+                                                        <button
+                                                            className="note-general-action-button"
+                                                            onClick={() => handleDeleteNote(note.id)}
+                                                        >
+                                                            <FaTrash color={"#e13a3a"} size={20}/>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className="no-data">No notes available</p>
+                                    )}
+
+                                </div>
+
+                            </>
                         </div>
 
                         {loanDetails?.status?.pendingApproval && (
                             <div className="general-section general-groups-section">
                                 <h3 className="general-section-title">Loan Purpose</h3>
                                 <table className="general-charges-table general-vertical-table">
-                                <tbody>
+                                    <tbody>
                                     <tr>
                                         <td className="label">Loan Purpose</td>
                                         <td className="value">{loanDetails?.purpose || "Not Available"}</td>
@@ -4374,7 +4400,7 @@ const LoanDetails = () => {
                                                                 >
                                                                     Undo Transaction
                                                                 </button>
-                                                                <button>View Receipts</button>
+                                                                {/*<button>View Receipts</button>*/}
                                                             </>
                                                         )}
                                                     </>
@@ -4930,47 +4956,6 @@ const LoanDetails = () => {
                             <p className="no-data">No notes available</p>
                         )}
 
-                        {/* Modal for Add/Edit Note */}
-                        {isNotesModalOpen && (
-                            <div className="create-provisioning-criteria-modal-overlay">
-                                <div className="create-provisioning-criteria-modal-content">
-                                    <h4 className="create-modal-title">
-                                        {editingNoteId ? "Edit Note" : "Add Note"}
-                                    </h4>
-                                    <div className="create-holiday-row">
-                                        <div className="create-provisioning-criteria-group">
-                                            <label htmlFor="note" className="create-provisioning-criteria-label">
-                                                Write Note
-                                            </label>
-                                            <textarea
-                                                id="note"
-                                                value={newNote}
-                                                placeholder={"Write Note..."}
-                                                onChange={(e) => setNewNote(e.target.value)}
-                                                className="create-provisioning-criteria-input"
-                                                rows="4"
-                                                required
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="create-provisioning-criteria-modal-actions">
-                                        <button
-                                            onClick={() => setIsNotesModalOpen(false)}
-                                            className="create-provisioning-criteria-cancel"
-                                        >
-                                            Cancel
-                                        </button>
-                                        <button
-                                            onClick={handleSaveNote}
-                                            className="create-provisioning-criteria-confirm"
-                                            disabled={!newNote.trim()}
-                                        >
-                                            Submit
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
                     </div>
                 );
             case "standingInstructions":
@@ -5249,6 +5234,17 @@ const LoanDetails = () => {
         });
     };
 
+    const handleLoanNumberClick = () => {
+        navigate("/clients", {
+            state: {
+                clientId: clientId,
+                clientName: clientDetails?.clientName || "Client Details",
+                activeTab: 'loan-accounts',
+                preventDuplicate: true,
+            },
+        });
+    };
+
     const checkScrollButtons = () => {
         const container = tabsContainerRef.current;
         if (container) {
@@ -5324,6 +5320,16 @@ const LoanDetails = () => {
                                 {loanDetails?.clientName || "N/A"} ({loanDetails?.clientAccountNo || "N/A"})
                             </span>
                         </li>
+                        <li>
+                            <span className="client-info-label">Loan Number:</span>
+                            <span
+                                className="client-info-value"
+                                style={{color: 'blue', cursor: 'pointer', textDecoration: 'underline'}}
+                                onClick={handleLoanNumberClick}
+                            >
+                                {loanDetails?.accountNo || "N/A"}
+                            </span>
+                        </li>
                         {!loanDetails?.status?.pendingApproval && (
                             <>
                                 {loanDetails?.inArrears && (
@@ -5351,7 +5357,7 @@ const LoanDetails = () => {
                     loanDetails?.status?.value?.toLowerCase() !== "approved" && (
                         <div className="client-info-section">
                             <ul className="client-info-list">
-                                <li>
+                            <li>
                                     <span className="client-info-label">Current Balance:</span>
                                     <span className="client-info-value">
                                         {loanDetails?.currency?.code} {(loanDetails?.summary?.totalOutstanding || "").toLocaleString()}
@@ -5520,9 +5526,9 @@ const LoanDetails = () => {
                                         <button className="dropdown-item" onClick={handleOpenAddChargeModal}>
                                             Add Loan Charge
                                         </button>
-                                        <button className="dropdown-item" onClick={handleOpenForeclosureModal}>
-                                            ForeClosure
-                                        </button>
+                                        {/*<button className="dropdown-item" onClick={handleOpenForeclosureModal}>*/}
+                                        {/*    ForeClosure*/}
+                                        {/*</button>*/}
                                         <button className="dropdown-item" onClick={handleOpenRepaymentModal}>
                                             Make Repayment
                                         </button>
@@ -5532,38 +5538,38 @@ const LoanDetails = () => {
                                         <button className="dropdown-item" onClick={handleOpenPrepayLoanModal}>
                                             Prepay Loan
                                         </button>
-                                        <button className="dropdown-item" onClick={handleOpenChargeOffModal}>
-                                            Charge-Off
-                                        </button>
-                                        <button className="dropdown-item" onClick={handleOpenReAgeModal}>
-                                            Re-Age
-                                        </button>
-                                        <button className="dropdown-item" onClick={handleOpenReAmortizeModal}>
-                                            Re-Amortize
-                                        </button>
-                                        <div className="dropdown-submenu">
-                                            <button
-                                                className="dropdown-item submenu-toggle"
-                                                onClick={() => handleSubmenuToggle("payments")}
-                                            >
-                                                Payments <FaCaretRight className={'submenu-icon'}/>
-                                            </button>
-                                            {activeSubmenu === "payments" && (
-                                                <div className="submenu-content">
-                                                    <button className="dropdown-item"
-                                                            onClick={handleOpenGoodwillCreditModal}>
-                                                        Goodwill Credit
-                                                    </button>
-                                                    <button className="dropdown-item" onClick={handleOpenPayoutRefundModal}>
-                                                        Payout Refund
-                                                    </button>
-                                                    <button className="dropdown-item"
-                                                            onClick={handleOpenMerchantRefundModal}>
-                                                        Merchant Issued Refund
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </div>
+                                        {/*<button className="dropdown-item" onClick={handleOpenChargeOffModal}>*/}
+                                        {/*    Charge-Off*/}
+                                        {/*</button>*/}
+                                        {/*<button className="dropdown-item" onClick={handleOpenReAgeModal}>*/}
+                                        {/*    Re-Age*/}
+                                        {/*</button>*/}
+                                        {/*<button className="dropdown-item" onClick={handleOpenReAmortizeModal}>*/}
+                                        {/*    Re-Amortize*/}
+                                        {/*</button>*/}
+                                        {/*<div className="dropdown-submenu">*/}
+                                        {/*    <button*/}
+                                        {/*        className="dropdown-item submenu-toggle"*/}
+                                        {/*        onClick={() => handleSubmenuToggle("payments")}*/}
+                                        {/*    >*/}
+                                        {/*        Payments <FaCaretRight className={'submenu-icon'}/>*/}
+                                        {/*    </button>*/}
+                                        {/*    {activeSubmenu === "payments" && (*/}
+                                        {/*        <div className="submenu-content">*/}
+                                        {/*            <button className="dropdown-item"*/}
+                                        {/*                    onClick={handleOpenGoodwillCreditModal}>*/}
+                                        {/*                Goodwill Credit*/}
+                                        {/*            </button>*/}
+                                        {/*            <button className="dropdown-item" onClick={handleOpenPayoutRefundModal}>*/}
+                                        {/*                Payout Refund*/}
+                                        {/*            </button>*/}
+                                        {/*            <button className="dropdown-item"*/}
+                                        {/*                    onClick={handleOpenMerchantRefundModal}>*/}
+                                        {/*                Merchant Issued Refund*/}
+                                        {/*            </button>*/}
+                                        {/*        </div>*/}
+                                        {/*    )}*/}
+                                        {/*</div>*/}
                                         <div className="dropdown-submenu">
                                             <button
                                                 className="dropdown-item submenu-toggle"
@@ -5643,28 +5649,28 @@ const LoanDetails = () => {
                         loanDetails?.status?.value?.toLowerCase()?.includes("approved")
                             ? [
                                 "general",
-                                "accountDetails",
+                                // "accountDetails",
                                 "repaymentSchedule",
                                 "loanCollateralDetails",
                                 "charges",
                                 "loanDocuments",
-                                "notes",
+                                // "notes",
                                 "standingInstructions",
                             ]
                             : loanDetails?.status?.value?.toLowerCase() === "overpaid"
                                 ? [
                                     "general",
-                                    "accountDetails",
+                                    // "accountDetails",
                                     "repaymentSchedule",
                                     "transactions",
                                     "loanCollateralDetails",
                                     "loanDocuments",
-                                    "notes",
+                                    // "notes",
                                     "standingInstructions",
                                 ]
                                 : [
                                     "general",
-                                    "accountDetails",
+                                    // "accountDetails",
                                     "repaymentSchedule",
                                     "transactions",
                                     "delinquencyTags",
@@ -5672,9 +5678,9 @@ const LoanDetails = () => {
                                     "charges",
                                     "loanReschedules",
                                     "loanDocuments",
-                                    "notes",
+                                    // "notes",
                                     "standingInstructions",
-                                    "externalAssetOwner",
+                                    // "externalAssetOwner",
                                 ],
                     ]
                         .flat()
@@ -6388,7 +6394,7 @@ const LoanDetails = () => {
                             <DatePicker
                                 selected={repaymentForm.transactionDate}
                                 onChange={(date) =>
-                                    setRepaymentForm((prev) => ({ ...prev, transactionDate: date }))
+                                    setRepaymentForm((prev) => ({...prev, transactionDate: date}))
                                 }
                                 maxDate={new Date()}
                                 className="create-provisioning-criteria-input"
@@ -6396,22 +6402,9 @@ const LoanDetails = () => {
                             />
                         </div>
 
-                        {/* Repayment Breakdown */}
-                        <div className="create-holiday-row">
-                            <ul className="repayment-summary-list">
-                                <li className="create-provisioning-criteria-label">
-                                    Principal: {repaymentData.principalPortion.toLocaleString()}
-                                </li>
-                                <li className="create-provisioning-criteria-label">
-                                    Interest: {repaymentData.interestPortion.toLocaleString()}
-                                </li>
-                                <li className="create-provisioning-criteria-label">
-                                    Fees: {repaymentData.feeChargesPortion.toLocaleString()}
-                                </li>
-                                <li className="create-provisioning-criteria-label">
-                                    Penalties: {repaymentData.penaltyChargesPortion.toLocaleString()}
-                                </li>
-                            </ul>
+                        <div className="create-provisioning-criteria-group">
+                            <label htmlFor="" className="create-provisioning-criteria-label">Loan
+                                Balance: {loanDetails?.summary?.totalOutstanding.toLocaleString()}</label>
                         </div>
 
                         {/* Transaction Amount */}
@@ -6422,22 +6415,15 @@ const LoanDetails = () => {
                             <input
                                 type="number"
                                 value={repaymentForm.transactionAmount}
-                                onChange={(e) =>
-                                    setRepaymentForm((prev) => ({ ...prev, transactionAmount: e.target.value }))
-                                }
-                                className="create-provisioning-criteria-input"
-                            />
-                        </div>
-
-                        {/* External ID */}
-                        <div className="create-provisioning-criteria-group">
-                            <label className="create-provisioning-criteria-label">External ID</label>
-                            <input
-                                type="text"
-                                value={repaymentForm.externalId}
-                                onChange={(e) =>
-                                    setRepaymentForm((prev) => ({ ...prev, externalId: e.target.value }))
-                                }
+                                onChange={(e) => {
+                                    const value = parseFloat(e.target.value);
+                                    if (value <= loanDetails?.summary?.totalOutstanding) {
+                                        setRepaymentForm((prev) => ({...prev, transactionAmount: value}));
+                                    } else {
+                                        alert(`Transaction amount cannot exceed the loan balance of ${loanDetails?.summary?.totalOutstanding.toLocaleString()}`);
+                                    }
+                                }}
+                                max={loanDetails?.summary?.totalOutstanding}
                                 className="create-provisioning-criteria-input"
                             />
                         </div>
@@ -6450,7 +6436,7 @@ const LoanDetails = () => {
                             <select
                                 value={repaymentForm.selectedPaymentType}
                                 onChange={(e) =>
-                                    setRepaymentForm((prev) => ({ ...prev, selectedPaymentType: e.target.value }))
+                                    setRepaymentForm((prev) => ({...prev, selectedPaymentType: e.target.value}))
                                 }
                                 className="create-provisioning-criteria-input"
                             >
@@ -6463,105 +6449,31 @@ const LoanDetails = () => {
                             </select>
                         </div>
 
-                        {/* Show Payment Details Toggle */}
                         <div className="create-provisioning-criteria-group">
-                            <label className="create-provisioning-criteria-label">
-                                Show Payment Details
-                            </label>
-                            <div className="switch-toggle">
-                                <label className="switch">
-                                    <input
-                                        type="checkbox"
-                                        checked={repaymentForm.showPaymentDetails}
-                                        onChange={(e) =>
-                                            setRepaymentForm((prev) => ({
-                                                ...prev,
-                                                showPaymentDetails: e.target.checked,
-                                            }))
-                                        }
-                                    />
-                                    <span className="slider round"></span>
-                                </label>
-                            </div>
+                            <label className="create-provisioning-criteria-label" htmlFor="receipt">Receipt
+                                Number</label>
+                            <input
+                                type="text"
+                                placeholder="Receipt #"
+                                value={repaymentForm.receiptNumber}
+                                onChange={(e) =>
+                                    setRepaymentForm((prev) => ({
+                                        ...prev,
+                                        receiptNumber: e.target.value,
+                                    }))
+                                }
+                                className="create-provisioning-criteria-input"
+                            />
                         </div>
-
-                        {/* Payment Details Fields */}
-                        {repaymentForm.showPaymentDetails && (
-                            <>
-                                <div className="create-holiday-row">
-                                    <input
-                                        type="text"
-                                        placeholder="Account #"
-                                        value={repaymentForm.accountNumber}
-                                        onChange={(e) =>
-                                            setRepaymentForm((prev) => ({
-                                                ...prev,
-                                                accountNumber: e.target.value,
-                                            }))
-                                        }
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Cheque #"
-                                        value={repaymentForm.chequeNumber}
-                                        onChange={(e) =>
-                                            setRepaymentForm((prev) => ({
-                                                ...prev,
-                                                chequeNumber: e.target.value,
-                                            }))
-                                        }
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Routing Code"
-                                        value={repaymentForm.routingCode}
-                                        onChange={(e) =>
-                                            setRepaymentForm((prev) => ({
-                                                ...prev,
-                                                routingCode: e.target.value,
-                                            }))
-                                        }
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                </div>
-                                <div className="create-holiday-row">
-                                    <input
-                                        type="text"
-                                        placeholder="Receipt #"
-                                        value={repaymentForm.receiptNumber}
-                                        onChange={(e) =>
-                                            setRepaymentForm((prev) => ({
-                                                ...prev,
-                                                receiptNumber: e.target.value,
-                                            }))
-                                        }
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Bank #"
-                                        value={repaymentForm.bankNumber}
-                                        onChange={(e) =>
-                                            setRepaymentForm((prev) => ({
-                                                ...prev,
-                                                bankNumber: e.target.value,
-                                            }))
-                                        }
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                </div>
-                            </>
-                        )}
 
                         {/* Note */}
                         <div className="create-provisioning-criteria-group">
                             <label className="create-provisioning-criteria-label">Note</label>
                             <textarea
                                 value={repaymentForm.note}
+                                placeholder={"Narration...(MPesa/Bank Transaction Number) etc."}
                                 onChange={(e) =>
-                                    setRepaymentForm((prev) => ({ ...prev, note: e.target.value }))
+                                    setRepaymentForm((prev) => ({...prev, note: e.target.value}))
                                 }
                                 className="create-provisioning-criteria-input"
                             />
@@ -6649,19 +6561,9 @@ const LoanDetails = () => {
                             />
                         </div>
 
-                        {/* Payment Summary */}
-                        <div className="create-holiday-row">
-                            <ul className="repayment-summary-list">
-                                <li className="create-provisioning-criteria-label">
-                                    Principal: {prepayLoanData.principalPortion?.toLocaleString()}
-                                </li>
-                                <li className="create-provisioning-criteria-label">
-                                    Interest: {prepayLoanData.interestPortion?.toLocaleString()}
-                                </li>
-                                <li className="create-provisioning-criteria-label">
-                                    Fees: {prepayLoanData.feeChargesPortion?.toLocaleString()}
-                                </li>
-                            </ul>
+                        <div className="create-provisioning-criteria-group">
+                            <label htmlFor="" className="create-provisioning-criteria-label">Loan
+                                Balance: {loanDetails?.summary?.totalOutstanding.toLocaleString()}</label>
                         </div>
 
                         {/* Transaction Amount */}
@@ -6673,21 +6575,16 @@ const LoanDetails = () => {
                                 type="number"
                                 id="prepayTransactionAmount"
                                 value={prepayTransactionAmount}
-                                onChange={(e) => setPrepayTransactionAmount(e.target.value)}
-                                className="create-provisioning-criteria-input"
-                            />
-                        </div>
-
-                        {/* External ID */}
-                        <div className="create-provisioning-criteria-group">
-                            <label htmlFor="prepayExternalId" className="create-provisioning-criteria-label">
-                                External ID
-                            </label>
-                            <input
-                                type="text"
-                                id="prepayExternalId"
-                                value={prepayExternalId}
-                                onChange={(e) => setPrepayExternalId(e.target.value)}
+                                // onChange={(e) => setPrepayTransactionAmount(e.target.value)}
+                                onChange={(e) => {
+                                    const value = parseFloat(e.target.value);
+                                    if (value <= loanDetails?.summary?.totalOutstanding) {
+                                        setPrepayTransactionAmount(value);
+                                    } else {
+                                        alert(`Transaction amount cannot exceed the loan balance of ${loanDetails?.summary?.totalOutstanding.toLocaleString()}`);
+                                    }
+                                }}
+                                max={loanDetails?.summary?.totalOutstanding}
                                 className="create-provisioning-criteria-input"
                             />
                         </div>
@@ -6712,68 +6609,17 @@ const LoanDetails = () => {
                             </select>
                         </div>
 
-                        {/* Payment Details Toggle */}
                         <div className="create-provisioning-criteria-group">
-                            <label htmlFor="showPrepayPaymentDetails" className="create-provisioning-criteria-label">
-                                Show Payment Details
-                            </label>
-                            <div className="switch-toggle">
-                                <label className="switch">
-                                    <input
-                                        type="checkbox"
-                                        id="showPrepayPaymentDetails"
-                                        checked={showPrepayPaymentDetails}
-                                        onChange={(e) => setShowPrepayPaymentDetails(e.target.checked)}
-                                    />
-                                    <span className="slider round"></span>
-                                </label>
-                            </div>
+                            <label className="create-provisioning-criteria-label" htmlFor="receipt">Receipt
+                                Number</label>
+                            <input
+                                type="text"
+                                placeholder="Receipt #"
+                                value={prepayReceipt}
+                                onChange={(e) => setPrepayReceipt(e.target.value)}
+                                className="create-provisioning-criteria-input"
+                            />
                         </div>
-
-                        {/* Payment Details */}
-                        {showPrepayPaymentDetails && (
-                            <>
-                                <div className="create-holiday-row">
-                                    <input
-                                        type="text"
-                                        placeholder="Account #"
-                                        value={prepayAccount}
-                                        onChange={(e) => setPrepayAccount(e.target.value)}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Cheque #"
-                                        value={prepayCheque}
-                                        onChange={(e) => setPrepayCheque(e.target.value)}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Routing Code"
-                                        value={prepayRoutingCode}
-                                        onChange={(e) => setPrepayRoutingCode(e.target.value)}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                </div>
-                                <div className="create-holiday-row">
-                                    <input
-                                        type="text"
-                                        placeholder="Receipt #"
-                                        value={prepayReceipt}
-                                        onChange={(e) => setPrepayReceipt(e.target.value)}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Bank #"
-                                        value={prepayBank}
-                                        onChange={(e) => setPrepayBank(e.target.value)}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                </div>
-                            </>
-                        )}
 
                         {/* Note */}
                         <div className="create-provisioning-criteria-group">
@@ -6783,6 +6629,7 @@ const LoanDetails = () => {
                             <textarea
                                 id="prepayNote"
                                 value={prepayNote}
+                                placeholder={"Narration...(MPesa/Bank Transaction Number) etc."}
                                 onChange={(e) => setPrepayNote(e.target.value)}
                                 className="create-provisioning-criteria-input"
                             />
@@ -7278,82 +7125,17 @@ const LoanDetails = () => {
                             </select>
                         </div>
 
-                        {/* External ID */}
                         <div className="create-provisioning-criteria-group">
-                            <label htmlFor="payoutExternalId" className="create-provisioning-criteria-label">
-                                External ID
-                            </label>
+                            <label className="create-provisioning-criteria-label" htmlFor="receipt">Receipt
+                                Number</label>
                             <input
                                 type="text"
-                                id="payoutExternalId"
-                                value={payoutExternalId}
-                                onChange={(e) => setPayoutExternalId(e.target.value)}
+                                placeholder="Receipt #"
+                                value={payoutReceiptNumber}
+                                onChange={(e) => setPayoutReceiptNumber(e.target.value)}
                                 className="create-provisioning-criteria-input"
                             />
                         </div>
-
-                        {/* Payment Details Toggle */}
-                        <div className="create-provisioning-criteria-group">
-                            <label className="create-provisioning-criteria-label" htmlFor="showPayoutPaymentDetails">
-                                Show Payment Details
-                            </label>
-                            <div className="switch-toggle">
-                                <label className="switch">
-                                    <input
-                                        type="checkbox"
-                                        id="showPayoutPaymentDetails"
-                                        checked={showPayoutPaymentDetails}
-                                        onChange={(e) => setShowPayoutPaymentDetails(e.target.checked)}
-                                    />
-                                    <span className="slider round"></span>
-                                </label>
-                            </div>
-                        </div>
-
-                        {/* Payment Details */}
-                        {showPayoutPaymentDetails && (
-                            <>
-                                <div className="create-holiday-row">
-                                    <input
-                                        type="text"
-                                        placeholder="Account #"
-                                        value={payoutAccountNumber}
-                                        onChange={(e) => setPayoutAccountNumber(e.target.value)}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Cheque #"
-                                        value={payoutChequeNumber}
-                                        onChange={(e) => setPayoutChequeNumber(e.target.value)}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Routing Code"
-                                        value={payoutRoutingCode}
-                                        onChange={(e) => setPayoutRoutingCode(e.target.value)}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                </div>
-                                <div className="create-holiday-row">
-                                    <input
-                                        type="text"
-                                        placeholder="Receipt #"
-                                        value={payoutReceiptNumber}
-                                        onChange={(e) => setPayoutReceiptNumber(e.target.value)}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Bank #"
-                                        value={payoutBankNumber}
-                                        onChange={(e) => setPayoutBankNumber(e.target.value)}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                </div>
-                            </>
-                        )}
 
                         {/* Note */}
                         <div className="create-provisioning-criteria-group">
@@ -7361,6 +7143,7 @@ const LoanDetails = () => {
                             <textarea
                                 id="payoutNote"
                                 value={payoutNote}
+                                placeholder={"Narration...(MPesa/Bank Transaction Number) etc."}
                                 onChange={(e) => setPayoutNote(e.target.value)}
                                 className="create-provisioning-criteria-input"
                             />
@@ -7439,82 +7222,17 @@ const LoanDetails = () => {
                             </select>
                         </div>
 
-                        {/* External ID */}
                         <div className="create-provisioning-criteria-group">
-                            <label htmlFor="merchantExternalId" className="create-provisioning-criteria-label">
-                                External ID
-                            </label>
+                            <label className="create-provisioning-criteria-label" htmlFor="receipt">Receipt
+                                Number</label>
                             <input
                                 type="text"
-                                id="merchantExternalId"
-                                value={merchantExternalId}
-                                onChange={(e) => setMerchantExternalId(e.target.value)}
+                                placeholder="Receipt #"
+                                value={merchantReceiptNumber}
+                                onChange={(e) => setMerchantReceiptNumber(e.target.value)}
                                 className="create-provisioning-criteria-input"
                             />
                         </div>
-
-                        {/* Payment Details Toggle */}
-                        <div className="create-provisioning-criteria-group">
-                            <label className="create-provisioning-criteria-label" htmlFor="showMerchantPaymentDetails">
-                                Show Payment Details
-                            </label>
-                            <div className="switch-toggle">
-                                <label className="switch">
-                                    <input
-                                        type="checkbox"
-                                        id="showMerchantPaymentDetails"
-                                        checked={showMerchantPaymentDetails}
-                                        onChange={(e) => setShowMerchantPaymentDetails(e.target.checked)}
-                                    />
-                                    <span className="slider round"></span>
-                                </label>
-                            </div>
-                        </div>
-
-                        {/* Payment Details */}
-                        {showMerchantPaymentDetails && (
-                            <>
-                                <div className="create-holiday-row">
-                                    <input
-                                        type="text"
-                                        placeholder="Account #"
-                                        value={merchantAccountNumber}
-                                        onChange={(e) => setMerchantAccountNumber(e.target.value)}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Cheque #"
-                                        value={merchantChequeNumber}
-                                        onChange={(e) => setMerchantChequeNumber(e.target.value)}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Routing Code"
-                                        value={merchantRoutingCode}
-                                        onChange={(e) => setMerchantRoutingCode(e.target.value)}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                </div>
-                                <div className="create-holiday-row">
-                                    <input
-                                        type="text"
-                                        placeholder="Receipt #"
-                                        value={merchantReceiptNumber}
-                                        onChange={(e) => setMerchantReceiptNumber(e.target.value)}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Bank #"
-                                        value={merchantBankNumber}
-                                        onChange={(e) => setMerchantBankNumber(e.target.value)}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                </div>
-                            </>
-                        )}
 
                         {/* Note */}
                         <div className="create-provisioning-criteria-group">
@@ -7522,6 +7240,7 @@ const LoanDetails = () => {
                             <textarea
                                 id="merchantNote"
                                 value={merchantNote}
+                                placeholder={"Narration...(MPesa/Bank Transaction Number) etc."}
                                 onChange={(e) => setMerchantNote(e.target.value)}
                                 className="create-provisioning-criteria-input"
                             />
@@ -9409,6 +9128,46 @@ const LoanDetails = () => {
                         <div className="create-provisioning-criteria-modal-actions">
                             <button onClick={closeJournalModal} className="create-provisioning-criteria-cancel">
                                 Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isNotesModalOpen && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">
+                            {editingNoteId ? "Edit Note" : "Add Note"}
+                        </h4>
+                        <div className="create-holiday-row">
+                            <div className="create-provisioning-criteria-group">
+                                <label htmlFor="note" className="create-provisioning-criteria-label">
+                                    Write Note
+                                </label>
+                                <textarea
+                                    id="note"
+                                    value={newNote}
+                                    placeholder={"Write Note..."}
+                                    onChange={(e) => setNewNote(e.target.value)}
+                                    className="create-provisioning-criteria-input"
+                                    rows="4"
+                                    required
+                                />
+                            </div>
+                        </div>
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button
+                                onClick={() => setIsNotesModalOpen(false)}
+                                className="create-provisioning-criteria-cancel"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleSaveNote}
+                                className="create-provisioning-criteria-confirm"
+                                disabled={!newNote.trim()}
+                            >
+                                Submit
                             </button>
                         </div>
                     </div>

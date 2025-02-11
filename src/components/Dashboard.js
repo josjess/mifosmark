@@ -351,8 +351,8 @@ const Dashboard = () => {
                     });
 
                     const portfolioAtRisk =
-                        totalOverdue > 0
-                            ? ((totalPrincipalOutstanding / totalOverdue) * 100).toFixed(2) + '%'
+                        totalPrincipalOutstanding > 0
+                            ? ((totalPrincipalOverdue / totalPrincipalOutstanding) * 100).toFixed(2) + '%'
                             : '';
 
 

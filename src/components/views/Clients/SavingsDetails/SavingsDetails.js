@@ -3003,68 +3003,17 @@ const SavingsAccounts = () => {
                             </select>
                         </div>
 
-                        {/* Toggle Payment Details */}
                         <div className="create-provisioning-criteria-group">
-                            <label className="create-provisioning-criteria-label" htmlFor="showPaymentDetails">
-                                Show Payment Details
-                            </label>
-                            <div className="switch-toggle">
-                                <label className="switch">
-                                    <input
-                                        type="checkbox"
-                                        id="showPaymentDetails"
-                                        checked={showDepositPaymentDetails}
-                                        onChange={(e) => setShowDepositPaymentDetails(e.target.checked)}
-                                    />
-                                    <span className="slider round"></span>
-                                </label>
-                            </div>
+                            <label className="create-provisioning-criteria-label" htmlFor="receipt">Receipt
+                                Number</label>
+                            <input
+                                type="text"
+                                placeholder="Receipt #"
+                                value={depositReceiptNumber}
+                                onChange={(e) => setDepositReceiptNumber(e.target.value)}
+                                className="create-provisioning-criteria-input"
+                            />
                         </div>
-
-                        {/* Payment Details Fields */}
-                        {showDepositPaymentDetails && (
-                            <>
-                                <div className="create-holiday-row">
-                                    <input
-                                        type="text"
-                                        placeholder="Account #"
-                                        value={depositAccountNumber}
-                                        onChange={(e) => setDepositAccountNumber(e.target.value)}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Cheque #"
-                                        value={depositChequeNumber}
-                                        onChange={(e) => setDepositChequeNumber(e.target.value)}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Routing Code"
-                                        value={depositRoutingCode}
-                                        onChange={(e) => setDepositRoutingCode(e.target.value)}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                </div>
-                                <div className="create-holiday-row">
-                                    <input
-                                        type="text"
-                                        placeholder="Receipt #"
-                                        value={depositReceiptNumber}
-                                        onChange={(e) => setDepositReceiptNumber(e.target.value)}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Bank #"
-                                        value={depositBankNumber}
-                                        onChange={(e) => setDepositBankNumber(e.target.value)}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                </div>
-                            </>
-                        )}
 
                         {/* Note */}
                         <div className="create-provisioning-criteria-group">
@@ -3074,6 +3023,7 @@ const SavingsAccounts = () => {
                             <textarea
                                 id="note"
                                 value={depositNote}
+                                placeholder={"Narration...(MPesa/Bank Transaction Number) etc."}
                                 onChange={(e) => setDepositNote(e.target.value)}
                                 className="create-provisioning-criteria-input"
                             />
@@ -3104,7 +3054,7 @@ const SavingsAccounts = () => {
                         <h4 className="create-modal-title">Block Deposit</h4>
                         <div className="create-provisioning-criteria-group">
                             <label htmlFor="blockDepositReason" className="create-provisioning-criteria-label">
-                                Reason <span>*</span>
+                            Reason <span>*</span>
                             </label>
                             <select
                                 id="blockDepositReason"
@@ -3190,62 +3140,16 @@ const SavingsAccounts = () => {
                         </div>
 
                         <div className="create-provisioning-criteria-group">
-                            <label className="create-provisioning-criteria-label">Show Payment Details</label>
-                            <div className="switch-toggle">
-                                <label className="switch">
-                                    <input
-                                        type="checkbox"
-                                        checked={showWithdrawPaymentDetails}
-                                        onChange={(e) => setShowWithdrawPaymentDetails(e.target.checked)}
-                                    />
-                                    <span className="slider round"></span>
-                                </label>
-                            </div>
+                            <label className="create-provisioning-criteria-label" htmlFor="receipt">Receipt
+                                Number</label>
+                            <input
+                                type="text"
+                                placeholder="Receipt #"
+                                value={withdrawReceiptNumber}
+                                onChange={(e) => setWithdrawReceiptNumber(e.target.value)}
+                                className="create-provisioning-criteria-input"
+                            />
                         </div>
-
-                        {showWithdrawPaymentDetails && (
-                            <>
-                                <div className="create-holiday-row">
-                                    <input
-                                        type="text"
-                                        placeholder="Account #"
-                                        value={withdrawAccountNumber}
-                                        onChange={(e) => setWithdrawAccountNumber(e.target.value)}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Cheque #"
-                                        value={withdrawChequeNumber}
-                                        onChange={(e) => setWithdrawChequeNumber(e.target.value)}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Routing Code"
-                                        value={withdrawRoutingCode}
-                                        onChange={(e) => setWithdrawRoutingCode(e.target.value)}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                </div>
-                                <div className="create-holiday-row">
-                                    <input
-                                        type="text"
-                                        placeholder="Receipt #"
-                                        value={withdrawReceiptNumber}
-                                        onChange={(e) => setWithdrawReceiptNumber(e.target.value)}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Bank #"
-                                        value={withdrawBankNumber}
-                                        onChange={(e) => setWithdrawBankNumber(e.target.value)}
-                                        className="create-provisioning-criteria-input"
-                                    />
-                                </div>
-                            </>
-                        )}
 
                         <div className="create-provisioning-criteria-group">
                             <label htmlFor="withdrawNote" className="create-provisioning-criteria-label">
@@ -3254,6 +3158,7 @@ const SavingsAccounts = () => {
                             <textarea
                                 id="withdrawNote"
                                 value={withdrawNote}
+                                placeholder={"Narration...(MPesa/Bank Transaction Number) etc."}
                                 onChange={(e) => setWithdrawNote(e.target.value)}
                                 className="create-provisioning-criteria-input"
                             />
