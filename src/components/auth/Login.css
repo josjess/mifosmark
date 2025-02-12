@@ -34,8 +34,8 @@
 .login-container {
     position: relative;
     background-color: rgba(255, 255, 255, 0.9);
-    border-radius: 12px;
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+    border-radius: 20px;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.9);
     padding: 40px;
     max-width: 400px;
     width: 100%;
@@ -107,20 +107,21 @@
 .login-btn {
     width: 100%;
     padding: 15px;
-    background-color: #4a90e2;
+    background-color: #1367cd;
     color: #ffffff;
     font-size: 16px;
     border: none;
-    border-radius: 8px;
+    border-radius: 20px;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.7);
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
 .login-btn:hover {
-    background-color: #357ABD;
+    background-color: #3540bd;
 }
 
 .login-btn:disabled {

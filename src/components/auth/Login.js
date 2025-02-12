@@ -1,12 +1,11 @@
-import React, {useState, useContext, memo} from 'react';
+import React, {useState, useContext, memo, useEffect} from 'react';
 import './Login.css';
 import { useNavigate } from 'react-router-dom';
 import { API_CONFIG } from "../../config";
 import { AuthContext } from '../../context/AuthContext';
 import { NotificationContext } from '../../context/NotificationContext';
 import { useLoading } from '../../context/LoadingContext';
-import {FaCog, FaEye, FaEyeSlash} from "react-icons/fa";
-import bcrypt from "bcryptjs";
+import { FaEye, FaEyeSlash} from "react-icons/fa";
 
 const Login = () => {
     const [username, setUsername] = useState('');
@@ -18,14 +17,8 @@ const Login = () => {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [showSecurityAnswer1, setShowSecurityAnswer1] = useState(false);
     const [showSecurityAnswer2, setShowSecurityAnswer2] = useState(false);
-    const {
-        login,
-        superAdminLogin,
-        updateSuperAdminCredentials,
-        superAdmin,
-        isSuperAdminFirstLogin
-    } = useContext(AuthContext);
-    const { baseURL, isBaseURLChanged, updateBaseURL, updateTenantId } = useContext(AuthContext);
+    const { login, superAdminLogin, updateSuperAdminCredentials, superAdmin} = useContext(AuthContext);
+    const { isBaseURLChanged, updateBaseURL, updateTenantId } = useContext(AuthContext);
     const { startLoading, stopLoading } = useLoading();
     const navigate = useNavigate();
 
@@ -53,14 +46,14 @@ const Login = () => {
 
                 updateBaseURL(defaultBaseURL);
                 updateTenantId(defaultTenantId);
-                showNotification("Base URL has been reset to the default.", "success");
+                showNotification("Base URL has been reset to the default!", "success");
                 window.location.reload();
             } else {
-                showNotification("Failed to reset Base URL: Unable to load config.", "error");
+                showNotification("Failed to reset Base URL: Unable to load config!", "error");
             }
         } catch (error) {
             console.error("Error resetting Base URL:", error);
-            showNotification("Error resetting Base URL.", "error");
+            showNotification("Error resetting Base URL!", "error");
         }
     };
 
@@ -79,7 +72,7 @@ const Login = () => {
                     stopLoading();
                     navigate("/");
                 } else {
-                    alert(response?.message || "Login failed for Super Admin.");
+                    showNotification(response?.message || "Login failed for Super Admin.", "error");
                     stopLoading();
                 }
             } else {
@@ -96,7 +89,7 @@ const Login = () => {
 
                 const data = await response.json();
                 if (response.ok) {
-                    showNotification("Login successful!", "success");
+                    showNotification("Login Successful! Welcome!", "success");
 
                     const userData = {
                         username: data.username,
@@ -112,12 +105,25 @@ const Login = () => {
                     login(userData, rememberMe);
                     navigate("/");
                 } else {
-                    showNotification(data.message || "Login failed", "error");
+                    switch (response.status) {
+                        case 401:
+                            showNotification("Incorrect username or password!", "error");
+                            break;
+                        case 404:
+                            showNotification("User not found!", "error");
+                            break;
+                        case 500:
+                            showNotification("Server error! Please try again later!", "error");
+                            break;
+                        default:
+                            showNotification(data.message || "Login failed! Please try again!", "error");
+                            break;
+                    }
                 }
             }
         } catch (error) {
             console.error("Error during login:", error);
-            showNotification("Error connecting to API", "error");
+            showNotification("There was an error connecting to API! Contact Support!", "error");
         } finally {
             stopLoading();
         }
@@ -435,19 +441,6 @@ const Login = () => {
                         </div>
                     </div>
                 )}
-                {/*<button*/}
-                {/*    onClick={() => setIsSettingUp(true)}*/}
-                {/*    style={{*/}
-                {/*        position: 'fixed',*/}
-                {/*        bottom: '20px',*/}
-                {/*        right: '20px',*/}
-                {/*        background: 'none',*/}
-                {/*        border: 'none',*/}
-                {/*        cursor: 'pointer',*/}
-                {/*    }}*/}
-                {/*>*/}
-                {/*    <FaCog size={30} color={'#af2727'}/>*/}
-                {/*</button>*/}
             </div>
         );
 };

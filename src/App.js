@@ -128,6 +128,7 @@ import SavingsDetails from "./components/views/Clients/SavingsDetails/SavingsDet
 import CollateralDetails from "./components/views/Clients/CollateralDetails/CollateralDetails";
 
 import SystemManagement from "./components/utilities/SystemManagement";
+import NotificationContainer from "./context/NotificationContainer";
 
 const App = () => {
     const { redirectToLogin, authInitialized, baseURL } = useContext(AuthContext);
@@ -161,7 +162,7 @@ const App = () => {
             <LoadingProvider>
                 <NotificationProvider>
                     <LoadingOverlay />
-                    {/*<Notification />*/}
+                    <NotificationContainer />
                     {/*<Navbar />*/}
                     {!isLoginPage && <Navbar />}
                     {!isLoginPage && <Sidebar className="sidebar" />}
