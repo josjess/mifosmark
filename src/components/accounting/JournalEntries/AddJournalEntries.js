@@ -5,15 +5,14 @@ import { API_CONFIG } from "../../../config";
 import { AuthContext } from "../../../context/AuthContext";
 import DatePicker from "react-datepicker";
 import './JournalEntries.css'
+import {NotificationContext} from "../../../context/NotificationContext";
 
 const AddJournalEntries = () => {
     const { user } = useContext(AuthContext);
     const { startLoading, stopLoading } = useLoading();
-
     const [currentStage, setCurrentStage] = useState(0);
     const [completedStages, setCompletedStages] = useState(new Set(["Preview"]));
     const [allStagesComplete, setAllStagesComplete] = useState(false);
-
     const [offices, setOffices] = useState([]);
     const [office, setOffice] = useState("");
     const [routingCode, setRoutingCode] = useState("");
@@ -24,30 +23,23 @@ const AddJournalEntries = () => {
         "Payment Details",
         "Preview",
     ]);
-
     const [currencies, setCurrencies] = useState([]);
     const [currency, setCurrency] = useState("");
     const [referenceNumber, setReferenceNumber] = useState("");
-
     const [transactionDate, setTransactionDate] = useState("");
     const [paymentType, setPaymentType] = useState("");
     const [accountNumber, setAccountNumber] = useState("");
     const [chequeNumber, setChequeNumber] = useState("");
     const [bankNumber, setBankNumber] = useState("");
     const [comments, setComments] = useState("");
-
     const [glAccounts, setGlAccounts] = useState([]);
     const [debits, setDebits] = useState([{ type: "", amount: "" }]);
     const [credits, setCredits] = useState([{ type: "", amount: "" }]);
     const [accountingRules, setAccountingRules] = useState([]);
-
     const [paymentTypes, setPaymentTypes] = useState([]);
-
     const [showTransactionTable, setShowTransactionTable] = useState(false);
     const [transactionDetails, setTransactionDetails] = useState(null);
-
     const [revertedTransactions, setRevertedTransactions] = useState({});
-
     const isStep1Complete = office && currency && transactionDate;
     const isStep2Complete = () => {
         const allDebitsValid = debits.every((debit) => debit.type && debit.amount && parseFloat(debit.amount) > 0);
@@ -61,17 +53,15 @@ const AddJournalEntries = () => {
 
         return allDebitsValid && allCreditsValid && isBalanced;
     };
-
     const usedDebitIds = debits.map((debit) => debit.type);
     const usedCreditIds = credits.map((credit) => credit.type);
-
     const [showRevertModal, setShowRevertModal] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [revertComments, setRevertComments] = useState("");
     const [newTransactionId, setNewTransactionId] = useState("");
     const [isReverted, setIsReverted] = useState(false);
-
     const [transactionId, setTransactionId] = useState("");
+    const {showNotification} = useContext(NotificationContext);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -269,9 +259,10 @@ const AddJournalEntries = () => {
             setComments("");
             setDebits([{ type: "", amount: "" }]);
             setCredits([{ type: "", amount: "" }]);
+            showNotification("Journal entry submitted!", 'success');
         } catch (error) {
             console.error("Error submitting journal entry:", error.response?.data || error.message);
-            alert("Failed to submit journal entry. Please try again.");
+            showNotification("Failed to submit journal entry!", 'error');
         } finally {
             stopLoading();
         }

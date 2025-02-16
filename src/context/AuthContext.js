@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, {createContext, useState, useEffect, useRef} from 'react';
 import bcrypt from "bcryptjs";
 import {API_CONFIG, loadConfig} from "../config";
 
@@ -6,6 +6,7 @@ export const AuthContext = createContext();
 
 const AUTH_DURATION_SHORT = 3 * 60 * 60 * 1000;
 const AUTH_DURATION_LONG = 10 * 24 * 60 * 60 * 1000;
+const DEFAULT_TIMEOUT = 5 * 60 * 1000;
 const ALL_COMPONENTS = {
     "accounting-frequent-postings": true,
     "accounting-journal-entries": true,
@@ -90,6 +91,7 @@ const ALL_COMPONENTS = {
     "admin-organization-payment-types": true,
     "admin-organization-sms-campaigns": true,
     "admin-organization-bulk-imports": true,
+    "pentaho-reports": true,
 };
 
 export const AuthProvider = ({ children }) => {
@@ -102,10 +104,15 @@ export const AuthProvider = ({ children }) => {
     const [redirectToLogin, setRedirectToLogin] = useState(false);
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
+    const [inactivityTimeout, setInactivityTimeout] = useState(
+        parseInt(localStorage.getItem('inactivityTimeout')) || DEFAULT_TIMEOUT
+    );
+
+    const logoutTimer = useRef(null);
 
     const fetchNotifications = async (savedUser) => {
         if (!savedUser || !savedUser.base64EncodedAuthenticationKey) {
-            console.log("User not found or missing authentication key");
+            // console.log("User not found or missing authentication key");
             return;
         }
 
@@ -211,22 +218,41 @@ export const AuthProvider = ({ children }) => {
             if (now - savedTimestamp < authDuration) {
                 setIsAuthenticated(true);
                 setUser(savedUser);
+                resetInactivityTimer();
 
-                const remainingTime = authDuration - (now - savedTimestamp);
-                setTimeout(() => {
-                    logout(true);
-                }, remainingTime);
+                // const remainingTime = authDuration - (now - savedTimestamp);
+                // setTimeout(() => {
+                //     logout(true);
+                // }, remainingTime);
             } else {
                 localStorage.removeItem('user');
                 localStorage.removeItem('loginTimestamp');
             }
         }
+
         setAuthInitialized(true);
     };
 
     useEffect(() => {
         initializeAuth();
-    }, []);
+
+        const activityEvents = ["mousemove", "keydown", "click", "scroll"];
+
+        const handleActivity = () => {
+            if (isAuthenticated) {
+                resetInactivityTimer();
+            }
+        };
+
+        activityEvents.forEach(event => window.addEventListener(event, handleActivity));
+
+        return () => {
+            activityEvents.forEach(event => window.removeEventListener(event, handleActivity));
+            if (logoutTimer.current) {
+                clearTimeout(logoutTimer.current);
+            }
+        };
+    }, [isAuthenticated, inactivityTimeout]);
 
     const login = (userData, rememberMe) => {
         const timestamp = new Date().getTime();
@@ -327,7 +353,7 @@ export const AuthProvider = ({ children }) => {
             modal.style.textAlign = 'center';
 
             const message = document.createElement('p');
-            message.textContent = 'Your session has expired. Please log in again. If you don\'t want to be logged out next time, check the "Remember Me" option when logging in.';
+            message.textContent = 'Your session has expired due to inactivity. Kindly log in again!';
             modal.appendChild(message);
 
             const closeButton = document.createElement('button');
@@ -350,6 +376,27 @@ export const AuthProvider = ({ children }) => {
             document.body.appendChild(overlay);
             document.body.appendChild(modal);
         }
+    };
+
+    const resetInactivityTimer = () => {
+        if (!isAuthenticated) return;
+
+        if (logoutTimer.current) {
+            clearTimeout(logoutTimer.current);
+        }
+        logoutTimer.current = setTimeout(() => {
+            logout(true);
+        }, inactivityTimeout);
+    };
+
+    const updateInactivityTimeout = (newTimeout) => {
+        if (!newTimeout || isNaN(newTimeout) || newTimeout < 5) {
+            newTimeout = 5;
+        }
+        const timeoutMs = newTimeout * 60 * 1000;
+        setInactivityTimeout(timeoutMs);
+        localStorage.setItem('inactivityTimeout', timeoutMs);
+        resetInactivityTimer();
     };
 
     const updateBaseURL = (newURL) => {
@@ -391,6 +438,7 @@ export const AuthProvider = ({ children }) => {
             updateSuperAdminCredentials,
             componentVisibility,
             toggleComponentVisibility,
+            updateInactivityTimeout
         }}>
             {children}
         </AuthContext.Provider>

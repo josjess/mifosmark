@@ -7,12 +7,12 @@
 }
 
 .custom-content {
-    max-width: 800px;
+    max-width: 600px;
     margin: 0 auto;
     background-color: #ffffff;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
 
 .custom-content h2 {
@@ -56,7 +56,7 @@
 .custom-date-input,
 .custom-select {
     padding: 10px;
-    font-size: 1rem;
+    font-size: 16px;
     border: 1px solid #cccccc;
     border-radius: 4px;
     outline: none;
@@ -296,4 +296,40 @@
     cursor: not-allowed;
     pointer-events: none;
     opacity: 0.7;
+}
+
+.modern-input {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    outline: none;
+    background-color: #ffffff;
+    transition: all 0.3s ease;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.modern-input:focus {
+    border-color: #2563eb;
+    box-shadow: 0px 0px 6px rgba(37, 99, 235, 0.4);
+}
+
+.modern-input::placeholder {
+    color: #9ca3af;
+    font-style: italic;
+}
+
+.custom-date-picker {
+    cursor: pointer;
+}
+
+.error-input {
+    border-color: #dc2626 !important;
+    background-color: #fef2f2;
+}
+
+.error-input:focus {
+    border-color: #b91c1c !important;
+    box-shadow: 0px 0px 6px rgba(220, 38, 38, 0.4);
 }

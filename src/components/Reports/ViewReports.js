@@ -1,17 +1,20 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, {useState, useEffect, useContext, useRef} from "react";
 import axios from "axios";
-import {Link, useParams} from "react-router-dom";
+import {Link, useNavigate, useParams} from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import { useLoading } from "../../context/LoadingContext";
 import { API_CONFIG } from "../../config";
 import "./ViewReports.css";
 import DatePicker from "react-datepicker";
 import * as XLSX from 'xlsx';
+import {NotificationContext} from "../../context/NotificationContext";
 
 const ReportFormPage = () => {
     const { user } = useContext(AuthContext);
     const { startLoading, stopLoading } = useLoading();
     const { reportId } = useParams();
+    const { showNotification } = useContext(NotificationContext);
+    const navigate = useNavigate();
 
     const [reportDetails, setReportDetails] = useState(null);
     const [formValues, setFormValues] = useState({});
@@ -29,6 +32,7 @@ const ReportFormPage = () => {
 
     const [parentChildMap, setParentChildMap] = useState({});
     const [fieldTypes, setFieldTypes] = useState({});
+    const notificationShown = useRef(false);
 
     useEffect(() => {
         if (reportId) fetchReportDetails();
@@ -68,7 +72,7 @@ const ReportFormPage = () => {
             await fetchParameterList(reportName);
         } catch (err) {
             console.error("Error fetching report details:", err);
-            setError("Failed to load report details.");
+            showNotification("Failed to load report details!", 'error');
         } finally {
             stopLoading();
         }
@@ -76,6 +80,8 @@ const ReportFormPage = () => {
 
     const fetchParameterList = async (reportName) => {
         startLoading();
+
+
         try {
             const response = await axios.get(
                 `${API_CONFIG.baseURL}/runreports/FullParameterList?R_reportListing='${reportName}'&parameterType=true`,
@@ -119,7 +125,15 @@ const ReportFormPage = () => {
                 });
         } catch (err) {
             console.error("Error fetching parameter list:", err);
-            setError("Failed to load parameter list. Please try again.");
+
+            if (err.response && err.response.status === 403 && !notificationShown.current) {
+                showNotification("There was an error fetching the report parameters!", "error");
+                notificationShown.current = true;
+                navigate("/reports/all");
+            } else if (!notificationShown.current) {
+                showNotification("Failed to load parameter list. Please try refreshing.", "error");
+                notificationShown.current = true;
+            }
         } finally {
             stopLoading();
         }
@@ -165,13 +179,17 @@ const ReportFormPage = () => {
             const { data, columnHeaders } = response.data || {};
             const { idIndex, nameIndex } = getColumnIndices(columnHeaders || []);
 
-            const parsedOptions = (data || []).map((rowObj) => {
+            let parsedOptions = (data || []).map((rowObj) => {
                 const row = rowObj.row || [];
                 return { id: row[idIndex] || "", name: row[nameIndex] || "-" };
             });
 
-            const hasAllOption = parsedOptions.some(option => option.id === -1);
-            if (!hasAllOption) {
+            parsedOptions = parsedOptions.map(option =>
+                (option.id === -1 || option.id === -10) ? { ...option, name: "All" } : option
+            );
+
+            const hasAllOption = parsedOptions.some(option => option.id === -1 || option.id === -10);
+            if (!hasAllOption && !parameterName.toLowerCase().includes("office")) {
                 parsedOptions.unshift({ id: -1, name: "All" });
             }
 
@@ -253,7 +271,7 @@ const ReportFormPage = () => {
                     <select
                         value={formValues[parameterName] || ""}
                         onChange={(e) => handleParentChange(parameterName, e.target.value)}
-                        className="custom-select"
+                        className="custom-select modern-input"
                     >
                         <option value="">Select an option</option>
                         {(options[parameterName] || []).map((option) => (
@@ -271,9 +289,9 @@ const ReportFormPage = () => {
                         onChange={(date) =>
                             handleInputChange(parameterName, date ? date.toISOString().split("T")[0] : "")
                         }
-                        className="custom-date-picker"
+                        className="custom-date-picker modern-input"
                         placeholderText="Select a date"
-                        dateFormat="yyyy-MM-dd"
+                        dateFormat="d MMMM yyyy"
                         showPopperArrow={false}
                         showMonthDropdown
                         showYearDropdown
@@ -287,7 +305,7 @@ const ReportFormPage = () => {
                         type="text"
                         value={formValues[parameterName] || ""}
                         onChange={(e) => handleInputChange(parameterName, e.target.value)}
-                        className="custom-text-input"
+                        className="custom-text-input modern-input"
                         placeholder="Enter value"
                     />
                 );
@@ -329,6 +347,7 @@ const ReportFormPage = () => {
             setShowTable(true);
         } catch (err) {
             console.error("Error running report:", err.response?.data || err.message);
+            showNotification('There was an error running the report!', 'error');
         } finally {
             stopLoading();
         }
@@ -394,7 +413,7 @@ const ReportFormPage = () => {
             XLSX.writeFile(workbook, fileName);
         } catch (err) {
             console.error("Error running and downloading report:", err.message);
-            alert("Failed to run and download the report. Please try again.");
+            showNotification("Failed to run and download the report! Please try again!", 'error');
         } finally {
             stopLoading();
         }
@@ -562,7 +581,7 @@ const ReportFormPage = () => {
             XLSX.writeFile(workbook, fileName);
         } catch (error) {
             console.error("Error exporting XLSX:", error.message);
-            alert("Failed to export the report. Please try again or contact support.");
+            showNotification("Failed to export the report. Please try again or contact support!", 'error');
         }
     };
 

@@ -5,6 +5,7 @@ import { API_CONFIG } from '../../../config';
 import { AuthContext } from "../../../context/AuthContext";
 import { useLoading } from '../../../context/LoadingContext';
 import './AddAccountingRule.css';
+import {NotificationContext} from "../../../context/NotificationContext";
 
 const AddAccountingRule = () => {
     const [step, setStep] = useState(1);
@@ -25,18 +26,14 @@ const AddAccountingRule = () => {
         debitTag: false,
         creditTag: false,
     });
-
     const [currentStage, setCurrentStage] = useState(0);
     const [completedStages, setCompletedStages] = useState(new Set());
-    const [allStagesComplete, setAllStagesComplete] = useState(false);
-
     const [showRuleModal, setShowRuleModal] = useState(false);
     const [ruleDetails, setRuleDetails] = useState(null);
-
     const { user } = useContext(AuthContext);
     const { startLoading, stopLoading } = useLoading();
-
     const [isEditMode, setIsEditMode] = useState(false);
+    const {showNotification} = useContext(NotificationContext);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -108,6 +105,7 @@ const AddAccountingRule = () => {
 
             setRuleDetails(ruleDetailsResponse.data);
             setShowRuleModal(true);
+            showNotification("Accounting Rule Added successfully!", 'success');
         } catch (error) {
             console.error('Error submitting or fetching rule details:', error);
         } finally {
@@ -132,6 +130,7 @@ const AddAccountingRule = () => {
                     },
                 });
                 handleCloseModal();
+                showNotification("Accounting Rule deleted!", 'success');
             } catch (error) {
                 console.error('Error deleting accounting rule:', error);
             } finally {

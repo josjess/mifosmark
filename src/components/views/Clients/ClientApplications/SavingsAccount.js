@@ -47,6 +47,7 @@ const SavingsAccount = () => {
     const [modifyData, setModifyData] = useState(null);
     const [currency, setCurrency] = useState('');
     const [decimalPlaces, setDecimalPlaces] = useState('');
+    const [officerId, setOfficerId] = useState(null);
 
     const fetchData = async () => {
         startLoading();
@@ -65,6 +66,7 @@ const SavingsAccount = () => {
             ]);
 
             setClientData(clientResponse.data);
+            setOfficerId(clientResponse.data?.staffId);
             setSavingsTemplate(savingsTemplateResponse.data);
         } catch (error) {
             console.error('Error fetching savings account data:', error);
@@ -72,6 +74,12 @@ const SavingsAccount = () => {
             stopLoading();
         }
     };
+
+    useEffect(() => {
+        if (officerId && !fieldOfficer) {
+            setFieldOfficer(prev => (officerId));
+        }
+    }, [officerId]);
 
     useEffect(() => {
         if (isModifying) {
@@ -264,7 +272,7 @@ const SavingsAccount = () => {
                                         <select
                                             id="fieldOfficer"
                                             className="staged-form-select"
-                                            value={fieldOfficer}
+                                            value={fieldOfficer || ''}
                                             onChange={(e) => setFieldOfficer(e.target.value)}
                                         >
                                             <option value="">-- Select Field Officer --</option>

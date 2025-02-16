@@ -1,9 +1,11 @@
 import React, { useState, useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import './EditBaseURLModal.css';
+import {NotificationContext} from "../../context/NotificationContext";
 
 const EditBaseURLModal = ({ isOpen, onClose }) => {
     const { baseURL, tenantId, updateBaseURL, updateTenantId, logout } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const [newBaseURL, setNewBaseURL] = useState(baseURL || "https://");
     const [newTenantId, setNewTenantId] = useState(tenantId || "");
     const [confirmChange, setConfirmChange] = useState(false);
@@ -29,7 +31,7 @@ const EditBaseURLModal = ({ isOpen, onClose }) => {
         updateTenantId(newTenantId);
         onClose();
         logout();
-        alert("Base URL and Tenant ID updated successfully! You have been logged out.");
+        showNotification("Base URL and Tenant ID updated successfully! You have been logged out.", 'success');
     };
 
     const handleProceedToConfirmation = () => {
@@ -49,9 +51,9 @@ const EditBaseURLModal = ({ isOpen, onClose }) => {
                     <h4 className="Edit-URL-modal-title">Edit Base URL</h4>
                     <div className="Edit-URL-warning-section">
                         <p className="Edit-URL-warning-text">
-                            <strong>Warning:</strong> Changing the Base URL is a critical setting. Ensure you know what
-                            you are doing. Incorrect changes may disrupt the application's functionality. Proceed only
-                            if absolutely necessary.
+                            <strong>Warning:</strong> Changing the Base URL is a critical setting! Ensure you know what
+                            you are doing! Incorrect changes may disrupt the application's functionality. Proceed only
+                            if absolutely necessary!
                         </p>
                         <div className="Edit-URL-confirmation-checkbox">
                             <input

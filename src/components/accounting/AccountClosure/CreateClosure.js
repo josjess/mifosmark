@@ -6,6 +6,7 @@ import { API_CONFIG } from '../../../config';
 import './CreateClosure.css';
 import DatePicker from "react-datepicker";
 import {format} from "date-fns";
+import {NotificationContext} from "../../../context/NotificationContext";
 
 const CreateClosure = () => {
     const { user } = useContext(AuthContext);
@@ -16,6 +17,7 @@ const CreateClosure = () => {
     const [offices, setOffices] = useState([]);
     const [formErrors, setFormErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const {showNotification} = useContext(NotificationContext);
 
     useEffect(() => {
         fetchOffices();
@@ -74,6 +76,7 @@ const CreateClosure = () => {
                 setOffice('');
                 setClosingDate('');
                 setComments('');
+                showNotification("Closure creation submitted successfully!", 'success');
             } catch (error) {
                 console.error("Error submitting closure:", error.response?.data || error.message);
             }

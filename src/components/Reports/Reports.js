@@ -1,19 +1,21 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaFileAlt, FaUser, FaFileInvoice, FaPiggyBank, FaChartPie, FaCogs, FaBalanceScale } from 'react-icons/fa';
 import './Reports.css';
+import {AuthContext} from "../../context/AuthContext";
 
 const Reports = () => {
     const navigate = useNavigate();
+    const { componentVisibility } = useContext(AuthContext);
 
     const options = [
-        { label: 'All', description: 'All available reports', icon: FaFileAlt, path: '/reports/all', color: '#6a82fb' },
-        { label: 'Clients', description: 'Client-focused reports', icon: FaUser, path: '/reports/clients', color: '#70bc0e' },
-        { label: 'Loans', description: 'Loan reports and insights', icon: FaFileInvoice, path: '/reports/loans', color: '#ff7b42' },
-        { label: 'Savings', description: 'Savings data reports', icon: FaPiggyBank, path: '/reports/savings', color: '#4a90e2' },
-        { label: 'Funds', description: 'Fund allocations', icon: FaChartPie, path: '/reports/funds', color: '#fbb03b' },
-        { label: 'Accounting', description: 'Financial accounts', icon: FaCogs, path: '/reports/accounting', color: '#1abc9c' },
-        { label: 'XBRL', description: 'Financial statements', icon: FaBalanceScale, path: '/report/XBRL', color: '#3498db' }
+        { id: "sidebar-reports-all", label: 'All', description: 'All available reports', icon: FaFileAlt, path: '/reports/all', color: '#6a82fb' },
+        { id: "sidebar-reports-clients", label: 'Clients', description: 'Client-focused reports', icon: FaUser, path: '/reports/clients', color: '#70bc0e' },
+        { id: "sidebar-reports-loans", label: 'Loans', description: 'Loan reports and insights', icon: FaFileInvoice, path: '/reports/loans', color: '#ff7b42' },
+        { id: "sidebar-reports-savings", label: 'Savings', description: 'Savings data reports', icon: FaPiggyBank, path: '/reports/savings', color: '#4a90e2' },
+        { id: "sidebar-reports-funds", label: 'Funds', description: 'Fund allocations', icon: FaChartPie, path: '/reports/funds', color: '#fbb03b' },
+        { id: "sidebar-reports-accounting", label: 'Accounting', description: 'Financial accounts', icon: FaCogs, path: '/reports/accounting', color: '#1abc9c' },
+        { id: "sidebar-reports-XBRL", label: 'XBRL', description: 'Financial statements', icon: FaBalanceScale, path: '/report/XBRL', color: '#3498db' }
     ];
 
     const columns = [
@@ -30,8 +32,9 @@ const Reports = () => {
             <div className="reports-cards">
                 {columns.map((column, index) => (
                     <div key={index} className="reports-card">
-                        {column.map(({ label, description, icon: Icon, path, color }) => (
-                            <div key={label} className="reports-item" onClick={() => navigate(path)}>
+                        {column.map(({ id, label, description, icon: Icon, path, color }) => (
+                            <div key={label}
+                                 className={`reports-item ${componentVisibility[id] ? "" : "hidden"}`} onClick={() => navigate(path)}>
                                 <div className="icon-container" style={{ backgroundColor: color }}>
                                     <Icon className="reports-icon" />
                                 </div>

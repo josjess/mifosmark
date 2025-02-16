@@ -15,7 +15,7 @@ const LoanAccount = () => {
     const location = useLocation();
     const { isModification, accountId } = location.state || {};
     const [isModifying, setIsModifying] = useState(isModification || false);
-    const [account, setAccount] = useState(accountId || null);
+    const [account ] = useState(accountId || null);
 
     const [currentStage, setCurrentStage] = useState('Details');
     const [clientData, setClientData] = useState(null);
@@ -27,12 +27,8 @@ const LoanAccount = () => {
     const [isCollateralModalOpen, setIsCollateralModalOpen] = useState(false);
     const [selectedCollateral, setSelectedCollateral] = useState('');
     const [quantity, setQuantity] = useState('');
-    const [loanPurpose, setLoanPurpose] = useState('');
-    const [loanOfficer, setLoanOfficer] = useState('');
-    const [frequency, setFrequency] = useState('');
-    const [selectedCharge, setSelectedCharge] = useState('');
-    const [chargeOptions, setChargeOptions] = useState([]);
     const [overdueCharges, setCharges] = useState([]);
+    const [officerId, setOfficerId] = useState(null);
 
     const [formData, setFormData] = useState({
         productName: "",
@@ -58,12 +54,8 @@ const LoanAccount = () => {
     });
 
     const [submittedOn, setSubmittedOn] = useState('');
-    const [disbursementOn, setDisbursementOn] = useState('');
 
     const [loanDetails, setLoanDetails] = useState({});
-
-    const [externalId, setExternalId] = useState('');
-    const [allStagesComplete, setAllStagesComplete] = useState(false);
 
     const [visitedStages, setVisitedStages] = useState([]);
     const [modifyData, setModifyData] = useState(null);
@@ -239,6 +231,11 @@ const LoanAccount = () => {
     };
 
     const fetchData = async () => {
+        if (!clientId) {
+            console.error("clientId is missing, skipping data fetch.");
+            return;
+        }
+
         startLoading();
         try {
             const headers = {
@@ -246,31 +243,62 @@ const LoanAccount = () => {
                 'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
             };
 
-            const [clientResponse, loanTemplateResponse, datatableResponse, clientAccountsResponse, collateralsResponse, chargesResponse] = await Promise.all([
-                axios.get(`${API_CONFIG.baseURL}/clients/${clientId}`, { headers }),
-                axios.get(`${API_CONFIG.baseURL}/loans/template?activeOnly=true&staffInSelectedOfficeOnly=true&clientId=${clientId}&templateType=individual`, { headers }),
-                axios.get(`${API_CONFIG.baseURL}/datatables?apptable=m_client`, { headers }),
-                axios.get(`${API_CONFIG.baseURL}/clients/${clientId}/accounts`, { headers }),
-                axios.get(`${API_CONFIG.baseURL}/clients/${clientId}/collaterals/template`, { headers }),
-                axios.get(`${API_CONFIG.baseURL}/clients/${clientId}/charges?pendingPayment=true`, { headers }),
+            const clientRequest = axios.get(`${API_CONFIG.baseURL}/clients/${clientId}`, { headers });
+            const loanTemplateRequest = axios.get(`${API_CONFIG.baseURL}/loans/template?activeOnly=true&staffInSelectedOfficeOnly=true&clientId=${clientId}&templateType=individual`, { headers });
+            const datatableRequest = axios.get(`${API_CONFIG.baseURL}/datatables?apptable=m_client`, { headers });
+            const clientAccountsRequest = axios.get(`${API_CONFIG.baseURL}/clients/${clientId}/accounts`, { headers });
+            const collateralsRequest = axios.get(`${API_CONFIG.baseURL}/clients/${clientId}/collaterals/template`, { headers });
+            const chargesRequest = axios.get(`${API_CONFIG.baseURL}/clients/${clientId}/charges?pendingPayment=true`, { headers });
+
+            const responses = await Promise.allSettled([
+                clientRequest,
+                loanTemplateRequest,
+                datatableRequest,
+                clientAccountsRequest,
+                collateralsRequest,
+                chargesRequest
             ]);
 
-            setClientData(clientResponse.data);
-            setLoanTemplate(loanTemplateResponse.data);
-            setDatatableInfo(datatableResponse.data);
-            setClientAccounts(clientAccountsResponse.data);
-            setCollateralTemplate(collateralsResponse.data);
-            setCharges(chargesResponse.data.pageItems);
+            responses.forEach((response, index) => {
+                if (response.status === "fulfilled") {
+                    switch (index) {
+                        case 0:
+                            setClientData(response.value.data);
+                            setOfficerId(prev => {
+                                return response.value.data?.staffId;
+                            });
+                            break;
+                        case 1: setLoanTemplate(response.value.data); break;
+                        case 2: setDatatableInfo(response.value.data); break;
+                        case 3: setClientAccounts(response.value.data); break;
+                        case 4: setCollateralTemplate(response.value.data); break;
+                        case 5: setCharges(response.value.data.pageItems); break;
+                        default: break;
+                    }
+                } else {
+                    console.error(`Error in request ${index}:`, response.reason);
+                }
+            });
+
         } catch (error) {
-            console.error("Error fetching loan account data:", error);
+            console.error("Error fetching data:", error);
         } finally {
             stopLoading();
         }
     };
 
     useEffect(() => {
+        if (officerId && !formData.loanOfficer) {
+            setFormData(prev => ({
+                ...prev,
+                loanOfficer: officerId
+            }));
+        }
+    }, [officerId, formData.loanOfficer]);
+
+    useEffect(() => {
         fetchData();
-    }, []);
+    }, [clientId]);
 
     const fetchLoanProductDetails = async (productId) => {
         startLoading();
@@ -458,7 +486,7 @@ const LoanAccount = () => {
                                         <label htmlFor="loanOfficer">Loan Officer</label>
                                         <select
                                             id="loanOfficer"
-                                            value={formData.loanOfficer}
+                                            value={formData.loanOfficer || ""}
                                             onChange={handleInputChange}
                                             className="staged-form-select"
                                         >

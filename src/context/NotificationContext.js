@@ -5,7 +5,7 @@ export const NotificationContext = createContext();
 export const NotificationProvider = ({ children }) => {
     const [notifications, setNotifications] = useState([]);
 
-    const showNotification = useCallback((message, type = 'info', duration = 30000) => {
+    const showNotification = useCallback((message, type = 'info', duration = 10000) => {
         const id = Date.now();
         const newNotification = { id, message, type, duration };
         setNotifications(prev => [...prev, newNotification]);

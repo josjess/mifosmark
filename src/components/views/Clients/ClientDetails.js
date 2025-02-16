@@ -3876,8 +3876,6 @@ const ClientDetails = ({ clientId, onClose }) => {
                 destinationGroupId: parseInt(destinationGroupId, 10),
             };
 
-            console.log("Payload being sent:", payload);
-
             await axios.post(
                 `${API_CONFIG.baseURL}/clients/${clientId}?command=acceptTransfer`,
                 payload,

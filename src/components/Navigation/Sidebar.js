@@ -5,6 +5,7 @@ import { AuthContext } from '../../context/AuthContext';
 import { NotificationContext } from '../../context/NotificationContext';
 import { TbChevronDown, TbChevronRight } from 'react-icons/tb';
 import './Sidebar.css';
+import {FaSheetPlastic} from "react-icons/fa6";
 
 const Sidebar = () => {
     const { user, logout } = useContext(AuthContext);
@@ -142,6 +143,9 @@ const Sidebar = () => {
                                 {componentVisibility['sidebar-reports-accounting'] && (
                                     <li onClick={() => navigate('/reports/accounting')}>Accounting</li>
                                 )}
+                                {componentVisibility['sidebar-reports-pentaho'] && (
+                                    <li onClick={() => navigate('/reports/pentaho')}>Pentaho</li>
+                                )}
                                 {componentVisibility['sidebar-reports-XBRL'] && (
                                     <li onClick={() => navigate('/report/XBRL')}>XBRL</li>
                                 )}
@@ -172,7 +176,8 @@ const Sidebar = () => {
                                     <li onClick={() => navigate('/chart-of-accounts')}>Chart of Accounts</li>
                                 )}
                                 {componentVisibility['sidebar-accounting-financial-activity-mappings'] && (
-                                    <li onClick={() => navigate('/financial-activity-mappings')}>Financial Activity Mappings
+                                    <li onClick={() => navigate('/financial-activity-mappings')}>Financial Activity
+                                        Mappings
                                     </li>
                                 )}
                                 {/*<li onClick={() => navigate('/#migrate-balances')}>Migrate Opening Balances</li>*/}
@@ -218,6 +223,11 @@ const Sidebar = () => {
                         )}
                     </li>
                 )}
+                <li onClick={() => navigate('/collection-sheet')} className="side-nav-item">
+                    <div className="nav-left">
+                        <FaSheetPlastic className="nav-icon"/> Collection Sheet
+                    </div>
+                </li>
                 <li onClick={handleLogout} className="side-nav-item logout-item">
                     <div className="nav-left">
                         <FaSignOutAlt className="nav-icon"/> Logout

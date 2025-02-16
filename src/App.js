@@ -129,6 +129,7 @@ import CollateralDetails from "./components/views/Clients/CollateralDetails/Coll
 
 import SystemManagement from "./components/utilities/SystemManagement";
 import NotificationContainer from "./context/NotificationContainer";
+import CollectionSheet from "./components/CollectionSheet";
 
 const App = () => {
     const { redirectToLogin, authInitialized, baseURL } = useContext(AuthContext);
@@ -293,6 +294,7 @@ const App = () => {
                             <Route path="/client/:clientId/savings-account/:savingsAccountId" element={<SavingsDetails/>} />
                             <Route path="/client/:clientId/collaterals/:collateralId" element={<CollateralDetails />} />
                             <Route path="/management" element={<SystemManagement />} />
+                            <Route path="/collection-sheet" element={<CollectionSheet />} />
 
                         </Route>
                     </Routes>

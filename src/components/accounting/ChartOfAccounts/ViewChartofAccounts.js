@@ -4,6 +4,7 @@ import { AuthContext } from '../../../context/AuthContext';
 import { useLoading } from '../../../context/LoadingContext';
 import { API_CONFIG } from '../../../config';
 import './ViewChartOfAccounts.css';
+import {NotificationContext} from "../../../context/NotificationContext";
 
 const ChartOfAccountsTable = () => {
     const { user } = useContext(AuthContext);
@@ -18,6 +19,7 @@ const ChartOfAccountsTable = () => {
     const [showAccountModal, setShowAccountModal] = useState(false);
     const [accountDetails, setAccountDetails] = useState(null);
     const [parents, setParents] = useState([]);
+    const {showNotification} = useContext(NotificationContext);
 
     useEffect(() => {
         fetchAccounts();
@@ -131,7 +133,7 @@ const ChartOfAccountsTable = () => {
                     },
                 });
                 setShowAccountModal(false);
-                alert('Account deleted successfully.');
+                showNotification('Account deleted successfully!', 'success');
             } catch (error) {
                 console.error('Error deleting account:', error);
             } finally {

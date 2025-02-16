@@ -5,12 +5,14 @@ import { API_CONFIG } from '../../../config';
 import { useNavigate } from 'react-router-dom';
 import './ProvisioningEntries.css';
 import DatePicker from "react-datepicker";
+import {NotificationContext} from "../../../context/NotificationContext";
 
 const CreateProvisioningEntryForm = () => {
     const { user } = useContext(AuthContext);
     const navigate = useNavigate();
     const [provisioningDate, setProvisioningDate] = useState(new Date().toISOString().split('T')[0]);
     const [createJournalEntries, setCreateJournalEntries] = useState(false);
+    const {showNotification} = useContext(NotificationContext);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -26,9 +28,10 @@ const CreateProvisioningEntryForm = () => {
                     },
                 }
             );
-            console.log('Provisioning entry created successfully');
+            showNotification("Provisioning entry created successfully!", 'success');
             navigate('/accounting'); // Redirect after successful submission
         } catch (error) {
+            showNotification("Error creating provisioning entry:", error);
             console.error('Error creating provisioning entry:', error);
         }
     };

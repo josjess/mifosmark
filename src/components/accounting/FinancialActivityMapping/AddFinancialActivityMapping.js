@@ -4,6 +4,7 @@ import { AuthContext } from '../../../context/AuthContext';
 import { useLoading } from '../../../context/LoadingContext';
 import { API_CONFIG } from '../../../config';
 import './AddFinancialActivityMapping.css';
+import {NotificationContext} from "../../../context/NotificationContext";
 
 const AddFinancialActivityMappingForm = () => {
     const { user } = useContext(AuthContext);
@@ -16,6 +17,7 @@ const AddFinancialActivityMappingForm = () => {
     const [mappingDetails, setMappingDetails] = useState(null);
     const [showMappingModal, setShowMappingModal] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
+    const {showNotification} = useContext(NotificationContext);
 
     useEffect(() => {
         const fetchTemplateData = async () => {
@@ -108,6 +110,7 @@ const AddFinancialActivityMappingForm = () => {
 
             setFinancialActivity('');
             setAccount('');
+            showNotification("Mapping created successfully!", 'success');
         } catch (error) {
             console.error('Error creating financial activity mapping:', error);
         } finally {
@@ -178,6 +181,7 @@ const AddFinancialActivityMappingForm = () => {
 
             setMappingDetails(updatedMappingDetailsResponse.data);
             setShowMappingModal(true);
+            showNotification("Mapping updated!", 'info');
         } catch (error) {
             console.error('Error updating financial activity mapping:', error);
         } finally {
@@ -198,6 +202,7 @@ const AddFinancialActivityMappingForm = () => {
                 setShowMappingModal(false);
                 setMappingDetails(null);
                 resetFormFields();
+                showNotification("Mapping deleted!", 'info');
             } catch (error) {
                 console.error('Error deleting mapping:', error);
             } finally {

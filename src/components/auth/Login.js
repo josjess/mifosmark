@@ -133,12 +133,12 @@ const Login = () => {
         try {
             if (setupStep === 1) {
                 if (!newUsername || !newPassword || !confirmPassword) {
-                    alert("All fields are required.");
+                    showNotification("All fields are required.", 'info');
                     return;
                 }
 
                 if (newPassword !== confirmPassword) {
-                    alert("Passwords do not match.");
+                    showNotification("Passwords do not match.", 'info');
                     return;
                 }
 
@@ -146,7 +146,7 @@ const Login = () => {
                 setSetupStep(2);
             } else if (setupStep === 2) {
                 if (!securityQuestion1 || !securityAnswer1 || !securityQuestion2 || !securityAnswer2) {
-                    alert("All fields are required.");
+                    showNotification("All fields are required.", 'info');
                     return;
                 }
 
@@ -155,12 +155,12 @@ const Login = () => {
                     { question: securityQuestion2, answer: securityAnswer2 },
                 ]);
 
-                alert("Super Admin setup completed!");
+                showNotification("Super Admin setup completed!", 'success');
                 navigate("/");
             }
         } catch (error) {
             console.error("Error during setup:", error);
-            alert("An error occurred during setup. Please try again.");
+            showNotification("An error occurred during setup. Please try again.", 'error');
         }
     };
 
@@ -375,17 +375,17 @@ const Login = () => {
                                     </button>
                                 </div>
                             </div>
-                            <div className="form-group-login remember-me">
-                                <label htmlFor="rememberMe">
-                                    <input
-                                        type="checkbox"
-                                        id="rememberMe"
-                                        checked={rememberMe}
-                                        onChange={(e) => setRememberMe(e.target.checked)}
-                                    />
-                                    Remember Me
-                                </label>
-                            </div>
+                            {/*<div className="form-group-login remember-me">*/}
+                            {/*    <label htmlFor="rememberMe">*/}
+                            {/*        <input*/}
+                            {/*            type="checkbox"*/}
+                            {/*            id="rememberMe"*/}
+                            {/*            checked={rememberMe}*/}
+                            {/*            onChange={(e) => setRememberMe(e.target.checked)}*/}
+                            {/*        />*/}
+                            {/*        Remember Me*/}
+                            {/*    </label>*/}
+                            {/*</div>*/}
 
                             <button type="submit" className="login-btn">
                                 Login

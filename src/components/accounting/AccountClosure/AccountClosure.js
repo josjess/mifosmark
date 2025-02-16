@@ -6,6 +6,7 @@ import { API_CONFIG } from "../../../config";
 import "./AccountClosure.css";
 import { format } from "date-fns";
 import {FaEdit, FaTrash, FaTrashAlt} from "react-icons/fa";
+import {NotificationContext} from "../../../context/NotificationContext";
 
 const AccountClosure = () => {
     const { user } = useContext(AuthContext);
@@ -18,6 +19,7 @@ const AccountClosure = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [pageSize, setPageSize] = useState(10);
+    const {showNotification} = useContext(NotificationContext);
 
     useEffect(() => {
         fetchClosures();
@@ -96,6 +98,7 @@ const AccountClosure = () => {
             );
             // console.log("Closure updated:", response.data);
             setShowModal(false);
+            showNotification("Closure Updated!", 'success');
             fetchClosures();
         } catch (error) {
             console.error("Error updating closure:", error);
@@ -117,6 +120,7 @@ const AccountClosure = () => {
                 },
             });
             // console.log("Closure deleted");
+            showNotification("Closure Deleted!", 'success');
             fetchClosures();
         } catch (error) {
             console.error("Error deleting closure:", error);

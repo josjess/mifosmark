@@ -4,6 +4,7 @@ import { AuthContext } from '../../../context/AuthContext';
 import { useLoading } from '../../../context/LoadingContext';
 import { API_CONFIG } from '../../../config';
 import './AddGLAccountForm.css';
+import {NotificationContext} from "../../../context/NotificationContext";
 
 const AddAccountForm = () => {
     const { user } = useContext(AuthContext);
@@ -27,6 +28,7 @@ const AddAccountForm = () => {
 
     const [showAccountModal, setShowAccountModal] = useState(false);
     const [accountDetails, setAccountDetails] = useState(null);
+    const {showNotification} = useContext(NotificationContext);
 
     useEffect(() => {
         const fetchTemplateData = async () => {
@@ -105,6 +107,7 @@ const AddAccountForm = () => {
             setTag('');
             setManualEntriesAllowed(true);
             setDescription('');
+            showNotification("GL Account created successfully!", 'success');
         } catch (error) {
             console.error('Error creating account:', error);
         } finally {
@@ -167,7 +170,7 @@ const AddAccountForm = () => {
 
             setAccountDetails(updatedAccountDetailsResponse.data);
             setShowAccountModal(true);
-
+            showNotification("Account Updated successfully!", 'success');
         } catch (error) {
             console.error('Error updating account:', error);
         } finally {
@@ -202,7 +205,7 @@ const AddAccountForm = () => {
                     },
                 });
                 setShowAccountModal(false);
-                alert('Account deleted successfully.');
+                showNotification("Account deleted successfully!", 'success');
             } catch (error) {
                 console.error('Error deleting account:', error);
             } finally {

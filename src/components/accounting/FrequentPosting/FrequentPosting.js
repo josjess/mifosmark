@@ -5,6 +5,8 @@ import axios from "axios";
 import {API_CONFIG} from "../../../config";
 import {AuthContext} from "../../../context/AuthContext";
 import DatePicker from "react-datepicker";
+import {format} from "date-fns";
+import {NotificationContext} from "../../../context/NotificationContext";
 
 const FrequentPostingForm = () => {
     const { user } = useContext(AuthContext);
@@ -34,6 +36,7 @@ const FrequentPostingForm = () => {
     const [bankNumber, setBankNumber] = useState('');
     const [comments, setComments] = useState('');
     const { startLoading, stopLoading } = useLoading();
+    const {showNotification} = useContext(NotificationContext);
 
     const isStep1Complete = office && accountingRule && currency && transactionDate;
     const isStep2Complete =  paymentType;
@@ -85,22 +88,59 @@ const FrequentPostingForm = () => {
         }
     };
 
-    const handleSubmit = () => {
-        console.log("Form Submitted!");
-        console.log({
-            office,
-            accountingRule,
-            currency,
-            referenceNumber,
-            transactionDate,
-            paymentType,
-            accountNumber,
-            chequeNumber,
-            routingCode,
-            receiptNumber,
-            bankNumber,
-            comments,
-        });
+    const handleSubmit = async (e) => {
+        startLoading();
+        e.preventDefault();
+
+        const formattedDate = format(new Date(transactionDate), "dd MMMM yyyy");
+
+        const payload = {
+            accountNumber: accountNumber,
+            accountingRule: parseFloat(accountingRule),
+            bankNumber: bankNumber,
+            checkNumber: chequeNumber,
+            comments: comments,
+            dateFormat: "dd MMMM yyyy",
+            locale: 'en',
+            credits: [],
+            debits: [],
+            currencyCode: currency,
+            officeId: parseInt(office),
+            paymentTypeId: parseInt(paymentType),
+            receiptNumber: receiptNumber,
+            referenceNumber: referenceNumber,
+            routingCode: routingCode,
+            transactionDate: formattedDate,
+        }
+
+        try {
+            const response = await axios.post(`${API_CONFIG.baseURL}/journalentries`, payload,{
+                headers: {
+                    Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+                    "Content-Type": "application/json",
+                },
+            });
+            showNotification("Transaction Posted!", 'success');
+        } catch (error) {
+            console.error("Error creating journal entry:", error);
+        } finally {
+            stopLoading();
+        }
+        // console.log({
+        //     office,
+        //     accountingRule,
+        //     currency,
+        //     referenceNumber,
+        //     transactionDate,
+        //     paymentType,
+        //     accountNumber,
+        //     chequeNumber,
+        //     routingCode,
+        //     receiptNumber,
+        //     bankNumber,
+        //     comments,
+        // });
     };
 
     const renderStageTracker = () => {

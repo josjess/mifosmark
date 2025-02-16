@@ -5,10 +5,12 @@ import { API_CONFIG } from '../../../config';
 import './Accruals.css';
 import {useNavigate} from "react-router-dom";
 import DatePicker from "react-datepicker";
+import {NotificationContext} from "../../../context/NotificationContext";
 
 const AccrualForm = () => {
     const { user } = useContext(AuthContext);
     const navigate = useNavigate();
+    const {showNotification} = useContext(NotificationContext);
     const [accrueUntil, setAccrueUntil] = useState(new Date().toISOString().split('T')[0]);
 
     const handleSubmit = async (e) => {
@@ -17,7 +19,7 @@ const AccrualForm = () => {
         const selectedDate = new Date(accrueUntil);
         const today = new Date();
         if (selectedDate >= today) {
-            alert("The selected date must be less than today's date.");
+            showNotification("The selected date must be less than today's date.", 'info');
             return;
         }
 
@@ -47,6 +49,7 @@ const AccrualForm = () => {
             );
 
             // console.log("Accrual submitted successfully:", response.data);
+            showNotification("Accrual submitted successfully!", 'success');
             navigate("/accounting");
         } catch (error) {
             console.error('Error submitting accrual:', error);
