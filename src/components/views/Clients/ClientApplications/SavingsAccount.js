@@ -6,10 +6,12 @@ import { useLoading } from '../../../../context/LoadingContext';
 import { API_CONFIG } from '../../../../config';
 import DatePicker from 'react-datepicker';
 import {FaTrash} from "react-icons/fa";
+import {NotificationContext} from "../../../../context/NotificationContext";
 
 const SavingsAccount = () => {
     const { clientId } = useParams();
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const navigate = useNavigate();
     const location = useLocation();
@@ -209,7 +211,7 @@ const SavingsAccount = () => {
             );
             setSelectedCharge('');
         } else {
-            alert('Please select a valid charge to add.');
+            showNotification('Please select a valid charge to add!', 'info');
         }
     };
 
@@ -872,12 +874,12 @@ const SavingsAccount = () => {
                 },
             });
 
-            alert(isModifying ? "Saving Account modified successfully!" : "Saving Account created successfully!");
+            showNotification(isModifying ? "Saving Account modified successfully!" : "Saving Account created successfully!", 'success');
             setIsModifying(false);
             navigate(`/client/${clientId}/savings-account/${response.data.savingsId}`, { state: { account: payload } });
         } catch (error) {
             console.error("Error submitting loan:", error);
-            alert("Failed to submit the loan. Please try again.");
+            showNotification("Failed to submit the loan. Please try again!", 'error');
         } finally {
             stopLoading();
         }

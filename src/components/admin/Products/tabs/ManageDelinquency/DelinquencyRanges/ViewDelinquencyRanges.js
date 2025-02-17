@@ -4,9 +4,11 @@ import { AuthContext } from '../../../../../../context/AuthContext';
 import { useLoading } from '../../../../../../context/LoadingContext';
 import { API_CONFIG } from '../../../../../../config';
 import './ViewDelinquencyRanges.css';
+import {NotificationContext} from "../../../../../../context/NotificationContext";
 
 const ViewDelinquencyRanges = () => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const [ranges, setRanges] = useState([]);
     const [pageSize, setPageSize] = useState(10);
@@ -88,11 +90,12 @@ const ViewDelinquencyRanges = () => {
                     },
                 }
             );
-            // console.log('Delinquency range updated successfully:', response.data);
+            showNotification('Delinquency range updated successfully:', 'success');
             setIsModalOpen(false);
             fetchDelinquencyRanges();
         } catch (error) {
             console.error('Error updating delinquency range:', error);
+            showNotification('Error updating delinquency range:', 'error');
         } finally {
             stopLoading();
         }
@@ -112,11 +115,12 @@ const ViewDelinquencyRanges = () => {
                         },
                     }
                 );
-                // console.log('Delinquency range deleted successfully.');
+                showNotification('Delinquency range deleted successfully!', 'success');
                 setIsModalOpen(false);
                 fetchDelinquencyRanges();
             } catch (error) {
                 console.error('Error deleting delinquency range:', error);
+                showNotification('Error deleting delinquency range:', 'error');
             } finally {
                 stopLoading();
             }

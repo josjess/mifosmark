@@ -6,10 +6,12 @@ import { useLoading } from '../../../../context/LoadingContext';
 import { API_CONFIG } from '../../../../config';
 import DatePicker from "react-datepicker";
 import {FaTrash} from "react-icons/fa";
+import {NotificationContext} from "../../../../context/NotificationContext";
 
 const LoanAccount = () => {
     const { clientId } = useParams();
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const navigate = useNavigate();
     const location = useLocation();
@@ -224,7 +226,7 @@ const LoanAccount = () => {
             setLoanDetails(response.data);
         } catch (error) {
             console.error("Error generating repayment schedule:", error);
-            alert("Failed to generate repayment schedule. Please try again.");
+            showNotification("Failed to generate repayment schedule. Please try again!", 'error');
         } finally {
             stopLoading();
         }
@@ -344,7 +346,7 @@ const LoanAccount = () => {
         );
 
         if (!selectedCharge) {
-            alert('Please select a charge to add.');
+            showNotification('Please select a charge to add!', 'info');
             return;
         }
 
@@ -364,7 +366,7 @@ const LoanAccount = () => {
 
     const handleAddCollateral = () => {
         if (!selectedCollateral || !quantity) {
-            alert('Please select a collateral and enter quantity.');
+            showNotification('Please select a collateral and enter quantity!', 'info');
             return;
         }
 
@@ -1252,7 +1254,7 @@ const LoanAccount = () => {
                 },
             });
 
-            alert(isModifying ? "Loan modified successfully!" : 'Loan submitted successfully!');
+            showNotification(isModifying ? "Loan modified successfully!" : 'Loan submitted successfully!', 'success');
             setIsModifying(false);
             setFormData({
                 principal: '',
@@ -1284,7 +1286,7 @@ const LoanAccount = () => {
             });
         } catch (error) {
             console.error("Error submitting loan:", error);
-            alert("Failed to submit the loan. Please try again.");
+            showNotification("Failed to submit the loan. Please try again!", 'error');
         } finally {
             stopLoading();
         }

@@ -4,9 +4,11 @@ import { AuthContext } from "../../../../../context/AuthContext";
 import { useLoading } from "../../../../../context/LoadingContext";
 import { API_CONFIG } from "../../../../../config";
 import "./CreateFund.css";
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const CreateFund = ({ onFormSubmitSuccess }) => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
 
     const [name, setName] = useState("");
@@ -31,6 +33,7 @@ const CreateFund = ({ onFormSubmitSuccess }) => {
             });
 
             onFormSubmitSuccess();
+            showNotification("Fund created successfully!", 'success');
         } catch (error) {
             console.error("Error creating fund:", error);
         } finally {

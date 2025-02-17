@@ -5,9 +5,11 @@ import { useLoading } from "../../../../../context/LoadingContext";
 import { AuthContext } from "../../../../../context/AuthContext";
 import "./AmazonS3Service.css";
 import {Link} from "react-router-dom";
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const AmazonS3Service = () => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const [data, setData] = useState([]);
     const [editMode, setEditMode] = useState(false);
@@ -31,6 +33,7 @@ const AmazonS3Service = () => {
             setData(response.data || []);
         } catch (error) {
             console.error("Error fetching S3 data:", error);
+            showNotification("Error fetching S3 data!", 'error');
         } finally {
             stopLoading();
         }
@@ -72,12 +75,12 @@ const AmazonS3Service = () => {
                     },
                 }
             );
-            // console.log("Submitted Values:", formValues);
+            showNotification("Submitted successfully!:", 'success');
             setEditMode(false);
             fetchS3Data();
         } catch (error) {
             console.error("Error updating S3 data:", error);
-            setSubmitError("Failed to submit the form. Please try again.");
+            showNotification("Failed to submit the form. Please try again!", 'error');
         } finally {
             stopLoading();
         }

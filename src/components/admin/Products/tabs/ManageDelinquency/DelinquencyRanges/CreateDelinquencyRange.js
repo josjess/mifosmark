@@ -4,9 +4,11 @@ import { AuthContext } from "../../../../../../context/AuthContext";
 import { useLoading } from "../../../../../../context/LoadingContext";
 import { API_CONFIG } from "../../../../../../config";
 import "./CreateDelinquencyRange.css";
+import {NotificationContext} from "../../../../../../context/NotificationContext";
 
 const CreateDelinquencyRange = () => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const [classification, setClassification] = useState("");
     const [daysFrom, setDaysFrom] = useState("");
@@ -35,8 +37,10 @@ const CreateDelinquencyRange = () => {
                     },
                 }
             );
+            showNotification("Delinquency range created successfully!", 'success');
         } catch (error) {
             console.error("Error creating delinquency range:", error);
+            showNotification("Error creating delinquency range:", 'error');
         } finally {
             stopLoading();
         }

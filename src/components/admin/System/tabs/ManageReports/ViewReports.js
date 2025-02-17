@@ -4,9 +4,11 @@ import { AuthContext } from '../../../../../context/AuthContext';
 import { useLoading } from '../../../../../context/LoadingContext';
 import { API_CONFIG } from '../../../../../config';
 import './ViewReports.css';
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const ViewReportsTable = () => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const [reports, setReports] = useState([]);
     const [pageSize, setPageSize] = useState(10);
@@ -108,8 +110,10 @@ const ViewReportsTable = () => {
             );
             setIsModalOpen(false);
             fetchReports();
+            showNotification("Report updated successfully!", 'success');
         } catch (error) {
             console.error("Error updating report:", error);
+            showNotification("Error updating report!", 'error');
         } finally {
             stopLoading();
         }

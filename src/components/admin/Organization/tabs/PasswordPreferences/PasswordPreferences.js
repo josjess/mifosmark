@@ -5,9 +5,11 @@ import { AuthContext } from '../../../../../context/AuthContext';
 import { useLoading } from '../../../../../context/LoadingContext';
 import { API_CONFIG } from '../../../../../config';
 import './PasswordPreferences.css';
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const PasswordPreferences = () => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const [preferences, setPreferences] = useState([]);
     const [selectedPreference, setSelectedPreference] = useState(null);
@@ -64,7 +66,7 @@ const PasswordPreferences = () => {
                     'Content-Type': 'application/json',
                 },
             });
-            alert('Password preference updated successfully!');
+            showNotification('Password preference updated successfully!', 'success');
             navigate('/organization');
         } catch (error) {
             console.error('Error updating password preference:', error);

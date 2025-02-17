@@ -7,12 +7,14 @@ import { useLoading } from '../../../context/LoadingContext';
 import { API_CONFIG } from '../../../config';
 import { AuthContext } from '../../../context/AuthContext';
 import { FaPlus, FaMinus } from 'react-icons/fa';
+import {NotificationContext} from "../../../context/NotificationContext";
 
 const CreateTemplateForm = () => {
     const [step, setStep] = useState(1);
     const [entityOptions, setEntityOptions] = useState([]);
     const [typeOptions, setTypeOptions] = useState([]);
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const [templateForm, setTemplateForm] = useState({
         entity: '',
@@ -131,7 +133,7 @@ const CreateTemplateForm = () => {
             });
 
             if (response.status === 200) {
-                alert("Template successfully created!");
+                showNotification("Template successfully created!", 'success');
                 setCurrentStage(0);
                 setCompletedStages(new Set());
                 setTemplateForm({
@@ -144,10 +146,9 @@ const CreateTemplateForm = () => {
             }
         } catch (error) {
             console.error("Error submitting template:", error);
-            alert("An error occurred. Please try again.");
+            showNotification("An error occurred. Please try again!", 'error');
         }
     };
-
 
     const renderStageTracker = () => (
         <div className="staged-form-stage-tracker">

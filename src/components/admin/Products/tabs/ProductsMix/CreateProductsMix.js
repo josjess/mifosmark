@@ -4,9 +4,11 @@ import { AuthContext } from "../../../../../context/AuthContext";
 import { useLoading } from "../../../../../context/LoadingContext";
 import { API_CONFIG } from "../../../../../config";
 import "./CreateProductsMix.css";
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const CreateProductsMix = () => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
 
     const [products, setProducts] = useState([]);
@@ -81,12 +83,13 @@ const CreateProductsMix = () => {
                     "Content-Type": "application/json",
                 },
             });
-            // alert("Products Mix created successfully!");
+            showNotification("Products Mix created successfully!, 'success");
             setSelectedProduct("");
             setSelectedRestrictedProducts([]);
             setAllowedProducts([]);
         } catch (error) {
             console.error("Error creating products mix:", error);
+            showNotification("Error creating products mix:", 'error');
         } finally {
             stopLoading();
         }

@@ -6,9 +6,11 @@ import { API_CONFIG } from '../../../../../config';
 import { Link } from 'react-router-dom';
 import { FiEdit } from 'react-icons/fi';
 import './Configuration.css';
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const ConfigurationPage = () => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const [configurations, setConfigurations] = useState([]);
     const [filter, setFilter] = useState({ name: '', status: '' });
@@ -41,6 +43,7 @@ const ConfigurationPage = () => {
             // console.log('Global Config:',response.data.globalConfiguration);
         } catch (error) {
             console.error('Error fetching configurations:', error);
+            showNotification('Error fetching configurations!', 'error');
             setConfigurations([]);
         } finally {
             stopLoading();
@@ -68,9 +71,10 @@ const ConfigurationPage = () => {
                     'Content-Type': 'application/json',
                 },
             });
-            // console.log(`Status for configuration ID ${id} updated successfully.`);
+            showNotification(`Status for configuration ID ${id} updated successfully!`, 'success');
         } catch (error) {
             console.error(`Failed to update status for configuration ID ${id}:`, error);
+            showNotification(`Failed to update status for configuration ID ${id}!`, 'error');
 
             setConfigurations((prev) =>
                 prev.map((config) =>
@@ -129,7 +133,7 @@ const ConfigurationPage = () => {
             setIsSubmitDisabled(true);
         } catch (error) {
             console.error("Error fetching configuration details:", error);
-            // alert("Failed to fetch configuration details. Please try again.");
+            showNotification("Failed to fetch configuration details. Please try again!", 'error');
         } finally {
             stopLoading();
         }
@@ -167,12 +171,12 @@ const ConfigurationPage = () => {
                 }
             );
 
-            // alert("Configuration updated successfully!");
+            showNotification("Configuration updated successfully!", 'success');
             setShowEditModal(false);
             fetchConfigurations();
         } catch (error) {
             console.error("Error updating configuration:", error);
-            // alert("Failed to update configuration. Please try again.");
+            showNotification("Failed to update configuration! Please try again!", 'error');
         } finally {
             stopLoading();
         }

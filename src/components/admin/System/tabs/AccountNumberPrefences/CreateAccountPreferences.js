@@ -4,9 +4,11 @@ import { AuthContext } from '../../../../../context/AuthContext';
 import { useLoading } from '../../../../../context/LoadingContext';
 import { API_CONFIG } from '../../../../../config';
 import './CreateAccountPreference.css';
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const AccountNumberPreferenceForm = () => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const [accountTypeOptions, setAccountTypeOptions] = useState([]);
     const [prefixTypeOptions, setPrefixTypeOptions] = useState([]);
@@ -51,7 +53,7 @@ const AccountNumberPreferenceForm = () => {
 
     const handleSubmit = async () => {
         if (!formData.accountType || !formData.prefixType) {
-            alert('Both Account Type and Prefix Type are required!');
+            showNotification('Both Account Type and Prefix Type are required!', 'info');
             return;
         }
         startLoading();
@@ -72,11 +74,12 @@ const AccountNumberPreferenceForm = () => {
                 }
             );
             if (response.status === 200) {
-                // alert('Account Number Preference created successfully!');
+                showNotification('Account Number Preference created successfully!', 'success');
                 setFormData({ accountType: '', prefixType: '' });
             }
         } catch (error) {
             console.error('Error creating account number preference:', error);
+            showNotification('Error creating account number preference:', 'error');
         } finally {
             stopLoading();
         }

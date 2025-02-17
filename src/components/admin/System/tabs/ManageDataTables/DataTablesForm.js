@@ -5,9 +5,11 @@ import { API_CONFIG } from '../../../../../config';
 import './DataTablesForm.css';
 import axios from "axios";
 import {FaEdit, FaTrash} from "react-icons/fa";
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const DataTableForm = ({ setActiveTab }) => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
 
     const [originalModalData, setOriginalModalData] = useState(null);
@@ -153,6 +155,7 @@ const DataTableForm = ({ setActiveTab }) => {
             }
         } catch (error) {
             console.error("Error creating data table:", error.response?.data || error.message);
+            showNotification("Error creating data table!", 'error');
         } finally {
             stopLoading();
         }

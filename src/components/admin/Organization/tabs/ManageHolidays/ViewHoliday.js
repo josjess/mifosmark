@@ -5,10 +5,12 @@ import { AuthContext } from "../../../../../context/AuthContext";
 import { useLoading } from "../../../../../context/LoadingContext";
 import { API_CONFIG } from "../../../../../config";
 import "./ViewHoliday.css";
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const ViewHoliday = () => {
     const { id } = useParams();
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const navigate = useNavigate();
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -96,6 +98,7 @@ const ViewHoliday = () => {
                         }
                     );
                     fetchHolidayDetails();
+                    showNotification("Holiday activated", 'info');
                 } catch (error) {
                     console.error("Error activating holiday:", error);
                 }
@@ -114,6 +117,7 @@ const ViewHoliday = () => {
                         },
                     });
                     navigate("/manage-holidays");
+                    showNotification("Holiday deleted!", 'error');
                 } catch (error) {
                     console.error("Error deleting holiday:", error);
                 }
@@ -173,6 +177,7 @@ const ViewHoliday = () => {
             );
             fetchHolidayDetails();
             setIsEditModalOpen(false);
+            showNotification("Holiday updated successfully!", 'info');
         } catch (error) {
             console.error("Error submitting edit:", error);
         } finally {

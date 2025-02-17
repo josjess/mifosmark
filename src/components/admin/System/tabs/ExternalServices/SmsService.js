@@ -5,9 +5,11 @@ import { useLoading } from "../../../../../context/LoadingContext";
 import { AuthContext } from "../../../../../context/AuthContext";
 import { Link } from "react-router-dom";
 import "./SmsService.css";
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const SmsService = () => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const [data, setData] = useState([]);
     const [editMode, setEditMode] = useState(false);
@@ -30,6 +32,7 @@ const SmsService = () => {
             setData(response.data || []);
         } catch (error) {
             console.error("Error fetching SMS service data:", error);
+            showNotification("Error fetching SMS service data!", 'error');
         } finally {
             stopLoading();
         }
@@ -70,11 +73,12 @@ const SmsService = () => {
                     },
                 }
             );
-            // console.log("Update Response:", response.data);
+            showNotification("Updated successfully!", 'success');
             fetchSmsData();
             setEditMode(false);
         } catch (error) {
             console.error("Error updating SMS service data:", error);
+            showNotification("Error updating SMS service data!", 'error');
         } finally {
             stopLoading();
         }

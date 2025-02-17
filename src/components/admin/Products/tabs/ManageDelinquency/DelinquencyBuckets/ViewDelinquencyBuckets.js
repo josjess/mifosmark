@@ -5,9 +5,11 @@ import { useLoading } from '../../../../../../context/LoadingContext';
 import { API_CONFIG } from '../../../../../../config';
 import './ViewDelinquencyBuckets.css';
 import { FaTrash } from 'react-icons/fa';
+import {NotificationContext} from "../../../../../../context/NotificationContext";
 
 const ViewDelinquencyBuckets = () => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const [buckets, setBuckets] = useState([]);
     const [ranges, setRanges] = useState([]);
@@ -133,11 +135,12 @@ const ViewDelinquencyBuckets = () => {
                     },
                 }
             );
-            // console.log('Bucket updated successfully.');
+            showNotification('Bucket updated successfully!', 'success');
             setIsBucketModalOpen(false);
             fetchDelinquencyBuckets();
         } catch (error) {
             console.error('Error updating bucket:', error);
+            showNotification('Error updating bucket:', 'error');
         } finally {
             stopLoading();
         }
@@ -158,11 +161,12 @@ const ViewDelinquencyBuckets = () => {
                     },
                 }
             );
-            // console.log('Bucket deleted successfully.');
+            showNotification('Bucket deleted successfully!', 'success');
             setIsBucketModalOpen(false);
             fetchDelinquencyBuckets();
         } catch (error) {
             console.error('Error deleting bucket:', error);
+            showNotification('Error deleting bucket:', 'error');
         } finally {
             stopLoading();
         }

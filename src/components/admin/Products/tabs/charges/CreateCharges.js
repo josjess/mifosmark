@@ -4,9 +4,11 @@ import { AuthContext } from "../../../../../context/AuthContext";
 import { useLoading } from "../../../../../context/LoadingContext";
 import { API_CONFIG } from "../../../../../config";
 import './CreateCharges.css'
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const CreateChargeForm = () => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
 
     const [chargeAppliesToOptions, setChargeAppliesToOptions] = useState([]);
@@ -141,7 +143,7 @@ const CreateChargeForm = () => {
                     "Content-Type": "application/json",
                 },
             });
-            alert("Charge created successfully!");
+            showNotification("Charge created successfully!", 'success');
             setSelectedChargeAppliesTo("");
             setFormValues({
                 chargeName: "",

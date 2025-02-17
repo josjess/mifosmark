@@ -4,9 +4,11 @@ import { AuthContext } from "../../../../../context/AuthContext";
 import { useLoading } from "../../../../../context/LoadingContext";
 import { API_CONFIG } from "../../../../../config";
 import "./CreateEntityDataTableCheck.css";
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const CreateEntityDataTableCheck = () => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
 
     const [entities, setEntities] = useState([]);
@@ -104,12 +106,13 @@ const CreateEntityDataTableCheck = () => {
                     "Content-Type": "application/json",
                 },
             });
-            // alert("Entity Data Table Check created successfully!");
+            showNotification("Entity Data Table Check created successfully!", 'success');
             setSelectedEntity("");
             setSelectedStatus("");
             setSelectedDatatable("");
         } catch (error) {
             console.error("Error creating Entity Data Table Check:", error);
+            showNotification("Error creating Entity Data Table Check:", 'error');
         } finally {
             stopLoading();
         }

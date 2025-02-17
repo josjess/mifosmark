@@ -5,9 +5,12 @@ import { useLoading } from '../../../../../context/LoadingContext';
 import { API_CONFIG } from '../../../../../config';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import './ViewPaymentTypes.css';
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const ViewPaymentTypes = () => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
+
     const { startLoading, stopLoading } = useLoading();
     const [paymentTypes, setPaymentTypes] = useState([]);
     const [nameFilter, setNameFilter] = useState('');
@@ -98,7 +101,7 @@ const ViewPaymentTypes = () => {
 
     const handleSubmit = async () => {
         if (!editPaymentType.name || !editPaymentType.position) {
-            alert("Payment Type and Position are required!");
+            showNotification("Payment Type and Position are required!", 'info');
             return;
         }
 
@@ -115,13 +118,13 @@ const ViewPaymentTypes = () => {
                     },
                 }
             );
-            alert("Payment Type updated successfully!");
+            showNotification("Payment Type updated successfully!", 'success');
             setShowEditModal(false);
             setEditPaymentType(null);
             fetchPaymentTypes();
         } catch (error) {
             console.error("Error updating payment type:", error);
-            alert("Failed to update Payment Type. Please try again.");
+            showNotification("Failed to update Payment Type. Please try again!", 'error');
         } finally {
             stopLoading();
         }
@@ -146,11 +149,11 @@ const ViewPaymentTypes = () => {
                     },
                 }
             );
-
+            showNotification("Payment Type deleted!", 'success');
             setPaymentTypes((prev) => prev.filter((type) => type.id !== paymentType.id));
         } catch (error) {
             console.error('Error deleting payment type:', error);
-            alert('Failed to delete the payment type. Please try again.');
+            showNotification('Failed to delete the payment type. Please try again!', 'error');
         } finally {
             stopLoading();
         }

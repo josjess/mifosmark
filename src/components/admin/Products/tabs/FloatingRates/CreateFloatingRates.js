@@ -5,9 +5,11 @@ import { AuthContext } from "../../../../../context/AuthContext";
 import { useLoading } from "../../../../../context/LoadingContext";
 import { API_CONFIG } from "../../../../../config";
 import "./CreateFloatingRates.css";
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const CreateFloatingRate = () => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
 
     const getTomorrowDate = () => {
@@ -80,13 +82,14 @@ const CreateFloatingRate = () => {
                     "Content-Type": "application/json",
                 },
             });
-            alert("Floating Rate created successfully!");
+            showNotification("Floating Rate created successfully!", 'success');
             setName("");
             setIsBaseLendingRate(false);
             setIsActive(false);
             setFloatingRatePeriods([]);
         } catch (error) {
             console.error("Error creating floating rate:", error);
+            showNotification("Error creating floating rate:", 'error');
         } finally {
             stopLoading();
         }

@@ -4,6 +4,7 @@ import { AuthContext } from "../../../context/AuthContext";
 import { API_CONFIG } from "../../../config";
 import "./CreateUser.css";
 import {FaEye, FaEyeSlash} from "react-icons/fa";
+import {NotificationContext} from "../../../context/NotificationContext";
 
 const CreateUserForm = ({ onUserCreated }) => {
     const stages = ["Basic Information", "Settings", "Preview"];
@@ -38,6 +39,7 @@ const CreateUserForm = ({ onUserCreated }) => {
     const [isStep2Valid, setIsStep2Valid] = useState(false);
 
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
 
     const isStep1Complete = () =>
         username.length >= 5 &&
@@ -184,7 +186,7 @@ const CreateUserForm = ({ onUserCreated }) => {
             }
         } catch (error) {
             console.error("Error creating user:", error);
-            alert("An error occurred while creating the user. Please try again.");
+            showNotification("An error occurred while creating the user. Please try again!", 'error');
         }
     };
 

@@ -4,9 +4,11 @@ import { useLoading } from '../../../../../context/LoadingContext';
 import { API_CONFIG } from '../../../../../config';
 import { FaTrash } from 'react-icons/fa';
 import './WorkflowJobs.css';
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const WorkflowJobs = () => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
 
     const [jobNames, setJobNames] = useState([]);
@@ -84,7 +86,7 @@ const WorkflowJobs = () => {
 
             if (response.status === 204) {
                 setAvailableSteps([]);
-                alert('No available steps to add for this job.');
+                showNotification('No available steps to add for this job!', 'info');
                 return;
             }
 
@@ -97,7 +99,7 @@ const WorkflowJobs = () => {
             setShowModal(true);
         } catch (error) {
             console.error('Error fetching available steps:', error);
-            alert('Failed to fetch available steps. Please try again.');
+            showNotification('Failed to fetch available steps. Please try again!', 'error');
         } finally {
             stopLoading();
         }
@@ -146,13 +148,15 @@ const WorkflowJobs = () => {
             });
 
             if (response.ok) {
-                alert('Changes applied successfully!');
+                showNotification('Changes applied successfully!', 'success');
                 setInitialLinkedSteps([...linkedSteps]); // Update initial state after successful save
             } else {
                 console.error('Error applying changes:', await response.json());
+                showNotification('Error applying changes!', 'error');
             }
         } catch (error) {
             console.error('Error applying changes:', error);
+            showNotification('Error applying changes!', "error");
         } finally {
             stopLoading();
         }

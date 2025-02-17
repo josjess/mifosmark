@@ -5,9 +5,11 @@ import { useLoading } from "../../../../../context/LoadingContext";
 import { AuthContext } from "../../../../../context/AuthContext";
 import { Link } from "react-router-dom";
 import "./NotificationService.css";
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const NotificationService = () => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const [data, setData] = useState([]);
     const [editMode, setEditMode] = useState(false);
@@ -30,6 +32,7 @@ const NotificationService = () => {
             setData(response.data || []);
         } catch (error) {
             console.error("Error fetching notification service data:", error);
+            showNotification("Error fetching notification service data:", 'error');
         } finally {
             stopLoading();
         }
@@ -70,11 +73,12 @@ const NotificationService = () => {
                 }
             );
 
-            // console.log("Update Response:", response.data);
+            showNotification("Updated successfully!", 'success');
             fetchNotificationData();
             setEditMode(false);
         } catch (error) {
             console.error("Error updating notification service data:", error);
+            showNotification("Error updating notification service data!", 'error');
         } finally {
             stopLoading();
         }

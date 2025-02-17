@@ -63,7 +63,7 @@ const ViewSurveysTable = () => {
     };
 
     const handleRowClick = (survey) => {
-        console.log('Row Data:', survey);
+        // console.log('Row Data:', survey);
     };
 
     return (

@@ -4,9 +4,11 @@ import { useLoading } from '../../../../../context/LoadingContext';
 import { API_CONFIG } from '../../../../../config';
 import { FaTrash } from 'react-icons/fa';
 import './HookForm.css';
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const HookForm = () => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
 
     const [hookTemplates, setHookTemplates] = useState([]);
@@ -151,7 +153,7 @@ const HookForm = () => {
             });
 
             if (response.ok) {
-                // alert('Hook created successfully!');
+                showNotification('Hook created successfully!', 'success');
                 setFormData({
                     hookTemplate: '',
                     displayName: '',
@@ -167,11 +169,11 @@ const HookForm = () => {
             } else {
                 const error = await response.json();
                 console.error('Error creating hook:', error);
-                alert('Failed to create hook. Please check your input.');
+                showNotification('Failed to create hook. Please check your input!', 'error');
             }
         } catch (error) {
             console.error('Error submitting hook form:', error);
-            alert('An unexpected error occurred. Please try again.');
+            showNotification('An unexpected error occurred. Please try again!', 'error');
         } finally {
             stopLoading();
         }

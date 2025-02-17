@@ -4,9 +4,11 @@ import { AuthContext } from '../../../../../context/AuthContext';
 import { useLoading } from '../../../../../context/LoadingContext';
 import './RoleDetailTab.css';
 import { API_CONFIG } from '../../../../../config';
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const RoleDetailTab = ({ role, onClose}) => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const [permissions, setPermissions] = useState([]);
     const [collapsedGroups, setCollapsedGroups] = useState({});
@@ -118,9 +120,10 @@ const RoleDetailTab = ({ role, onClose}) => {
 
             setIsEditing(false);
             fetchRoleDetails();
+            showNotification("Permissions updated successfully!", 'success');
         } catch (error) {
             console.error('Error updating permissions:', error);
-            alert('Failed to update permissions. Please try again.');
+            showNotification('Failed to update permissions! Please try again!', 'error');
         } finally {
             stopLoading();
         }
@@ -147,9 +150,10 @@ const RoleDetailTab = ({ role, onClose}) => {
             setIsEditing(false);
             setPermissions([]);
             onClose();
+            showNotification(`Permision ${action} successfully!`, 'success');
         } catch (error) {
             console.error(`Error ${role.disabled ? 'enabling' : 'disabling'} the role:`, error);
-            alert(`Failed to ${action} the role. Please try again.`);
+            showNotification(`Failed to ${action} the role. Please try again!`, 'error');
         } finally {
             stopLoading();
         }
@@ -186,9 +190,10 @@ const RoleDetailTab = ({ role, onClose}) => {
             );
 
             onClose();
+            showNotification("Role deleted successfully!", 'success');
         } catch (error) {
             console.error('Error deleting role:', error);
-            alert('Failed to delete the role. Please try again.');
+            showNotification('Failed to delete the role. Please try again!', 'error');
         } finally {
             stopLoading();
         }

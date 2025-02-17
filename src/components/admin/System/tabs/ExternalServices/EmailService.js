@@ -5,9 +5,11 @@ import { useLoading } from "../../../../../context/LoadingContext";
 import { AuthContext } from "../../../../../context/AuthContext";
 import { Link } from "react-router-dom";
 import "./EmailService.css";
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const EmailService = () => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const [data, setData] = useState([]);
     const [editMode, setEditMode] = useState(false);
@@ -78,11 +80,12 @@ const EmailService = () => {
                 }
             );
 
-            // console.log("Update Response:", response.data);
+            showNotification("Updated successfully!", 'success');
             fetchEmailData();
             setEditMode(false);
         } catch (error) {
             console.error("Error updating email service data:", error);
+            showNotification("Error updating email service data!", 'error');
         } finally {
             stopLoading();
         }

@@ -6,9 +6,11 @@ import { useLoading } from '../../../../../context/LoadingContext';
 import { API_CONFIG } from '../../../../../config';
 import './BulkLoanReassignment.css';
 import DatePicker from "react-datepicker";
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const BulkLoanReassignment = () => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const navigate = useNavigate();
 
@@ -365,11 +367,11 @@ const BulkLoanReassignment = () => {
                 }
             }
 
-            alert('Bulk reassignment successful!');
+            showNotification('Bulk reassignment successful!', 'success');
             navigate('/organization');
         } catch (error) {
             console.error('Error submitting reassignment:', error);
-            alert('Failed to reassign accounts. Please try again.');
+            showNotification('Failed to reassign accounts. Please try again!', 'error');
         } finally {
             stopLoading();
         }

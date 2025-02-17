@@ -5,9 +5,11 @@ import { useLoading } from "../../../../../context/LoadingContext";
 import { API_CONFIG } from "../../../../../config";
 import { FaEdit } from "react-icons/fa";
 import "./CreateProvisioningCriteria.css";
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const CreateProvisioningCriteria = () => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
 
     const [criteriaName, setCriteriaName] = useState("");
@@ -107,7 +109,7 @@ const CreateProvisioningCriteria = () => {
                     "Content-Type": "application/json",
                 },
             });
-            alert("Provisioning Criteria created successfully!");
+            showNotification("Provisioning Criteria created successfully!", 'success');
         } catch (error) {
             console.error("Error creating provisioning criteria:", error);
         } finally {

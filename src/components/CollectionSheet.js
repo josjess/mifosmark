@@ -34,6 +34,15 @@ const CollectionSheet = () => {
     const [selectedPayment, setSelectedPayment] = useState(null);
     const [paymentType, setPaymentType] = useState("");
     const [receiptNumber, setReceiptNumber] = useState("");
+    const [paymentAmount, setPaymentAmount] = useState("");
+    const [savedPayments, setSavedPayments] = useState({});
+
+    useEffect(() => {
+        // Reset the paymentAmount when selectedPayment changes
+        if (selectedPayment) {
+            setPaymentAmount("");
+        }
+    }, [selectedPayment]);
 
     const openPaymentModal = (item, type) => {
         setSelectedPayment({ ...item, type });
@@ -48,20 +57,25 @@ const CollectionSheet = () => {
     };
 
     const handleSavePayment = () => {
-        if (!paymentType || !receiptNumber) {
-            showNotification("Please select a payment type and enter a receipt number!", "info");
+        if (!paymentType || !receiptNumber || !paymentAmount) {
+            showNotification("Please fill in all required fields: payment type, receipt number, and amount!", "info");
             return;
         }
 
         const paymentData = {
-            accountId: selectedPayment.accountId,
-            clientId: selectedPayment.clientId,
-            collectionType: selectedPayment.type,
+            loanId: selectedPayment.type === "loan" ? selectedPayment.accountId : null,
+            savingId: selectedPayment.type === "saving" ? selectedPayment.accountId : null,
+            transactionAmount: parseFloat(paymentAmount),
             paymentType,
-            receiptNumber
+            receiptNumber,
         };
 
-        showNotification("Payment Added Successfully!", "success");
+        setSavedPayments(prev => ({
+            ...prev,
+            [selectedPayment.accountId]: paymentData
+        }));
+
+        showNotification("Payment Saved!", "success");
         closePaymentModal();
     };
 
@@ -179,7 +193,6 @@ const CollectionSheet = () => {
         } finally {
             stopLoading();
             setSelectedOffice(null);
-            setSelectedDate("");
             setSelectedStaff(null);
         }
     };
@@ -213,6 +226,41 @@ const CollectionSheet = () => {
 
     const paginatedLoans = filteredLoans.slice((loanPage - 1) * loanPageSize, loanPage * loanPageSize);
     const paginatedSavings = filteredSavings.slice((savingsPage - 1) * savingsPageSize, savingsPage * savingsPageSize);
+
+    const handleSave = async () => {
+        const formattedDate = new Date(selectedDate).toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
+        });
+
+        const bulkRepaymentTransactions = Object.values(savedPayments).filter(p => p.loanId !== null);
+
+        const payload = {
+            dateFormat: "dd MMMM yyyy",
+            locale: "en",
+            transactionDate: formattedDate,
+            bulkRepaymentTransactions,
+        };
+
+        try {
+            startLoading();
+            const response = await axios.post(`${API_CONFIG.baseURL}/collectionsheet?command=saveCollectionSheet`, payload, {
+                headers: {
+                    Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                    "Fineract-Platform-TenantId": `${API_CONFIG.tenantId}`,
+                    "Content-Type": "application/json",
+                },
+            });
+            showNotification("Collection Sheet Submitted Successfully!", "success");
+            setShowForm(true);
+        } catch (err) {
+            console.error("Error submitting collection sheet:", err);
+            showNotification("Failed to submit collection sheet! Please try again.", "error");
+        } finally {
+            stopLoading();
+        }
+    };
 
     return (
         <div className="custom-page-container neighbor-element">
@@ -376,21 +424,32 @@ const CollectionSheet = () => {
                                     <div className="pagination">
                                         <button
                                             className="pagination-button"
-                                            onClick={() => setLoanPage(1)} disabled={loanPage === 1}>Start</button>
+                                            onClick={() => setLoanPage(1)} disabled={loanPage === 1}>Start
+                                        </button>
                                         <button
                                             className="pagination-button"
-                                            onClick={() => setLoanPage(prev => Math.max(prev - 1, 1))} disabled={loanPage === 1}>Previous</button>
+                                            onClick={() => setLoanPage(prev => Math.max(prev - 1, 1))}
+                                            disabled={loanPage === 1}>Previous
+                                        </button>
                                         <span>Page {loanPage} of {totalLoanPages}</span>
                                         <button
                                             className="pagination-button"
                                             onClick={() => setLoanPage(prev => Math.min(prev + 1, totalLoanPages))}
-                                                disabled={loanPage === totalLoanPages}>Next</button>
+                                            disabled={loanPage === totalLoanPages}>Next
+                                        </button>
                                         <button
                                             className="pagination-button"
                                             onClick={() => setLoanPage(totalLoanPages)}
-                                                disabled={loanPage === totalLoanPages}>End</button>
+                                            disabled={loanPage === totalLoanPages}>End
+                                        </button>
                                     </div>
                                 )}
+
+                                <div className="submit-button-container">
+                                    <button onClick={handleSave} className="submit-button">
+                                        Submit Collection Sheet
+                                    </button>
+                                </div>
                             </>
                         )}
 
@@ -402,7 +461,8 @@ const CollectionSheet = () => {
                                             <label>Filter by Deposit Account, Client Name, or Product Name: </label>
                                             <input type="text"
                                                    placeholder="Filter by Deposit Account, Client Name, or Product Name"
-                                                   value={savingsFilter} onChange={(e) => setSavingsFilter(e.target.value)}
+                                                   value={savingsFilter}
+                                                   onChange={(e) => setSavingsFilter(e.target.value)}
                                                    className="filter-input"/>
                                         </div>
                                     </div>
@@ -463,21 +523,32 @@ const CollectionSheet = () => {
                                     <div className="pagination">
                                         <button
                                             className="pagination-button"
-                                            onClick={() => setSavingsPage(1)} disabled={savingsPage === 1}>Start</button>
+                                            onClick={() => setSavingsPage(1)} disabled={savingsPage === 1}>Start
+                                        </button>
                                         <button
                                             className="pagination-button"
-                                            onClick={() => setSavingsPage(prev => Math.max(prev - 1, 1))} disabled={savingsPage === 1}>Previous</button>
+                                            onClick={() => setSavingsPage(prev => Math.max(prev - 1, 1))}
+                                            disabled={savingsPage === 1}>Previous
+                                        </button>
                                         <span>Page {savingsPage} of {totalSavingsPages}</span>
                                         <button
                                             className="pagination-button"
                                             onClick={() => setSavingsPage(prev => Math.min(prev + 1, totalSavingsPages))}
-                                                disabled={savingsPage === totalSavingsPages}>Next</button>
+                                            disabled={savingsPage === totalSavingsPages}>Next
+                                        </button>
                                         <button
                                             className="pagination-button"
                                             onClick={() => setSavingsPage(totalSavingsPages)}
-                                                disabled={savingsPage === totalSavingsPages}>End</button>
+                                            disabled={savingsPage === totalSavingsPages}>End
+                                        </button>
                                     </div>
                                 )}
+
+                                <div className="submit-button-container">
+                                    <button onClick={handleSave} className="submit-button">
+                                        Submit Collection Sheet
+                                    </button>
+                                </div>
                             </>
                         )}
                     </div>
@@ -486,10 +557,12 @@ const CollectionSheet = () => {
             {showPaymentModal && selectedPayment && (
                 <div className="create-provisioning-criteria-modal-overlay">
                     <div className="create-provisioning-criteria-modal-content">
-                        <h3 className="create-modal-title">Payment for {selectedPayment.type === "loan" ? "Loan" : "Saving"} account Id: {selectedPayment.accountId}</h3>
+                        <h3 className="create-modal-title">Payment
+                            for {selectedPayment.type === "loan" ? "Loan" : "Saving"} account
+                            Id: {selectedPayment.accountId}</h3>
 
                         <div className="create-provisioning-criteria-group">
-                            <label className="create-provisioning-criteria-label">Payment Type:</label>
+                            <label className="create-provisioning-criteria-label">Payment Type <span>*</span></label>
                             <select
                                 value={paymentType}
                                 className="create-provisioning-criteria-input"
@@ -502,11 +575,26 @@ const CollectionSheet = () => {
                         </div>
 
                         <div className="create-provisioning-criteria-group">
-                            <label className="create-provisioning-criteria-label">Receipt Number:</label>
+                            <label className="create-provisioning-criteria-label">Receipt Number <span>*</span></label>
                             <input type="text"
                                    value={receiptNumber}
                                    className="create-provisioning-criteria-input"
-                                   onChange={(e) => setReceiptNumber(e.target.value)} />
+                                   onChange={(e) => setReceiptNumber(e.target.value)}/>
+                        </div>
+
+                        <div className="create-provisioning-criteria-group">
+                            <label htmlFor="paymentAmount" className="create-provisioning-criteria-label">
+                                Amount <span>*</span>
+                            </label>
+                            <input
+                                type="number"
+                                id="paymentAmount"
+                                value={paymentAmount}
+                                onChange={(e) => setPaymentAmount(parseFloat(e.target.value))}
+                                min="0"
+                                className="create-provisioning-criteria-input"
+                                step="10"
+                            />
                         </div>
 
                         <div className="create-provisioning-criteria-modal-actions">

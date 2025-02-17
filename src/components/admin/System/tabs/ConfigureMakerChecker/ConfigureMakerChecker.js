@@ -5,9 +5,11 @@ import { useLoading } from '../../../../../context/LoadingContext';
 import { API_CONFIG } from '../../../../../config';
 import { Link } from 'react-router-dom';
 import './ConfigureMakerChecker.css';
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const ConfigureMakerChecker = () => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const [activities, setActivities] = useState([]);
     const [permissions, setPermissions] = useState({});
@@ -45,6 +47,7 @@ const ConfigureMakerChecker = () => {
             setCollapsedGroups(initialCollapsed);
         } catch (error) {
             console.error('Error fetching activities:', error);
+            showNotification('Error fetching activities!', 'error');
         } finally {
             stopLoading();
         }
@@ -94,8 +97,10 @@ const ConfigureMakerChecker = () => {
                 },
             });
             setEditMode(false);
+            showNotification("Permissions updated!", 'success')
         } catch (error) {
             console.error('Error updating permissions:', error);
+            showNotification('Error updating permissions!', 'error');
         } finally {
             stopLoading();
         }

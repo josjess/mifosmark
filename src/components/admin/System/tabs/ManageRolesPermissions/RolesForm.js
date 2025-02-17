@@ -3,9 +3,11 @@ import { AuthContext } from '../../../../../context/AuthContext';
 import { API_CONFIG } from '../../../../../config';
 import axios from 'axios';
 import './RolesForm.css';
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const RoleForm = ({ setActiveTab, onRolesUpdate }) => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [error, setError] = useState('');
@@ -28,14 +30,14 @@ const RoleForm = ({ setActiveTab, onRolesUpdate }) => {
                     },
                 }
             );
-            console.log('Role Created:', response.data);
+            showNotification('Role Created!', 'success');
 
             onRolesUpdate();
 
             setActiveTab('viewRoles');
         } catch (err) {
             console.error('Error creating role:', err);
-            setError('Failed to create role. Please try again.');
+            showNotification('Failed to create role. Please try again!', 'error');
         }
     };
 

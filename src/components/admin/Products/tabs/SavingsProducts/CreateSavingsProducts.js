@@ -4,6 +4,7 @@ import { AuthContext } from "../../../../../context/AuthContext";
 import { useLoading } from "../../../../../context/LoadingContext";
 import { API_CONFIG } from "../../../../../config";
 import { FaTrash} from "react-icons/fa";
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const stages = [
     "Details",
@@ -21,6 +22,7 @@ const CreateSavingsProducts = ({ onSuccess, productToEdit}) => {
     const [errors, setErrors] = useState({});
     const [isNextDisabled, setIsNextDisabled] = useState(true);
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
 
     useEffect( () => {
@@ -193,7 +195,7 @@ const CreateSavingsProducts = ({ onSuccess, productToEdit}) => {
             );
 
             if (response.status === 200 || response.status === 201) {
-                alert(`Savings Product ${productToEdit ? 'Updated' : 'Created'} Successfully!`);
+                showNotification(`Savings Product ${productToEdit ? 'Updated' : 'Created'} Successfully!`, 'success');
 
                 const productName = formData?.Details?.productName || 'Savings Product';
 
@@ -206,13 +208,13 @@ const CreateSavingsProducts = ({ onSuccess, productToEdit}) => {
                 });
             } else {
                 console.error(`Error ${productToEdit ? 'Updating' : 'Creating'} Savings Product:`, response.data);
-                alert(`Error ${productToEdit ? 'Updating' : 'Creating'} Savings Product.`);
+                showNotification(`Error ${productToEdit ? 'Updating' : 'Creating'} Savings Product.`, 'error');
             }
         } catch (error) {
             console.error("Error in handlePreview:", error.response?.data || error.message);
-            alert(
+            showNotification(
                 error.response?.data?.defaultUserMessage ||
-                "An unexpected error occurred."
+                "An unexpected error occurred.", 'error'
             );
         }
     };

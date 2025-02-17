@@ -5,9 +5,11 @@ import { AuthContext } from "../../../../../../context/AuthContext";
 import { useLoading } from "../../../../../../context/LoadingContext";
 import { API_CONFIG } from "../../../../../../config";
 import "./CreateDelinquencyBucket.css";
+import {NotificationContext} from "../../../../../../context/NotificationContext";
 
 const CreateDelinquencyBucket = () => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const [name, setName] = useState("");
     const [delinquencyRanges, setDelinquencyRanges] = useState([]);
@@ -69,11 +71,12 @@ const CreateDelinquencyBucket = () => {
                     "Content-Type": "application/json",
                 },
             });
-            alert("Delinquency bucket created successfully!");
+            showNotification("Delinquency bucket created successfully!", 'success');
             setName("");
             setSelectedRanges([]);
         } catch (error) {
             console.error("Error creating delinquency bucket:", error);
+            showNotification("Error creating delinquency bucket:", 'error');
         } finally {
             stopLoading();
         }

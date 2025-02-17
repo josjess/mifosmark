@@ -5,13 +5,13 @@ import { AuthContext } from '../../../../../context/AuthContext';
 import './DataTableDetail.css';
 import { API_CONFIG } from '../../../../../config';
 import { FaCheck, FaTimes } from 'react-icons/fa';
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const DataTableDetail = ({ dataTable, onCloseTab, tabId }) => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const [tableDetails, setTableDetails] = useState(null);
-    const [setCodes] = useState([]);
-
 
     useEffect(() => {
         fetchTableDetails();
@@ -56,9 +56,10 @@ const DataTableDetail = ({ dataTable, onCloseTab, tabId }) => {
                 }
             );
             onCloseTab(tabId);
+            showNotification("Table deleted successfully!", 'success');
         } catch (err) {
             console.error('Error deleting table:', err);
-            alert('Failed to delete the table. Please try again later.');
+            showNotification('Failed to delete the table. Please try again later!', 'error');
         } finally {
             stopLoading();
         }

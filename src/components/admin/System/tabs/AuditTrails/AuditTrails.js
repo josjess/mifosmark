@@ -6,9 +6,11 @@ import { useLoading } from "../../../../../context/LoadingContext";
 import "./AuditTrails.css";
 import { saveAs } from "file-saver";
 import {Link} from "react-router-dom";
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const AuditTrails = () => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const [filters, setFilters] = useState({
         resourceId: "",
@@ -127,6 +129,7 @@ const AuditTrails = () => {
             setIsModalOpen(true);
         } catch (error) {
             console.error("Error fetching row data:", error);
+            showNotification("Error fetching row data!", 'error');
         } finally {
             stopLoading();
         }

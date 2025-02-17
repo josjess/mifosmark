@@ -4,9 +4,11 @@ import { useLoading } from '../../../../../context/LoadingContext';
 import { FaTrash, FaEdit } from 'react-icons/fa';
 import { API_CONFIG } from '../../../../../config';
 import './CreateReport.css';
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const ReportForm = () => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
 
     const [editParameterIndex, setEditParameterIndex] = useState(null);
@@ -110,7 +112,7 @@ const ReportForm = () => {
             });
 
             if (response.ok) {
-                alert('Report created successfully!');
+                showNotification('Report created successfully!', 'success');
                 setFormData({
                     reportName: '',
                     reportType: '',
@@ -124,9 +126,11 @@ const ReportForm = () => {
             } else {
                 const error = await response.json();
                 console.error('Error creating report:', error);
+                showNotification('Error creating report!', 'error');
             }
         } catch (error) {
             console.error('Error submitting report form:', error);
+            showNotification('Error submitting report form!', 'error');
         } finally {
             stopLoading();
         }

@@ -6,10 +6,12 @@ import { useLoading } from '../../../../context/LoadingContext';
 import { API_CONFIG } from '../../../../config';
 import DatePicker from "react-datepicker";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
+import {NotificationContext} from "../../../../context/NotificationContext";
 
 const CentersSavingsApplication = () => {
     const { centerId } = useParams();
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const navigate = useNavigate();
 
@@ -134,10 +136,10 @@ const CentersSavingsApplication = () => {
 
             await axios.post(`${API_CONFIG.baseURL}/savingsaccounts`, submissionData, { headers });
 
-            alert("Center savings application submitted successfully!");
+            showNotification("Center savings application submitted successfully!", 'success');
         } catch (error) {
             console.error('Error submitting savings application:', error);
-            alert('Submission failed. Please try again.');
+            showNotification('Submission failed. Please try again!', 'error');
         } finally {
             stopLoading();
         }

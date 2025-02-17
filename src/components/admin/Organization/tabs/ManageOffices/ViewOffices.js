@@ -4,9 +4,11 @@ import { AuthContext } from '../../../../../context/AuthContext';
 import { useLoading } from '../../../../../context/LoadingContext';
 import { API_CONFIG } from '../../../../../config';
 import './ViewOffices.css';
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const ViewOffices = () => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const [offices, setOffices] = useState([]);
     const [pageSize, setPageSize] = useState(10);
@@ -89,7 +91,7 @@ const ViewOffices = () => {
                     },
                 }
             );
-            console.log("Office updated successfully:", response.data);
+            showNotification("Office updated successfully:", 'success');
             setIsOfficeModalOpen(false);
             fetchOffices();
         } catch (error) {

@@ -5,9 +5,11 @@ import { useLoading } from '../../../../../context/LoadingContext';
 import { API_CONFIG } from '../../../../../config';
 import './ViewTellers.css';
 import {FaEye} from "react-icons/fa";
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const ViewTellers = ({onViewCashiers}) => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const [tellers, setTellers] = useState([]);
     const [branchFilter, setBranchFilter] = useState('');
@@ -144,6 +146,7 @@ const ViewTellers = ({onViewCashiers}) => {
             });
             fetchTellers();
             setIsModalOpen(false);
+            showNotification("Teller updated successfully!", 'success');
         } catch (error) {
             console.error('Error updating teller:', error);
         } finally {
@@ -163,6 +166,7 @@ const ViewTellers = ({onViewCashiers}) => {
             });
             fetchTellers();
             setIsModalOpen(false);
+            showNotification("Teller deleted successfully!", 'success');
         } catch (error) {
             console.error('Error deleting teller:', error);
         } finally {

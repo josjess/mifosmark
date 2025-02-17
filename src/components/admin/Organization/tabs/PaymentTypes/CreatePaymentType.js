@@ -4,9 +4,11 @@ import { AuthContext } from "../../../../../context/AuthContext";
 import { useLoading } from "../../../../../context/LoadingContext";
 import { API_CONFIG } from "../../../../../config";
 import "./CreatePaymentType.css";
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const CreatePaymentType = ({ onFormSubmitSuccess }) => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
 
     const [paymentType, setPaymentType] = useState("");
@@ -34,6 +36,7 @@ const CreatePaymentType = ({ onFormSubmitSuccess }) => {
                 },
             });
             onFormSubmitSuccess();
+            showNotification("Payment type created successfully!", 'success');
         } catch (error) {
             console.error("Error creating payment type:", error);
         } finally {

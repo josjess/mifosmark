@@ -61,7 +61,7 @@ const ViewHooksTable = () => {
     };
 
     const handleRowClick = (hook) => {
-        console.log('Row Data:', hook);
+        // console.log('Row Data:', hook);
     };
 
     return (

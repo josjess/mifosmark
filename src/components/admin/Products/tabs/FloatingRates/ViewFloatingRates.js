@@ -4,9 +4,11 @@ import { AuthContext } from '../../../../../context/AuthContext';
 import { useLoading } from '../../../../../context/LoadingContext';
 import { API_CONFIG } from '../../../../../config';
 import './ViewFloatingRates.css';
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const ViewFloatingRates = () => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const [floatingRates, setFloatingRates] = useState([]);
     const [pageSize, setPageSize] = useState(10);
@@ -36,6 +38,7 @@ const ViewFloatingRates = () => {
             setFloatingRates(response.data || []);
         } catch (error) {
             console.error('Error fetching floating rates:', error);
+            showNotification('Error fetching floating rates:', 'error');
         } finally {
             stopLoading();
         }
@@ -54,7 +57,7 @@ const ViewFloatingRates = () => {
     );
 
     const handleRowClick = (rate) => {
-        console.log('Selected Floating Rate:', rate);
+        // console.log('Selected Floating Rate:', rate);
     };
 
     return (

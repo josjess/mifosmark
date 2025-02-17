@@ -5,9 +5,11 @@ import { AuthContext } from "../../../../../../context/AuthContext";
 import { useLoading } from "../../../../../../context/LoadingContext";
 import { API_CONFIG } from "../../../../../../config";
 import "./CreateTaxGroup.css";
+import {NotificationContext} from "../../../../../../context/NotificationContext";
 
 const CreateTaxGroup = () => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const [name, setName] = useState("");
     const [taxComponents, setTaxComponents] = useState([]);
@@ -89,11 +91,12 @@ const CreateTaxGroup = () => {
                     "Content-Type": "application/json",
                 },
             });
-            alert("Tax group created successfully!");
+            showNotification("Tax group created successfully!", 'success');
             setName("");
             setSelectedComponents([]);
         } catch (error) {
             console.error("Error creating tax group:", error);
+            showNotification("Error creating tax group:", 'error');
         } finally {
             stopLoading();
         }

@@ -5,9 +5,11 @@ import { AuthContext } from '../../../../../context/AuthContext';
 import { useLoading } from '../../../../../context/LoadingContext';
 import './SchedulerJobs.css';
 import {FaTrash} from "react-icons/fa";
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const SchedulerJobs = ({ onRowClick }) => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const [schedulerStatus, setSchedulerStatus] = useState(null);
     const [jobs, setJobs] = useState([]);
@@ -43,6 +45,7 @@ const SchedulerJobs = ({ onRowClick }) => {
             setSchedulerStatus(response.data.active);
         } catch (error) {
             console.error('Error fetching scheduler status:', error.message);
+            showNotification('Error fetching scheduler status!', 'error');
             setSchedulerStatus(null);
         } finally {
             stopLoading();
@@ -73,6 +76,7 @@ const SchedulerJobs = ({ onRowClick }) => {
             setJobs(response.data || []);
         } catch (error) {
             console.error('Error fetching jobs:', error.message);
+            showNotification('Error fetching jobs!', 'error');
             setJobs([]);
         } finally {
             setIsRefreshing(false);
@@ -172,6 +176,7 @@ const SchedulerJobs = ({ onRowClick }) => {
                 );
             }
             setIsAddParamsModalVisible(false);
+            showNotification("Ran successfully!", 'success');
             fetchJobs();
         } catch (error) {
             console.error('Error executing jobs:', error.message);
@@ -225,7 +230,7 @@ const SchedulerJobs = ({ onRowClick }) => {
                     }
                 );
 
-                if (response.status !== 202) {
+                if (response.status !== 202 || response.status !== 200) {
                     console.error(`Failed to execute job ${jobId}:`, response.statusText);
                     throw new Error(`Job ${jobId} execution failed.`);
                 }

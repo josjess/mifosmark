@@ -4,9 +4,11 @@ import { AuthContext } from '../../../../../context/AuthContext';
 import { useLoading } from '../../../../../context/LoadingContext';
 import { API_CONFIG } from '../../../../../config';
 import './ViewFunds.css';
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const ViewFunds = () => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const [funds, setFunds] = useState([]);
     const [nameFilter, setNameFilter] = useState('');
@@ -87,6 +89,7 @@ const ViewFunds = () => {
             });
             setIsModalOpen(false);
             fetchFunds();
+            showNotification("Fund updated successfully!", 'success');
         } catch (error) {
             console.error("Error updating fund:", error);
         } finally {

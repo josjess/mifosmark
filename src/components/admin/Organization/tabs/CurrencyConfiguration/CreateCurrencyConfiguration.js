@@ -5,9 +5,11 @@ import { useLoading } from "../../../../../context/LoadingContext";
 import { API_CONFIG } from "../../../../../config";
 import { FaTrash } from "react-icons/fa";
 import "./CreateCurrencyConfiguration.css";
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const CreateEditCurrencies = ({ onSuccess }) => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
 
     const [currencyOptions, setCurrencyOptions] = useState([]);
@@ -83,6 +85,7 @@ const CreateEditCurrencies = ({ onSuccess }) => {
             });
 
             onSuccess();
+            showNotification("Currencies updated!", 'success');
         } catch (error) {
             console.error("Error updating currencies:", error);
         } finally {

@@ -5,9 +5,11 @@ import { useLoading } from '../../../../../context/LoadingContext';
 import { API_CONFIG } from '../../../../../config';
 import './ViewRoles.css';
 import {FiEdit} from "react-icons/fi";
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const ViewRolesTable = ({ onRowClick}) => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const [roles, setRoles] = useState([]);
     const [pageSize, setPageSize] = useState(10);
@@ -104,7 +106,7 @@ const ViewRolesTable = ({ onRowClick}) => {
 
     const handleSubmit = async () => {
         if (!editRole || !editRole.description.trim()) {
-            alert("Description is required.");
+            showNotification("Description is required!", 'info');
             return;
         }
 
@@ -127,9 +129,10 @@ const ViewRolesTable = ({ onRowClick}) => {
 
             setShowEditModal(false);
             fetchRoles();
+            showNotification("Role Updated!", 'success');
         } catch (error) {
             console.error("Error updating role:", error);
-            alert("Failed to update role. Please try again.");
+            showNotification("Failed to update role. Please try again!", 'error');
         } finally {
             stopLoading();
         }

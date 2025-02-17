@@ -6,6 +6,7 @@ import { API_CONFIG } from "../../../../../config";
 import "./CreateLoanProducts.css";
 import {FaEdit, FaTrash} from "react-icons/fa";
 import DatePicker from "react-datepicker";
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const stages = [
     "Details",
@@ -23,6 +24,7 @@ const CreateLoanProducts = ({ onSuccess, productToEdit }) => {
     const [errors, setErrors] = useState({});
     const [isNextDisabled, setIsNextDisabled] = useState(true);
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
     const [modalState, setModalState] = useState({
@@ -192,6 +194,7 @@ const CreateLoanProducts = ({ onSuccess, productToEdit }) => {
                 }));
             } catch (error) {
                 console.error("Error fetching data:", error);
+                showNotification("Error fetching data:", 'error');
             } finally {
                 stopLoading();
             }
@@ -251,7 +254,7 @@ const CreateLoanProducts = ({ onSuccess, productToEdit }) => {
     };
 
     const handleAddAdvancedRule = (type) => {
-        console.log('Add Advanced Rule')
+        // console.log('Add Advanced Rule')
     };
 
     const handleNext = () => {
@@ -396,7 +399,7 @@ const CreateLoanProducts = ({ onSuccess, productToEdit }) => {
             );
 
             if (response.status === 200 || response.status === 201) {
-                alert(`Loan Product ${productToEdit ? 'Updated' : 'Created'} Successfully!`);
+                showNotification(`Loan Product ${productToEdit ? 'Updated' : 'Created'} Successfully!`, 'success');
 
                 const productName = formData?.Details?.productName || 'Loan Product';
 
@@ -419,9 +422,9 @@ const CreateLoanProducts = ({ onSuccess, productToEdit }) => {
             }
         } catch (error) {
             console.error("Error in handleSubmit:", error);
-            alert(
+            showNotification(
                 error.response?.data?.defaultUserMessage ||
-                "An unexpected error occurred."
+                "An unexpected error occurred.", 'error'
             );
         }
     };

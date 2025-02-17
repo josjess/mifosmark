@@ -5,9 +5,11 @@ import { AuthContext } from '../../../../../context/AuthContext';
 import { useLoading } from '../../../../../context/LoadingContext';
 import { API_CONFIG } from '../../../../../config';
 import './WorkingDays.css';
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const WorkingDays = () => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const navigate = useNavigate();
 
@@ -101,7 +103,7 @@ const WorkingDays = () => {
                 },
             });
 
-            alert('Working days updated successfully!');
+            showNotification('Working days updated successfully!', 'success');
             navigate('/organization');
         } catch (error) {
             console.error('Error updating working days:', error);

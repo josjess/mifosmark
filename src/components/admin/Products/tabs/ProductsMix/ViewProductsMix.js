@@ -4,9 +4,11 @@ import { AuthContext } from '../../../../../context/AuthContext';
 import { useLoading } from '../../../../../context/LoadingContext';
 import { API_CONFIG } from '../../../../../config';
 import './ViewProductsMix.css';
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const ViewProductsMix = () => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const [productsMix, setProductsMix] = useState([]);
     const [selectedProduct, setSelectedProduct] = useState(null);
@@ -100,11 +102,12 @@ const ViewProductsMix = () => {
                     },
                 }
             );
-            // console.log('Product mix updated successfully.');
+            showNotification('Product mix updated successfully!', 'success');
             setIsModalOpen(false);
             fetchProductsMix();
         } catch (error) {
             console.error('Error updating product mix:', error);
+            showNotification('Error updating product mix!', 'error');
         } finally {
             stopLoading();
         }
@@ -130,11 +133,12 @@ const ViewProductsMix = () => {
                     },
                 }
             );
-            // console.log('Product mix deleted successfully.');
+            showNotification('Product mix deleted successfully!', 'success');
             setIsModalOpen(false);
             fetchProductsMix();
         } catch (error) {
             console.error('Error deleting product mix:', error);
+            showNotification('Error deleting product mix!', 'error');
         } finally {
             stopLoading();
         }

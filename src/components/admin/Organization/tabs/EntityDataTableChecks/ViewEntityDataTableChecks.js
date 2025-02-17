@@ -5,9 +5,11 @@ import { useLoading } from '../../../../../context/LoadingContext';
 import { API_CONFIG } from '../../../../../config';
 import './ViewEntityDataTableChecks.css';
 import {FaTrash} from "react-icons/fa";
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const ViewEntityDataTableChecks = () => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const [dataTableChecks, setDataTableChecks] = useState([]);
     const [entityFilter, setEntityFilter] = useState('');
@@ -76,9 +78,10 @@ const ViewEntityDataTableChecks = () => {
                 });
 
                 fetchDataTableChecks();
+                showNotification("Data table deleted!", 'success');
             } catch (error) {
                 console.error("Error deleting data table check:", error);
-                alert("An error occurred while deleting the data table check.");
+                showNotification("An error occurred while deleting the data table check!", 'error');
             } finally {
                 stopLoading();
             }

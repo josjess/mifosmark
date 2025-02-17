@@ -7,6 +7,7 @@ import { API_CONFIG } from '../../../../../config';
 import './BulkImport.css';
 import {FaDownload, FaUpload} from "react-icons/fa";
 import {FaArrowRotateRight} from "react-icons/fa6";
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const BulkImport = () => {
     const { user } = useContext(AuthContext);
@@ -20,6 +21,7 @@ const BulkImport = () => {
     const [legalForm, setLegalForm] = useState('');
     const [file, setFile] = useState(null);
     const [uploadHistory, setUploadHistory] = useState([]);
+    const { showNotification } = useContext(NotificationContext);
 
     const entityConfig = {
         offices: { title: 'Office' },
@@ -116,7 +118,7 @@ const BulkImport = () => {
 
     const handleFileUpload = async () => {
         if (!file) {
-            alert('Please select a file before uploading.');
+            showNotification('Please select a file before uploading!', 'info');
             return;
         }
         startLoading();
@@ -135,11 +137,11 @@ const BulkImport = () => {
                     },
                 }
             );
-            // alert('File uploaded successfully!');
+            showNotification('File uploaded successfully!', 'success');
             setFile(null);
         } catch (error) {
             console.error('Error uploading file:', error);
-            // alert('Failed to upload file.');
+            showNotification('Failed to upload file!', 'error');
         } finally {
             stopLoading();
         }

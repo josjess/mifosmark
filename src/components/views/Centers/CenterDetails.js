@@ -7,9 +7,11 @@ import { FaTrash, FaEdit, FaStickyNote} from 'react-icons/fa';
 import {useNavigate} from "react-router-dom";
 import DatePicker from "react-datepicker";
 import {format} from "date-fns";
+import {NotificationContext} from "../../../context/NotificationContext";
 
 const CenterDetails = ({ centerId, onClose }) => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const navigate = useNavigate();
 
@@ -51,7 +53,7 @@ const CenterDetails = ({ centerId, onClose }) => {
         { id: 1, value: 'Business Completed' },
         { id: 2, value: 'Merged with Another Center' },
         { id: 3, value: 'Other' },
-    ]; // Example reasons, update based on your backend data.
+    ];
 
     useEffect(() => {
         setCenterImage(process.env.PUBLIC_URL + 'Images/centers.png');
@@ -276,9 +278,10 @@ const CenterDetails = ({ centerId, onClose }) => {
             await axios.put(`${API_CONFIG.baseURL}/centers/${centerId}`, payload, { headers });
             setIsEditModalOpen(false);
             fetchGeneralTabData();
+            showNotification("Center details updated!", 'info');
         } catch (error) {
             console.error("Error updating center data:", error);
-            alert("Failed to update center details. Please try again.");
+            showNotification("Failed to update center details. Please try again!", 'error');
         } finally {
             stopLoading();
         }
@@ -339,7 +342,7 @@ const CenterDetails = ({ centerId, onClose }) => {
             setSelectedGroup(null);
         } catch (error) {
             console.error("Error adding group to center:", error);
-            alert("Failed to add group. Please try again.");
+            showNotification("Failed to add group. Please try again!", 'error');
         } finally {
             stopLoading();
         }
@@ -368,7 +371,7 @@ const CenterDetails = ({ centerId, onClose }) => {
             fetchManageGroupsData();
         } catch (error) {
             console.error("Error removing group from center:", error);
-            alert("Failed to remove group. Please try again.");
+            showNotification("Failed to remove group. Please try again!", 'error');
         } finally {
             stopLoading();
         }
@@ -435,7 +438,7 @@ const CenterDetails = ({ centerId, onClose }) => {
             fetchGeneralTabData(); // Refresh the center details
         } catch (error) {
             console.error('Error assigning staff:', error);
-            alert('Failed to assign staff. Please try again.');
+            showNotification('Failed to assign staff. Please try again!', 'error');
         } finally {
             stopLoading();
         }
@@ -464,7 +467,7 @@ const CenterDetails = ({ centerId, onClose }) => {
             fetchGeneralTabData();
         } catch (error) {
             console.error('Error unassigning staff:', error);
-            alert('Failed to unassign staff.');
+            showNotification('Failed to unassign staff!', 'error');
         } finally {
             stopLoading();
         }
@@ -501,14 +504,14 @@ const CenterDetails = ({ centerId, onClose }) => {
             fetchGeneralTabData();
         } catch (error) {
             console.error('Error attaching meeting:', error.response?.data || error);
-            alert('Failed to attach meeting. Please try again.');
+            showNotification('Failed to attach meeting. Please try again!', 'error');
         } finally {
             stopLoading();
         }
     };
 
     const handleViewStaffAssignmentHistory = () => {
-        // Add navigation or modal logic
+        // modal logic
     };
 
     const handleCloseCenter = async () => {
@@ -542,12 +545,12 @@ const CenterDetails = ({ centerId, onClose }) => {
                 { headers }
             );
 
-            alert('Center closed successfully.');
+            showNotification('Center closed successfully!', 'success');
             setIsCloseModalOpen(false);
             fetchGeneralTabData(); // Refresh center details
         } catch (error) {
             console.error('Error closing center:', error.response?.data || error);
-            alert('Failed to close center. Please try again.');
+            showNotification('Failed to close center. Please try again!', 'error');
         } finally {
             stopLoading();
         }
@@ -570,11 +573,11 @@ const CenterDetails = ({ centerId, onClose }) => {
 
             await axios.delete(`${API_CONFIG.baseURL}/centers/${centerId}`, { headers });
 
-            alert('Center deleted successfully.');
+            showNotification('Center deleted successfully!', 'success');
             onClose();
         } catch (error) {
             console.error('Error deleting center:', error.response?.data || error);
-            alert('Failed to delete center. Please try again.');
+            showNotification('Failed to delete center. Please try again!', 'error');
         } finally {
             stopLoading();
         }

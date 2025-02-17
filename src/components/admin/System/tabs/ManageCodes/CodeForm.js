@@ -4,9 +4,11 @@ import axios from 'axios';
 import { AuthContext } from '../../../../../context/AuthContext';
 import { API_CONFIG } from '../../../../../config';
 import './CodeForm.css';
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const CodeForm = () => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const [codeName, setCodeName] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
@@ -31,10 +33,10 @@ const CodeForm = () => {
                     },
                 }
             );
-            console.log('Response:', response.data);
             navigate('/manage-codes');
         } catch (err) {
             console.error('Error submitting code:', err);
+            showNotification('Error submitting code!', 'error');
             setError('Failed to submit. Please try again.');
         }
     };

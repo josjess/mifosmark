@@ -4,9 +4,11 @@ import { AuthContext } from "../../../../../context/AuthContext";
 import { useLoading } from "../../../../../context/LoadingContext";
 import { API_CONFIG } from "../../../../../config";
 import "./CreateCollaterals.css";
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const CreateCollateral = () => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
 
     const [name, setName] = useState("");
@@ -34,6 +36,7 @@ const CreateCollateral = () => {
             setCurrencyOptions(response.data || []);
         } catch (error) {
             console.error("Error fetching template data:", error);
+            showNotification("Error fetching template data:", 'error');
         } finally {
             stopLoading();
         }
@@ -61,7 +64,7 @@ const CreateCollateral = () => {
                     "Content-Type": "application/json",
                 },
             });
-            alert("Collateral created successfully!");
+            showNotification("Collateral created successfully!", 'success');
             setName("");
             setQuality("");
             setUnitType("");
@@ -70,6 +73,7 @@ const CreateCollateral = () => {
             setCurrency("");
         } catch (error) {
             console.error("Error creating collateral:", error);
+            showNotification("Error creating collateral:", 'error');
         } finally {
             stopLoading();
         }

@@ -5,9 +5,11 @@ import { API_CONFIG } from '../../../../../config';
 import { AuthContext } from '../../../../../context/AuthContext';
 import { useLoading } from '../../../../../context/LoadingContext';
 import './LoanProductDetails.css';
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const LoanProductDetails = ({ loanProductId, onClose, onEdit }) => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const [loanProductDetails, setLoanProductDetails] = useState(null);
 
@@ -25,6 +27,7 @@ const LoanProductDetails = ({ loanProductId, onClose, onEdit }) => {
                 setLoanProductDetails(response.data);
             } catch (error) {
                 console.error('Error fetching loan product details:', error);
+                showNotification('Error fetching loan product details:', 'error');
             } finally {
                 stopLoading();
             }

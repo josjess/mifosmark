@@ -7,9 +7,11 @@ import { Link } from 'react-router-dom';
 import './EntityMapping.css';
 import { FiLink } from 'react-icons/fi';
 import {FaEdit, FaTrash} from "react-icons/fa";
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const EntityMapping = () => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const [mappings, setMappings] = useState([]);
     const [selectedMapping, setSelectedMapping] = useState(null);
@@ -43,6 +45,7 @@ const EntityMapping = () => {
             setMappings(response.data || []);
         } catch (error) {
             console.error('Error fetching entity mappings:', error);
+            showNotification('Error fetching entity mappings!', 'error');
         } finally {
             stopLoading();
         }
@@ -79,6 +82,7 @@ const EntityMapping = () => {
             });
         } catch (error) {
             console.error('Error fetching field data:', error);
+            showNotification('Error fetching field data!', 'error');
         }
     };
 
@@ -113,7 +117,7 @@ const EntityMapping = () => {
 
         const currentFormValues = formValuesByMapping[selectedMapping?.id];
         if (!currentFormValues?.first || !currentFormValues?.second) {
-            alert('Both fields are mandatory. Please fill them before submitting.');
+            showNotification('Both fields are mandatory! Please fill them before submitting!', 'info');
             return;
         }
 
@@ -177,7 +181,7 @@ const EntityMapping = () => {
         e.preventDefault();
 
         if (!modalFormValues.firstEntity || !modalFormValues.secondEntity || !modalFormValues.startDate || !modalFormValues.endDate) {
-            alert('All fields are mandatory. Please fill them before submitting.');
+            showNotification('All fields are mandatory! Please fill them before submitting!', 'info');
             return;
         }
 
@@ -222,7 +226,7 @@ const EntityMapping = () => {
 
         } catch (error) {
             console.error('Error adding mapping:', error);
-            alert('Failed to add mapping. Please try again.');
+            showNotification('Failed to add mapping! Please try again!', 'error');
         } finally {
             stopLoading();
             setIsModalOpen(false);

@@ -8,13 +8,13 @@ import './LoanDetails.css'
 import {FaCaretLeft, FaCaretRight, FaEdit, FaExclamationTriangle, FaStickyNote, FaTrash} from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import {FaToolbox} from "react-icons/fa6";
-import Select from "react-select";
 import AsyncSelect from "react-select/async";
+import {NotificationContext} from "../../../../context/NotificationContext";
 
 const LoanDetails = () => {
     const { clientId, loanId } = useParams();
-    const { state } = useLocation();
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const navigate = useNavigate();
 
@@ -460,7 +460,7 @@ const LoanDetails = () => {
             setIsJournalModalOpen(true);
         } catch (error) {
             console.error("Error fetching journal entries:", error);
-            alert("Failed to fetch journal entries. Please try again.");
+            showNotification("Failed to fetch journal entries. Please try again!", 'error');
         } finally {
             setIsLoadingJournal(false);
         }
@@ -511,11 +511,11 @@ const LoanDetails = () => {
                 { headers }
             );
 
-            alert("Transaction undone successfully.");
+            showNotification("Transaction undone successfully!", 'success');
             fetchLoanData();
         } catch (error) {
             console.error("Error undoing transaction:", error);
-            alert("Failed to undo transaction. Please try again.");
+            showNotification("Failed to undo transaction. Please try again!", 'error');
         } finally {
             setIsUndoingTransaction(false);
         }
@@ -554,7 +554,7 @@ const LoanDetails = () => {
             setIsTransactionModalOpen(true);
         } catch (error) {
             console.error("Error fetching transaction details:", error);
-            alert("Failed to load transaction details. Please try again.");
+            showNotification("Failed to load transaction details. Please try again!", 'error');
         } finally {
             setIsLoadingTransaction(false);
         }
@@ -571,7 +571,7 @@ const LoanDetails = () => {
 
     const handleGenerateReport = async () => {
         if (!exportForm.fromDate || !exportForm.toDate) {
-            alert("Please select both dates.");
+            showNotification("Please select both dates!", 'info');
             return;
         }
 
@@ -609,11 +609,11 @@ const LoanDetails = () => {
             link.click();
             document.body.removeChild(link);
 
-            alert("Report downloaded successfully.");
+            showNotification("Report downloaded successfully!", 'success');
             setIsExportModalOpen(false);
         } catch (error) {
             console.error("Error generating report:", error);
-            alert("Failed to generate report.");
+            showNotification("Failed to generate report!", 'error');
         } finally {
             setIsSubmittingExport(false);
         }
@@ -639,7 +639,7 @@ const LoanDetails = () => {
             setIsCreditBalanceRefundModalOpen(true);
         } catch (error) {
             console.error("Error fetching credit balance refund template:", error);
-            alert("Failed to fetch credit balance refund details.");
+            showNotification("Failed to fetch credit balance refund details!", 'error');
         }
     };
 
@@ -678,12 +678,12 @@ const LoanDetails = () => {
                 { headers }
             );
 
-            alert("Credit balance refund successful.");
+            showNotification("Credit balance refund successful!", 'success');
             setIsCreditBalanceRefundModalOpen(false);
             fetchLoanData();
         } catch (error) {
             console.error("Error processing credit balance refund:", error);
-            alert("Failed to process credit balance refund.");
+            showNotification("Failed to process credit balance refund!", 'error');
         } finally {
             setIsSubmittingRefund(false);
         }
@@ -789,12 +789,12 @@ const LoanDetails = () => {
 
             await axios.post(`${API_CONFIG.baseURL}/accounttransfers`, payload, { headers });
 
-            alert("Funds transferred successfully.");
+            showNotification("Funds transferred successfully!", 'success');
             setIsTransferModalOpen(false);
             fetchLoanData();
         } catch (error) {
             console.error("Error transferring funds:", error);
-            alert("Failed to transfer funds. Please try again.");
+            showNotification("Failed to transfer funds. Please try again!", 'error');
         }
     };
 
@@ -821,7 +821,7 @@ const LoanDetails = () => {
             setIsDisburseToSavingsModalOpen(true);
         } catch (error) {
             console.error("Error fetching disbursement to savings template:", error);
-            alert("Failed to fetch disbursement details. Please try again.");
+            showNotification("Failed to fetch disbursement details. Please try again!", 'error');
         }
     };
 
@@ -859,12 +859,12 @@ const LoanDetails = () => {
                 { headers }
             );
 
-            alert("Loan successfully disbursed to savings.");
+            showNotification("Loan successfully disbursed to savings!", 'success');
             setIsDisburseToSavingsModalOpen(false);
             fetchLoanData();
         } catch (error) {
             console.error("Error during disbursement to savings:", error);
-            alert("Failed to disburse loan to savings. Please try again.");
+            showNotification("Failed to disburse loan to savings. Please try again!", 'error');
         } finally {
             setIsSubmittingDisburseToSavings(false);
         }
@@ -893,7 +893,7 @@ const LoanDetails = () => {
             setIsDisburseModalOpen(true);
         } catch (error) {
             console.error("Error fetching disbursement template:", error);
-            alert("Failed to fetch disbursement details.");
+            showNotification("Failed to fetch disbursement details!", 'error');
         }
     };
 
@@ -934,12 +934,12 @@ const LoanDetails = () => {
 
             await axios.post(`${API_CONFIG.baseURL}/loans/${loanId}?command=disburse`, payload, { headers });
 
-            alert("Loan disbursed successfully.");
+            showNotification("Loan disbursed successfully!", 'success');
             setIsDisburseModalOpen(false);
             fetchLoanData();
         } catch (error) {
             console.error("Error disbursing loan:", error);
-            alert("Failed to disburse the loan.");
+            showNotification("Failed to disburse the loan!", 'error');
         } finally {
             setIsSubmittingDisbursement(false);
         }
@@ -961,12 +961,12 @@ const LoanDetails = () => {
 
             await axios.post(`${API_CONFIG.baseURL}/loans/${loanId}?command=undoapproval`, payload, { headers });
 
-            alert("Loan approval undone successfully.");
+            showNotification("Loan approval undone successfully!", 'success');
             setIsUndoApprovalModalOpen(false);
             fetchLoanData();
         } catch (error) {
             console.error("Error undoing loan approval:", error);
-            alert("Failed to undo loan approval. Please try again.");
+            showNotification("Failed to undo loan approval. Please try again!", 'error');
         } finally {
             setIsSubmittingUndoApproval(false);
         }
@@ -982,7 +982,7 @@ const LoanDetails = () => {
 
     const handleDeleteLoan = async (loanId) => {
         if (!loanId) {
-            alert("Loan ID is required.");
+            showNotification("Loan ID is required!", 'info');
             return;
         }
 
@@ -997,13 +997,13 @@ const LoanDetails = () => {
 
             await axios.delete(`${API_CONFIG.baseURL}/loans/${loanId}`, { headers });
 
-            alert("Loan deleted successfully.");
+            showNotification("Loan deleted successfully!", 'success');
             setIsDeleteModalOpen(false);
 
             handleBreadcrumbNavigation();
         } catch (error) {
             console.error("Error deleting loan:", error);
-            alert("Failed to delete loan. Please try again.");
+            showNotification("Failed to delete loan. Please try again!", 'error');
         } finally {
             setIsDeletingLoan(false);
         }
@@ -1021,13 +1021,13 @@ const LoanDetails = () => {
             setLoanScreenReports(response.data || []);
         } catch (error) {
             console.error("Error fetching loan screen reports:", error);
-            alert("Failed to fetch loan screen reports. Please try again.");
+            showNotification("Failed to fetch loan screen reports. Please try again!", 'error');
         }
     };
 
     const handleGenerateLoanScreenReport = async (loanId) => {
         if (!selectedReportId) {
-            alert("Please select a report to generate.");
+            showNotification("Please select a report to generate!", 'info');
             return;
         }
 
@@ -1047,11 +1047,11 @@ const LoanDetails = () => {
 
             await axios.post(`${API_CONFIG.baseURL}/templates/?loanId=${loanId}`, payload, { headers });
 
-            alert("Loan screen report generated successfully.");
+            showNotification("Loan screen report generated successfully!", 'success');
             setIsLoanScreenReportsModalOpen(false);
         } catch (error) {
             console.error("Error generating loan screen report:", error);
-            alert("Failed to generate loan screen report. Please try again.");
+            showNotification("Failed to generate loan screen report. Please try again!", 'error');
         } finally {
             setIsSubmittingReport(false);
         }
@@ -1114,12 +1114,12 @@ const LoanDetails = () => {
 
             await axios.post(`${API_CONFIG.baseURL}/loans/${loanId}?command=assignLoanOfficer`, payload, { headers });
 
-            alert("Loan officer changed successfully.");
+            showNotification("Loan officer changed successfully!", 'success');
             setIsChangeLoanOfficerModalOpen(false);
             fetchLoanData();
         } catch (error) {
             console.error("Error changing loan officer:", error);
-            alert("Failed to change loan officer. Please try again.");
+            showNotification("Failed to change loan officer. Please try again!", 'error');
         } finally {
             setIsSubmittingLoanOfficerChange(false);
         }
@@ -1140,7 +1140,7 @@ const LoanDetails = () => {
             setIsAddCollateralModalOpen(true);
         } catch (error) {
             console.error("Error fetching collateral template:", error);
-            alert("Failed to fetch collateral template.");
+            showNotification("Failed to fetch collateral template!", 'error');
         }
     };
 
@@ -1178,10 +1178,10 @@ const LoanDetails = () => {
 
             setIsAddCollateralModalOpen(false);
             fetchLoanData();
-            alert("Collateral added successfully.");
+            showNotification("Collateral added successfully!", 'success');
         } catch (error) {
             console.error("Error adding collateral:", error);
-            alert("Failed to add collateral.");
+            showNotification("Failed to add collatera!", 'error');
         } finally {
             setIsSubmittingCollateral(false);
         }
@@ -1226,10 +1226,10 @@ const LoanDetails = () => {
             await axios.post(`${API_CONFIG.baseURL}/loans/${loanId}?command=withdrawnByApplicant`, payload, { headers });
             setIsWithdrawModalOpen(false);
             fetchLoanData();
-            alert("Loan withdrawn successfully by the client");
+            showNotification("Loan withdrawn successfully by the client!", 'success');
         } catch (error) {
             console.error("Error withdrawing loan:", error);
-            alert("Error withdrawing loan: " + (error?.response?.data?.errors?.[0]?.defaultUserMessage || "Unknown error"));
+            showNotification("Error withdrawing loan: ", 'error');
         } finally {
             setIsSubmittingWithdraw(false);
         }
@@ -1274,10 +1274,10 @@ const LoanDetails = () => {
             await axios.post(`${API_CONFIG.baseURL}/loans/${loanId}?command=reject`, payload, { headers });
             setIsRejectModalOpen(false);
             fetchLoanData();
-            alert("Loan rejected successfully");
+            showNotification("Loan rejected successfully!", 'success');
         } catch (error) {
             console.error("Error rejecting loan:", error);
-            alert("Error rejecting loan: " + (error?.response?.data?.errors?.[0]?.defaultUserMessage || "Unknown error"));
+            showNotification("Error rejecting loan: ", 'error');
         } finally {
             setIsSubmittingRejection(false);
         }
@@ -1354,9 +1354,10 @@ const LoanDetails = () => {
             await axios.post(`${API_CONFIG.baseURL}/loans/${loanId}?command=approve`, payload, { headers });
             setIsApproveModalOpen(false);
             fetchLoanData();
-            alert('Loan approved successfully');
+            showNotification('Loan approved successfully', 'success');
         } catch (error) {
             console.error("Error approving loan:", error);
+            showNotification("Error approving loan!", 'error');
         } finally {
             setIsSubmittingApproval(false);
         }
@@ -1387,11 +1388,11 @@ const LoanDetails = () => {
                 { headers }
             );
 
-            alert("Recovery from guarantor submitted successfully.");
+            showNotification("Recovery from guarantor submitted successfully.", 'success');
             handleCloseRecoverFromGuarantorModal();
         } catch (error) {
             console.error("Error recovering from guarantor:", error);
-            alert("Failed to recover from guarantor.");
+            showNotification("Failed to recover from guarantor.", 'success');
         } finally {
             setIsSubmittingRecoverFromGuarantor(false);
             stopLoading();
@@ -1419,7 +1420,7 @@ const LoanDetails = () => {
             setIsCreateGuarantorModalOpen(true);
         } catch (error) {
             console.error("Error fetching guarantor data:", error);
-            alert("Failed to load data for creating a guarantor.");
+            showNotification("Failed to load data for creating a guarantor!", 'error');
         } finally {
             stopLoading();
         }
@@ -1447,12 +1448,12 @@ const LoanDetails = () => {
         const { firstName, lastName, relationship, dateOfBirth, address1, address2, city, zip, mobile, residencePhone, existingClientName } = guarantorDetails;
 
         if (isExistingClient && (!existingClientName || !relationship)) {
-            alert("Please fill in all mandatory fields for an existing client.");
+            showNotification("Please fill in all mandatory fields for an existing client!", 'info');
             return;
         }
 
         if (!isExistingClient && (!firstName || !lastName || !relationship || !dateOfBirth)) {
-            alert("Please fill in all mandatory fields for a new guarantor.");
+            showNotification("Please fill in all mandatory fields for a new guarantor!", 'info');
             return;
         }
 
@@ -1492,11 +1493,11 @@ const LoanDetails = () => {
 
             await axios.post(`${API_CONFIG.baseURL}/loans/${loanId}/guarantors`, payload, { headers });
 
-            alert("Guarantor created successfully.");
+            showNotification("Guarantor created successfully!", 'success');
             handleCloseCreateGuarantorModal();
         } catch (error) {
             console.error("Error creating guarantor:", error);
-            alert("Failed to create guarantor.");
+            showNotification("Failed to create guarantor!", 'error');
         } finally {
             setIsSubmittingGuarantor(false);
             stopLoading();
@@ -1523,7 +1524,7 @@ const LoanDetails = () => {
             setIsGuarantorsModalOpen(true);
         } catch (error) {
             console.error("Error fetching guarantors details:", error);
-            alert("Failed to fetch guarantors details.");
+            showNotification("Failed to fetch guarantors details!", 'error');
         } finally {
             stopLoading();
         }
@@ -1537,7 +1538,7 @@ const LoanDetails = () => {
 
     const handleSubmitGuarantorsNote = async () => {
         if (!guarantorsNote) {
-            alert("Please provide a note.");
+            showNotification("Please provide a note!", 'info');
             return;
         }
 
@@ -1561,11 +1562,11 @@ const LoanDetails = () => {
                 { headers }
             );
 
-            alert("Guarantors note submitted successfully.");
+            showNotification("Guarantors note submitted successfully!", 'success');
             handleCloseGuarantorsModal();
         } catch (error) {
             console.error("Error submitting guarantors note:", error);
-            alert("Failed to submit guarantors note.");
+            showNotification("Failed to submit guarantors note!", 'error');
         } finally {
             setIsSubmittingGuarantors(false);
             stopLoading();
@@ -1591,7 +1592,7 @@ const LoanDetails = () => {
                 closedOn: new Date(),
             }));
         } catch (error) {
-            alert("Failed to fetch close data.");
+            showNotification("Failed to fetch close data!", 'error');
             console.error("Error fetching close data:", error);
         } finally {
             stopLoading();
@@ -1638,10 +1639,10 @@ const LoanDetails = () => {
                 { headers }
             );
 
-            alert("Loan successfully closed.");
+            showNotification("Loan successfully closed!", 'success');
             handleCloseCloseModal();
         } catch (error) {
-            alert("Failed to submit close.");
+            showNotification("Failed to submit close!", 'error');
             console.error("Error submitting close:", error);
         } finally {
             stopLoading();
@@ -1667,7 +1668,7 @@ const LoanDetails = () => {
                 closedOn: new Date(),
             }));
         } catch (error) {
-            alert("Failed to fetch close (as rescheduled) data.");
+            showNotification("Failed to fetch close (as rescheduled) data!", 'success');
             console.error("Error fetching close (as rescheduled) data:", error);
         } finally {
             stopLoading();
@@ -1714,10 +1715,10 @@ const LoanDetails = () => {
                 { headers }
             );
 
-            alert("Loan successfully closed (as rescheduled).");
+            showNotification("Loan successfully closed (as rescheduled)!", 'success');
             handleCloseCloseRescheduledModal();
         } catch (error) {
-            alert("Failed to submit close (as rescheduled).");
+            showNotification("Failed to submit close (as rescheduled)!", 'error');
             console.error("Error submitting close (as rescheduled):", error);
         } finally {
             stopLoading();
@@ -1745,7 +1746,7 @@ const LoanDetails = () => {
                 writeOffDate: new Date(),
             }));
         } catch (error) {
-            alert("Failed to fetch write-off data.");
+            showNotification("Failed to fetch write-off data!", 'error');
             console.error("Error fetching write-off data:", error);
         } finally {
             stopLoading();
@@ -1795,10 +1796,10 @@ const LoanDetails = () => {
                 { headers }
             );
 
-            alert("Write-off successful.");
+            showNotification("Write-off successful!", 'success');
             handleCloseWriteOffModal();
         } catch (error) {
-            alert("Failed to submit write-off.");
+            showNotification("Failed to submit write-off!", 'success');
             console.error("Error submitting write-off:", error);
         } finally {
             setIsSubmittingWriteOff(false);
@@ -1824,7 +1825,7 @@ const LoanDetails = () => {
             setIsLoanRescheduleModalOpen(true);
         } catch (error) {
             console.error("Error fetching reschedule data:", error);
-            alert("Failed to load data for Reschedule.");
+            showNotification("Failed to load data for Reschedule!", 'error');
         }
     };
 
@@ -1847,7 +1848,7 @@ const LoanDetails = () => {
 
     const handleSubmitLoanReschedule = async () => {
         if (!loanRescheduleFromInstallment || !loanRescheduleReason || !loanSubmittedOn) {
-            alert("Please fill in all mandatory fields.");
+            showNotification("Please fill in all mandatory fields!", 'info');
             return;
         }
 
@@ -1895,11 +1896,11 @@ const LoanDetails = () => {
 
             await axios.post(`${API_CONFIG.baseURL}/rescheduleloans`, payload, { headers });
 
-            alert("Loan rescheduled successfully.");
+            showNotification("Loan rescheduled successfully!", 'success');
             handleCloseLoanRescheduleModal();
         } catch (error) {
             console.error("Error submitting reschedule:", error);
-            alert("Failed to submit Reschedule.");
+            showNotification("Failed to submit Reschedule!", 'success');
         } finally {
             setIsSubmittingLoanReschedule(false);
             stopLoading();
@@ -1924,7 +1925,7 @@ const LoanDetails = () => {
             setIsWaiveInterestModalOpen(true);
         } catch (error) {
             console.error("Error fetching waive interest data:", error);
-            alert("Failed to load data for Waive Interest.");
+            showNotification("Failed to load data for Waive Interest.", 'error');
         }
     };
 
@@ -1937,7 +1938,7 @@ const LoanDetails = () => {
 
     const handleSubmitWaiveInterest = async () => {
         if (!waiveInterestDate || !waiveTransactionAmount) {
-            alert("Please fill in all mandatory fields.");
+            showNotification("Please fill in all mandatory fields!", 'info');
             return;
         }
 
@@ -1969,11 +1970,11 @@ const LoanDetails = () => {
                 { headers }
             );
 
-            alert("Interest waived successfully.");
+            showNotification("Interest waived successfully!", 'success');
             handleCloseWaiveInterestModal();
         } catch (error) {
             console.error("Error submitting waive interest:", error);
-            alert("Failed to submit Waive Interest.");
+            showNotification("Failed to submit Waive Interest!", 'error');
         } finally {
             setIsSubmittingWaiveInterest(false);
             stopLoading();
@@ -1999,7 +2000,7 @@ const LoanDetails = () => {
             setIsMerchantRefundModalOpen(true);
         } catch (error) {
             console.error("Error fetching merchant issued refund data:", error);
-            alert("Failed to load data for Merchant Issued Refund.");
+            showNotification("Failed to load data for Merchant Issued Refund!", 'error');
         }
     };
 
@@ -2020,7 +2021,7 @@ const LoanDetails = () => {
 
     const handleSubmitMerchantRefund = async () => {
         if (!merchantTransactionDate || !merchantTransactionAmount || !merchantSelectedPaymentType) {
-            alert("Please fill in all mandatory fields.");
+            showNotification("Please fill in all mandatory fields!", 'info');
             return;
         }
 
@@ -2059,11 +2060,11 @@ const LoanDetails = () => {
                 { headers }
             );
 
-            alert("Merchant Issued Refund submitted successfully.");
+            showNotification("Merchant Issued Refund submitted successfully!", 'success');
             handleCloseMerchantRefundModal();
         } catch (error) {
             console.error("Error submitting merchant issued refund:", error);
-            alert("Failed to submit Merchant Issued Refund.");
+            showNotification("Failed to submit Merchant Issued Refund!", 'error');
         } finally {
             setIsSubmittingMerchantRefund(false);
             stopLoading();
@@ -2089,7 +2090,7 @@ const LoanDetails = () => {
             setIsPayoutRefundModalOpen(true);
         } catch (error) {
             console.error("Error fetching payout refund data:", error);
-            alert("Failed to load data for payout refund.");
+            showNotification("Failed to load data for payout refund!", 'error');
         }
     };
 
@@ -2110,7 +2111,7 @@ const LoanDetails = () => {
 
     const handleSubmitPayoutRefund = async () => {
         if (!payoutTransactionDate || !payoutTransactionAmount || !payoutSelectedPaymentType) {
-            alert("Please fill in all mandatory fields.");
+            showNotification("Please fill in all mandatory fields!", 'info');
             return;
         }
 
@@ -2149,11 +2150,11 @@ const LoanDetails = () => {
                 { headers }
             );
 
-            alert("Payout refund submitted successfully.");
+            showNotification("Payout refund submitted successfully!", 'success');
             handleClosePayoutRefundModal();
         } catch (error) {
             console.error("Error submitting payout refund:", error);
-            alert("Failed to submit payout refund.");
+            showNotification("Failed to submit payout refund!", 'error');
         } finally {
             setIsSubmittingPayoutRefund(false);
             stopLoading();
@@ -2179,7 +2180,7 @@ const LoanDetails = () => {
             setIsGoodwillCreditModalOpen(true);
         } catch (error) {
             console.error("Error fetching goodwill credit data:", error);
-            alert("Failed to load data for goodwill credit.");
+            showNotification("Failed to load data for goodwill credit!", 'error');
         }
     };
 
@@ -2200,7 +2201,7 @@ const LoanDetails = () => {
 
     const handleSubmitGoodwillCredit = async () => {
         if (!goodwillTransactionDate || !goodwillTransactionAmount || !goodwillSelectedPaymentType) {
-            alert("Please fill in all mandatory fields.");
+            showNotification("Please fill in all mandatory fields!", 'info');
             return;
         }
 
@@ -2239,11 +2240,11 @@ const LoanDetails = () => {
                 { headers }
             );
 
-            alert("Goodwill credit submitted successfully.");
+            showNotification("Goodwill credit submitted successfully!", 'success');
             handleCloseGoodwillCreditModal();
         } catch (error) {
             console.error("Error submitting goodwill credit:", error);
-            alert("Failed to submit goodwill credit.");
+            showNotification("Failed to submit goodwill credit!", 'error');
         } finally {
             setIsSubmittingGoodwillCredit(false);
             stopLoading();
@@ -2262,7 +2263,7 @@ const LoanDetails = () => {
 
     const handleSubmitReAmortize = async () => {
         if (!reAmortizeReason) {
-            alert("Reason is required.");
+            showNotification("Reason is required.", 'info');
             return;
         }
 
@@ -2289,11 +2290,11 @@ const LoanDetails = () => {
                 { headers }
             );
 
-            alert("Re-Amortization submitted successfully.");
+            showNotification("Re-Amortization submitted successfully!", 'success');
             handleCloseReAmortizeModal();
         } catch (error) {
             console.error("Error submitting re-amortization:", error);
-            alert("Failed to submit re-amortization.");
+            showNotification("Failed to submit re-amortization.", 'error');
         } finally {
             setIsSubmittingReAmortize(false);
             stopLoading();
@@ -2316,7 +2317,7 @@ const LoanDetails = () => {
 
     const handleSubmitReAge = async () => {
         if (!reAgeInstallments || !reAgeFrequencyNumber || !reAgeFrequencyType || !reAgeStartDate) {
-            alert("All mandatory fields must be filled.");
+            showNotification("All mandatory fields must be filled.", 'info');
             return;
         }
 
@@ -2351,11 +2352,11 @@ const LoanDetails = () => {
                 { headers }
             );
 
-            alert("Re-Age submitted successfully.");
+            showNotification("Re-Age submitted successfully.", 'success');
             handleCloseReAgeModal();
         } catch (error) {
             console.error("Error submitting re-age:", error);
-            alert("Failed to submit re-age.");
+            showNotification("Failed to submit re-age.", 'error');
         } finally {
             setIsSubmittingReAge(false);
             stopLoading();
@@ -2382,7 +2383,7 @@ const LoanDetails = () => {
             setChargeOffReason(chargeOffReasonOptions[0]?.id || "");
         } catch (error) {
             console.error("Error fetching charge-off template:", error);
-            alert("Failed to fetch charge-off details.");
+            showNotification("Failed to fetch charge-off details.", 'error');
         }
     };
 
@@ -2397,7 +2398,7 @@ const LoanDetails = () => {
 
     const handleSubmitChargeOff = async () => {
         if (!chargeOffDate || !chargeOffReason || !chargeOffNote.trim()) {
-            alert("All mandatory fields must be filled.");
+            showNotification("All mandatory fields must be filled.", 'info');
             return;
         }
 
@@ -2430,11 +2431,11 @@ const LoanDetails = () => {
                 { headers }
             );
 
-            alert("Charge-Off submitted successfully.");
+            showNotification("Charge-Off submitted successfully.", 'success');
             handleCloseChargeOffModal();
         } catch (error) {
             console.error("Error submitting charge-off:", error);
-            alert("Failed to submit charge-off.");
+            showNotification("Failed to submit charge-off.", 'error');
         } finally {
             setIsSubmittingChargeOff(false);
             stopLoading();
@@ -2468,7 +2469,7 @@ const LoanDetails = () => {
             setPrepayPaymentType(paymentTypeOptions[0]?.id || "");
         } catch (error) {
             console.error("Error fetching prepay loan template:", error);
-            alert("Failed to fetch prepay loan details.");
+            showNotification("Failed to fetch prepay loan details.", 'error');
         }
     };
 
@@ -2490,7 +2491,7 @@ const LoanDetails = () => {
 
     const handleSubmitPrepayLoan = async () => {
         if (!prepayTransactionAmount || !prepayPaymentType || !prepayNote.trim()) {
-            alert("All mandatory fields must be filled.");
+            showNotification("All mandatory fields must be filled.", 'info');
             return;
         }
 
@@ -2529,11 +2530,11 @@ const LoanDetails = () => {
                 { headers }
             );
 
-            alert("Prepay Loan submitted successfully.");
+            showNotification("Prepay Loan submitted successfully.", 'success');
             handleClosePrepayLoanModal();
         } catch (error) {
             console.error("Error submitting prepay loan:", error);
-            alert("Failed to submit prepay loan.");
+            showNotification("Failed to submit prepay loan.", 'error');
         } finally {
             setIsSubmittingPrepayLoan(false);
             stopLoading();
@@ -2551,7 +2552,7 @@ const LoanDetails = () => {
 
     const handleSubmitUndoDisbursal = async () => {
         if (!undoDisbursalNote.trim()) {
-            alert("Note is required.");
+            showNotification("Note is required.", 'info');
             return;
         }
 
@@ -2576,12 +2577,12 @@ const LoanDetails = () => {
                 { headers }
             );
 
-            alert("Loan Disbursal undone successfully!");
+            showNotification("Loan Disbursal undone successfully!", 'success');
             handleCloseUndoDisbursalModal();
             fetchLoanData();
         } catch (error) {
             console.error("Error submitting undo disbursal:", error);
-            alert("Failed to submit undo disbursal.");
+            showNotification("Failed to submit undo disbursal.", 'error');
         } finally {
             setIsSubmittingUndoDisbursal(false);
             stopLoading();
@@ -2645,7 +2646,7 @@ const LoanDetails = () => {
         } = repaymentForm;
 
         if (!transactionDate || !transactionAmount || !selectedPaymentType) {
-            alert("Please fill all mandatory fields.");
+            showNotification("Please fill all mandatory fields.", 'info');
             return;
         }
 
@@ -2680,12 +2681,12 @@ const LoanDetails = () => {
                 { headers }
             );
 
-            alert("Repayment submitted successfully!");
+            showNotification("Repayment submitted successfully!", 'success');
             handleCloseRepaymentModal();
             fetchLoanData();
         } catch (error) {
             console.error("Error submitting repayment:", error);
-            alert("Failed to submit repayment.");
+            showNotification("Failed to submit repayment.", 'error');
         } finally {
             setIsSubmittingRepayment(false);
             stopLoading();
@@ -2733,7 +2734,7 @@ const LoanDetails = () => {
 
     const handleSubmitForeclosure = async () => {
         if (!foreclosureForm.transactionDate || !foreclosureForm.note) {
-            alert("Please fill all mandatory fields.");
+            showNotification("Please fill all mandatory fields.", 'info');
             return;
         }
 
@@ -2764,12 +2765,12 @@ const LoanDetails = () => {
                 { headers }
             );
 
-            alert("Foreclosure transaction submitted successfully!");
+            showNotification("Foreclosure transaction submitted successfully!", 'success');
             handleCloseForeclosureModal();
             fetchLoanData();
         } catch (error) {
             console.error("Error submitting foreclosure transaction:", error);
-            alert("Failed to submit foreclosure transaction.");
+            showNotification("Failed to submit foreclosure transaction.", 'error');
         } finally {
             setIsSubmittingForeclosure(false);
             stopLoading();
@@ -2854,12 +2855,12 @@ const LoanDetails = () => {
                 { headers }
             );
 
-            alert("Loan charge added successfully!");
+            showNotification("Loan charge added successfully!", 'success');
             handleCloseModal();
             fetchLoanData();
         } catch (error) {
             console.error("Error adding loan charge:", error);
-            alert("Failed to add loan charge.");
+            showNotification("Failed to add loan charge.", 'error');
         } finally {
             setIsSubmitting(false);
             stopLoading();
@@ -3119,7 +3120,7 @@ const LoanDetails = () => {
 
     const handleSubmitUpload = async () => {
         if (!uploadPayload.fileName || !uploadPayload.file) {
-            alert("File Name and File are mandatory.");
+            showNotification("File Name and File are mandatory.", 'info');
             return;
         }
 
@@ -6420,7 +6421,7 @@ const LoanDetails = () => {
                                     if (value <= loanDetails?.summary?.totalOutstanding) {
                                         setRepaymentForm((prev) => ({...prev, transactionAmount: value}));
                                     } else {
-                                        alert(`Transaction amount cannot exceed the loan balance of ${loanDetails?.summary?.totalOutstanding.toLocaleString()}`);
+                                        showNotification(`Transaction amount cannot exceed the loan balance of ${loanDetails?.summary?.totalOutstanding.toLocaleString()}`, 'info');
                                     }
                                 }}
                                 max={loanDetails?.summary?.totalOutstanding}
@@ -6581,7 +6582,7 @@ const LoanDetails = () => {
                                     if (value <= loanDetails?.summary?.totalOutstanding) {
                                         setPrepayTransactionAmount(value);
                                     } else {
-                                        alert(`Transaction amount cannot exceed the loan balance of ${loanDetails?.summary?.totalOutstanding.toLocaleString()}`);
+                                        showNotification(`Transaction amount cannot exceed the loan balance of ${loanDetails?.summary?.totalOutstanding.toLocaleString()}`, 'info');
                                     }
                                 }}
                                 max={loanDetails?.summary?.totalOutstanding}

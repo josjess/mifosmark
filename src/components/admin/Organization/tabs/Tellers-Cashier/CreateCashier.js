@@ -4,9 +4,11 @@ import { AuthContext } from '../../../../../context/AuthContext';
 import { useLoading } from '../../../../../context/LoadingContext';
 import './CreateCashier.css';
 import {API_CONFIG} from "../../../../../config";
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const CreateCashier = ({ teller, onFormSubmitSuccess }) => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
 
     const [staff, setStaff] = useState([]);
@@ -89,6 +91,7 @@ const CreateCashier = ({ teller, onFormSubmitSuccess }) => {
                 },
             });
             onFormSubmitSuccess();
+            showNotification("Cashier created successfully!", 'success');
         } catch (error) {
             console.error('Error creating cashier:', error);
         } finally {

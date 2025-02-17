@@ -4,9 +4,11 @@ import { AuthContext } from '../../../../../context/AuthContext';
 import { useLoading } from '../../../../../context/LoadingContext';
 import { API_CONFIG } from '../../../../../config';
 import './ViewAccountPreferences.css';
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const ViewAccountNumberPreferencesTable = () => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const [preferences, setPreferences] = useState([]);
     const [selectedPreference, setSelectedPreference] = useState(null);
@@ -115,8 +117,10 @@ const ViewAccountNumberPreferencesTable = () => {
 
             setIsModalOpen(false);
             fetchPreferences();
+            showNotification("Preference updated successfully!", 'success');
         } catch (error) {
             console.error('Error updating preference:', error);
+            showNotification('Error updating preference:', 'error');
         } finally {
             stopLoading();
         }
@@ -140,6 +144,7 @@ const ViewAccountNumberPreferencesTable = () => {
 
             setIsModalOpen(false);
             fetchPreferences();
+            showNotification("Preference deleted successfully!", 'info');
         } catch (error) {
             console.error('Error deleting preference:', error);
         } finally {

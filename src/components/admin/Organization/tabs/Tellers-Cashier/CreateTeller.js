@@ -4,9 +4,11 @@ import { AuthContext } from "../../../../../context/AuthContext";
 import { useLoading } from "../../../../../context/LoadingContext";
 import { API_CONFIG } from "../../../../../config";
 import "./CreateTeller.css";
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const CreateTeller = ({ onFormSubmitSuccess }) => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
 
     const [tellerName, setTellerName] = useState("");
@@ -42,7 +44,7 @@ const CreateTeller = ({ onFormSubmitSuccess }) => {
         e.preventDefault();
 
         if (endDate && new Date(endDate) < new Date(startDate)) {
-            alert("End Date cannot be earlier than Start Date.");
+            showNotification("End Date cannot be earlier than Start Date!", 'info');
             return;
         }
 
@@ -78,6 +80,7 @@ const CreateTeller = ({ onFormSubmitSuccess }) => {
             });
 
             onFormSubmitSuccess();
+            showNotification("Teller created successfully!", 'success');
         } catch (error) {
             console.error("Error creating teller:", error);
         } finally {

@@ -4,9 +4,11 @@ import { API_CONFIG } from '../../../../../config';
 import { AuthContext } from '../../../../../context/AuthContext';
 import { useLoading } from '../../../../../context/LoadingContext';
 import './ViewJobDetails.css';
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const ViewJobDetails = ({ job }) => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const [jobDetails, setJobDetails] = useState(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -80,8 +82,10 @@ const ViewJobDetails = ({ job }) => {
             });
             fetchJobDetails();
             setIsEditModalOpen(false);
+            showNotification("Job details updated successfully!", 'success');
         } catch (error) {
             console.error('Error updating job details:', error.message);
+            showNotification('Error updating job details:', 'error');
         } finally {
             stopLoading();
         }

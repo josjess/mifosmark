@@ -5,6 +5,7 @@ import { API_CONFIG } from '../../../../../config';
 import { AuthContext } from '../../../../../context/AuthContext';
 import './CodeDetail.css';
 import {FaEdit, FaTrash} from "react-icons/fa";
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const CodeDetail = ({ code }) => {
     const codeId = code.id;
@@ -16,6 +17,7 @@ const CodeDetail = ({ code }) => {
     const [originalValues, setOriginalValues] = useState([]);
     const [errors, setErrors] = useState({});
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
 
     useEffect(() => {
         fetchCodeValues();
@@ -66,8 +68,10 @@ const CodeDetail = ({ code }) => {
 
             setNewCodeValue({ name: '', description: '', position: '', isActive: false });
             fetchCodeValues();
+            showNotification("Code values added successfully!", 'success');
         } catch (error) {
             console.error('Error adding code value:', error);
+            showNotification('Error adding code value!', 'error');
         } finally {
             stopLoading();
         }
@@ -96,8 +100,10 @@ const CodeDetail = ({ code }) => {
 
             setEditingIndex(null);
             fetchCodeValues();
+            showNotification("Code value updated successfully!", 'success');
         } catch (error) {
             console.error('Error updating code value:', error);
+            showNotification('Error updating code value!', 'error');
         } finally {
             stopLoading();
         }
@@ -115,8 +121,10 @@ const CodeDetail = ({ code }) => {
                 },
             });
             fetchCodeValues();
+            showNotification("Code value deleted successfully!", 'success');
         } catch (error) {
             console.error('Error deleting code value:', error);
+            showNotification('Error deleting code value!', 'error');
         } finally {
             stopLoading();
         }

@@ -4,9 +4,11 @@ import { AuthContext } from '../../../../../context/AuthContext';
 import { useLoading } from '../../../../../context/LoadingContext';
 import { API_CONFIG } from '../../../../../config';
 import './CreateOffice.css';
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const CreateOffice = ({ onFormSubmitSuccess }) => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
 
     const [name, setName] = useState('');
@@ -63,7 +65,7 @@ const CreateOffice = ({ onFormSubmitSuccess }) => {
                     'Content-Type': 'application/json',
                 },
             });
-            console.log('Office created successfully:', response.data);
+            showNotification('Office created successfully:', 'success');
 
             if (onFormSubmitSuccess) onFormSubmitSuccess();
         } catch (error) {

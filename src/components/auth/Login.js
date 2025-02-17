@@ -1,4 +1,4 @@
-import React, {useState, useContext, memo, useEffect} from 'react';
+import React, {useState, useContext, memo } from 'react';
 import './Login.css';
 import { useNavigate } from 'react-router-dom';
 import { API_CONFIG } from "../../config";
@@ -10,7 +10,6 @@ import { FaEye, FaEyeSlash} from "react-icons/fa";
 const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [rememberMe, setRememberMe] = useState(false);
     const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] = useState(false);
     const { showNotification } = useContext(NotificationContext);
     const [showPassword, setShowPassword] = useState(false);
@@ -102,7 +101,7 @@ const Login = () => {
                         permissions: data.permissions,
                     };
 
-                    login(userData, rememberMe);
+                    login(userData);
                     navigate("/");
                 } else {
                     switch (response.status) {

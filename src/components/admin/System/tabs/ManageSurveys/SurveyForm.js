@@ -3,9 +3,11 @@ import { AuthContext } from '../../../../../context/AuthContext';
 import { useLoading } from '../../../../../context/LoadingContext';
 import { API_CONFIG } from '../../../../../config';
 import './SurveyForm.css';
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const SurveyForm = () => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
 
     const [surveyData, setSurveyData] = useState({
@@ -91,18 +93,18 @@ const SurveyForm = () => {
             });
 
             if (response.ok) {
-                alert('Survey created successfully!');
+                showNotification('Survey created successfully!', 'success');
                 setSurveyData({ key: '', name: '', countryCode: '', description: '' });
                 setQuestions([{ key: '', text: '', description: '', options: [{ text: '', value: '' }] }]);
                 setShowQuestions(false);
             } else {
                 const errorData = await response.json();
                 console.error('Error creating survey:', errorData);
-                alert('Failed to create survey. Please try again.');
+                showNotification('Failed to create survey. Please try again!', 'error');
             }
         } catch (error) {
             console.error('Error creating survey:', error);
-            alert('An error occurred. Please try again later.');
+            showNotification('An error occurred. Please try again later!', 'error');
         } finally {
             stopLoading();
         }

@@ -7,6 +7,7 @@ import { API_CONFIG } from '../../../config';
 import {AuthContext} from "../../../context/AuthContext";
 import DatePicker from "react-datepicker";
 import Select from "react-select";
+import {NotificationContext} from "../../../context/NotificationContext";
 
 
 const AddCenterForm = ({ onSuccessfulSubmit }) => {
@@ -20,6 +21,7 @@ const AddCenterForm = ({ onSuccessfulSubmit }) => {
     const [office, setOffice] = useState('');
     const [staff, setStaff] = useState('');
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
 
     const [groups, setGroups] = useState([]);
 
@@ -106,12 +108,12 @@ const AddCenterForm = ({ onSuccessfulSubmit }) => {
 
         const today = new Date();
         if (new Date(submittedOn) > today) {
-            alert("Submitted On Date cannot be in the future.");
+            showNotification("Submitted On Date cannot be in the future!", 'info');
             return;
         }
 
         if (isActive && (!activationDate || new Date(activationDate) > today)) {
-            alert("Activation Date must be in the past or today.");
+            showNotification("Activation Date must be in the past or today!", 'info');
             return;
         }
 
@@ -166,12 +168,14 @@ const AddCenterForm = ({ onSuccessfulSubmit }) => {
             setGroups([]);
             setStaffs([]);
 
+            showNotification("Center created successfully!", 'success');
+
             if (onSuccessfulSubmit) {
                 onSuccessfulSubmit();
             }
         } catch (error) {
             console.error("Error submitting center data:", error);
-            alert("There was an error creating the center. Please try again.");
+            showNotification("There was an error creating the center. Please try again!", 'success');
         } finally {
             stopLoading();
         }

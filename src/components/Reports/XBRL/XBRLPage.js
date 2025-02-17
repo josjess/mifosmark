@@ -8,6 +8,7 @@ import { Tooltip as ReactTooltip } from "react-tooltip";
 import "./XBRLPage.css";
 import {Link} from "react-router-dom";
 import DatePicker from "react-datepicker";
+import {NotificationContext} from "../../../context/NotificationContext";
 
 const XBRLReports = () => {
     const [taxonomyData, setTaxonomyData] = useState([]);
@@ -20,6 +21,7 @@ const XBRLReports = () => {
         endDate: "",
     });
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
 
     const fetchXBRLData = async () => {
@@ -120,7 +122,7 @@ const XBRLReports = () => {
         const { startDate, endDate } = reportDates;
 
         if (!startDate || !endDate) {
-            alert("Both Start Date and End Date are required.");
+            showNotification("Both Start Date and End Date are required!", 'info');
             return;
         }
 
@@ -138,12 +140,12 @@ const XBRLReports = () => {
                 }
             );
 
-            console.log("Report generated successfully:", response.data);
-            alert("Report generated successfully!");
+            // console.log("Report generated successfully:", response.data);
+            showNotification("Report generated successfully!", 'success');
             handleCloseReportModal();
         } catch (error) {
             console.error("Error generating report:", error);
-            alert("Failed to generate report. Please try again.");
+            showNotification("Failed to generate report. Please try again!", 'success');
         } finally {
             stopLoading();
         }
@@ -169,10 +171,10 @@ const XBRLReports = () => {
                 }
             );
             // console.log("Save changes response:", response.data);
-            // alert("Changes saved successfully!");
+            showNotification("Changes saved successfully!", 'success');
         } catch (error) {
             console.error("Error saving changes:", error);
-            // alert("Failed to save changes. Please try again.");
+            showNotification("Failed to save changes. Please try again!", 'error');
         } finally {
             stopLoading();
         }

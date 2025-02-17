@@ -194,7 +194,7 @@ const CreateFixedDepositProducts = () => {
     };
 
     const handleAddAdvancedRule = (type) => {
-        console.log('Add Advanced Rule')
+        // console.log('Add Advanced Rule')
     };
 
     const handleFieldChange = (stage, field, value) => {

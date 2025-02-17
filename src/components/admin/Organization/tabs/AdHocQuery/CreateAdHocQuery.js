@@ -4,6 +4,7 @@ import { AuthContext } from '../../../../../context/AuthContext';
 import { useLoading } from '../../../../../context/LoadingContext';
 import { API_CONFIG } from '../../../../../config';
 import './CreateAdHocQuery.css';
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const CreateAdHocQuery = ({ onFormSubmitSuccess }) => {
     const { user } = useContext(AuthContext);
@@ -16,6 +17,7 @@ const CreateAdHocQuery = ({ onFormSubmitSuccess }) => {
     const [reportRunFrequency, setReportRunFrequency] = useState('');
     const [isActive, setIsActive] = useState(false);
     const [frequencies, setFrequencies] = useState([]);
+    const { showNotification } = useContext(NotificationContext);
 
     useEffect(() => {
         fetchTemplate();
@@ -67,6 +69,7 @@ const CreateAdHocQuery = ({ onFormSubmitSuccess }) => {
                 }
             );
             onFormSubmitSuccess();
+            showNotification("Ad Hoc query submitted!", 'success');
         } catch (error) {
             console.error('Error creating Ad Hoc Query:', error);
         } finally {

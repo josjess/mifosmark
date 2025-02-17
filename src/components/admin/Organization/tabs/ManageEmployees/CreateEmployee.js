@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../../../../context/AuthContext";
 import { useLoading } from "../../../../../context/LoadingContext";
 import { API_CONFIG } from "../../../../../config";
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const CreateEmployee = ({ onFormSubmitSuccess }) => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
-    const navigate = useNavigate();
 
     const [offices, setOffices] = useState([]);
     const [officeId, setOfficeId] = useState("");
@@ -80,6 +80,7 @@ const CreateEmployee = ({ onFormSubmitSuccess }) => {
             if (onFormSubmitSuccess) {
                 onFormSubmitSuccess();
             }
+            showNotification("Employee created successfully!", 'success');
         } catch (error) {
             console.error("Error creating employee:", error);
         } finally {

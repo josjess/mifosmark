@@ -4,9 +4,11 @@ import { API_CONFIG } from '../../../config';
 import { AuthContext } from '../../../context/AuthContext';
 import { useLoading } from '../../../context/LoadingContext';
 import './ViewUserDetails.css';
+import {NotificationContext} from "../../../context/NotificationContext";
 
 const ViewUserDetails = ({ selectedUser, onClose }) => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const [userDetails, setUserDetails] = useState(null);
 
@@ -130,9 +132,10 @@ const ViewUserDetails = ({ selectedUser, onClose }) => {
 
             setEditModalOpen(false);
 
-            // console.log("User details updated successfully");
+            showNotification("User details updated successfully!", 'success');
         } catch (error) {
             console.error("Error updating user details:", error.message);
+            showNotification("Error updating user details!", 'error');
         } finally {
             setIsSubmitting(false);
             stopLoading();
@@ -149,7 +152,7 @@ const ViewUserDetails = ({ selectedUser, onClose }) => {
         startLoading();
         try {
             if (!validatePassword(passwordData.password)) {
-                alert("Password does not meet the requirements.");
+                showNotification("Password does not meet the requirements!", 'info');
                 return;
             }
 
@@ -169,8 +172,10 @@ const ViewUserDetails = ({ selectedUser, onClose }) => {
 
 
             setChangePasswordModalOpen(false);
+            showNotification("Password updated successfully!", 'success');
         } catch (error) {
             console.error("Error changing password:", error.message);
+            showNotification("Error changing password!", 'error');
         } finally {
             setIsSubmittingPassword(false);
             stopLoading();
@@ -194,7 +199,7 @@ const ViewUserDetails = ({ selectedUser, onClose }) => {
             onClose()
         } catch (error) {
             console.error("Error deleting user:", error.message);
-            alert("An error occurred while deleting the user. Please try again.");
+            showNotification("An error occurred while deleting the user! Please try again!", 'error');
         } finally {
             stopLoading();
         }

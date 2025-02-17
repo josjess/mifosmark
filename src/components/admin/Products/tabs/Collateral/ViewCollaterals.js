@@ -4,9 +4,11 @@ import { AuthContext } from '../../../../../context/AuthContext';
 import { useLoading } from '../../../../../context/LoadingContext';
 import { API_CONFIG } from '../../../../../config';
 import './ViewCollaterals.css';
+import {NotificationContext} from "../../../../../context/NotificationContext";
 
 const ViewCollaterals = ({onRowClick}) => {
     const { user } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const [collaterals, setCollaterals] = useState([]);
     const [pageSize, setPageSize] = useState(10);
@@ -35,6 +37,7 @@ const ViewCollaterals = ({onRowClick}) => {
             setCollaterals(response.data || []);
         } catch (error) {
             console.error('Error fetching collaterals:', error);
+            showNotification('Error fetching collaterals:', 'error');
         } finally {
             stopLoading();
         }
