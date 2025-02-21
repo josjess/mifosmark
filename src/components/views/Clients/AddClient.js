@@ -1042,6 +1042,7 @@ const AddClientForm = () => {
 
             const formattedActivationDate = isActive ? format(new Date(activationDate), 'dd MMMM yyyy') : null;
             const formattedSubmittedOnDate = submittedOn ? format(new Date(submittedOn), 'dd MMMM yyyy') : null;
+            const formattedDateOfBirth = dateOfBirth ? format(new Date(dateOfBirth), 'dd MMMM yyyy') : null;
 
             const clientData = {
                 officeId: parseInt(office),
@@ -1055,6 +1056,7 @@ const AddClientForm = () => {
                 active: isActive,
                 activationDate: formattedActivationDate,
                 submittedOnDate: formattedSubmittedOnDate,
+                dateOfBirth: formattedDateOfBirth,
                 dateFormat: 'dd MMMM yyyy',
                 locale: 'en',
                 genderId: gender ? parseInt(clientTemplate.genderOptions?.find((g) => g.name === gender)?.id) : undefined,

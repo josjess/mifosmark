@@ -7,6 +7,7 @@ import { API_CONFIG } from '../../../config';
 import { useLoading } from '../../../context/LoadingContext';
 import { AuthContext } from '../../../context/AuthContext';
 import {NotificationContext} from "../../../context/NotificationContext";
+import {format} from "date-fns";
 
 
 const EditClientDetails = () => {
@@ -84,21 +85,26 @@ const EditClientDetails = () => {
                 'Content-Type': 'application/json',
             };
 
-            const allowedKeys = [
-                'firstname',
-                'lastname',
-                'externalId',
-                'isStaff',
-                'staffId',
-                'activationDate',
-                'mobileNumber',
-                'emailAddress',
-                'clientType',
-                'clientClassification',
-            ];
-            const cleanedData = Object.fromEntries(
-                Object.entries(clientData).filter(([key]) => allowedKeys.includes(key))
-            );
+            const formattedDateOfBirth = clientData.dateOfBirth ? format(new Date(clientData.dateOfBirth), 'dd MMMM yyyy') : null;
+
+            const cleanedData = {
+                firstname: clientData.firstname || "",
+                lastname: clientData.lastname || "",
+                externalId: clientData.externalId || "",
+                isStaff: clientData.isStaff ?? false,
+                staffId: clientData.staffId || null,
+                activationDate: clientData.activationDate || "",
+                dateOfBirth: formattedDateOfBirth,
+                genderId: clientData.gender ? parseInt(templateData.genderOptions?.find((g) => g.id === clientData.gender)?.id) : undefined,
+                mobileNo: clientData.mobileNo || "",
+                emailAddress: clientData.emailAddress || "",
+                clientTypeId: clientData.clientType || "",
+                clientClassificationId: clientData.clientClassification || "",
+                dateFormat: 'dd MMMM yyyy',
+                locale: 'en',
+            };
+
+            await axios.put(`${API_CONFIG.baseURL}/clients/${clientId}`, cleanedData, { headers });
 
             await axios.put(`${API_CONFIG.baseURL}/clients/${clientId}`, cleanedData, { headers });
 
@@ -107,7 +113,7 @@ const EditClientDetails = () => {
                 state: {
                     clientId: clientId,
                     clientName: clientData?.displayName || "Client Details",
-                    preventDuplicate: true, // Prevent duplicate tabs
+                    preventDuplicate: true,
                 },
             });
         } catch (error) {
@@ -228,7 +234,7 @@ const EditClientDetails = () => {
                             <input
                                 type="text"
                                 id="externalId"
-                                value={clientData.externalId || ''}
+                                value={clientData?.externalId || ''}
                                 onChange={(e) => handleInputChange('externalId', e.target.value)}
                                 className="staged-form-input"
                             />
@@ -242,7 +248,7 @@ const EditClientDetails = () => {
                             <input
                                 type="text"
                                 id="firstname"
-                                value={clientData.firstname || ''}
+                                value={clientData?.firstname || ''}
                                 onChange={(e) => handleInputChange('firstname', e.target.value)}
                                 required
                                 className="staged-form-input"
@@ -254,7 +260,7 @@ const EditClientDetails = () => {
                             <input
                                 type="text"
                                 id="middleName"
-                                value={clientData.middleName || ''}
+                                value={clientData?.middleName || ''}
                                 onChange={(e) => handleInputChange('middleName', e.target.value)}
                                 className="staged-form-input"
                             />
@@ -267,7 +273,7 @@ const EditClientDetails = () => {
                             <input
                                 type="text"
                                 id="lastname"
-                                value={clientData.lastname || ''}
+                                value={clientData?.lastname || ''}
                                 onChange={(e) => handleInputChange('lastname', e.target.value)}
                                 required
                                 className="staged-form-input"
@@ -278,12 +284,17 @@ const EditClientDetails = () => {
                             <label htmlFor="dateOfBirth">Date of Birth</label>
                             <DatePicker
                                 id="dateOfBirth"
-                                selected={convertBackendDateToDate(clientData?.dateOfBirth)}
+                                selected={clientData?.dateOfBirth ? new Date(clientData.dateOfBirth) : convertBackendDateToDate(clientData?.dateOfBirth)}
                                 onChange={(date) =>
-                                    handleInputChange('dateOfBirth', date.toISOString().split('T')[0])
+                                    handleInputChange('dateOfBirth', date ? date.toISOString().split('T')[0] : "")
                                 }
                                 dateFormat="MMMM d, yyyy"
                                 className="staged-form-input"
+                                showPopperArrow={false}
+                                showMonthDropdown
+                                showYearDropdown
+                                dropdownMode="select"
+                                maxDate={new Date()}
                             />
                         </div>
                     </div>
@@ -293,7 +304,7 @@ const EditClientDetails = () => {
                             <label htmlFor="gender">Gender</label>
                             <select
                                 id="gender"
-                                value={clientData.gender || ''}
+                                value={clientData?.gender || ''}
                                 onChange={(e) => handleInputChange('gender', e.target.value)}
                                 className="staged-form-select"
                             >
@@ -310,7 +321,7 @@ const EditClientDetails = () => {
                             <label htmlFor="staff">Staff</label>
                             <select
                                 id="staff"
-                                value={clientData.staffId || ''}
+                                value={clientData?.staffId || ''}
                                 onChange={(e) => handleInputChange('staffId', e.target.value)}
                                 className="staged-form-select"
                             >
@@ -340,7 +351,7 @@ const EditClientDetails = () => {
                             <input
                                 type="text"
                                 id="mobileNumber"
-                                value={clientData.mobileNumber || ''}
+                                value={clientData?.mobileNo || ''}
                                 onChange={(e) => handleInputChange('mobileNumber', e.target.value)}
                                 className="staged-form-input"
                             />
@@ -351,7 +362,7 @@ const EditClientDetails = () => {
                             <input
                                 type="email"
                                 id="emailAddress"
-                                value={clientData.emailAddress || ''}
+                                value={clientData?.emailAddress || ''}
                                 onChange={(e) => handleInputChange('emailAddress', e.target.value)}
                                 className="staged-form-input"
                             />
@@ -363,7 +374,7 @@ const EditClientDetails = () => {
                             <label htmlFor="clientType">Client Type</label>
                             <select
                                 id="clientType"
-                                value={clientData.clientType || ''}
+                                value={clientData?.clientType?.id || clientData?.clientType || ''}
                                 onChange={(e) => handleInputChange('clientType', e.target.value)}
                                 className="staged-form-select"
                             >
@@ -380,7 +391,7 @@ const EditClientDetails = () => {
                             <label htmlFor="clientClassification">Client Classification</label>
                             <select
                                 id="clientClassification"
-                                value={clientData.clientClassification || ''}
+                                value={clientData?.clientClassification?.id || clientData?.clientClassification || ''}
                                 onChange={(e) => handleInputChange('clientClassification', e.target.value)}
                                 className="staged-form-select"
                             >
@@ -396,28 +407,42 @@ const EditClientDetails = () => {
 
                     <div className="staged-form-row">
                         <div className="staged-form-field">
-                            <label htmlFor="submittedOn">Submitted On <span>*</span></label>
+                            <label htmlFor="submittedOn">Submitted On (View Only)</label>
                             <DatePicker
                                 id="submittedOn"
-                                selected={convertBackendDateToDate(clientData?.timeline?.submittedOnDate)}
+                                selected={clientData?.submittedOnDate
+                                    ? new Date(clientData.submittedOnDate)
+                                    : convertBackendDateToDate(clientData?.timeline?.submittedOnDate)}
                                 onChange={(date) =>
-                                    handleInputChange('submittedOnDate', date.toISOString().split('T')[0])
+                                    handleInputChange('submittedOnDate', date ? date.toISOString().split('T')[0] : "")
                                 }
                                 dateFormat="MMMM d, yyyy"
                                 className="staged-form-input"
+                                showPopperArrow={false}
+                                readOnly
+                                showMonthDropdown
+                                showYearDropdown
+                                dropdownMode="select"
                             />
                         </div>
 
                         <div className="staged-form-field">
-                            <label htmlFor="activatedOn">Activated On</label>
+                            <label htmlFor="activatedOn">Activated On (View Only)</label>
                             <DatePicker
                                 id="activatedOn"
-                                selected={convertBackendDateToDate(clientData?.timeline?.activatedOnDate)}
+                                selected={clientData?.submittedOnDate
+                                    ? new Date(clientData.submittedOnDate)
+                                    : convertBackendDateToDate(clientData?.timeline?.submittedOnDate)}
                                 onChange={(date) =>
-                                    handleInputChange('activatedOnDate', date.toISOString().split('T')[0])
+                                    handleInputChange('activatedOnDate', date ? date.toISOString().split('T')[0] : "")
                                 }
                                 dateFormat="MMMM d, yyyy"
                                 className="staged-form-input"
+                                showPopperArrow={false}
+                                readOnly
+                                showMonthDropdown
+                                showYearDropdown
+                                dropdownMode="select"
                             />
                         </div>
                     </div>
