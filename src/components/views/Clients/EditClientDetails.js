@@ -6,6 +6,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { API_CONFIG } from '../../../config';
 import { useLoading } from '../../../context/LoadingContext';
 import { AuthContext } from '../../../context/AuthContext';
+import {NotificationContext} from "../../../context/NotificationContext";
 
 
 const EditClientDetails = () => {
@@ -17,6 +18,7 @@ const EditClientDetails = () => {
     const { startLoading, stopLoading } = useLoading();
     const { user } = useContext(AuthContext);
     const navigate = useNavigate();
+    const { showNotification } = useContext(NotificationContext);
 
     // Fetch Client Data and Template Data
     const fetchClientData = async () => {
@@ -40,6 +42,7 @@ const EditClientDetails = () => {
             setTemplateData(templateResponse.data);
         } catch (error) {
             console.error('Error fetching client details:', error);
+            showNotification('Error fetching client details!', 'error');
         } finally {
             stopLoading();
         }
@@ -99,7 +102,7 @@ const EditClientDetails = () => {
 
             await axios.put(`${API_CONFIG.baseURL}/clients/${clientId}`, cleanedData, { headers });
 
-            alert('Client details updated successfully!');
+            showNotification('Client details updated successfully!', 'success');
             navigate('/clients', {
                 state: {
                     clientId: clientId,
@@ -109,7 +112,7 @@ const EditClientDetails = () => {
             });
         } catch (error) {
             console.error('Error updating client details:', error);
-            alert('Failed to update client details.');
+            showNotification('Failed to update client details!', 'error');
         } finally {
             stopLoading();
         }

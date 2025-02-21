@@ -7,11 +7,13 @@ import {FaEdit, FaStickyNote, FaTrash} from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import Select from "react-select";
 import {useNavigate} from "react-router-dom";
+import {NotificationContext} from "../../../context/NotificationContext";
 
 const GroupDetails = ({ groupId, onClose }) => {
     const { user } = useContext(AuthContext);
     const { startLoading, stopLoading } = useLoading();
     const navigate = useNavigate();
+    const { showNotification } = useContext(NotificationContext);
 
     const [GroupImage, setGroupImage] = useState(null);
     const [groupDetails, setGroupDetails] = useState(null);
@@ -676,7 +678,7 @@ const GroupDetails = ({ groupId, onClose }) => {
 
     const handleActivateGroupSubmit = async () => {
         if (!activationDate || activationDate < submissionDate) {
-            alert("Activation date must be on or after the submission date.");
+            showNotification("Activation date must be on or after the submission date!", 'info');
             return;
         }
 
@@ -702,8 +704,10 @@ const GroupDetails = ({ groupId, onClose }) => {
             setIsActivateModalOpen(false);
             const groupResponse = await axios.get(`${API_CONFIG.baseURL}/groups/${groupId}?associations=all`, { headers });
             setGroupDetails(groupResponse.data);
+            showNotification("Group activated successfully!", 'success')
         } catch (error) {
             console.error('Error activating group:', error);
+            showNotification('Error activating group!', 'error');
         } finally {
             stopLoading();
         }
@@ -758,7 +762,7 @@ const GroupDetails = ({ groupId, onClose }) => {
         const { name, staffId, submittedOnDate, activationDate, externalId } = editGroupData;
 
         if (!name || !submittedOnDate || !activationDate) {
-            alert('Name, Submitted On Date, and Activation Date are mandatory.');
+            showNotification('Name, Submitted On Date, and Activation Date are mandatory!', 'info');
             return;
         }
 
@@ -793,8 +797,10 @@ const GroupDetails = ({ groupId, onClose }) => {
 
             const updatedResponse = await axios.get(`${API_CONFIG.baseURL}/groups/${groupId}?associations=all`, { headers });
             setGroupDetails(updatedResponse.data);
+            showNotification("Group editing successful!", 'success');
         } catch (error) {
             console.error('Error editing group:', error);
+            showNotification('Error editing group!', 'error');
         } finally {
             stopLoading();
         }
@@ -824,6 +830,7 @@ const GroupDetails = ({ groupId, onClose }) => {
             );
         } catch (error) {
             console.error('Error fetching group associations:', error);
+            showNotification('Error fetching group associations!', 'error');
         } finally {
             stopLoading();
         }
@@ -831,7 +838,7 @@ const GroupDetails = ({ groupId, onClose }) => {
 
     const handleSubmitTransferClients = async () => {
         if (!selectedClients.length || !destinationGroup) {
-            alert('Please select clients and a destination group.');
+            showNotification('Please select clients and a destination group!', 'info');
             return;
         }
 
@@ -850,11 +857,12 @@ const GroupDetails = ({ groupId, onClose }) => {
         try {
             startLoading();
             await axios.post(`${API_CONFIG.baseURL}/groups/${groupId}?command=transferClients`, payload, { headers });
-            alert('Clients transferred successfully.');
+            showNotification('Clients transferred successfully!', 'success');
             setIsTransferModalOpen(false);
             fetchGroupAssociations(); // Refresh data
         } catch (error) {
             console.error('Error transferring clients:', error);
+            showNotification('Error transferring clients!', 'error');
         } finally {
             stopLoading();
         }
@@ -918,10 +926,10 @@ const GroupDetails = ({ groupId, onClose }) => {
             );
 
             if (invalidClients.length > 0) {
-                alert(
+                showNotification(
                     `Selected clients (${invalidClients.join(
                         ", "
-                    )}) belong to a different office than the group.`
+                    )}) belong to a different office than the group.`, 'info'
                 );
                 return;
             }
@@ -942,9 +950,10 @@ const GroupDetails = ({ groupId, onClose }) => {
             fetchGroupClients();
             setSelectedClientIds([]);
             setSearchQuery("");
+            showNotification("Clients added successfully!", 'success');
         } catch (error) {
             console.error("Error adding clients:", error);
-            alert("Error adding clients. Please try again.");
+            showNotification("Error adding clients. Please try again!", 'error');
         } finally {
             stopLoading();
         }
@@ -1015,10 +1024,11 @@ const GroupDetails = ({ groupId, onClose }) => {
                 { headers }
             );
             setGroupDetails(response.data);
+            showNotification("Staff unassigned!", 'success');
 
         } catch (error) {
             console.error("Error unassigning staff:", error);
-            alert("Failed to unassign staff. Please try again.");
+            showNotification("Failed to unassign staff. Please try again!", 'error');
         } finally {
             stopLoading();
         }
@@ -1042,7 +1052,7 @@ const GroupDetails = ({ groupId, onClose }) => {
             setIsAssignStaffModalOpen(true);
         } catch (error) {
             console.error("Error fetching available staff:", error);
-            alert("Failed to fetch staff options. Please try again.");
+            showNotification("Failed to fetch staff options. Please try again!", 'error');
         } finally {
             stopLoading();
         }
@@ -1050,7 +1060,7 @@ const GroupDetails = ({ groupId, onClose }) => {
 
     const handleAssignStaff = async () => {
         if (!selectedStaffId) {
-            alert("Please select a staff to assign.");
+            showNotification("Please select a staff to assign!", 'info');
             return;
         }
 
@@ -1078,9 +1088,10 @@ const GroupDetails = ({ groupId, onClose }) => {
 
             setIsAssignStaffModalOpen(false);
             setSelectedStaffId('');
+            showNotification("Staff assigned successfully!", 'success');
         } catch (error) {
             console.error("Error assigning staff:", error);
-            alert("Failed to assign staff. Please try again.");
+            showNotification("Failed to assign staff. Please try again!", 'error');
         } finally {
             stopLoading();
         }
@@ -1104,7 +1115,7 @@ const GroupDetails = ({ groupId, onClose }) => {
             setIsAttachMeetingModalOpen(true);
         } catch (error) {
             console.error('Error fetching calendar types:', error);
-            alert('Failed to fetch calendar options. Please try again.');
+            showNotification('Failed to fetch calendar options. Please try again!', 'error');
         } finally {
             stopLoading();
         }
@@ -1112,7 +1123,7 @@ const GroupDetails = ({ groupId, onClose }) => {
 
     const handleCreateMeeting = async () => {
         if (!meetingStartDate || !meetingTypeId) {
-            alert("Please provide a valid meeting start date and type.");
+            showNotification("Please provide a valid meeting start date and type!", 'info');
             return;
         }
 
@@ -1147,9 +1158,10 @@ const GroupDetails = ({ groupId, onClose }) => {
             setMeetingStartDate(null);
             setIsRepeating(false);
             setMeetingTypeId('');
+            showNotification("Meeting created successfully", 'success');
         } catch (error) {
             console.error("Error creating meeting:", error);
-            alert("Failed to create the meeting. Please try again.");
+            showNotification("Failed to create the meeting. Please try again!", 'error');
         } finally {
             stopLoading();
         }
@@ -1173,7 +1185,7 @@ const GroupDetails = ({ groupId, onClose }) => {
             setIsCloseModalOpen(true);
         } catch (error) {
             console.error('Error fetching closure reasons:', error);
-            alert('Failed to fetch closure reasons. Please try again.');
+            showNotification('Failed to fetch closure reasons. Please try again!', 'error');
         } finally {
             stopLoading();
         }
@@ -1181,7 +1193,7 @@ const GroupDetails = ({ groupId, onClose }) => {
 
     const handleCloseGroup = async () => {
         if (!closedOnDate || !selectedClosureReason) {
-            alert('Please provide a valid closure date and reason.');
+            showNotification('Please provide a valid closure date and reason!', 'info');
             return;
         }
 
@@ -1213,9 +1225,10 @@ const GroupDetails = ({ groupId, onClose }) => {
             setIsCloseModalOpen(false);
             setClosedOnDate(null);
             setSelectedClosureReason('');
+            showNotification("Group closed successfully!", 'success');
         } catch (error) {
             console.error('Error closing group:', error);
-            alert('Failed to close the group. Please try again.');
+            showNotification('Failed to close the group. Please try again!', 'error');
         } finally {
             stopLoading();
         }

@@ -26,12 +26,61 @@ const EditBaseURLModal = ({ isOpen, onClose }) => {
         setNewTenantId(e.target.value);
     };
 
-    const handleSave = () => {
-        updateBaseURL(newBaseURL);
+    const testNewBaseURL = async (url) => {
+        try {
+            const response = await fetch(`${url}/authentication`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username: "mifos", password: "password" }),
+            });
+
+            return response.ok;
+        } catch (error) {
+            console.error("Error testing new Base URL:", error);
+            return false;
+        }
+    };
+
+    const setupProxy = async (targetURL) => {
+        const proxyURL = `${targetURL}/authentication`;
+
+        try {
+            const getResponse = await fetch(proxyURL);
+            if (!getResponse.ok && getResponse.status !== 403) {
+                console.error("GET request failed:", getResponse.status);
+                return null;
+            }
+
+            return null;
+        } catch (error) {
+            console.error("Proxy setup error:", error);
+            return null;
+        }
+    };
+
+    const handleSave = async () => {
+        let finalURL = newBaseURL;
+
+        showNotification("Testing Base URL...", "info");
+
+        const isBaseURLValid = await testNewBaseURL(newBaseURL);
+
+        if (!isBaseURLValid) {
+            const proxyURL = await setupProxy(newBaseURL);
+
+            if (!proxyURL) {
+                showNotification("Failed to update Base URL due to CORS issues!", "error");
+                return;
+            }
+
+            finalURL = proxyURL;
+        }
+
+        updateBaseURL(finalURL);
         updateTenantId(newTenantId);
         onClose();
         logout();
-        showNotification("Base URL and Tenant ID updated successfully! You have been logged out.", 'success');
+        showNotification("Base URL and Tenant ID updated successfully! You have been logged out.", "success");
     };
 
     const handleProceedToConfirmation = () => {

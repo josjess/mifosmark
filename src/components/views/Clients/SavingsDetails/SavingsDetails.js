@@ -7,10 +7,12 @@ import { API_CONFIG } from "../../../../config";
 import "./SavingsDetails.css";
 import {FaCaretLeft, FaCaretRight, FaEdit, FaStickyNote, FaTrash} from "react-icons/fa";
 import DatePicker from "react-datepicker";
+import {NotificationContext} from "../../../../context/NotificationContext";
 
 const SavingsAccounts = () => {
     const { clientId, savingsAccountId } = useParams();
     const { state } = useLocation();
+    const { showNotification } = useContext(NotificationContext);
     const { user } = useContext(AuthContext);
     const { startLoading, stopLoading } = useLoading();
     const navigate = useNavigate();
@@ -225,12 +227,12 @@ const SavingsAccounts = () => {
                 { headers }
             );
 
-            alert("Savings account activated successfully.");
+            showNotification("Savings account activated successfully!", 'success');
             fetchSavingsData();
             handleCloseActivateModal();
         } catch (error) {
             console.error("Error activating savings account:", error);
-            alert("Failed to activate the savings account. Please try again.");
+            showNotification("Failed to activate the savings account. Please try again.", 'error');
         }
     };
 
@@ -248,7 +250,7 @@ const SavingsAccounts = () => {
                     { headers }
                 );
 
-                alert("Savings account deleted successfully.");
+                showNotification("Savings account deleted successfully.", 'info');
                 navigate("/clients", {
                     state: {
                         clientId: clientId,
@@ -258,7 +260,7 @@ const SavingsAccounts = () => {
                 });
             } catch (error) {
                 console.error("Error deleting savings account:", error);
-                alert("Failed to delete the savings account. Please try again.");
+                showNotification("Failed to delete the savings account. Please try again.", 'error');
             }
         }
     };
@@ -278,7 +280,7 @@ const SavingsAccounts = () => {
     const handleWithdrawnByClient = async () => {
         try {
             if (!withdrawnForm.withdrawnOnDate) {
-                alert("Withdrawn On Date is required.");
+                showNotification("Withdrawn On Date is required.", 'info');
                 return;
             }
 
@@ -301,12 +303,12 @@ const SavingsAccounts = () => {
                 { headers }
             );
 
-            alert("Account marked as withdrawn successfully.");
+            showNotification("Account marked as withdrawn successfully.", 'success');
             handleCloseWithdrawnModal();
             fetchSavingsData();
         } catch (error) {
             console.error("Error withdrawing account:", error);
-            alert("Failed to mark the account as withdrawn. Please try again.");
+            showNotification("Failed to mark the account as withdrawn. Please try again.", 'error');
         }
     };
 
@@ -325,7 +327,7 @@ const SavingsAccounts = () => {
     const handleRejectAccount = async () => {
         try {
             if (!rejectForm.rejectedOnDate) {
-                alert("Rejected On Date is required.");
+                showNotification("Rejected On Date is required.", 'info');
                 return;
             }
 
@@ -348,12 +350,12 @@ const SavingsAccounts = () => {
                 { headers }
             );
 
-            alert("Account rejected successfully.");
+            showNotification("Account rejected successfully.", 'success');
             handleCloseRejectModal();
             fetchSavingsData();
         } catch (error) {
             console.error("Error rejecting account:", error);
-            alert("Failed to reject the account. Please try again.");
+            showNotification("Failed to reject the account. Please try again.", 'error');
         }
     };
 
@@ -375,7 +377,7 @@ const SavingsAccounts = () => {
 
     const handleApproveAccount = async () => {
         if (!approveForm.approvedOnDate) {
-            alert("Please select an approval date.");
+            showNotification("Please select an approval date.", 'info');
             return;
         }
 
@@ -399,12 +401,12 @@ const SavingsAccounts = () => {
 
             await axios.post(endpoint, payload, { headers });
 
-            alert("Account approved successfully.");
+            showNotification("Account approved successfully.", 'success');
             fetchSavingsData();
             handleCloseApproveModal();
         } catch (error) {
             console.error("Error approving account:", error);
-            alert("Failed to approve account. Please try again.");
+            showNotification("Failed to approve account. Please try again.", 'error');
         } finally {
             setIsProcessingApproval(false);
         }
@@ -422,7 +424,7 @@ const SavingsAccounts = () => {
 
     const handleUndoApproval = async () => {
         if (!undoApprovalNote.trim()) {
-            alert("Please provide a note for undo approval.");
+            showNotification("Please provide a note for undo approval.", 'info');
             return;
         }
 
@@ -443,12 +445,12 @@ const SavingsAccounts = () => {
 
             await axios.post(endpoint, payload, { headers });
 
-            alert("Approval undone successfully.");
+            showNotification("Approval undone successfully.", 'success');
             fetchSavingsData();
             handleCloseUndoApprovalModal();
         } catch (error) {
             console.error("Error undoing approval:", error);
-            alert("Failed to undo approval. Please try again.");
+            showNotification("Failed to undo approval. Please try again.", 'error');
         } finally {
             setIsProcessingUndo(false);
         }
@@ -500,7 +502,7 @@ const SavingsAccounts = () => {
             handleCloseExportModal();
         } catch (error) {
             console.error("Error generating report:", error);
-            alert("Failed to generate report. Please try again.");
+            showNotification("Failed to generate report. Please try again.", 'error');
         }
     };
 
@@ -523,7 +525,7 @@ const SavingsAccounts = () => {
             setIsAssignStaffModalOpen(true);
         } catch (error) {
             console.error("Error fetching assign staff data:", error);
-            alert("Failed to load data for assigning staff.");
+            showNotification("Failed to load data for assigning staff.", 'error');
         } finally {
             stopLoading();
         }
@@ -537,7 +539,7 @@ const SavingsAccounts = () => {
 
     const handleSubmitAssignStaff = async () => {
         if (!assignToStaff || !assignmentDate) {
-            alert("Please fill in all mandatory fields.");
+            showNotification("Please fill in all mandatory fields.", 'info');
             return;
         }
 
@@ -567,14 +569,14 @@ const SavingsAccounts = () => {
                 { headers }
             );
 
-            alert("Savings officer assigned successfully.");
+            showNotification("Savings officer assigned successfully.", 'success');
             setAssignToStaff("");
             setAssignmentDate(null);
             handleCloseAssignStaffModal();
             fetchSavingsData();
         } catch (error) {
             console.error("Error assigning staff:", error);
-            alert("Failed to assign staff.");
+            showNotification("Failed to assign staff.", 'error');
         } finally {
             stopLoading();
         }
@@ -614,7 +616,7 @@ const SavingsAccounts = () => {
             setIsTransferFundsModalOpen(true);
         } catch (error) {
             console.error("Error fetching transfer funds data:", error);
-            alert("Failed to load data for fund transfer.");
+            showNotification("Failed to load data for fund transfer.", 'error');
         } finally {
             stopLoading();
         }
@@ -641,7 +643,7 @@ const SavingsAccounts = () => {
             !transferAmount ||
             !transferDescription
         ) {
-            alert("Please fill in all mandatory fields.");
+            showNotification("Please fill in all mandatory fields.", 'info');
             return;
         }
 
@@ -675,12 +677,12 @@ const SavingsAccounts = () => {
 
             await axios.post(`${API_CONFIG.baseURL}/accounttransfers`, payload, { headers });
 
-            alert("Funds transferred successfully.");
+            showNotification("Funds transferred successfully.", 'success');
             handleCloseTransferFundsModal();
             fetchSavingsData();
         } catch (error) {
             console.error("Error transferring funds:", error);
-            alert("Failed to transfer funds.");
+            showNotification("Failed to transfer funds.", 'error');
         } finally {
             stopLoading();
         }
@@ -712,7 +714,7 @@ const SavingsAccounts = () => {
             setIsCloseModalOpen(true);
         } catch (error) {
             console.error("Error fetching close account data:", error);
-            alert("Failed to load data for closing the account.");
+            showNotification("Failed to load data for closing the account.", 'error');
         } finally {
             stopLoading();
         }
@@ -736,7 +738,7 @@ const SavingsAccounts = () => {
 
     const handleSubmitClose = async () => {
         if (!closeTransactionDate || (isWithdrawBalance && !closeSelectedPaymentType)) {
-            alert("Please fill in all mandatory fields.");
+            showNotification("Please fill in all mandatory fields.", 'info');
             return;
         }
 
@@ -771,12 +773,12 @@ const SavingsAccounts = () => {
                 { headers }
             );
 
-            alert("Account closed successfully.");
+            showNotification("Account closed successfully.", 'success');
             handleCloseCloseModal();
             fetchSavingsData();
         } catch (error) {
             console.error("Error closing account:", error);
-            alert("Failed to close the account.");
+            showNotification("Failed to close the account.", 'error');
         } finally {
             stopLoading();
         }
@@ -801,7 +803,7 @@ const SavingsAccounts = () => {
             setIsAddChargeModalOpen(true);
         } catch (error) {
             console.error("Error fetching charge template:", error);
-            alert("Failed to load data for adding a charge.");
+            showNotification("Failed to load data for adding a charge.", 'error');
         } finally {
             stopLoading();
         }
@@ -816,7 +818,7 @@ const SavingsAccounts = () => {
 
     const handleSubmitAddCharge = async () => {
         if (!selectedCharge || !chargeAmount || !dueDate) {
-            alert("Please fill in all mandatory fields.");
+            showNotification("Please fill in all mandatory fields.", 'info');
             return;
         }
 
@@ -846,12 +848,12 @@ const SavingsAccounts = () => {
                 { headers }
             );
 
-            alert("Charge added successfully.");
+            showNotification("Charge added successfully.", 'success');
             handleCloseAddChargeModal();
             fetchSavingsData();
         } catch (error) {
             console.error("Error adding charge:", error);
-            alert("Failed to add charge.");
+            showNotification("Failed to add charge.", 'error');
         } finally {
             stopLoading();
         }
@@ -880,12 +882,12 @@ const SavingsAccounts = () => {
                 { headers }
             );
 
-            alert("Interest posted successfully.");
+            showNotification("Interest posted successfully.", 'success');
             handleClosePostInterestModal();
             fetchSavingsData();
         } catch (error) {
             console.error("Error posting interest:", error);
-            alert("Failed to post interest.");
+            showNotification("Failed to post interest.", 'error');
         } finally {
             stopLoading();
         }
@@ -902,7 +904,7 @@ const SavingsAccounts = () => {
 
     const handlePostInterestAsOn = async () => {
         if (!postInterestTransactionDate) {
-            alert("Please select a transaction date.");
+            showNotification("Please select a transaction date.", 'info');
             return;
         }
 
@@ -931,12 +933,12 @@ const SavingsAccounts = () => {
                 { headers }
             );
 
-            alert("Interest posted successfully.");
+            showNotification("Interest posted successfully.", 'success');
             handleClosePostInterestAsOnModal();
             fetchSavingsData();
         } catch (error) {
             console.error("Error posting interest:", error);
-            alert("Failed to post interest.");
+            showNotification("Failed to post interest.", 'error');
         } finally {
             stopLoading();
         }
@@ -965,12 +967,12 @@ const SavingsAccounts = () => {
                 { headers }
             );
 
-            alert("Interest calculated successfully.");
+            showNotification("Interest calculated successfully.", 'success');
             handleCloseCalculateInterestModal();
             fetchSavingsData();
         } catch (error) {
             console.error("Error calculating interest:", error);
-            alert("Failed to calculate interest.");
+            showNotification("Failed to calculate interest.", 'error');
         } finally {
             stopLoading();
         }
@@ -1001,7 +1003,7 @@ const SavingsAccounts = () => {
             setIsHoldAmountModalOpen(true);
         } catch (error) {
             console.error("Error fetching hold amount reasons:", error);
-            alert("Failed to load hold amount reasons.");
+            showNotification("Failed to load hold amount reasons.", 'error');
         } finally {
             stopLoading();
         }
@@ -1030,7 +1032,7 @@ const SavingsAccounts = () => {
 
     const handleSubmitHoldAmount = async () => {
         if (!holdAmountReason || !holdTransactionDate || !holdTransactionAmount) {
-            alert("Please fill in all mandatory fields.");
+            showNotification("Please fill in all mandatory fields.", 'info');
             return;
         }
 
@@ -1056,12 +1058,12 @@ const SavingsAccounts = () => {
                 { headers }
             );
 
-            alert("Amount held successfully.");
+            showNotification("Amount held successfully.", 'success');
             handleCloseHoldAmountModal();
             fetchSavingsData();
         } catch (error) {
             console.error("Error holding amount:", error);
-            alert("Failed to hold amount.");
+            showNotification("Failed to hold amount.", 'error');
         } finally {
             stopLoading();
         }
@@ -1092,7 +1094,7 @@ const SavingsAccounts = () => {
             setIsBlockAccountModalOpen(true);
         } catch (error) {
             console.error("Error fetching block account reasons:", error);
-            alert("Failed to load block account reasons.");
+            showNotification("Failed to load block account reasons.", 'error');
         } finally {
             stopLoading();
         }
@@ -1109,7 +1111,7 @@ const SavingsAccounts = () => {
 
     const handleSubmitBlockAccount = async () => {
         if (!blockAccountReason) {
-            alert("Please select a reason.");
+            showNotification("Please select a reason.", 'info');
             return;
         }
 
@@ -1132,12 +1134,12 @@ const SavingsAccounts = () => {
                 { headers }
             );
 
-            alert("Account blocked successfully.");
+            showNotification("Account blocked successfully.", 'success');
             handleCloseBlockAccountModal();
             fetchSavingsData();
         } catch (error) {
             console.error("Error blocking account:", error);
-            alert("Failed to block account.");
+            showNotification("Failed to block account.", 'error');
         } finally {
             stopLoading();
         }
@@ -1168,7 +1170,7 @@ const SavingsAccounts = () => {
             setIsBlockWithdrawalModalOpen(true);
         } catch (error) {
             console.error("Error fetching block withdrawal reasons:", error);
-            alert("Failed to load block withdrawal reasons.");
+            showNotification("Failed to load block withdrawal reasons.", 'error');
         } finally {
             stopLoading();
         }
@@ -1185,7 +1187,7 @@ const SavingsAccounts = () => {
 
     const handleSubmitBlockWithdrawal = async () => {
         if (!blockWithdrawalReason) {
-            alert("Please select a reason.");
+            showNotification("Please select a reason.", 'info');
             return;
         }
 
@@ -1208,12 +1210,12 @@ const SavingsAccounts = () => {
                 { headers }
             );
 
-            alert("Withdrawal blocked successfully.");
+            showNotification("Withdrawal blocked successfully.", 'success');
             handleCloseBlockWithdrawalModal();
             fetchSavingsData();
         } catch (error) {
             console.error("Error blocking withdrawal:", error);
-            alert("Failed to block withdrawal.");
+            showNotification("Failed to block withdrawal.", 'error');
         } finally {
             stopLoading();
         }
@@ -1238,7 +1240,7 @@ const SavingsAccounts = () => {
             setIsWithdrawModalOpen(true);
         } catch (error) {
             console.error("Error fetching withdraw data:", error);
-            alert("Failed to load data for withdrawal.");
+            showNotification("Failed to load data for withdrawal.", 'error');
         } finally {
             stopLoading();
         }
@@ -1260,7 +1262,7 @@ const SavingsAccounts = () => {
 
     const handleSubmitWithdraw = async () => {
         if (!withdrawTransactionDate || !withdrawTransactionAmount || !withdrawSelectedPaymentType) {
-            alert("Please fill in all mandatory fields.");
+            showNotification("Please fill in all mandatory fields.", 'info');
             return;
         }
 
@@ -1300,7 +1302,7 @@ const SavingsAccounts = () => {
                 { headers }
             );
 
-            alert("Withdrawal submitted successfully.");
+            showNotification("Withdrawal submitted successfully.", 'success');
 
             setWithdrawTransactionDate(null);
             setWithdrawTransactionAmount("");
@@ -1317,7 +1319,7 @@ const SavingsAccounts = () => {
             fetchSavingsData();
         } catch (error) {
             console.error("Error submitting withdrawal:", error);
-            alert("Failed to submit withdrawal.");
+            showNotification("Failed to submit withdrawal.", 'error');
         } finally {
             setIsSubmittingWithdraw(false);
             stopLoading();
@@ -1347,7 +1349,7 @@ const SavingsAccounts = () => {
             setIsBlockDepositModalOpen(true);
         } catch (error) {
             console.error("Error fetching block deposit reasons:", error);
-            alert("Failed to fetch block deposit reasons.");
+            showNotification("Failed to fetch block deposit reasons.", 'error');
         } finally {
             stopLoading();
         }
@@ -1355,7 +1357,7 @@ const SavingsAccounts = () => {
 
     const handleSubmitBlockDeposit = async () => {
         if (!selectedBlockDepositReason) {
-            alert("Please select a reason.");
+            showNotification("Please select a reason.", 'info');
             return;
         }
 
@@ -1379,12 +1381,12 @@ const SavingsAccounts = () => {
                 { headers }
             );
 
-            alert("Deposit block submitted successfully.");
+            showNotification("Deposit block submitted successfully.", 'success');
             fetchSavingsData();
             handleCloseBlockDepositModal();
         } catch (error) {
             console.error("Error blocking deposit:", error);
-            alert("Failed to block deposit.");
+            showNotification("Failed to block deposit.", 'error');
         } finally {
             setIsSubmittingBlockDeposit(false);
             stopLoading();
@@ -1418,7 +1420,7 @@ const SavingsAccounts = () => {
             setIsDepositModalOpen(true);
         } catch (error) {
             console.error("Error fetching deposit data:", error);
-            alert("Failed to load data for deposit.");
+            showNotification("Failed to load data for deposit.", 'error');
         }
     };
 
@@ -1438,7 +1440,7 @@ const SavingsAccounts = () => {
 
     const handleSubmitDeposit = async () => {
         if (!depositTransactionDate || !depositTransactionAmount || !depositSelectedPaymentType) {
-            alert("Please fill in all mandatory fields.");
+            showNotification("Please fill in all mandatory fields.", 'info');
             return;
         }
 
@@ -1478,7 +1480,7 @@ const SavingsAccounts = () => {
                 { headers }
             );
 
-            alert("Deposit submitted successfully.");
+            showNotification("Deposit submitted successfully.", 'success');
             setDepositTransactionDate(null);
             setDepositTransactionAmount("");
             setDepositSelectedPaymentType("");
@@ -1493,7 +1495,7 @@ const SavingsAccounts = () => {
             fetchSavingsData();
         } catch (error) {
             console.error("Error submitting deposit:", error);
-            alert("Failed to submit deposit.");
+            showNotification("Failed to submit deposit.", 'error');
         } finally {
             setIsSubmittingDeposit(false);
             stopLoading();
@@ -1747,7 +1749,7 @@ const SavingsAccounts = () => {
             setIsTransactionModalOpen(true);
         } catch (error) {
             console.error("Error fetching transaction details:", error);
-            alert("Failed to fetch transaction details.");
+            showNotification("Failed to fetch transaction details.", 'error');
         } finally {
             stopLoading();
         }
@@ -1780,7 +1782,7 @@ const SavingsAccounts = () => {
             fetchSavingsData();
         } catch (error) {
             console.error("Error undoing transaction:", error);
-            alert("Failed to undo transaction. Please try again.");
+            showNotification("Failed to undo transaction. Please try again.", 'error');
         } finally {
             stopLoading();
         }
@@ -1809,7 +1811,7 @@ const SavingsAccounts = () => {
             link.click();
         } catch (error) {
             console.error("Error viewing receipt:", error);
-            alert("Failed to view receipt. Please try again.");
+            showNotification("Failed to view receipt. Please try again.", 'error');
         } finally {
             stopLoading();
         }
@@ -1839,7 +1841,7 @@ const SavingsAccounts = () => {
             setIsJournalEntriesModalOpen(true);
         } catch (error) {
             console.error("Error fetching journal entries:", error);
-            alert("Failed to fetch journal entries. Please try again.");
+            showNotification("Failed to fetch journal entries. Please try again.", 'error');
         } finally {
             stopLoading();
         }
@@ -2648,11 +2650,11 @@ const SavingsAccounts = () => {
                 { headers }
             );
 
-            alert("Account successfully unblocked.");
+            showNotification("Account successfully unblocked.", 'success');
             fetchSavingsData();
         } catch (error) {
             console.error("Error unblocking the account:", error);
-            alert("Failed to unblock the account. Please try again.");
+            showNotification("Failed to unblock the account. Please try again.", 'error');
         }
     };
 

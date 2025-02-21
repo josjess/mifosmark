@@ -169,9 +169,9 @@ const Login = () => {
 
     const renderSetupFormStep1 = () => (
         <div className="body"
-             style={{
-                 background: `url(${process.env.PUBLIC_URL}/Images/microfinance.jpg) no-repeat center center/cover`,
-             }}
+             // style={{
+             //     background: `url(${process.env.PUBLIC_URL}/Images/microfinance.jpg) no-repeat center center/cover`,
+             // }}
         >
             <div className="login-container">
                 <header className="login-header">
@@ -240,9 +240,9 @@ const Login = () => {
 
     const renderSetupFormStep2 = () => (
         <div className="body"
-             style={{
-                 background: `url(${process.env.PUBLIC_URL}/Images/microfinance.jpg) no-repeat center center/cover`,
-             }}
+             // style={{
+             //     background: `url(${process.env.PUBLIC_URL}/Images/microfinance.jpg) no-repeat center center/cover`,
+             // }}
         >
             <div className="login-container">
                 <header className="login-header">
@@ -326,9 +326,9 @@ const Login = () => {
             : renderSetupFormStep2()
         : (
             <div className="body"
-                 style={{
-                     background: `url(${process.env.PUBLIC_URL}/Images/microfinance.jpg) no-repeat center center/cover`,
-                 }}
+                 // style={{
+                 //     background: `url(${process.env.PUBLIC_URL}/Images/microfinance.jpg) no-repeat center center/cover`,
+                 // }}
             >
                 <div className="login-container">
                     <header className="login-header">

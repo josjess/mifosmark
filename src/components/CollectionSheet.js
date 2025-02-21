@@ -134,7 +134,7 @@ const CollectionSheet = () => {
 
     const isDateValid = (date) => {
         const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
+        yesterday.setDate(yesterday.getDate());
         return date && date <= yesterday;
     };
 
@@ -294,7 +294,7 @@ const CollectionSheet = () => {
                                 className="staged-form-input"
                                 dateFormat="d MMMM yyyy"
                                 showPopperArrow={false}
-                                maxDate={new Date(new Date().setDate(new Date().getDate() - 1))}
+                                maxDate={new Date(new Date().setDate(new Date().getDate()))}
                                 showMonthDropdown
                                 showYearDropdown
                                 dropdownMode="select"

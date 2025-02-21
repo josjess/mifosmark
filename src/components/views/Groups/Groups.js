@@ -4,6 +4,7 @@ import '../styling.css';
 import { AuthContext } from '../../../context/AuthContext';
 import { useLoading } from '../../../context/LoadingContext';
 import { API_CONFIG } from '../../../config';
+import {NotificationContext} from "../../../context/NotificationContext";
 
 const Groups = ({ onRowClick }) => {
     const [groups, setGroups] = useState([]);
@@ -14,6 +15,7 @@ const Groups = ({ onRowClick }) => {
     const [filters, setFilters] = useState({ searchQuery: '' });
     const { user } = useContext(AuthContext);
     const { startLoading, stopLoading } = useLoading();
+    const { showNotification } = useContext(NotificationContext);
 
     const fetchGroups = async () => {
         try {
@@ -28,6 +30,7 @@ const Groups = ({ onRowClick }) => {
             setGroups(response.data || []);
         } catch (error) {
             console.error('Error fetching groups:', error);
+            showNotification('Error fetching groups!', 'error');
         } finally {
             stopLoading();
         }

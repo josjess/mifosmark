@@ -9,11 +9,13 @@ import {useLocation, useNavigate} from "react-router-dom";
 import DatePicker from "react-datepicker";
 import {format} from "date-fns";
 import AsyncSelect from "react-select/async";
+import {NotificationContext} from "../../../context/NotificationContext";
 
 const ClientDetails = ({ clientId, onClose }) => {
     const { user } = useContext(AuthContext);
     const { startLoading, stopLoading } = useLoading();
     const navigate = useNavigate();
+    const { showNotification } = useContext(NotificationContext);
 
     const [clientDetails, setClientDetails] = useState(null);
     const [activeTab, setActiveTab] = useState('general');
@@ -336,8 +338,10 @@ const ClientDetails = ({ clientId, onClose }) => {
 
             fetchGeneralTabData();
             handleCloseActivateClientModal();
+            showNotification("Activated!", 'success')
         } catch (error) {
             console.error("Failed to activate client:", error);
+            showNotification("Failed to activate client:", 'error');
         }
     };
 
@@ -359,8 +363,10 @@ const ClientDetails = ({ clientId, onClose }) => {
                 },
             });
             onClose();
+            showNotification("Deleted!", 'success')
         } catch (error) {
             console.error("Failed to delete client:", error);
+            showNotification("Failed to delete client!", 'error');
         } finally {
             handleCloseDeleteModal();
         }
@@ -378,6 +384,7 @@ const ClientDetails = ({ clientId, onClose }) => {
             setRejectionNarrations(response.data.narrations || []);
         } catch (error) {
             console.error("Failed to fetch rejection reasons:", error);
+            showNotification("Failed to fetch rejection reasons!", 'error');
         }
     };
 
@@ -412,8 +419,9 @@ const ClientDetails = ({ clientId, onClose }) => {
             });
             fetchGeneralTabData();
             handleCloseRejectModal();
+            showNotification("Rejected!", 'success');
         } catch (error) {
-            console.error("Rejection failed:", error);
+            showNotification("Rejection failed!", 'error');
         }
     };
 
@@ -432,6 +440,7 @@ const ClientDetails = ({ clientId, onClose }) => {
             setShowWithdrawModal(true);
         } catch (error) {
             console.error('Failed to fetch withdrawal narrations:', error);
+            showNotification('Failed to fetch withdrawal narrations!', 'error');
         }
     };
 
@@ -443,7 +452,7 @@ const ClientDetails = ({ clientId, onClose }) => {
 
     const handleConfirmWithdrawal = async (clientId) => {
         if (!withdrawalDate || !withdrawalReasonId) {
-            alert('Please fill in all mandatory fields.');
+            showNotification('Please fill in all mandatory fields.', 'info');
             return;
         }
 
@@ -472,8 +481,10 @@ const ClientDetails = ({ clientId, onClose }) => {
             );
             handleCloseWithdrawModal();
             fetchGeneralTabData();
+            showNotification("Withdrawn!", 'success');
         } catch (error) {
             console.error('Failed to withdraw client approval:', error);
+            showNotification('Failed to withdraw client approval!', 'error');
         }
     };
 
@@ -509,12 +520,12 @@ const ClientDetails = ({ clientId, onClose }) => {
                 { headers }
             );
 
-            alert("Savings account activated successfully.");
+            showNotification("Savings account activated successfully.", 'success');
             fetchGeneralTabData();
             handleCloseActivateModal();
         } catch (error) {
             console.error("Error activating savings account:", error);
-            alert("Failed to activate the savings account. Please try again.");
+            showNotification("Failed to activate the savings account. Please try again.", 'error');
         }
     };
 
@@ -537,7 +548,7 @@ const ClientDetails = ({ clientId, onClose }) => {
 
     const handleApproveAccount = async () => {
         if (!approveForm.approvedOnDate) {
-            alert("Please select an approval date.");
+            showNotification("Please select an approval date.", 'info');
             return;
         }
 
@@ -561,12 +572,12 @@ const ClientDetails = ({ clientId, onClose }) => {
 
             await axios.post(endpoint, payload, { headers });
 
-            alert("Account approved successfully.");
+            showNotification("Account approved successfully.", 'success');
             fetchGeneralTabData();
             handleCloseApproveModal();
         } catch (error) {
             console.error("Error approving account:", error);
-            alert("Failed to approve account. Please try again.");
+            showNotification("Failed to approve account. Please try again.", 'error');
         } finally {
             setIsProcessingApproval(false);
         }
@@ -585,7 +596,7 @@ const ClientDetails = ({ clientId, onClose }) => {
 
     const handleUndoApproval = async () => {
         if (!undoApprovalNote.trim()) {
-            alert("Please provide a note for undo approval.");
+            showNotification("Please provide a note for undo approval.", 'info');
             return;
         }
 
@@ -606,12 +617,12 @@ const ClientDetails = ({ clientId, onClose }) => {
 
             await axios.post(endpoint, payload, { headers });
 
-            alert("Approval undone successfully.");
+            showNotification("Approval undone successfully.", 'success');
             fetchGeneralTabData();
             handleCloseUndoApprovalModal();
         } catch (error) {
             console.error("Error undoing approval:", error);
-            alert("Failed to undo approval. Please try again.");
+            showNotification("Failed to undo approval. Please try again.", 'error');
         } finally {
             setIsProcessingUndo(false);
         }
@@ -639,6 +650,7 @@ const ClientDetails = ({ clientId, onClose }) => {
             }));
         } catch (error) {
             console.error("Error fetching clients:", error);
+            showNotification("Error fetching client options!", 'error');
             return [];
         }
     };
@@ -669,6 +681,7 @@ const ClientDetails = ({ clientId, onClose }) => {
             setIsOverpayTransferModalOpen(true);
         } catch (error) {
             console.error("Error fetching transfer template:", error);
+            showNotification("Error fetching transfer template!", 'error');
         }
     };
 
@@ -688,6 +701,7 @@ const ClientDetails = ({ clientId, onClose }) => {
             setAccountOptions(response.data.fromAccountOptions || []);
         } catch (error) {
             console.error("Error fetching account options:", error);
+            showNotification("Error fetching account options!", 'error');
         }
     };
 
@@ -727,12 +741,12 @@ const ClientDetails = ({ clientId, onClose }) => {
 
             await axios.post(`${API_CONFIG.baseURL}/accounttransfers`, payload, { headers });
 
-            alert("Funds transferred successfully.");
+            showNotification("Funds transferred successfully.", 'success');
             setIsOverpayTransferModalOpen(false);
             fetchGeneralTabData();
         } catch (error) {
             console.error("Error transferring funds:", error);
-            alert("Failed to transfer funds. Please try again.");
+            showNotification("Failed to transfer funds. Please try again.", 'error');
         }
     };
 
@@ -759,6 +773,7 @@ const ClientDetails = ({ clientId, onClose }) => {
             setSelectedLoanId(loanId);
         } catch (error) {
             console.error("Error fetching disbursement template:", error);
+            showNotification("Error fetching disbursement template!", 'error');
         }
     };
 
@@ -799,12 +814,12 @@ const ClientDetails = ({ clientId, onClose }) => {
 
             await axios.post(`${API_CONFIG.baseURL}/loans/${selectedLoanId}?command=disburse`, payload, { headers });
 
-            alert("Loan disbursed successfully.");
+            showNotification("Loan disbursed successfully.", 'success');
             setIsDisburseModalOpen(false);
             fetchGeneralTabData();
         } catch (error) {
             console.error("Error disbursing loan:", error);
-            alert("Failed to disburse loan. Please try again.");
+            showNotification("Failed to disburse loan. Please try again.", 'error');
         } finally {
             setIsSubmitting(false);
         }
@@ -860,6 +875,7 @@ const ClientDetails = ({ clientId, onClose }) => {
 
         } catch (error) {
             console.error('Error fetching client details:', error);
+            showNotification('Error fetching client details!', 'error');
         } finally {
             stopLoading();
         }
@@ -889,6 +905,7 @@ const ClientDetails = ({ clientId, onClose }) => {
             setIsChargeOverviewVisible(true);
         } catch (error) {
             console.error('Error fetching charges overview:', error);
+            showNotification('Error fetching charges overview!', 'error');
         } finally {
             stopLoading();
         }
@@ -1310,6 +1327,7 @@ const ClientDetails = ({ clientId, onClose }) => {
             setIsNotesModalOpen(false);
         } catch (error) {
             console.error('Error saving note:', error);
+            showNotification('Error saving note!', 'error');
         } finally {
             stopLoading();
         }
@@ -1338,8 +1356,10 @@ const ClientDetails = ({ clientId, onClose }) => {
                 { headers }
             );
             setNotes(updatedNotes.data);
+            showNotification("Deleted!", 'success');
         } catch (error) {
             console.error('Error deleting note:', error);
+            showNotification('Error deleting note!', 'error');
         } finally {
             stopLoading();
         }
@@ -1357,7 +1377,7 @@ const ClientDetails = ({ clientId, onClose }) => {
 
         } catch (error) {
             console.error("Error during loan disbursement:", error);
-            alert("Failed to disburse loan. Please try again.")
+            showNotification("Failed to disburse loan. Please try again.", 'error')
         }
     }
 
@@ -1432,13 +1452,18 @@ const ClientDetails = ({ clientId, onClose }) => {
             await axios.post(`${API_CONFIG.baseURL}/loans/${loanId}?command=approve`, payload, { headers });
             setIsLoanApproveModalOpen(false);
             fetchGeneralTabData();
-            alert('Loan approved successfully');
+            showNotification('Loan approved successfully', 'success');
         } catch (error) {
             console.error("Error approving loan:", error);
+            showNotification("Error approving loan!", 'error');
         } finally {
             setIsLoanSubmittingApproval(false);
         }
     };
+
+    const activeLoans = filteredLoanAccounts.filter(account => account.status?.active);
+
+    const lastActiveLoan = activeLoans.length > 0 ? activeLoans[activeLoans.length - 1] : null;
 
     const renderTabContent = () => {
         switch (activeTab) {
@@ -1528,26 +1553,24 @@ const ClientDetails = ({ clientId, onClose }) => {
                             {/* Performance History Section */}
                             {activeSection === 'performance-history' && (
                                 <div id="performance-history" className="general-section general-performance-history">
-                                    <h3 className="general-section-title">Performance History</h3>
+                                    <h3 className="general-section-title" style ={{marginLeft: "auto"}}>Performance History</h3>
                                     <div className="general-details-columns">
                                         <div className="general-details-column">
-                                            <p><strong>No. of Loan
-                                                Cycles:</strong> {clientDetails.performanceHistory?.loanCycles || ''}
-                                            </p>
-                                            <p><strong>Last Loan
-                                                Amount:</strong> {clientDetails.performanceHistory?.lastLoanAmount || ''}
-                                            </p>
-                                            <p><strong>Total
-                                                Savings:</strong> {clientDetails.performanceHistory?.totalSavings || ''}
-                                            </p>
+                                            <p><strong>is staff?:</strong> {clientDetails?.isStaff ? "Yes" : 'No'}</p>
+                                            <p><strong>Mobile Number:</strong> {clientDetails?.mobileNo || ''}</p>
+                                            <p><strong>Gender:</strong> {clientDetails?.gender?.name || ''}</p>
+                                            <p><strong>Date of Birth:</strong> {formatDate(clientDetails?.dateOfBirth) || ''}</p>
                                         </div>
                                         <div className="general-details-column">
-                                            <p><strong>No. of Active
-                                                Loans:</strong> {clientDetails.performanceHistory?.activeLoans || ''}
-                                            </p>
-                                            <p><strong>No. of Active
-                                                Savings:</strong> {clientDetails.performanceHistory?.activeSavings || ''}
-                                            </p>
+                                            <p><strong>No. of Loan Cycle:</strong> {lastActiveLoan
+                                                ? `${lastActiveLoan?.loanCycle}`
+                                                : "No active loans available"}</p>
+                                            <p><strong>Last loan Amount: </strong>
+                                                {lastActiveLoan
+                                                    ? `${lastActiveLoan.currency?.code || ""} ${lastActiveLoan.originalLoan.toLocaleString()}`
+                                                    : "No active loans available"}</p>
+                                            <p><strong>No. of active Loans:</strong> {activeLoans.length}</p>
+                                            <p><strong>No. of active savings:</strong> {filteredSavingsAccounts.length}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -3259,6 +3282,7 @@ const ClientDetails = ({ clientId, onClose }) => {
             clearImageSelection();
         } catch (error) {
             console.error('Error uploading client image:', error);
+            showNotification('Error uploading client image!', 'error');
         } finally {
             stopLoading();
         }
@@ -3361,7 +3385,7 @@ const ClientDetails = ({ clientId, onClose }) => {
             setCapturedImage(null);
         } catch (error) {
             console.error('Error uploading captured image:', error);
-            alert("Failed to upload image. Please try again.");
+            showNotification("Failed to upload image. Please try again.", 'error');
         } finally {
             stopLoading();
         }
@@ -3405,7 +3429,7 @@ const ClientDetails = ({ clientId, onClose }) => {
 
     const handleDeleteSignature = async () => {
         if (!signatureData || !signatureData.id) {
-            alert("No signature to delete.");
+            showNotification("No signature to delete.", 'info');
             return;
         }
 
@@ -3422,12 +3446,12 @@ const ClientDetails = ({ clientId, onClose }) => {
                     { headers }
                 );
 
-                alert("Signature deleted successfully.");
+                showNotification("Signature deleted successfully.", 'success');
                 setSignatureData(null);
                 setIsSignatureModalOpen(false);
             } catch (error) {
                 console.error('Error deleting signature:', error);
-                alert("Failed to delete the signature. Please try again.");
+                showNotification("Failed to delete the signature. Please try again.", 'error');
             }
         }
     };
@@ -3471,13 +3495,13 @@ const ClientDetails = ({ clientId, onClose }) => {
     //         URL.revokeObjectURL(objectUrl);
     //     } catch (error) {
     //         console.error('Error downloading document:', error);
-    //         alert('Failed to download the document. Please ensure the API supports this functionality.');
+    //         showNotification('Failed to download the document. Please ensure the API supports this functionality.', 'error);
     //     }
     // };
 
     const handleSubmitDocument = async () => {
         if (!selectedDocument) {
-            alert("Please select a document before submitting.");
+            showNotification("Please select a document before submitting.", 'info');
             return;
         }
 
@@ -3499,12 +3523,12 @@ const ClientDetails = ({ clientId, onClose }) => {
                 { headers }
             );
 
-            alert("Document uploaded successfully!");
+            showNotification("Document uploaded successfully!", 'success');
             setSelectedDocument(null);
             setIsSignatureModalOpen(false);
         } catch (error) {
             console.error("Error uploading document:", error);
-            alert("Failed to upload the document. Please try again.");
+            showNotification("Failed to upload the document. Please try again.", 'error');
         } finally {
             stopLoading();
         }
@@ -3541,7 +3565,7 @@ const ClientDetails = ({ clientId, onClose }) => {
 
     const handleCloseClient = async () => {
         if (!closeOnDate || !closureReason) {
-            alert('Both fields are required.');
+            showNotification('Both fields are required.', 'info');
             return;
         }
 
@@ -3569,12 +3593,12 @@ const ClientDetails = ({ clientId, onClose }) => {
 
             await axios.post(`${API_CONFIG.baseURL}/clients/${clientId}?command=close`, payload, { headers });
 
-            alert('Client successfully closed.');
+            showNotification('Client successfully closed.', 'success');
             fetchGeneralTabData();
             setIsCloseClientModalOpen(false);
         } catch (error) {
             console.error('Error closing client:', error);
-            alert('Failed to close client. Please try again.');
+            showNotification('Failed to close client. Please try again.', 'error');
         } finally {
             stopLoading();
         }
@@ -3609,7 +3633,7 @@ const ClientDetails = ({ clientId, onClose }) => {
 
     const handleTransferClient = async () => {
         if (!transferOffice || !transferDate) {
-            alert('Please fill in all mandatory fields.');
+            showNotification('Please fill in all mandatory fields.', 'info');
             return;
         }
 
@@ -3639,11 +3663,12 @@ const ClientDetails = ({ clientId, onClose }) => {
             );
 
             setIsTransferModalOpen(false);
+            showNotification("Transfer proposal submitted!", 'success');
             fetchGeneralTabData();
         } catch (error) {
             console.error('Error proposing client transfer:', error);
             if (error.response?.data?.defaultUserMessage) {
-                alert(error.response.data.defaultUserMessage);
+                showNotification(error.response.data.defaultUserMessage, 'error');
             }
         } finally {
             stopLoading();
@@ -3677,7 +3702,7 @@ const ClientDetails = ({ clientId, onClose }) => {
 
     const handleAssignStaff = async () => {
         if (!selectedStaff) {
-            alert("Please select a staff member.");
+            showNotification("Please select a staff member.", 'info');
             return;
         }
 
@@ -3700,9 +3725,10 @@ const ClientDetails = ({ clientId, onClose }) => {
 
             setIsAssignStaffModalOpen(false);
             await fetchGeneralTabData();
+            showNotification("Staff assigned!", 'success');
         } catch (error) {
             console.error("Error assigning staff:", error);
-            alert("Failed to assign staff. Please try again.");
+            showNotification("Failed to assign staff. Please try again.", 'error');
         } finally {
             stopLoading();
         }
@@ -3747,6 +3773,7 @@ const ClientDetails = ({ clientId, onClose }) => {
 
             await fetchGeneralTabData();
             closeUnassignStaffModal();
+            showNotification("Staff unassigned successfully!", 'error');
         } catch (error) {
             console.error('Error unassigning staff:', error);
         } finally {
@@ -3803,8 +3830,10 @@ const ClientDetails = ({ clientId, onClose }) => {
             fetchGeneralTabData();
 
             setIsUndoTransferModalOpen(false);
+            showNotification("Transfer undone successfully!", 'success');
         } catch (error) {
             console.error('Error undoing transfer:', error);
+            showNotification('Error undoing transfer!', 'error');
         } finally {
             stopLoading();
         }
@@ -3884,8 +3913,10 @@ const ClientDetails = ({ clientId, onClose }) => {
 
             fetchGeneralTabData();
             setIsAcceptTransferModalOpen(false);
+            showNotification("Transferred!", 'success');
         } catch (error) {
             console.error('Error accepting transfer:', error);
+            showNotification('Error accepting transfer!', 'error');
         } finally {
             stopLoading();
         }
@@ -3947,8 +3978,10 @@ const ClientDetails = ({ clientId, onClose }) => {
 
             setIsRejectTransferModalOpen(false);
             fetchGeneralTabData();
+            showNotification("Transfer rejected!", 'success');
         } catch (error) {
             console.error('Error rejecting transfer:', error);
+            showNotification('Error rejecting transfer!', 'error');
         } finally {
             stopLoading();
         }
@@ -4074,9 +4107,11 @@ const ClientDetails = ({ clientId, onClose }) => {
 
             // Refetch client data after successful submission
             fetchGeneralTabData();
+            showNotification("Collateral added!", 'success');
             setIsAddCollateralModalOpen(false);
         } catch (error) {
             console.error('Error submitting collateral:', error);
+            showNotification('Error submitting collateral!', 'error');
         } finally {
             stopLoading();
         }
@@ -4134,11 +4169,13 @@ const ClientDetails = ({ clientId, onClose }) => {
                 { headers }
             );
 
-            // Refetch client data to reflect the updated savings account
+
             fetchGeneralTabData();
-            setIsUpdateSavingsModalOpen(false); // Close the modal
+            setIsUpdateSavingsModalOpen(false);
+            showNotification("Savings updated!", 'success');
         } catch (error) {
             console.error('Error updating default savings:', error);
+            showNotification('Error updating default savings!', 'error');
         } finally {
             stopLoading();
         }
@@ -4172,7 +4209,7 @@ const ClientDetails = ({ clientId, onClose }) => {
 
     const handleGenerateReport = async () => {
         if (!selectedReportId) {
-            alert('Please select a report to generate.');
+            showNotification('Please select a report to generate.', 'info');
             return;
         }
 
@@ -4193,6 +4230,7 @@ const ClientDetails = ({ clientId, onClose }) => {
             setGeneratedReport(response.data);
         } catch (error) {
             console.error('Error generating report:', error);
+            showNotification('Error generating report!', 'error');
         } finally {
             setIsReportLoading(false);
         }
@@ -4239,7 +4277,7 @@ const ClientDetails = ({ clientId, onClose }) => {
             setPaymentTypeOptions(data.paymentTypeOptions || []);
         } catch (error) {
             console.error("Error fetching loan repayment details:", error);
-            alert("Failed to fetch loan repayment details. Please try again.");
+            showNotification("Failed to fetch loan repayment details. Please try again.", 'error');
         } finally {
             stopLoading();
         }
@@ -4288,13 +4326,13 @@ const ClientDetails = ({ clientId, onClose }) => {
                 { headers }
             );
 
-            alert("Loan repayment successful.");
+            showNotification("Loan repayment successful.", 'success');
             setIsRepaymentModalOpen(false);
             setReceiptNumber('');
             fetchGeneralTabData();
         } catch (error) {
             console.error("Error processing loan repayment:", error);
-            alert("Loan repayment failed. Please try again.");
+            showNotification("Loan repayment failed. Please try again.", 'error');
         } finally {
             stopLoading();
         }
@@ -4319,7 +4357,7 @@ const ClientDetails = ({ clientId, onClose }) => {
             setIsDepositModalOpen(true);
         } catch (error) {
             console.error('Error fetching deposit details:', error);
-            alert('Failed to load deposit details. Please try again.');
+            showNotification('Failed to load deposit details. Please try again.', 'error');
         } finally {
             stopLoading();
         }
@@ -4361,7 +4399,7 @@ const ClientDetails = ({ clientId, onClose }) => {
                 { headers }
             );
 
-            alert("Deposit successful.");
+            showNotification("Deposit successful.", 'success');
             setDepositTransactionDate(null);
             setDepositTransactionAmount("");
             setDepositPaymentType("");
@@ -4376,7 +4414,7 @@ const ClientDetails = ({ clientId, onClose }) => {
             fetchGeneralTabData();
         } catch (error) {
             console.error('Error making deposit:', error);
-            alert('Deposit failed. Please try again.');
+            showNotification('Deposit failed. Please try again.', 'error');
         } finally {
             stopLoading();
         }
@@ -4401,7 +4439,7 @@ const ClientDetails = ({ clientId, onClose }) => {
             setIsWithdrawModalOpen(true);
         } catch (error) {
             console.error('Error fetching withdrawal details:', error);
-            alert('Failed to load withdrawal details. Please try again.');
+            showNotification('Failed to load withdrawal details. Please try again.', 'error');
         } finally {
             stopLoading();
         }
@@ -4443,7 +4481,7 @@ const ClientDetails = ({ clientId, onClose }) => {
                 { headers }
             );
 
-            alert("Withdrawal successful.");
+            showNotification("Withdrawal successful.", 'success');
             setWithdrawTransactionDate(null);
             setWithdrawTransactionAmount("");
             setWithdrawPaymentType("");
@@ -4458,7 +4496,7 @@ const ClientDetails = ({ clientId, onClose }) => {
             fetchGeneralTabData();
         } catch (error) {
             console.error("Error making withdrawal:", error.response?.data || error.message);
-            alert(error.response?.data?.defaultUserMessage || "Withdrawal failed. Please try again.");
+            showNotification(error.response?.data?.defaultUserMessage || "Withdrawal failed. Please try again.", 'error');
         } finally {
             stopLoading();
         }
@@ -5669,7 +5707,7 @@ const ClientDetails = ({ clientId, onClose }) => {
                                     if (value <= loanBalance) {
                                         setTransactionAmount(value);
                                     } else {
-                                        alert(`Transaction amount cannot exceed the loan balance of ${loanBalance.toLocaleString()}`);
+                                        showNotification(`Transaction amount cannot exceed the loan balance of ${loanBalance.toLocaleString()}`);
                                     }
                                 }}
                                 max={loanBalance}

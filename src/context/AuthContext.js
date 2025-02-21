@@ -92,6 +92,7 @@ const ALL_COMPONENTS = {
     "admin-organization-sms-campaigns": true,
     "admin-organization-bulk-imports": true,
     "pentaho-reports": true,
+    "table-reports": true,
 };
 
 export const AuthProvider = ({ children }) => {

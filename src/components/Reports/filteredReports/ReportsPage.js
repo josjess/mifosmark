@@ -5,9 +5,11 @@ import { useLoading } from "../../../context/LoadingContext";
 import { API_CONFIG } from "../../../config";
 import {Link, useNavigate, useParams} from "react-router-dom";
 import "./AllReports.css";
+import {NotificationContext} from "../../../context/NotificationContext";
 
 const ReportsPage = () => {
     const { user, componentVisibility } = useContext(AuthContext);
+    const { showNotification } = useContext(NotificationContext);
     const { startLoading, stopLoading } = useLoading();
     const { reportType } = useParams();
 
@@ -19,6 +21,7 @@ const ReportsPage = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [categoryFilter, setCategoryFilter] = useState("");
     const [pentahoReports, setPentahoReports] = useState([]);
+    const [tableReports, setTableReports] = useState([]);
 
     const [categories, setCategories] = useState([]);
     const navigate = useNavigate();
@@ -47,8 +50,10 @@ const ReportsPage = () => {
     }, [reports, reportType]);
 
     useEffect(() => {
+        filteredReports();
         setTotalPages(Math.ceil(filteredReports().length / pageSize));
-    }, [reports, pentahoReports, nameFilter, pageSize, activeTab]);
+        setCurrentPage(1);
+    }, [reports, pentahoReports, tableReports, categoryFilter, componentVisibility, nameFilter, pageSize, activeTab]);
 
     const formattedReportType =
         reportType && reportType !== "all"
@@ -75,25 +80,31 @@ const ReportsPage = () => {
                 allReports = allReports.filter((report) => report.reportCategory === formattedReportType);
             }
 
-            const pentaho = allReports.filter((report) => report.reportType?.toLowerCase() === "pentaho");
-            const otherReports = allReports.filter((report) => report.reportType?.toLowerCase() !== "pentaho");
+            const pentaho = allReports.filter(report => report.reportType?.toLowerCase() === "pentaho");
+            const table = allReports.filter(report => report.reportType?.toLowerCase() === "table");
+            const otherReports = allReports.filter(report => !["pentaho", "table"].includes(report.reportType?.toLowerCase()));
 
             setReports(otherReports);
             setPentahoReports(pentaho);
+            setTableReports(table);
         } catch (error) {
             console.error("Error fetching reports:", error);
+            showNotification("Error fetching reports!", 'error');
         } finally {
             stopLoading();
         }
     };
 
     const filteredReports = () => {
-        const data =
-            activeTab === "standardReports"
-                ? reports
-                : componentVisibility['pentaho-reports']
-                    ? pentahoReports
-                    : [];
+        let data = [];
+
+        if (activeTab === "standardReports") {
+            data = reports;
+        } else if (activeTab === "pentahoReports" && componentVisibility["pentaho-reports"]) {
+            data = pentahoReports;
+        } else if (activeTab === "tableReports" && componentVisibility["table-reports"]) {
+            data = tableReports;
+        }
 
         return data.filter(
             (report) =>
@@ -125,7 +136,7 @@ const ReportsPage = () => {
                 {reportType.charAt(0).toUpperCase() + reportType.slice(1).toLowerCase()}
             </h2>
 
-            {componentVisibility['pentaho-reports'] && (
+            {(componentVisibility['pentaho-reports'] || componentVisibility['table-reports']) && (
                 <div className="users-tab-container">
                     <button
                         className={`users-tab-button ${activeTab === "standardReports" ? "active" : ""}`}
@@ -133,12 +144,24 @@ const ReportsPage = () => {
                     >
                         Standard Reports
                     </button>
-                    <button
-                        className={`users-tab-button ${activeTab === "pentahoReports" ? "active" : ""}`}
-                        onClick={() => setActiveTab("pentahoReports")}
-                    >
-                        Pentaho Reports
-                    </button>
+
+                    {componentVisibility['pentaho-reports'] && (
+                        <button
+                            className={`users-tab-button ${activeTab === "pentahoReports" ? "active" : ""}`}
+                            onClick={() => setActiveTab("pentahoReports")}
+                        >
+                            Pentaho Reports
+                        </button>
+                    )}
+
+                    {componentVisibility['table-reports'] && (
+                        <button
+                            className={`users-tab-button ${activeTab === "tableReports" ? "active" : ""}`}
+                            onClick={() => setActiveTab("tableReports")}
+                        >
+                            Table Reports
+                        </button>
+                    )}
                 </div>
             )}
 

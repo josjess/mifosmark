@@ -5,6 +5,7 @@ import {AuthContext} from "../../../context/AuthContext";
 import {useLoading} from "../../../context/LoadingContext";
 import {API_CONFIG} from "../../../config";
 import DatePicker from "react-datepicker";
+import {NotificationContext} from "../../../context/NotificationContext";
 
 const CreateStandingInstructions = () => {
     const navigate = useNavigate();
@@ -35,6 +36,7 @@ const CreateStandingInstructions = () => {
         recurrenceFrequency: '',
         onMonthDay: '',
     });
+    const { showNotification } = useContext(NotificationContext);
 
     useEffect(() => {
         const fetchClientData = async () => {
@@ -112,8 +114,10 @@ const CreateStandingInstructions = () => {
                     preventDuplicate: true,
                 },
             });
+            showNotification("Standing Instructions submitted!", 'success');
         } catch (error) {
             console.error('Error creating standing instructions:', error);
+            showNotification('Error creating standing instructions!', 'error');
         }
     };
 

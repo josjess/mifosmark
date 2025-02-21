@@ -9,6 +9,7 @@ import {AuthContext} from "../../../context/AuthContext";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";
+import {NotificationContext} from "../../../context/NotificationContext";
 
 const stages = [
     "Basic User Info",
@@ -18,6 +19,7 @@ const stages = [
 
 const AddClientForm = () => {
     const [legalForm, setLegalForm] = useState('');
+    const { showNotification } = useContext(NotificationContext);
 
     const [isActive, setIsActive] = useState(false);
     const [openSavingsAccount, setOpenSavingsAccount] = useState(false);
@@ -160,6 +162,7 @@ const AddClientForm = () => {
             setStaffs(response.data.staffOptions || []);
         } catch (error) {
             console.error("Error fetching staff options:", error);
+            showNotification("Error fetching staff options!", 'error');
             setStaffs([]);
         }
     };
@@ -189,6 +192,7 @@ const AddClientForm = () => {
                 setClientTemplate(response.data || {});
             } catch (error) {
                 console.error('Error fetching client template:', error);
+                showNotification('Error fetching client template!', 'error');
             } finally {
                 stopLoading();
             }
@@ -212,6 +216,7 @@ const AddClientForm = () => {
                 setSavingsCharges(savingsRelatedCharges);
             } catch (error) {
                 console.error('Error fetching charges template:', error);
+                showNotification('Error fetching charges template!', 'error');
             }
         };
 
@@ -1016,22 +1021,22 @@ const AddClientForm = () => {
             };
 
             if (!legalForm) {
-                console.error('Legal form must be selected.');
+                showNotification('Legal form must be selected!', 'info');
                 return;
             }
 
             if (legalForm === clientTemplate.clientLegalFormOptions?.find(option => option.code === "legalFormType.person")?.value && (!firstName || !lastName)) {
-                console.error('First and Last Name are required for Person legal form.');
+                showNotification('First and Last Name are required for Person legal form!', 'info');
                 return;
             }
 
             if (legalForm === clientTemplate.clientLegalFormOptions?.find(option => option.code === "legalFormType.entity")?.value && !name) {
-                console.error('Name is required for Entity legal form.');
+                showNotification('Name is required for Entity legal form!', 'info');
                 return;
             }
 
             if (isActive && !activationDate) {
-                console.error('Activation date is required when activating the client.');
+                showNotification('Activation date is required when activating the client!', 'info');
                 return;
             }
 
@@ -1090,6 +1095,7 @@ const AddClientForm = () => {
             });
         } catch (error) {
             console.error('Error submitting client data:', error.response?.data || error.message);
+            showNotification('Error submitting client data:', 'error');
         } finally {
             stopLoading();
         }

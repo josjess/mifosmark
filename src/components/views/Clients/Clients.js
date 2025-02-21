@@ -4,6 +4,7 @@ import '../styling.css';
 import { AuthContext } from '../../../context/AuthContext';
 import { useLoading } from '../../../context/LoadingContext';
 import { API_CONFIG } from '../../../config';
+import {NotificationContext} from "../../../context/NotificationContext";
 
 const Clients = ({ onRowClick }) => {
     const [clients, setClients] = useState([]);
@@ -14,6 +15,7 @@ const Clients = ({ onRowClick }) => {
     const [filters, setFilters] = useState({ searchQuery: '' });
     const { user } = useContext(AuthContext);
     const { startLoading, stopLoading } = useLoading();
+    const { showNotification } = useContext(NotificationContext);
 
     const fetchClients = async () => {
         try {
@@ -29,6 +31,7 @@ const Clients = ({ onRowClick }) => {
             setFilteredClients(response.data.pageItems || []);
         } catch (error) {
             console.error('Error fetching clients:', error);
+            showNotification('Error fetching clients!', 'error');
         } finally {
             stopLoading();
         }
