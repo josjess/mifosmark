@@ -7,7 +7,7 @@ const NotificationContainer = () => {
     const { notifications, dismissNotification } = useContext(NotificationContext);
 
     return (
-        <div className="notification-container">
+        <div className="notification-context-container">
             {notifications.map(({ id, message, type, duration }) => (
                 <Notification
                     key={id}
