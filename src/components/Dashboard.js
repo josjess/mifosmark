@@ -21,7 +21,9 @@ const Dashboard = () => {
         principalOutstanding: 0, interestOutstanding: 0, totalOutstanding: 0, interestThisMonth: 0,
         principalOverdue: 0, interestOverdue: 0, totalOverdue: 0, nonPerformingAssets: 0, savingsCount: 0,
         loansForApproval: 0, loansForDisapproval: 0, portfolioAtRisk: 0, todaysDisbursementsCount: 0,
-        borrowersPerLoanOfficer: 0, averageLoanDisbursed: 0, clientsPerPersonnel: 0, todaysDisbursements: 0, thisMonthDisbursementsCount: 0,
+        borrowersPerLoanOfficer: 0, averageLoanDisbursed: 0, clientsPerPersonnel: 0, todaysDisbursements: 0, thisMonthsDisbursementsCount: 0,
+        countPrincipalOutstanding: 0, countPrincipalOverdue: 0, countInterestOverdue: 0, countTotalOverdue: 0, countNonPerformingAssets: 0,
+        countLoansForApproval: 0, countLoansForDisapproval: 0, countInterestOutstanding: 0
     });
     const [selectedOffice, setSelectedOffice] = useState(user?.officeId);
     const [officeOptions, setOfficeOptions] = useState([]);
@@ -166,9 +168,11 @@ const Dashboard = () => {
                             );
                         });
 
+                        const count = filteredLoans.length;
+
                         return {
                             total: filteredLoans.reduce((sum, loan) => sum + loan.principal, 0),
-                            count: filteredLoans.length,
+                            count: count,
                         };
                     };
 
@@ -333,21 +337,66 @@ const Dashboard = () => {
                     let loansForApproval = 0;
                     let loansForDisapproval = 0;
 
+                    let countPrincipalOutstanding = 0, countPrincipalOverdue = 0, countInterestOverdue = 0,
+                        countTotalOverdue = 0, countNonPerformingAssets = 0,
+                        countLoansForApproval = 0, countLoansForDisapproval = 0, countInterestOutstanding = 0;
+
                     filteredLoans.forEach(loan => {
                         const summary = loan.summary || {};
-                        totalPrincipalOutstanding += summary.principalOutstanding || 0;
-                        totalInterestOutstanding += summary.interestOutstanding || 0;
-                        totalPrincipalOverdue += summary.principalOverdue || 0;
-                        totalInterestOverdue += summary.interestOverdue || 0;
-                        totalInterestThisMonth += summary.interestCharged || 0;
-                        totalOverdue += summary.totalOverdue || 0;
+                        if (summary.principalOutstanding) {
+                            totalPrincipalOutstanding += summary.principalOutstanding;
+                            countPrincipalOutstanding++;
+                        }
+                        // totalPrincipalOutstanding += summary.principalOutstanding || 0;
+                        if (summary.interestOutstanding) {
+                            totalInterestOutstanding += summary.interestOutstanding;
+                            countInterestOutstanding ++;
+                        }
+                        if (summary.principalOverdue) {
+                            totalPrincipalOverdue += summary.principalOverdue;
+                            countPrincipalOverdue++;
+                        }
+                        // totalInterestOutstanding += summary.interestOutstanding || 0;
+                        // totalPrincipalOverdue += summary.principalOverdue || 0;
+                        if (summary.interestOverdue) {
+                            totalInterestOverdue += summary.interestOverdue;
+                            countInterestOverdue++;
+                        }
+                        if (summary.interestCharged) {
+                            totalInterestThisMonth += summary.interestCharged;
+                        }
+                        if (summary.totalOverdue) {
+                            totalOverdue += summary.totalOverdue;
+                            countTotalOverdue++;
+                        }
+                        // totalInterestOverdue += summary.interestOverdue || 0;
+                        // totalInterestThisMonth += summary.interestCharged || 0;
+                        // totalOverdue += summary.totalOverdue || 0;
 
-                        if (loan.isNPA) nonPerformingAssets++;
-                        if (loan.status.pendingApproval) loansForApproval += loan.principal;
-                        if (loan.status?.waitingForDisbursal) loansForDisapproval += loan.principal;
+                        if (loan.isNPA) {
+                            nonPerformingAssets++;
+                            countNonPerformingAssets++;
+                        }
+                        if (loan.status?.pendingApproval && loan.principal) {
+                            loansForApproval += loan.principal;
+                            countLoansForApproval++;
+                        }
+                        if (loan.status?.waitingForDisbursal && loan.principal) {
+                            loansForDisapproval += loan.principal;
+                            countLoansForDisapproval++;
+                        }
 
-                        totalDisbursedAmount += loan.principal || 0;
-                        disbursedLoansCount++;
+                        if (loan.principal) {
+                            totalDisbursedAmount += loan.principal;
+                            disbursedLoansCount++;
+                        }
+
+                        // if (loan.isNPA) nonPerformingAssets++;
+                        // if (loan.status.pendingApproval) loansForApproval += loan.principal;
+                        // if (loan.status?.waitingForDisbursal) loansForDisapproval += loan.principal;
+
+                        // totalDisbursedAmount += loan.principal || 0;
+                        // disbursedLoansCount++;
                     });
 
                     const portfolioAtRisk =
@@ -384,6 +433,15 @@ const Dashboard = () => {
                         portfolioAtRisk,
                         averageLoanDisbursed,
                         savingsCount,
+
+                        countPrincipalOutstanding,
+                        countPrincipalOverdue,
+                        countInterestOverdue,
+                        countTotalOverdue,
+                        countNonPerformingAssets,
+                        countLoansForApproval,
+                        countLoansForDisapproval,
+                        countInterestOutstanding
                     };
                 } catch (error) {
                     console.error("Error fetching loan data:", error);
@@ -424,7 +482,9 @@ const Dashboard = () => {
         principalOutstanding, interestOutstanding, totalOutstanding, interestThisMonth,
         principalOverdue, interestOverdue, totalOverdue, nonPerformingAssets, loansForApproval, loansForDisapproval,
         portfolioAtRisk, borrowersPerLoanOfficer, averageLoanDisbursed, clientsPerPersonnel, averageClientsPerLoanOfficer,
-        todaysDisbursements, thisMonthsDisbursements, repaymentsToday, totalSavings, totalSavingsMobilizedThisMonth, todaysDisbursementsCount, thisMonthDisbursementsCount
+        todaysDisbursements, thisMonthsDisbursements, repaymentsToday, totalSavings, totalSavingsMobilizedThisMonth, todaysDisbursementsCount, thisMonthsDisbursementsCount,
+        countPrincipalOutstanding, countPrincipalOverdue, countInterestOverdue, countTotalOverdue, countNonPerformingAssets,
+        countLoansForApproval, countLoansForDisapproval, countInterestOutstanding
     } = dashboardData;
 
     return (
@@ -531,7 +591,10 @@ const Dashboard = () => {
                                     <h3>Today's Disbursements</h3>
                                 </div>
                                 <p>{todaysDisbursements}</p>
-                                <div className="card-footer">{todaysDisbursementsCount} loans disbursed today</div>
+                                <div className="card-footer">
+                                    {todaysDisbursementsCount} {todaysDisbursementsCount === 1 ? 'loan' : 'loans'} disbursed
+                                    today
+                                </div>
                             </div>
 
                             <div className="card">
@@ -542,7 +605,10 @@ const Dashboard = () => {
                                     <h3>This Month's Disbursements</h3>
                                 </div>
                                 <p>{thisMonthsDisbursements}</p>
-                                <div className="card-footer">{thisMonthDisbursementsCount} loans disbursed this month</div>
+                                <div className="card-footer">
+                                    {thisMonthsDisbursementsCount} {thisMonthsDisbursementsCount === 1 ? 'loan' : 'loans'} disbursed
+                                    this month
+                                </div>
                             </div>
 
                             <div className="card">
@@ -615,7 +681,7 @@ const Dashboard = () => {
                                     <h3>Principal Outstanding</h3>
                                 </div>
                                 <p>{principalOutstanding}</p>
-                                <div className="card-footer">Total unpaid principal</div>
+                                <div className="card-footer">{countPrincipalOutstanding} loans</div>
                             </div>
                             <div className="card">
                                 <div className="card-header">
@@ -625,7 +691,7 @@ const Dashboard = () => {
                                     <h3>Interest Outstanding</h3>
                                 </div>
                                 <p>{interestOutstanding}</p>
-                                <div className="card-footer">Interest yet to be paid</div>
+                                <div className="card-footer">Interest yet to be paid, {countInterestOutstanding} loans</div>
                             </div>
                             <div className="card">
                                 <div className="card-header">
@@ -655,7 +721,7 @@ const Dashboard = () => {
                                     <h3>Principal Overdue</h3>
                                 </div>
                                 <p>{principalOverdue}</p>
-                                <div className="card-footer">Principal payments overdue</div>
+                                <div className="card-footer">{countPrincipalOverdue} loans</div>
                             </div>
                             <div className="card">
                                 <div className="card-header">
@@ -665,7 +731,7 @@ const Dashboard = () => {
                                     <h3>Interest Overdue</h3>
                                 </div>
                                 <p>{interestOverdue}</p>
-                                <div className="card-footer">Interest payments overdue</div>
+                                <div className="card-footer">Interest payments overdue, {countInterestOverdue} loans</div>
                             </div>
                             <div className="card">
                                 <div className="card-header">
@@ -675,7 +741,7 @@ const Dashboard = () => {
                                     <h3>Total Overdue</h3>
                                 </div>
                                 <p>{totalOverdue}</p>
-                                <div className="card-footer">Total overdue amount</div>
+                                <div className="card-footer">{countTotalOverdue} loans</div>
                             </div>
                             <div className="card">
                                 <div className="card-header">
@@ -685,7 +751,7 @@ const Dashboard = () => {
                                     <h3>Non-Performing Assets</h3>
                                 </div>
                                 <p>{nonPerformingAssets}</p>
-                                <div className="card-footer">Loans not generating income</div>
+                                <div className="card-footer">Loans not generating income, {countNonPerformingAssets} loans</div>
                             </div>
                             <div className="card">
                                 <div className="card-header">
@@ -695,7 +761,7 @@ const Dashboard = () => {
                                     <h3>Pending Approval</h3>
                                 </div>
                                 <p>{loansForApproval}</p>
-                                <div className="card-footer">total loan amount awaiting approval</div>
+                                <div className="card-footer">{countLoansForApproval} loans</div>
                             </div>
                             <div className="card">
                                 <div className="card-header">
@@ -705,7 +771,7 @@ const Dashboard = () => {
                                     <h3>Pending Disbursements</h3>
                                 </div>
                                 <p>{loansForDisapproval}</p>
-                                <div className="card-footer">Total loan amount pending disbursements</div>
+                                <div className="card-footer">{countLoansForDisapproval} loans</div>
                             </div>
 
                             <div className="card">
@@ -736,7 +802,8 @@ const Dashboard = () => {
                                     <h3>Saving Accounts' created this month</h3>
                                 </div>
                                 <p>{totalSavingsMobilizedThisMonth}</p>
-                                <div className="card-footer">{totalSavingsMobilizedThisMonth} new accounts this month</div>
+                                <div className="card-footer">{totalSavingsMobilizedThisMonth} new accounts this month
+                                </div>
                             </div>
                         </section>
                     </div>

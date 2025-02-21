@@ -342,6 +342,7 @@ const Login = () => {
                                 <label htmlFor="username">Username</label>
                                 <input
                                     type="text"
+                                    title={"enter your username"}
                                     id="username"
                                     placeholder="Enter your username"
                                     value={username}
@@ -356,6 +357,7 @@ const Login = () => {
                                     <input
                                         type={showPassword ? "text" : "password"}
                                         id="password"
+                                        title={"enter password"}
                                         placeholder="Enter your password"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
