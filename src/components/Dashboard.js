@@ -508,7 +508,6 @@ const Dashboard = () => {
                                 >
                                     {user?.officeId === 1 ? (
                                         <>
-                                            <option value="all">All Offices</option>
                                             {officeOptions.map((office) => (
                                                 <option key={office.id} value={office.id}>
                                                     {office.name}
@@ -799,7 +798,7 @@ const Dashboard = () => {
                                     <div className="icon-container">
                                         <FaBalanceScale className="card-icon"/>
                                     </div>
-                                    <h3>Saving Accounts' created this month</h3>
+                                    <h3>Clients Recruited this Month</h3>
                                 </div>
                                 <p>{totalSavingsMobilizedThisMonth}</p>
                                 <div className="card-footer">{totalSavingsMobilizedThisMonth} new accounts this month

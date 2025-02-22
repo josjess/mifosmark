@@ -86,6 +86,7 @@ const CollectionSheet = () => {
 
     useEffect(() => {
         fetchOffices();
+        // eslint-disable-next-line
     }, []);
 
     useEffect(() => {
@@ -94,6 +95,7 @@ const CollectionSheet = () => {
         } else {
             setStaff([]);
         }
+        // eslint-disable-next-line
     }, [selectedOffice]);
 
     const fetchOffices = async () => {
@@ -245,7 +247,7 @@ const CollectionSheet = () => {
 
         try {
             startLoading();
-            const response = await axios.post(`${API_CONFIG.baseURL}/collectionsheet?command=saveCollectionSheet`, payload, {
+            await axios.post(`${API_CONFIG.baseURL}/collectionsheet?command=saveCollectionSheet`, payload, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
                     "Fineract-Platform-TenantId": `${API_CONFIG.tenantId}`,

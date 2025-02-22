@@ -2517,11 +2517,11 @@ const SavingsAccounts = () => {
                             <table className="delinquency-table">
                                 <thead>
                                 <tr>
-                                    <th>Client</th>
+                                    <th>Client Name</th>
                                     <th>From Account</th>
                                     <th>Beneficiary</th>
                                     <th>To Account</th>
-                                    <th>Amount</th>
+                                    <th>Type</th>
                                     <th>Validity</th>
                                     <th>Actions</th>
                                 </tr>
@@ -2529,25 +2529,23 @@ const SavingsAccounts = () => {
                                 <tbody>
                                 {standingInstructions.map((instruction, index) => (
                                     <tr key={index}>
-                                        <td>{instruction.clientName || "N/A"}</td>
-                                        <td>{instruction.fromAccountId || "N/A"}</td>
-                                        <td>{instruction.beneficiaryName || "N/A"}</td>
-                                        <td>{instruction.toAccountId || "N/A"}</td>
+                                        <td>{instruction?.fromClient?.displayName || ""}</td>
+                                        <td>{instruction?.fromAccount?.accountNo || ""}</td>
+                                        <td>{instruction?.toClient?.displayName || ""}</td>
+                                        <td>{instruction?.toAccount?.accountNo || ""}</td>
+                                        {/*<td>*/}
+                                        {/*    {instruction.amount*/}
+                                        {/*        ? `${instruction.currency?.code || ""} ${instruction.amount.toLocaleString()}`*/}
+                                        {/*        : "N/A"}*/}
+                                        {/*</td>*/}
                                         <td>
-                                            {instruction.amount
-                                                ? `${instruction.currency?.code || ""} ${instruction.amount.toLocaleString()}`
-                                                : "N/A"}
+                                            {instruction?.transferType
+                                                ? `${instruction?.transferType?.value || ""}`
+                                                : ""}
                                         </td>
                                         <td>
-                                            {instruction.validityStartDate && instruction.validityEndDate
-                                                ? `${new Date(instruction.validityStartDate).toLocaleDateString(
-                                                    "en-GB",
-                                                    {
-                                                        day: "2-digit",
-                                                        month: "long",
-                                                        year: "numeric",
-                                                    }
-                                                )} - ${new Date(instruction.validityEndDate).toLocaleDateString(
+                                            {instruction?.validFrom
+                                                ? `${new Date(instruction.validFrom).toLocaleDateString(
                                                     "en-GB",
                                                     {
                                                         day: "2-digit",
@@ -2555,15 +2553,15 @@ const SavingsAccounts = () => {
                                                         year: "numeric",
                                                     }
                                                 )}`
-                                                : "N/A"}
+                                                : ""}
                                         </td>
                                         <td>
-                                            <button
-                                                className="charges-action-button adjust-charge"
-                                                onClick={() => handleEditInstruction(instruction)}
-                                            >
-                                                <FaEdit className="charges-action-icon" />
-                                            </button>
+                                            {/*<button*/}
+                                            {/*    className="charges-action-button adjust-charge"*/}
+                                            {/*    onClick={() => handleEditInstruction(instruction)}*/}
+                                            {/*>*/}
+                                            {/*    <FaEdit className="charges-action-icon" />*/}
+                                            {/*</button>*/}
                                             <button
                                                 className="charges-action-button waive-charge"
                                                 onClick={() => handleDeleteInstruction(instruction.id)}
@@ -4010,15 +4008,7 @@ const SavingsAccounts = () => {
                                 </tr>
                                 <tr>
                                     <td className="create-provisioning-criteria-label">Payment Details</td>
-                                    <td>
-                                        <ul>
-                                            <li>Account #: {transactionDetails.paymentDetailData?.accountNumber || ""}</li>
-                                            <li>Cheque #: {transactionDetails.paymentDetailData?.checkNumber || ""}</li>
-                                            <li>Routing Code: {transactionDetails.paymentDetailData?.routingCode || ""}</li>
-                                            <li>Receipt #: {transactionDetails.paymentDetailData?.receiptNumber || ""}</li>
-                                            <li>Bank #: {transactionDetails.paymentDetailData?.bankNumber || ""}</li>
-                                        </ul>
-                                    </td>
+                                    <td>Receipt: {transactionDetails.paymentDetailData?.receiptNumber || ""}</td>
                                 </tr>
                                 </tbody>
                             </table>

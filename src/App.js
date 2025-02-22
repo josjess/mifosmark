@@ -132,7 +132,7 @@ import NotificationContainer from "./context/NotificationContainer";
 import CollectionSheet from "./components/CollectionSheet";
 
 const App = () => {
-    const { redirectToLogin, authInitialized, baseURL } = useContext(AuthContext);
+    const { redirectToLogin, authInitialized } = useContext(AuthContext);
     const [configLoaded, setConfigLoaded] = useState(false);
 
     useEffect(() => {

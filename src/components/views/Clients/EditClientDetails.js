@@ -106,8 +106,6 @@ const EditClientDetails = () => {
 
             await axios.put(`${API_CONFIG.baseURL}/clients/${clientId}`, cleanedData, { headers });
 
-            await axios.put(`${API_CONFIG.baseURL}/clients/${clientId}`, cleanedData, { headers });
-
             showNotification('Client details updated successfully!', 'success');
             navigate('/clients', {
                 state: {

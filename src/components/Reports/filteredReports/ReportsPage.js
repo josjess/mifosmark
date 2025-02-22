@@ -138,11 +138,20 @@ const ReportsPage = () => {
 
             {(componentVisibility['pentaho-reports'] || componentVisibility['table-reports']) && (
                 <div className="users-tab-container">
+                    {componentVisibility['table-reports'] && (
+                        <button
+                            className={`users-tab-button ${activeTab === "tableReports" ? "active" : ""}`}
+                            onClick={() => setActiveTab("tableReports")}
+                        >
+                            Standard Reports
+                        </button>
+                    )}
+
                     <button
                         className={`users-tab-button ${activeTab === "standardReports" ? "active" : ""}`}
                         onClick={() => setActiveTab("standardReports")}
                     >
-                        Standard Reports
+                        Other Reports
                     </button>
 
                     {componentVisibility['pentaho-reports'] && (
@@ -151,15 +160,6 @@ const ReportsPage = () => {
                             onClick={() => setActiveTab("pentahoReports")}
                         >
                             Pentaho Reports
-                        </button>
-                    )}
-
-                    {componentVisibility['table-reports'] && (
-                        <button
-                            className={`users-tab-button ${activeTab === "tableReports" ? "active" : ""}`}
-                            onClick={() => setActiveTab("tableReports")}
-                        >
-                            Table Reports
                         </button>
                     )}
                 </div>

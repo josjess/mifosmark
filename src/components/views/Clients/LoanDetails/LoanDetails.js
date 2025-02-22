@@ -493,7 +493,7 @@ const LoanDetails = () => {
             };
 
             const payload = {
-                transactionDate: formatDateForPayload(new Date(transactionDate[0], transactionDate[1] - 1, transactionDate[2])),
+                transactionDate: formatDateForPayload(new Date(transactionDate)),
                 transactionAmount: 0,
                 dateFormat: "dd MMMM yyyy",
                 locale: "en",
@@ -513,6 +513,7 @@ const LoanDetails = () => {
 
             showNotification("Transaction undone successfully!", 'success');
             fetchLoanData();
+            closeTransactionModal();
         } catch (error) {
             console.error("Error undoing transaction:", error);
             showNotification("Failed to undo transaction. Please try again!", 'error');
@@ -9026,22 +9027,22 @@ const LoanDetails = () => {
 
                         {/* Action Buttons */}
                         <div className="modal-actions">
-                            <button
-                                className="create-provisioning-criteria-confirm"
-                                disabled={transactionDetails?.manuallyReversed || transactionDetails?.type?.toLowerCase() === "disbursement"}
-                            >
-                                Edit
-                            </button>
-                            <button
-                                className="create-provisioning-criteria-confirm"
-                                disabled={transactionDetails?.manuallyReversed || transactionDetails?.type?.toLowerCase() === "disbursement"}
-                            >
-                                Chargeback
-                            </button>
+                            {/*<button*/}
+                            {/*    className="create-provisioning-criteria-confirm"*/}
+                            {/*    disabled={transactionDetails?.manuallyReversed || transactionDetails?.type?.toLowerCase() === "disbursement"}*/}
+                            {/*>*/}
+                            {/*    Edit*/}
+                            {/*</button>*/}
+                            {/*<button*/}
+                            {/*    className="create-provisioning-criteria-confirm"*/}
+                            {/*    disabled={transactionDetails?.manuallyReversed || transactionDetails?.type?.toLowerCase() === "disbursement"}*/}
+                            {/*>*/}
+                            {/*    Chargeback*/}
+                            {/*</button>*/}
                             <button
                                 className="create-provisioning-criteria-confirm"
                                 style={{backgroundColor: "#d9534f"}}
-                                onClick={() => handleUndoTransaction(transactionDetails.id, transactionDetails.date)}
+                                onClick={() => handleUndoTransaction(transactionDetails?.id, transactionDetails?.transactionDate)}
                                 disabled={transactionDetails?.manuallyReversed || isUndoingTransaction}
                             >
                                 {isUndoingTransaction ? "Processing..." : "Undo"}
