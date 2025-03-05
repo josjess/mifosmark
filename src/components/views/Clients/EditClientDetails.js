@@ -90,12 +90,13 @@ const EditClientDetails = () => {
             const cleanedData = {
                 firstname: clientData.firstname || "",
                 lastname: clientData.lastname || "",
+                middlename: clientData.middlename || "",
                 externalId: clientData.externalId || "",
                 isStaff: clientData.isStaff ?? false,
                 staffId: clientData.staffId || null,
                 activationDate: clientData.activationDate || "",
                 dateOfBirth: formattedDateOfBirth,
-                genderId: clientData.gender ? parseInt(templateData.genderOptions?.find((g) => g.id === clientData.gender)?.id) : undefined,
+                genderId: clientData.gender,
                 mobileNo: clientData.mobileNo || "",
                 emailAddress: clientData.emailAddress || "",
                 clientTypeId: clientData.clientType || "",
@@ -258,7 +259,7 @@ const EditClientDetails = () => {
                             <input
                                 type="text"
                                 id="middleName"
-                                value={clientData?.middleName || ''}
+                                value={clientData?.middlename || ''}
                                 onChange={(e) => handleInputChange('middleName', e.target.value)}
                                 className="staged-form-input"
                             />
@@ -284,7 +285,10 @@ const EditClientDetails = () => {
                                 id="dateOfBirth"
                                 selected={clientData?.dateOfBirth ? new Date(clientData.dateOfBirth) : convertBackendDateToDate(clientData?.dateOfBirth)}
                                 onChange={(date) =>
-                                    handleInputChange('dateOfBirth', date ? date.toISOString().split('T')[0] : "")
+                                    handleInputChange('dateOfBirth', date
+                                        ? new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().split('T')[0]
+                                        : ""
+                                    )
                                 }
                                 dateFormat="MMMM d, yyyy"
                                 className="staged-form-input"
@@ -302,7 +306,7 @@ const EditClientDetails = () => {
                             <label htmlFor="gender">Gender</label>
                             <select
                                 id="gender"
-                                value={clientData?.gender || ''}
+                                value={clientData?.gender?.id || clientData?.gender || ''}
                                 onChange={(e) => handleInputChange('gender', e.target.value)}
                                 className="staged-form-select"
                             >

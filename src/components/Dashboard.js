@@ -50,7 +50,7 @@ const Dashboard = () => {
                 };
 
                 const response = await axios.get(`${API_BASE_URL}/offices`, { headers });
-                const offices = response.data || [];
+                const offices = response?.data || [];
                 setOfficeOptions(offices);
 
                 if (user.officeId === 1) {
@@ -88,6 +88,7 @@ const Dashboard = () => {
             };
 
             const fetchClientData = async () => {
+                startLoading();
                 try {
                     const officeFilter = selectedOffice && selectedOffice !== "all" ? `&officeId=${selectedOffice}` : "";
                     const response = await axios.get(`${API_BASE_URL}/clients?${officeFilter}`, { headers });
@@ -98,9 +99,9 @@ const Dashboard = () => {
                     const defaultCurrency = currencyResponse.data.selectedCurrencyOptions[0] || {};
                     const { code: currencyCode, code: currencySymbol, decimalPlaces } = defaultCurrency;
 
-                    const staff = staffResponse.data;
-                    const loans = loansResponse.data.pageItems;
-                    const clients = response.data.pageItems;
+                    const staff = staffResponse?.data;
+                    const loans = loansResponse?.data?.pageItems;
+                    const clients = response?.data?.pageItems;
 
                     const filteredClients =
                         selectedOffice && selectedOffice !== "all"
@@ -108,16 +109,26 @@ const Dashboard = () => {
                             : clients;
 
                     const activeClients = filteredClients.filter(client => client.status.value === "Active").length;
-                    const inactiveClients = filteredClients.filter(client => client.status.value === "Inactive").length;
+                    const inactiveClients = filteredClients.filter(client =>
+                        ["Inactive", "Closed", "Withdrawn"].includes(client.status.value)
+                    ).length;
                     const newClients = filteredClients.filter(client => client.status.value === "Pending").length;
                     activeClientsRef.current = activeClients;
 
-                    const activeLoans = loans.filter(loan => loan.status.active).length;
-                    const loanOfficers = staff.filter(member => member.isLoanOfficer && member.isActive);
+                    // const activeLoans = loans.filter(loan => loan.status.active).length;
+                    // const loanOfficers = staff.filter(member => member.isLoanOfficer && member.isActive);
+
+                    const activeLoanClients = filteredClients.filter(client =>
+                        loans.some(loan => loan.clientId === client.id && loan.status.active)
+                    ).length;
+
+                    const loanOfficersInOffice = selectedOffice && selectedOffice !== "all"
+                        ? staff.filter(member => member.isLoanOfficer && member.isActive && member.officeId === parseInt(selectedOffice))
+                        : staff.filter(member => member.isLoanOfficer && member.isActive);
 
                     const borrowersPerLoanOfficer =
-                        loanOfficers.length > 0
-                            ? Math.round(activeLoans / loanOfficers.length)
+                        loanOfficersInOffice.length > 0
+                            ? Math.round(activeLoanClients / loanOfficersInOffice.length)
                             : 'N/A';
 
                     const clientsPerPersonnel =
@@ -126,8 +137,8 @@ const Dashboard = () => {
                             : 'N/A';
 
                     const averageClientsPerLoanOfficer =
-                        loanOfficers.length > 0
-                            ? Math.round(activeClients / loanOfficers.length)
+                        loanOfficersInOffice.length > 0
+                            ? Math.round(filteredClients.length / loanOfficersInOffice.length)
                             : 'N/A';
 
                     const getTodaysDisbursements = (loans) => {
@@ -204,6 +215,8 @@ const Dashboard = () => {
                 } catch (error) {
                     console.error("Error fetching client data:", error);
                     throw error;
+                } finally {
+                    stopLoading();
                 }
             };
 
@@ -306,18 +319,19 @@ const Dashboard = () => {
                 return repaymentCount;
             };
 
-            const fetchLoanData = async () => {
+            const fetchLoanData = async (activeClients) => {
+                startLoading();
                 try {
                     const officeFilter = selectedOffice && selectedOffice !== "all" ? `&officeId=${selectedOffice}` : "";
                     const response = await axios.get(`${API_BASE_URL}/loans?${officeFilter}`, { headers });
                     const currencyResponse = await axios.get(`${API_BASE_URL}/currencies`, { headers });
                     const savingsResponse = await axios.get(`${API_BASE_URL}/savingsaccounts`, { headers });
 
-                    const defaultCurrency = currencyResponse.data.selectedCurrencyOptions[0] || {};
+                    const defaultCurrency = currencyResponse?.data?.selectedCurrencyOptions[0] || {};
                     const { code: currencyCode, code: currencySymbol, decimalPlaces } = defaultCurrency;
 
-                    const loans = response.data.pageItems;
-                    const savings = savingsResponse.data.pageItems;
+                    const loans = response?.data?.pageItems;
+                    const savings = savingsResponse?.data?.pageItems;
 
                     const filteredLoans =
                         selectedOffice && selectedOffice !== "all"
@@ -341,30 +355,51 @@ const Dashboard = () => {
                         countTotalOverdue = 0, countNonPerformingAssets = 0,
                         countLoansForApproval = 0, countLoansForDisapproval = 0, countInterestOutstanding = 0;
 
+                    const today = new Date();
+                    const thisMonthLoans = filteredLoans.filter(loan => {
+                        const disbursementDateArray = loan.timeline?.actualDisbursementDate;
+                        if (!Array.isArray(disbursementDateArray) || disbursementDateArray.length < 3) {
+                            return false;
+                        }
+
+                        const [year, month] = disbursementDateArray;
+                        return (
+                            year === today.getFullYear() &&
+                            month === today.getMonth() + 1
+                        );
+                    });
+
+                    thisMonthLoans.forEach(loan => {
+                        const summary = loan?.summary || {};
+                        if (summary?.interestCharged) {
+                            totalInterestThisMonth += summary.interestCharged;
+                        }
+                    });
+
                     filteredLoans.forEach(loan => {
                         const summary = loan.summary || {};
-                        if (summary.principalOutstanding) {
+                        if (summary?.principalOutstanding) {
                             totalPrincipalOutstanding += summary.principalOutstanding;
                             countPrincipalOutstanding++;
                         }
                         // totalPrincipalOutstanding += summary.principalOutstanding || 0;
-                        if (summary.interestOutstanding) {
+                        if (summary?.interestOutstanding) {
                             totalInterestOutstanding += summary.interestOutstanding;
                             countInterestOutstanding ++;
                         }
-                        if (summary.principalOverdue) {
+                        if (summary?.principalOverdue) {
                             totalPrincipalOverdue += summary.principalOverdue;
                             countPrincipalOverdue++;
                         }
                         // totalInterestOutstanding += summary.interestOutstanding || 0;
                         // totalPrincipalOverdue += summary.principalOverdue || 0;
-                        if (summary.interestOverdue) {
+                        if (summary?.interestOverdue) {
                             totalInterestOverdue += summary.interestOverdue;
                             countInterestOverdue++;
                         }
-                        if (summary.interestCharged) {
-                            totalInterestThisMonth += summary.interestCharged;
-                        }
+                        // if (summary.interestCharged) {
+                        //     totalInterestThisMonth += summary.interestCharged;
+                        // }
                         if (summary.totalOverdue) {
                             totalOverdue += summary.totalOverdue;
                             countTotalOverdue++;
@@ -373,7 +408,7 @@ const Dashboard = () => {
                         // totalInterestThisMonth += summary.interestCharged || 0;
                         // totalOverdue += summary.totalOverdue || 0;
 
-                        if (loan.isNPA) {
+                        if (loan?.isNPA) {
                             nonPerformingAssets++;
                             countNonPerformingAssets++;
                         }
@@ -412,8 +447,8 @@ const Dashboard = () => {
                     const totalSavingsMobilizedThisMonth = calculateSavingsMobilizedThisMonth(savings);
 
                     const averageLoanDisbursed =
-                        activeClientsRef.current > 0
-                            ? formatCurrency(totalOutstandingCalc / parseInt(activeClientsRef.current), currencyCode, currencySymbol, decimalPlaces)
+                        activeClients > 0
+                            ? formatCurrency(totalOutstandingCalc / activeClients, currencyCode, currencySymbol, decimalPlaces)
                             : formatCurrency(0, currencyCode, currencySymbol, decimalPlaces);
 
 
@@ -446,13 +481,16 @@ const Dashboard = () => {
                 } catch (error) {
                     console.error("Error fetching loan data:", error);
                     throw error;
+                } finally {
+                    stopLoading();
                 }
             };
 
             const fetchData = async () => {
                 startLoading();
                 try {
-                    const [clientData, loanData] = await Promise.all([fetchClientData(), fetchLoanData()]);
+                    const clientData = await fetchClientData();
+                    const loanData = await fetchLoanData(clientData.activeClients);
                     if (isMounted) {
                         setDashboardData(prev => ({
                             ...prev,
@@ -516,7 +554,7 @@ const Dashboard = () => {
                                         </>
                                     ) : (
                                         <option value={user?.officeId}>
-                                            {officeOptions.find((office) => office.id === user?.officeId)?.name || "Current Office"}
+                                            {officeOptions.find((office) => office.id === user?.officeId)?.name || "Current Branch"}
                                         </option>
                                     )}
                                 </select>

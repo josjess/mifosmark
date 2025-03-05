@@ -1536,15 +1536,15 @@ const ClientDetails = ({ clientId, onClose }) => {
                                     {/*>*/}
                                     {/*    Share Accounts*/}
                                     {/*</li>*/}
-                                    <li
-                                        className={activeSection === 'collateral-data' ? 'active' : ''}
-                                        onClick={() => {
-                                            setActiveSection('collateral-data');
-                                            setIsSidebarHidden(true);
-                                        }}
-                                    >
-                                        Collateral Data
-                                    </li>
+                                    {/*<li*/}
+                                    {/*    className={activeSection === 'collateral-data' ? 'active' : ''}*/}
+                                    {/*    onClick={() => {*/}
+                                    {/*        setActiveSection('collateral-data');*/}
+                                    {/*        setIsSidebarHidden(true);*/}
+                                    {/*    }}*/}
+                                    {/*>*/}
+                                    {/*    Collateral Data*/}
+                                    {/*</li>*/}
                                 </ul>
                             </div>
                         </div>
@@ -1612,10 +1612,10 @@ const ClientDetails = ({ clientId, onClose }) => {
                                                 >
                                                     <td>{charge.name}</td>
                                                     <td>{formatDate(charge.dueDate)}</td>
-                                                    <td>{charge.due}</td>
-                                                    <td>{charge.paid}</td>
-                                                    <td>{charge.waived}</td>
-                                                    <td>{charge.outstanding}</td>
+                                                    <td>{charge?.currency?.code} {charge.amount}</td>
+                                                    <td>{charge?.currency?.code} {charge.amountPaid}</td>
+                                                    <td>{charge?.currency?.code} {charge.amountWaived}</td>
+                                                    <td>{charge?.currency?.code} {charge.amountOutstanding}</td>
                                                     <td>
                                                         <button className="general-action-button"
                                                                 onClick={(e) => {
@@ -2205,55 +2205,9 @@ const ClientDetails = ({ clientId, onClose }) => {
                             )}
 
                             {/* Collateral Data Section */}
-                            {activeSection === 'collateral-data' && (
-                                <div id={'collateral-data'} className="general-section general-collateral-data">
-                                    <div className="general-section-header">
-                                        <h3 className="general-section-title">Collateral Data</h3>
-                                        <button
-                                            className="general-collateral-button"
-                                            disabled={!clientDetails?.clientCollateralManagements?.length}
-                                        >
-                                            View Collaterals
-                                        </button>
-                                    </div>
-                                    <table className="general-collateral-table">
-                                        <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Name</th>
-                                            <th>Percent To Base</th>
-                                            <th>Quantity</th>
-                                            <th>Unit Price</th>
-                                            <th>Total Value</th>
-                                            <th>Total Collateral Value</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        {clientDetails?.clientCollateralManagements?.length > 0 ? (
-                                            clientDetails.clientCollateralManagements.map((item, index) => (
-                                                <tr
-                                                    key={index}
-                                                    onClick={() => handleCollateralRowClick(item)}
-                                                    style={{cursor: "pointer"}}
-                                                >
-                                                    <td>{item.id || "N/A"}</td>
-                                                    <td>{item.name || "N/A"}</td>
-                                                    <td>{item.pctToBase ? `${item.pctToBase}%` : "N/A"}</td>
-                                                    <td>{item.quantity || "N/A"}</td>
-                                                    <td>{item.unitPrice ? item.unitPrice.toLocaleString() : "N/A"}</td>
-                                                    <td>{item.total ? item.total.toLocaleString() : "N/A"}</td>
-                                                    <td>{item.totalCollateral ? item.totalCollateral.toLocaleString() : "N/A"}</td>
-                                                </tr>
-                                            ))
-                                        ) : (
-                                            <tr>
-                                                <td colSpan="5">No collateral data available</td>
-                                            </tr>
-                                        )}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            )}
+                            {/*{activeSection === 'collateral-data' && (*/}
+                            {/*    */}
+                            {/*)}*/}
                         </div>
                     </div>
                 );
@@ -2970,135 +2924,186 @@ const ClientDetails = ({ clientId, onClose }) => {
                 );
             case 'documents':
                 return (
-                    <div className="general-section general-documents-section">
-                        <div className="general-section-header">
-                            <h3 className="general-section-title">Documents</h3>
-                            <button
-                                className="create-provisioning-criteria-submit"
-                                onClick={() => setIsDocumentsModalOpen(true)}
-                            >
-                                Add Document
-                            </button>
+                    <>
+                        <div className="general-section general-documents-section">
+                            <div className="general-section-header">
+                                <h3 className="general-section-title">Documents</h3>
+                                <button
+                                    className="create-provisioning-criteria-submit"
+                                    onClick={() => setIsDocumentsModalOpen(true)}
+                                >
+                                    Add Document
+                                </button>
+                            </div>
+                            {documents.length > 0 ? (
+                                <table className="general-accounts-table">
+                                    <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Description</th>
+                                        <th>File Name</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {documents.map((doc, index) => (
+                                        <tr key={index}>
+                                            <td>{doc.name}</td>
+                                            <td>{doc.description || ''}</td>
+                                            <td>{doc.fileName}</td>
+                                            <td className={"create-provisioning-criteria-actions"}>
+                                                <button
+                                                    className="create-adhoc-query-submit"
+                                                    style={{marginRight: '10px'}}
+                                                    // onClick={() => handleViewDocument(doc.id)}
+                                                >
+                                                    View
+                                                </button>
+                                                <button
+                                                    className="create-provisioning-criteria-cancel"
+                                                    // onClick={() => handleDeleteDocument(doc.id)}
+                                                >
+                                                    Delete
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    </tbody>
+                                </table>
+                            ) : (
+                                <p className="no-data">No documents available</p>
+                            )}
+                            {isDocumentsModalOpen && (
+                                <div className="create-provisioning-criteria-modal-overlay">
+                                    <div className="create-provisioning-criteria-modal-content">
+                                        <h4 className="create-modal-title">Upload Documents</h4>
+                                        <div className="create-holiday-row">
+                                            <div className="create-provisioning-criteria-group">
+                                                <label htmlFor="fileName"
+                                                       className="create-provisioning-criteria-label">
+                                                    File Name <span>*</span>
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    id="fileName"
+                                                    value={newDocument.fileName}
+                                                    onChange={(e) =>
+                                                        setNewDocument((prev) => ({
+                                                            ...prev,
+                                                            fileName: e.target.value,
+                                                        }))
+                                                    }
+                                                    className="create-provisioning-criteria-input"
+                                                    required
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="create-holiday-row">
+                                            <div className="create-provisioning-criteria-group">
+                                                <label htmlFor="description"
+                                                       className="create-provisioning-criteria-label">
+                                                    Description
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    id="description"
+                                                    value={newDocument.description}
+                                                    onChange={(e) =>
+                                                        setNewDocument((prev) => ({
+                                                            ...prev,
+                                                            description: e.target.value,
+                                                        }))
+                                                    }
+                                                    className="create-provisioning-criteria-input"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="create-holiday-row">
+                                            <div className="create-provisioning-criteria-group">
+                                                <label htmlFor="file" className="create-provisioning-criteria-label">
+                                                    Upload <span>*</span>
+                                                </label>
+                                                <input
+                                                    type="file"
+                                                    id="file"
+                                                    onChange={(e) =>
+                                                        setNewDocument((prev) => ({
+                                                            ...prev,
+                                                            file: e.target.files[0],
+                                                        }))
+                                                    }
+                                                    className="create-provisioning-criteria-input"
+                                                    required
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="create-provisioning-criteria-modal-actions">
+                                            <button
+                                                onClick={() => setIsDocumentsModalOpen(false)}
+                                                className="create-provisioning-criteria-cancel"
+                                            >
+                                                Cancel
+                                            </button>
+                                            <button
+                                                onClick={handleAddDocument}
+                                                className="create-provisioning-criteria-confirm"
+                                                disabled={!newDocument.fileName || !newDocument.file}
+                                            >
+                                                Confirm
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
-                        {documents.length > 0 ? (
-                            <table className="general-accounts-table">
+                        <div id={'collateral-data'} className="general-section general-collateral-data">
+                            <div className="general-section-header">
+                                <h3 className="general-section-title">Collateral Data</h3>
+                                <button
+                                    className="general-collateral-button"
+                                    disabled={!clientDetails?.clientCollateralManagements?.length}
+                                >
+                                    View Collaterals
+                                </button>
+                            </div>
+                            <table className="general-collateral-table">
                                 <thead>
                                 <tr>
+                                    <th>ID</th>
                                     <th>Name</th>
-                                    <th>Description</th>
-                                    <th>File Name</th>
-                                    <th>Actions</th>
+                                    <th>Percent To Base</th>
+                                    <th>Quantity</th>
+                                    <th>Unit Price</th>
+                                    <th>Total Value</th>
+                                    <th>Total Collateral Value</th>
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {documents.map((doc, index) => (
-                                    <tr key={index}>
-                                        <td>{doc.name}</td>
-                                        <td>{doc.description || ''}</td>
-                                        <td>{doc.fileName}</td>
-                                        <td className={"create-provisioning-criteria-actions"}>
-                                            <button
-                                                className="create-adhoc-query-submit"
-                                                style={{marginRight: '10px'}}
-                                                // onClick={() => handleViewDocument(doc.id)}
-                                            >
-                                                View
-                                            </button>
-                                            <button
-                                                className="create-provisioning-criteria-cancel"
-                                                // onClick={() => handleDeleteDocument(doc.id)}
-                                            >
-                                                Delete
-                                            </button>
-                                        </td>
+                                {clientDetails?.clientCollateralManagements?.length > 0 ? (
+                                    clientDetails.clientCollateralManagements.map((item, index) => (
+                                        <tr
+                                            key={index}
+                                            onClick={() => handleCollateralRowClick(item)}
+                                            style={{cursor: "pointer"}}
+                                        >
+                                            <td>{item.id || "N/A"}</td>
+                                            <td>{item.name || "N/A"}</td>
+                                            <td>{item.pctToBase ? `${item.pctToBase}%` : "N/A"}</td>
+                                            <td>{item.quantity || "N/A"}</td>
+                                            <td>{item.unitPrice ? item.unitPrice.toLocaleString() : "N/A"}</td>
+                                            <td>{item.total ? item.total.toLocaleString() : "N/A"}</td>
+                                            <td>{item.totalCollateral ? item.totalCollateral.toLocaleString() : "N/A"}</td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td className={"no-data"} colSpan="7">No collateral data available</td>
                                     </tr>
-                                ))}
+                                )}
                                 </tbody>
                             </table>
-                        ) : (
-                            <p className="no-data">No documents available</p>
-                        )}
-                        {isDocumentsModalOpen && (
-                            <div className="create-provisioning-criteria-modal-overlay">
-                                <div className="create-provisioning-criteria-modal-content">
-                                    <h4 className="create-modal-title">Upload Documents</h4>
-                                    <div className="create-holiday-row">
-                                        <div className="create-provisioning-criteria-group">
-                                            <label htmlFor="fileName" className="create-provisioning-criteria-label">
-                                                File Name <span>*</span>
-                                            </label>
-                                            <input
-                                                type="text"
-                                                id="fileName"
-                                                value={newDocument.fileName}
-                                                onChange={(e) =>
-                                                    setNewDocument((prev) => ({
-                                                        ...prev,
-                                                        fileName: e.target.value,
-                                                    }))
-                                                }
-                                                className="create-provisioning-criteria-input"
-                                                required
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="create-holiday-row">
-                                        <div className="create-provisioning-criteria-group">
-                                            <label htmlFor="description" className="create-provisioning-criteria-label">
-                                                Description
-                                            </label>
-                                            <input
-                                                type="text"
-                                                id="description"
-                                                value={newDocument.description}
-                                                onChange={(e) =>
-                                                    setNewDocument((prev) => ({
-                                                        ...prev,
-                                                        description: e.target.value,
-                                                    }))
-                                                }
-                                                className="create-provisioning-criteria-input"
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="create-holiday-row">
-                                        <div className="create-provisioning-criteria-group">
-                                            <label htmlFor="file" className="create-provisioning-criteria-label">
-                                                Upload <span>*</span>
-                                            </label>
-                                            <input
-                                                type="file"
-                                                id="file"
-                                                onChange={(e) =>
-                                                    setNewDocument((prev) => ({
-                                                        ...prev,
-                                                        file: e.target.files[0],
-                                                    }))
-                                                }
-                                                className="create-provisioning-criteria-input"
-                                                required
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="create-provisioning-criteria-modal-actions">
-                                        <button
-                                            onClick={() => setIsDocumentsModalOpen(false)}
-                                            className="create-provisioning-criteria-cancel"
-                                        >
-                                            Cancel
-                                        </button>
-                                        <button
-                                            onClick={handleAddDocument}
-                                            className="create-provisioning-criteria-confirm"
-                                            disabled={!newDocument.fileName || !newDocument.file}
-                                        >
-                                            Confirm
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </div>
+                        </div>
+                    </>
                 );
             case 'notes':
                 return (
@@ -3208,23 +3213,23 @@ const ClientDetails = ({ clientId, onClose }) => {
     };
 
     const handleChargeRowClick = (charge) => {
-        console.log("Charge clicked:", charge);
+        // console.log("Charge clicked:", charge);
     };
 
     const handleUpcomingChargeRowClick = (charge) => {
-        console.log("Upcoming charge clicked:", charge);
+        // console.log("Upcoming charge clicked:", charge);
     };
 
     const handleFixedDepositAccountRowClick = (account) => {
-        console.log("Fixed deposit account row clicked:", account);
+        // console.log("Fixed deposit account row clicked:", account);
     };
 
     const handleRecurringDepositAccountRowClick = (account) => {
-        console.log("Recurring deposit account row clicked:", account);
+        // console.log("Recurring deposit account row clicked:", account);
     };
 
     const handleShareAccountRowClick = (account) => {
-        console.log("Share account row clicked:", account);
+        // console.log("Share account row clicked:", account);
     };
 
     const handleCollateralRowClick = (item) => {
@@ -4331,8 +4336,10 @@ const ClientDetails = ({ clientId, onClose }) => {
             setReceiptNumber('');
             fetchGeneralTabData();
         } catch (error) {
-            console.error("Error processing loan repayment:", error);
-            showNotification("Loan repayment failed. Please try again.", 'error');
+            const errorMessage = error.response?.data?.errors?.[0]?.defaultUserMessage ||
+                error.response?.data?.defaultUserMessage ||
+                "An unexpected error occurred.";
+            showNotification(errorMessage, 'error');
         } finally {
             stopLoading();
         }
@@ -4413,8 +4420,10 @@ const ClientDetails = ({ clientId, onClose }) => {
             setIsDepositModalOpen(false);
             fetchGeneralTabData();
         } catch (error) {
-            console.error('Error making deposit:', error);
-            showNotification('Deposit failed. Please try again.', 'error');
+            const errorMessage = error.response?.data?.errors?.[0]?.defaultUserMessage ||
+                error.response?.data?.defaultUserMessage ||
+                "An unexpected error occurred.";
+            showNotification(errorMessage, 'error');
         } finally {
             stopLoading();
         }
@@ -4555,7 +4564,7 @@ const ClientDetails = ({ clientId, onClose }) => {
                         <li>
                             {clientDetails.status.code === 'clientStatusType.transfer.in.progress' ? (
                                 <>
-                                    <span className="client-info-label">Current Office:</span>
+                                    <span className="client-info-label">Current Branch:</span>
                                     <span className="client-info-value">{clientDetails.officeName || ''}</span>
                                     <span className="client-info-label">Transfer To:</span>
                                     <span
@@ -4563,7 +4572,7 @@ const ClientDetails = ({ clientId, onClose }) => {
                                 </>
                             ) : (
                                 <>
-                                    <span className="client-info-label">Office:</span>
+                                    <span className="client-info-label">Branch:</span>
                                     <span className="client-info-value">{clientDetails.officeName || ''}</span>
                                 </>
                             )}
@@ -4574,12 +4583,12 @@ const ClientDetails = ({ clientId, onClose }) => {
                         </li>
                         {clientDetails.staffName && (
                             <li>
-                                <span className="client-info-label">Staff:</span>
+                                <span className="client-info-label">Loan Officer:</span>
                                 <span className="client-info-value">{clientDetails.staffName}</span>
                             </li>
                         )}
                         <li>
-                            <span className="client-info-label">External ID:</span>
+                            <span className="client-info-label">National ID/Passport:</span>
                             <span className="client-info-value">{clientDetails.externalId || ''}</span>
                         </li>
                         <li>

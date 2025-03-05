@@ -268,7 +268,7 @@ const AddClientForm = () => {
                         <div className="staged-form-row">
                             <div className="staged-form-field">
                                 <label htmlFor="office">
-                                    Office <span className="staged-form-required">*</span>
+                                    Branch <span className="staged-form-required">*</span>
                                 </label>
                                 <select
                                     id="office"
@@ -277,7 +277,7 @@ const AddClientForm = () => {
                                     className="staged-form-select"
                                     required
                                 >
-                                    <option value="">-- Select Office --</option>
+                                    <option value="">-- Select Branch --</option>
                                     {clientTemplate.officeOptions?.length > 0
                                         ? clientTemplate.officeOptions.map((office) => (
                                             <option key={office.id} value={office.id}>
@@ -290,7 +290,7 @@ const AddClientForm = () => {
 
                             <div className="staged-form-field">
                                 <label htmlFor="staff">
-                                    Staff
+                                    Loan Officer
                                 </label>
                                 <select
                                     id="staff"
@@ -299,7 +299,7 @@ const AddClientForm = () => {
                                     className="staged-form-select"
                                     disabled={!office}
                                 >
-                                    <option value="">-- Select Staff --</option>
+                                    <option value="">-- Select Loan Officer --</option>
                                     {staffs.length > 0
                                         ? staffs.map((staff) => (
                                             <option key={staff.id} value={staff.id}>
@@ -314,7 +314,7 @@ const AddClientForm = () => {
                         <div className="staged-form-row">
                             <div className="staged-form-field">
                                 <label htmlFor="externalId">
-                                    External ID <span className="staged-form-required">*</span>
+                                    National ID/Passport <span className="staged-form-required">*</span>
                                 </label>
                                 <input
                                     id="externalId"
