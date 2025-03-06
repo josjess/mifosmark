@@ -4356,7 +4356,7 @@ const ClientDetails = ({ clientId, onClose }) => {
             await axios.get(`${API_CONFIG.baseURL}/clients/${clientId}`, { headers });
 
             const transactionResponse = await axios.get(
-                `${API_CONFIG.baseURL}/savingsaccounts/${clientId}/transactions/template`,
+                `${API_CONFIG.baseURL}/savingsaccounts/${selectedSavingsId}/transactions/template`,
                 { headers }
             );
 
@@ -4440,7 +4440,7 @@ const ClientDetails = ({ clientId, onClose }) => {
             await axios.get(`${API_CONFIG.baseURL}/clients/${clientId}`, { headers });
 
             const transactionResponse = await axios.get(
-                `${API_CONFIG.baseURL}/savingsaccounts/${clientId}/transactions/template`,
+                `${API_CONFIG.baseURL}/savingsaccounts/${selectedSavingsId}/transactions/template`,
                 { headers }
             );
 

@@ -879,7 +879,7 @@ const SavingsAccount = () => {
             navigate(`/client/${clientId}/savings-account/${response.data.savingsId}`, { state: { account: payload } });
         } catch (error) {
             console.error("Error submitting loan:", error);
-            showNotification("Failed to submit the loan. Please try again!", 'error');
+            showNotification("Failed to create the account. Please try again!", 'error');
         } finally {
             stopLoading();
         }

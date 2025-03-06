@@ -73,7 +73,7 @@ const Clients = ({ onRowClick }) => {
     const fetchOffices = async () => {
         startLoading();
         try {
-            const response = await axios.get(`${API_CONFIG.baseURL}/fineract-provider/api/v1/offices`, {
+            const response = await axios.get(`${API_CONFIG.baseURL}/offices`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
                     'Fineract-Platform-TenantID': `${API_CONFIG.tenantId}`,
@@ -181,8 +181,8 @@ const Clients = ({ onRowClick }) => {
                             onChange={handlePageSizeChange}
                             className="filter-input"
                         >
-                            <option value={5}>5</option>
-                            <option value={10}>10</option>
+                            {/*<option value={5}>5</option>*/}
+                            {/*<option value={10}>10</option>*/}
                             <option value={20}>20</option>
                             <option value={50}>50</option>
                             <option value={100}>100</option>
