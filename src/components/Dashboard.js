@@ -255,24 +255,30 @@ const Dashboard = () => {
                 }
             };
 
-            const calculateTotalSavings = (savingsResponse) => {
+            const calculateTotalSavings = (savingsResponse, clients, officeId) => {
                 let total = 0;
                 let savingsCount = 0;
 
-                if (Array.isArray(savingsResponse)) {
-                    savingsResponse.forEach((account) => {
-                        const accountBalance = account.summary?.accountBalance;
+                if (!Array.isArray(savingsResponse) || !Array.isArray(clients)) return { total, savingsCount };
 
-                        if (accountBalance !== undefined) {
-                            const parsedBalance = parseInt(accountBalance, 10);
+                // Map clients to their office IDs for quick lookup
+                const clientOfficeMap = new Map(clients.map(client => [client.id, client.officeId]));
 
-                            if (!isNaN(parsedBalance)) {
-                                total += parsedBalance;
-                                savingsCount++;
-                            }
+                savingsResponse.forEach((account) => {
+                    const accountBalance = account.summary?.accountBalance;
+                    const clientOfficeId = clientOfficeMap.get(account.clientId);
+
+                    // Apply office filter
+                    const officeFilter = officeId && officeId !== "all" ? clientOfficeId === parseInt(officeId) : true;
+
+                    if (officeFilter && accountBalance !== undefined) {
+                        const parsedBalance = parseFloat(accountBalance);
+                        if (!isNaN(parsedBalance)) {
+                            total += parsedBalance;
+                            savingsCount++;
                         }
-                    });
-                }
+                    }
+                });
 
                 return { total, savingsCount };
             };
@@ -493,9 +499,9 @@ const Dashboard = () => {
 
                     const totalOutstandingCalc = totalPrincipalOutstanding + totalInterestOutstanding;
 
-                    const { total: totalSavings, savingsCount } = calculateTotalSavings(savings);
-
                     const clientsList = Array.isArray(clientsRef.current) ? clientsRef.current : [];
+
+                    const { total: totalSavings, savingsCount } = calculateTotalSavings(savings, clientsList, selectedOffice);
 
                     const totalSavingsMobilizedThisMonth = calculateSavingsMobilizedThisMonth(savings, clientsList, selectedOffice);
 
