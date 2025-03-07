@@ -230,7 +230,7 @@ const Dashboard = () => {
 
 
 
-                    const { repaymentCount, totalRepaymentAmount } = calculateRepaymentsToday(loans, currencyCode, currencySymbol, decimalPlaces);
+                    const { repaymentCount, totalRepaymentAmount } = calculateRepaymentsToday(loans, currencyCode, currencySymbol, decimalPlaces, selectedOffice);
 
                     return {
                         totalClients: filteredClients.length,
@@ -305,10 +305,12 @@ const Dashboard = () => {
                 }).length;
             };
 
-            const calculateRepaymentsToday = (loans, currencyCode, currencySymbol, decimalPlaces) => {
+            const calculateRepaymentsToday = (loans, currencyCode, currencySymbol, decimalPlaces, officeId) => {
                 const today = new Date();
                 let repaymentCount = 0;
                 let totalRepaymentAmount = 0;
+
+                if (!Array.isArray(loans)) return { repaymentCount, totalRepaymentAmount: formatCurrency(0, currencyCode, currencySymbol, decimalPlaces) };
 
                 loans.forEach((loan) => {
                     const {
@@ -317,13 +319,17 @@ const Dashboard = () => {
                         numberOfRepayments,
                         repaymentEvery,
                         repaymentFrequencyType,
-                        summary
+                        summary,
+                        clientOfficeId
                     } = loan;
+
+                    const officeFilter = officeId && officeId !== "all" ? clientOfficeId === parseInt(officeId) : true;
 
                     if (
                         status.active &&
                         timeline.actualDisbursementDate &&
-                        Array.isArray(timeline.actualDisbursementDate)
+                        Array.isArray(timeline.actualDisbursementDate) &&
+                        officeFilter
                     ) {
                         const disbursementDate = new Date(
                             timeline.actualDisbursementDate[0],
@@ -371,7 +377,10 @@ const Dashboard = () => {
                     }
                 });
 
-                return {repaymentCount, totalRepaymentAmount: formatCurrency(totalRepaymentAmount, currencyCode, currencySymbol, decimalPlaces) };
+                return {
+                    repaymentCount,
+                    totalRepaymentAmount: formatCurrency(totalRepaymentAmount, currencyCode, currencySymbol, decimalPlaces)
+                };
             };
 
             const fetchLoanData = async (activeClients) => {
