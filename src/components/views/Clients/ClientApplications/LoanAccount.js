@@ -488,7 +488,7 @@ const LoanAccount = () => {
                             <>
                                 <div className="staged-form-row">
                                     <div className="staged-form-field">
-                                        <label htmlFor="externalId">National ID/Passport</label>
+                                        <label htmlFor="externalId">Loan External ID</label>
                                         <input
                                             type="text"
                                             id="externalId"

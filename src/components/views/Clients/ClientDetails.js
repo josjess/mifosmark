@@ -3,7 +3,7 @@ import axios from 'axios';
 import { API_CONFIG } from '../../../config';
 import {AuthContext} from "../../../context/AuthContext";
 import {useLoading} from "../../../context/LoadingContext";
-import {FaUpload, FaCamera, FaTrash, FaSignature, FaEdit, FaStickyNote} from 'react-icons/fa';
+import {FaUpload, FaCamera, FaTrash, FaSignature, FaEdit, FaStickyNote, FaEye} from 'react-icons/fa';
 import './ClientDetails.css'
 import {useLocation, useNavigate} from "react-router-dom";
 import DatePicker from "react-datepicker";
@@ -300,6 +300,17 @@ const ClientDetails = ({ clientId, onClose }) => {
     const [showActivateModal, setShowActivateModal] = useState(false);
     const [activationDate, setActivationDate] = useState(null);
 
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [selectedIdentity, setSelectedIdentity] = useState(null);
+
+    const [isIdentifierUploadModalOpen, setIsIdentifierUploadModalOpen] = useState(false);
+    const [selectedIdentifier, setSelectedIdentifier] = useState(null);
+    const [fileName, setFileName] = useState('');
+    const [selectedFile, setSelectedFile] = useState(null);
+
+    const [isDeleteDocumentModalOpen, setIsDeleteDocumentModalOpen] = useState(false);
+    const [selectedDeleteDocument, setSelectedDeleteDocument] = useState(null);
+
     const [loanBalance, setLoanBalance] = useState(0);
 
     const location = useLocation();
@@ -310,6 +321,95 @@ const ClientDetails = ({ clientId, onClose }) => {
             setIsSidebarHidden(true);
         }
     }, [location]);
+
+    const handleOpenUploadModal = (identifier) => {
+        setSelectedIdentifier(identifier);
+        setIsIdentifierUploadModalOpen(true);
+        setFileName('');
+        setSelectedFile(null);
+    };
+
+    const handleFileChange = (event) => {
+        const file = event.target.files[0];
+        setSelectedFile(file);
+    };
+
+    const handleConfirmUpload = async () => {
+        if (!selectedIdentifier || !selectedFile || !fileName) {
+            showNotification("File Name and Document are required!", 'error');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("file", selectedFile);
+        formData.append("name", fileName);
+
+        const headers = {
+            Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+            'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+        };
+
+        try {
+            startLoading();
+
+            await axios.post(
+                `${API_CONFIG.baseURL}/client_identifiers/${selectedIdentifier.id}/documents`,
+                formData,
+                { headers }
+            );
+
+            fetchIdentityData();
+            setIsIdentifierUploadModalOpen(false);
+            setSelectedIdentifier(null);
+            showNotification("Document uploaded successfully!", 'success');
+        } catch (error) {
+            console.error("Error uploading document:", error);
+            showNotification("Failed to upload document.", 'error');
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const handleIdentifierDeleteClick = (identity) => {
+        setSelectedIdentity(identity);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleIdentifierConfirmDelete = async () => {
+        if (!selectedIdentity) return;
+
+        const headers = {
+            Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+            'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+            'Content-Type': 'application/json',
+        };
+
+        try {
+            startLoading();
+
+            await axios.delete(
+                `${API_CONFIG.baseURL}/clients/${clientId}/identifiers/${selectedIdentity.id}`,
+                { headers }
+            );
+
+            fetchIdentityData();
+
+            setIsDeleteModalOpen(false);
+            setSelectedIdentity(null);
+            showNotification("Identifier deleted successfully!", 'success');
+        } catch (error) {
+            console.error('Error deleting identity:', error);
+
+            let errorMessage = "Failed to delete identifier!";
+            if (error.response?.data?.developerMessage) {
+                errorMessage = error.response.data.developerMessage[0];
+            }
+
+            showNotification(errorMessage, 'error');
+        } finally {
+            stopLoading();
+        }
+    };
 
     const handleOpenActivateClientModal = () => {
         setShowActivateModal(true);
@@ -1145,35 +1245,79 @@ const ClientDetails = ({ clientId, onClose }) => {
         }
     };
 
+    const fetchIdentityData = async () => {
+        const headers = {
+            Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+            'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+        };
+
+        try {
+            startLoading();
+
+            const identitiesResponse = await axios.get(
+                `${API_CONFIG.baseURL}/clients/${clientId}/identifiers`,
+                { headers }
+            );
+            const identifiers = identitiesResponse.data;
+
+            const documentRequests = identifiers.map(async (identifier) => {
+                try {
+                    const docResponse = await axios.get(
+                        `${API_CONFIG.baseURL}/client_identifiers/${identifier.id}/documents`,
+                        { headers }
+                    );
+
+                    const documents = docResponse.data;
+
+                    const fileRequests = documents.map(async (doc) => {
+                        try {
+                            const fileResponse = await axios.get(
+                                `${API_CONFIG.baseURL}/client_identifiers/${identifier.id}/documents/${doc.id}/attachment`,
+                                { headers, responseType: 'blob' }
+                            );
+
+                            const fileBlob = new Blob([fileResponse.data], { type: doc.type });
+                            const fileURL = URL.createObjectURL(fileBlob);
+
+                            return { ...doc, fileURL };
+                        } catch (fileError) {
+                            console.error(`Error fetching file for document ${doc.id}:`, fileError);
+                            return { ...doc, fileURL: null };
+                        }
+                    });
+
+                    const resolvedFiles = await Promise.all(fileRequests);
+                    return { identifierId: identifier.id, documents: resolvedFiles };
+                } catch (error) {
+                    console.error(`Error fetching documents for identifier ${identifier.id}:`, error);
+                    return { identifierId: identifier.id, documents: [] };
+                }
+            });
+
+            const documentsData = await Promise.all(documentRequests);
+
+            const enrichedIdentifiers = identifiers.map((identifier) => {
+                const matchedDocs = documentsData.find(doc => doc.identifierId === identifier.id);
+                return { ...identifier, identityDocuments: matchedDocs?.documents || [] };
+            });
+
+            setIdentities(enrichedIdentifiers);
+
+            const templateResponse = await axios.get(
+                `${API_CONFIG.baseURL}/clients/${clientId}/identifiers/template`,
+                { headers }
+            );
+            setDocumentTypeOptions(templateResponse.data.allowedDocumentTypes);
+        } catch (error) {
+            console.error('Error fetching identity data:', error);
+        } finally {
+            stopLoading();
+        }
+    };
+
     // Identities
     useEffect(() => {
         if (activeTab === 'identities') {
-            const fetchIdentityData = async () => {
-                const headers = {
-                    Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
-                    'Content-Type': 'application/json',
-                };
-                try {
-                    startLoading();
-
-                    const identitiesResponse = await axios.get(
-                        `${API_CONFIG.baseURL}/clients/${clientId}/identifiers`,
-                        { headers }
-                    );
-                    setIdentities(identitiesResponse.data);
-
-                    const templateResponse = await axios.get(
-                        `${API_CONFIG.baseURL}/clients/${clientId}/identifiers/template`,
-                        { headers }
-                    );
-                    setDocumentTypeOptions(templateResponse.data.allowedDocumentTypes);
-                } catch (error) {
-                    console.error('Error fetching identity data:', error);
-                } finally {
-                    stopLoading();
-                }
-            };
 
             fetchIdentityData();
         }
@@ -1214,27 +1358,27 @@ const ClientDetails = ({ clientId, onClose }) => {
         }
     };
 
+    const fetchDocuments = async () => {
+        const headers = {
+            Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+            'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+            'Content-Type': 'application/json',
+        };
+
+        try {
+            const response = await axios.get(
+                `${API_CONFIG.baseURL}/clients/${clientId}/documents`,
+                { headers }
+            );
+            setDocuments(response.data);
+        } catch (error) {
+            console.error('Error fetching documents:', error);
+        }
+    };
+
     // Documents
     useEffect(() => {
         if (activeTab === 'documents') {
-            const fetchDocuments = async () => {
-                const headers = {
-                    Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
-                    'Content-Type': 'application/json',
-                };
-
-                try {
-                    const response = await axios.get(
-                        `${API_CONFIG.baseURL}/clients/${clientId}/documents`,
-                        { headers }
-                    );
-                    setDocuments(response.data);
-                } catch (error) {
-                    console.error('Error fetching documents:', error);
-                }
-            };
-
             fetchDocuments();
         }
     }, [activeTab, clientId]);
@@ -1274,26 +1418,79 @@ const ClientDetails = ({ clientId, onClose }) => {
         }
     };
 
+    const handleViewDocument = async (documentId) => {
+        try {
+            startLoading();
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+            };
+
+            const response = await axios.get(
+                `${API_CONFIG.baseURL}/clients/${clientId}/documents/${documentId}/attachment`,
+                { headers, responseType: 'blob' }
+            );
+
+            const fileBlob = new Blob([response.data], { type: response.headers['content-type'] });
+            const fileURL = URL.createObjectURL(fileBlob);
+            window.open(fileURL, '_blank');
+        } catch (error) {
+            console.error('Error fetching document:', error);
+            showNotification("Failed to open the document.", 'error');
+        } finally {
+            stopLoading();
+        }
+    };
+
+    const handleConfirmDeleteDocument = async (documentId) => {
+        try {
+            startLoading();
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+            };
+
+            await axios.delete(
+                `${API_CONFIG.baseURL}/clients/${clientId}/documents/${documentId}`,
+                { headers }
+            );
+
+            fetchDocuments();
+            showNotification("Document deleted successfully!", 'success');
+        } catch (error) {
+            console.error('Error deleting document:', error);
+            showNotification("Failed to delete the document!", 'error');
+        } finally {
+            stopLoading();
+            setIsDeleteDocumentModalOpen(false);
+            setSelectedDeleteDocument(null);
+        }
+    };
+
+    const fetchNotes = async () => {
+        const headers = {
+            Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+            'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+            'Content-Type': 'application/json',
+        };
+
+        try {
+            startLoading();
+            const response = await axios.get(
+                `${API_CONFIG.baseURL}/clients/${clientId}/notes`,
+                { headers }
+            );
+            setNotes(response.data);
+        } catch (error) {
+            console.error('Error fetching notes:', error);
+        } finally {
+            stopLoading();
+        }
+    };
+
     // Note
     useEffect(() => {
         if (activeTab === 'notes') {
-            const fetchNotes = async () => {
-                const headers = {
-                    Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-                    'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
-                    'Content-Type': 'application/json',
-                };
-
-                try {
-                    const response = await axios.get(
-                        `${API_CONFIG.baseURL}/clients/${clientId}/notes`,
-                        { headers }
-                    );
-                    setNotes(response.data);
-                } catch (error) {
-                    console.error('Error fetching notes:', error);
-                }
-            };
 
             fetchNotes();
         }
@@ -1464,6 +1661,11 @@ const ClientDetails = ({ clientId, onClose }) => {
     const activeLoans = filteredLoanAccounts.filter(account => account.status?.active);
 
     const lastActiveLoan = activeLoans.length > 0 ? activeLoans[activeLoans.length - 1] : null;
+
+    const formatStatus = (status) => {
+        if (!status) return '';
+        return status.replace('clientIdentifierStatusType.', '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    };
 
     const renderTabContent = () => {
         switch (activeTab) {
@@ -2775,7 +2977,8 @@ const ClientDetails = ({ clientId, onClose }) => {
                             <table className="general-accounts-table">
                                 <thead>
                                 <tr>
-                                    <th>ID Description</th>
+                                    <th>ID </th>
+                                    <th>Description</th>
                                     <th>Type</th>
                                     <th>Document Key</th>
                                     <th>Identity Documents</th>
@@ -2786,22 +2989,46 @@ const ClientDetails = ({ clientId, onClose }) => {
                                 <tbody>
                                 {identities.map((identity, index) => (
                                     <tr key={index}>
-                                        <td>{identity.description || 'N/A'}</td>
-                                        <td>{identity.documentTypeName || 'N/A'}</td>
-                                        <td>{identity.documentKey || 'N/A'}</td>
+                                        <td>{identity.id || ''}</td>
+                                        <td>{identity.description || ''}</td>
+                                        <td>{identity.documentType.name || ''}</td>
+                                        <td>{identity.documentKey || ''}</td>
                                         <td>
-                                            {identity.identityDocuments && identity.identityDocuments.length > 0 ? (
-                                                <button className="view-documents-button">
-                                                    View Documents
-                                                </button>
+                                            {identity.identityDocuments?.length > 0 ? (
+                                                identity.identityDocuments.map((doc, index) => (
+                                                    <div key={index} className="document-view">
+                                                        <a
+                                                            href={doc.fileURL}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                        >
+                                                            {doc.name}
+
+                                                        </a>
+                                                        <FaEye
+                                                            className="document-icon"
+                                                            onClick={() => window.open(doc.fileURL, "_blank")}
+                                                        />
+                                                    </div>
+                                                ))
                                             ) : (
                                                 'No Documents'
                                             )}
                                         </td>
-                                        <td>{identity.status || 'N/A'}</td>
+                                        <td>{formatStatus(identity.status)}</td>
                                         <td>
-                                            <button className="general-action-button">Edit</button>
-                                            <button className="create-provisioning-criteria-cancel">Delete</button>
+                                            <button
+                                                className="general-action-button"
+                                                onClick={() => handleOpenUploadModal(identity)}
+                                            >
+                                            Upload
+                                            </button>
+                                            <button
+                                                className="create-provisioning-criteria-cancel"
+                                                onClick={() => handleIdentifierDeleteClick(identity)}
+                                            >
+                                                Delete
+                                            </button>
                                         </td>
                                     </tr>
                                 ))}
@@ -2812,7 +3039,7 @@ const ClientDetails = ({ clientId, onClose }) => {
                         )}
                         {isIdentityModalOpen && (
                             <div className="create-provisioning-criteria-modal-overlay">
-                                <div className="create-provisioning-criteria-modal-content">
+                            <div className="create-provisioning-criteria-modal-content">
                                     <h4 className="create-modal-title">Add Identity</h4>
                                     <div className="create-holiday-row">
                                         <div className="create-provisioning-criteria-group">
@@ -2955,13 +3182,16 @@ const ClientDetails = ({ clientId, onClose }) => {
                                                 <button
                                                     className="create-adhoc-query-submit"
                                                     style={{marginRight: '10px'}}
-                                                    // onClick={() => handleViewDocument(doc.id)}
+                                                    onClick={() => handleViewDocument(doc.id)}
                                                 >
                                                     View
                                                 </button>
                                                 <button
                                                     className="create-provisioning-criteria-cancel"
-                                                    // onClick={() => handleDeleteDocument(doc.id)}
+                                                    onClick={() => {
+                                                        setSelectedDeleteDocument(doc);
+                                                        setIsDeleteDocumentModalOpen(true);
+                                                    }}
                                                 >
                                                     Delete
                                                 </button>
@@ -3415,10 +3645,17 @@ const ClientDetails = ({ clientId, onClose }) => {
             );
 
             if (signatureDocument) {
+                const fileResponse = await axios.get(
+                    `${API_CONFIG.baseURL}/clients/${clientId}/documents/${signatureDocument.id}/attachment`,
+                    { headers, responseType: 'blob' }
+                );
+
+                const fileBlob = new Blob([fileResponse.data], { type: signatureDocument.type });
+                const fileURL = URL.createObjectURL(fileBlob);
+
                 setSignatureData({
-                    id: signatureDocument.id,
-                    name: signatureDocument.fileName,
-                    description: signatureDocument.description,
+                    ...signatureDocument,
+                    fileURL,
                 });
             } else {
                 setSignatureData(null);
@@ -3464,7 +3701,7 @@ const ClientDetails = ({ clientId, onClose }) => {
     const handleUploadDocument = () => {
         const input = document.createElement("input");
         input.type = "file";
-        input.accept = ".pdf,.doc,.docx";
+        input.accept = "";
         input.onchange = (event) => {
             const file = event.target.files[0];
             if (file) {
@@ -3473,36 +3710,6 @@ const ClientDetails = ({ clientId, onClose }) => {
         };
         input.click();
     };
-
-    // const handleDownloadDocument = async () => {
-    //     try {
-    //         // Construct the URL for downloading the document
-    //         const downloadUrl = `${API_CONFIG.baseURL}/clients/${clientId}/documents/${signatureData.id}/content`;
-    //         const headers = {
-    //             Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
-    //             'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
-    //         };
-    //
-    //         // Fetch the actual document content
-    //         const response = await axios.get(downloadUrl, { headers, responseType: 'blob' });
-    //         const blob = new Blob([response.data], { type: response.headers['content-type'] });
-    //
-    //         // Trigger the download
-    //         const anchor = document.createElement('a');
-    //         const objectUrl = URL.createObjectURL(blob);
-    //         anchor.href = objectUrl;
-    //         anchor.download = signatureData.fileName || 'downloaded_document';
-    //         document.body.appendChild(anchor);
-    //         anchor.click();
-    //
-    //         // Clean up
-    //         document.body.removeChild(anchor);
-    //         URL.revokeObjectURL(objectUrl);
-    //     } catch (error) {
-    //         console.error('Error downloading document:', error);
-    //         showNotification('Failed to download the document. Please ensure the API supports this functionality.', 'error);
-    //     }
-    // };
 
     const handleSubmitDocument = async () => {
         if (!selectedDocument) {
@@ -3649,10 +3856,8 @@ const ClientDetails = ({ clientId, onClose }) => {
                 'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
             };
 
-            // Format the transfer date to "dd MMMM yyyy"
             const formattedTransferDate = format(new Date(transferDate), 'dd MMMM yyyy');
 
-            // Adjusted payload with the correct format
             const payload = {
                 destinationOfficeId: transferOffice,
                 transferDate: formattedTransferDate,
@@ -3667,13 +3872,38 @@ const ClientDetails = ({ clientId, onClose }) => {
                 { headers }
             );
 
+            const clientResponse = await axios.get(
+                `${API_CONFIG.baseURL}/clients/${clientId}`,
+                { headers }
+            );
+
+            const clientData = clientResponse.data;
+
+            if (!clientData.groups || clientData.groups.length === 0) {
+                const acceptPayload = { note: 'Transfer accepted automatically!' };
+
+                await axios.post(
+                    `${API_CONFIG.baseURL}/clients/${clientId}?command=acceptTransfer`,
+                    acceptPayload,
+                    { headers }
+                );
+
+                showNotification("Transfer completed automatically!", 'success');
+            } else {
+                showNotification("Transfer proposal submitted!", 'success');
+            }
+
             setIsTransferModalOpen(false);
-            showNotification("Transfer proposal submitted!", 'success');
+            setTransferOffice('');
+            setTransferDate('');
+            setTransferNote('');
             fetchGeneralTabData();
         } catch (error) {
             console.error('Error proposing client transfer:', error);
             if (error.response?.data?.defaultUserMessage) {
                 showNotification(error.response.data.defaultUserMessage, 'error');
+            } else {
+                showNotification("Error submitting transfer proposal!", 'error');
             }
         } finally {
             stopLoading();
@@ -4843,7 +5073,7 @@ const ClientDetails = ({ clientId, onClose }) => {
                         {selectedDocument ? (
                             // Section for previewing the newly selected document before submission
                             <div className="create-document-preview-section">
-                                <p>Selected Document: {selectedDocument.name}</p>
+                                <p className="create-provisioning-criteria-label">Selected Document: {selectedDocument.name}</p>
                                 <div className="create-provisioning-criteria-modal-actions">
                                     <button
                                         onClick={handleSubmitDocument}
@@ -4862,45 +5092,42 @@ const ClientDetails = ({ clientId, onClose }) => {
                         ) : signatureData ? (
                             // Section for viewing, downloading, and deleting the existing document
                             <div className="create-document-preview-section">
-                                <p className={"create-provisioning-criteria-label"}>
-                                    <strong>File:</strong> {signatureData.name}
-                                </p>
+                                <div className="signature-details">
+                                    <div className="signature-row">
+                                        <span className="signature-label">File Name:</span>
+                                        <span className="signature-value">{signatureData.fileName}</span>
+                                    </div>
+                                    <div className="signature-row">
+                                        <span className="signature-label">Description:</span>
+                                        <span className="signature-value">{signatureData.description}</span>
+                                    </div>
+                                    <div className="signature-row">
+                                        <span className="signature-label">View Signature:</span>
+                                        <a href={signatureData.fileURL} target="_blank" rel="noopener noreferrer"
+                                           className="view-signature-link">
+                                            {signatureData.fileName} <FaEye className="view-signature-icon"/>
+                                        </a>
+                                    </div>
+                                </div>
                                 <div className="create-provisioning-criteria-modal-actions">
-                                    {/*<button*/}
-                                    {/*    onClick={() =>*/}
-                                    {/*        window.open(*/}
-                                    {/*            `${API_CONFIG.baseURL}/clients/${clientId}/documents/${signatureData.id}`,*/}
-                                    {/*            '_blank'*/}
-                                    {/*        )*/}
-                                    {/*    }*/}
-                                    {/*    className="create-provisioning-criteria-confirm"*/}
-                                    {/*>*/}
-                                    {/*    View*/}
-                                    {/*</button>*/}
-                                    {/*<button*/}
-                                    {/*    onClick={handleDownloadDocument}*/}
-                                    {/*    className="create-provisioning-criteria-confirm"*/}
-                                    {/*>*/}
-                                    {/*    Download*/}
-                                    {/*</button>*/}
-                                    <button
-                                        onClick={handleDeleteSignature}
-                                        className="create-provisioning-criteria-cancel"
-                                    >
-                                        Delete
-                                    </button>
                                     <button
                                         onClick={() => setIsSignatureModalOpen(false)}
                                         className="create-provisioning-criteria-cancel"
                                     >
                                         Close
                                     </button>
+                                    <button
+                                        onClick={handleDeleteSignature}
+                                        className="create-provisioning-criteria-confirm"
+                                    >
+                                        Delete
+                                    </button>
                                 </div>
                             </div>
                         ) : (
                             // Section when no document is uploaded
                             <div className="create-no-document-section">
-                                <p>No document uploaded.</p>
+                                <p className="create-provisioning-criteria-label">No document uploaded.</p>
                                 <div className="create-provisioning-criteria-modal-actions">
                                     <button
                                         onClick={handleUploadDocument}
@@ -5027,7 +5254,7 @@ const ClientDetails = ({ clientId, onClose }) => {
                                 <DatePicker
                                     id="transferDate"
                                     selected={transferDate ? new Date(transferDate) : null}
-                                    onChange={(date) => setTransferDate(date.toISOString().split('T')[0])}
+                                    onChange={(date) => setTransferDate(date.toLocaleDateString('en-CA'))}
                                     className="create-provisioning-criteria-input"
                                     placeholderText="Select Transfer Date"
                                     dateFormat="MMMM d, yyyy"
@@ -6865,6 +7092,106 @@ const ClientDetails = ({ clientId, onClose }) => {
                     </div>
                 </div>
             )}
+            {isDeleteModalOpen && selectedIdentity && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">Confirm Deletion</h4>
+                        <p className="delete-confirmation-message">
+                            Are you sure you want to delete the identifier for this client?
+                            <br/>
+                            <strong>Type:</strong> {selectedIdentity.documentType.name} <br/>
+                            <strong>Document Key:</strong> {selectedIdentity.documentKey}
+                        </p>
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button
+                                onClick={() => setIsDeleteModalOpen(false)}
+                                className="create-provisioning-criteria-cancel"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleIdentifierConfirmDelete}
+                                className="create-provisioning-criteria-confirm"
+                            >
+                                Confirm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isIdentifierUploadModalOpen && selectedIdentifier && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h2 className="create-modal-title">Upload Document</h2>
+
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">
+                                File Name <span className="required">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                value={fileName}
+                                onChange={(e) => setFileName(e.target.value)}
+                                className="create-provisioning-criteria-input"
+                                required
+                            />
+                        </div>
+
+                        <div className="create-provisioning-criteria-group">
+                            <label className="create-provisioning-criteria-label">
+                                Upload File <span>*</span>
+                            </label>
+                            <input
+                                type="file"
+                                onChange={handleFileChange}
+                                className="create-provisioning-criteria-input"
+                                required
+                            />
+                        </div>
+
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button
+                                onClick={() => setIsUploadModalOpen(false)}
+                                className="create-provisioning-criteria-cancel"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleConfirmUpload}
+                                className="create-provisioning-criteria-confirm"
+                                disabled={!fileName || !selectedFile}
+                            >
+                                Confirm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isDeleteDocumentModalOpen && selectedDeleteDocument && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">Delete Document</h4>
+                        <p className="delete-confirmation-message">
+                            Are you sure you want to delete the document <strong>"{selectedDeleteDocument.name}"</strong>?
+                        </p>
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button
+                                onClick={() => setIsDeleteDocumentModalOpen(false)}
+                                className="create-provisioning-criteria-cancel"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => handleConfirmDeleteDocument(selectedDeleteDocument.id)}
+                                className="create-provisioning-criteria-confirm"
+                            >
+                                Confirm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
         </div>
     );
 };

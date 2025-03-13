@@ -349,12 +349,12 @@ const EditClientDetails = () => {
 
                     <div className="staged-form-row">
                         <div className="staged-form-field">
-                            <label htmlFor="mobileNumber">Mobile No.</label>
+                            <label htmlFor="mobileNo">Mobile No.</label>
                             <input
                                 type="text"
-                                id="mobileNumber"
+                                id="mobileNo"
                                 value={clientData?.mobileNo || ''}
-                                onChange={(e) => handleInputChange('mobileNumber', e.target.value)}
+                                onChange={(e) => handleInputChange('mobileNo', e.target.value)}
                                 className="staged-form-input"
                             />
                         </div>

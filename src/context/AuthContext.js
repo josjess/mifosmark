@@ -385,9 +385,12 @@ export const AuthProvider = ({ children }) => {
         if (logoutTimer.current) {
             clearTimeout(logoutTimer.current);
         }
-        logoutTimer.current = setTimeout(() => {
-            logout(true);
-        }, inactivityTimeout);
+
+        if (document.visibilityState === "visible") {
+            logoutTimer.current = setTimeout(() => {
+                logout(true);
+            }, inactivityTimeout);
+        }
     };
 
     const updateInactivityTimeout = (newTimeout) => {

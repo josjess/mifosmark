@@ -246,7 +246,7 @@ const BulkLoanReassignment = () => {
         setClientLoans([]);
         setGroupLoans([]);
         if (officerId) {
-            console.log(officerId);
+            // console.log(officerId);
             fetchAndGroupAccounts(officerId);
         }
     };
@@ -288,11 +288,38 @@ const BulkLoanReassignment = () => {
                     dateFormat: 'dd MMMM yyyy',
                 };
 
-                await axios.post(
-                    `${API_CONFIG.baseURL}/loans/${loanId}?command=assignLoanOfficer`,
-                    loanPayload,
-                    {headers}
-                );
+                try {
+                    await axios.post(
+                        `${API_CONFIG.baseURL}/loans/${loanId}?command=assignLoanOfficer`,
+                        loanPayload,
+                        { headers }
+                    );
+                } catch (error) {
+                    console.warn(`Reassignment failed for loan ID ${loanId}. Checking if unassigned...`);
+
+                    try {
+                        const { data: loan } = await axios.get(`${API_CONFIG.baseURL}/loans/${loanId}`, { headers });
+
+                        if (!loan.loanOfficerId) {
+                            const assignPayload = {
+                                toLoanOfficerId: toLoanOfficer,
+                                assignmentDate: formattedAssignmentDate,
+                                locale: 'en',
+                                dateFormat: 'dd MMMM yyyy',
+                            };
+
+                            await axios.post(
+                                `${API_CONFIG.baseURL}/loans/${loanId}?command=assignLoanOfficer`,
+                                assignPayload,
+                                { headers }
+                            );
+                        } else {
+                            throw error;
+                        }
+                    } catch (fetchError) {
+                        throw fetchError;
+                    }
+                }
             }
 
             for (const savingsId of selectedSavingsAccounts) {
@@ -362,6 +389,7 @@ const BulkLoanReassignment = () => {
                             // console.log(`Successfully unassigned and reassigned savings account ${savingsId}`);
                         } catch (unassignError) {
                             console.error(`Failed to unassign and reassign savings account ${savingsId}:`, unassignError);
+                            throw unassignError;
                         }
                     }
                 }
@@ -371,7 +399,17 @@ const BulkLoanReassignment = () => {
             navigate('/organization');
         } catch (error) {
             console.error('Error submitting reassignment:', error);
-            showNotification('Failed to reassign accounts. Please try again!', 'error');
+
+            let errorMessage = 'Failed to reassign accounts. Please try again!';
+            if (error.response?.data) {
+                if (error.response.data.errors?.length) {
+                    errorMessage = error.response.data.errors[0].developerMessage || error.response.data.errors[0].defaultUserMessage;
+                } else if (error.response.data.developerMessage) {
+                    errorMessage = error.response.data.developerMessage;
+                }
+            }
+
+            showNotification(errorMessage, 'error');
         } finally {
             stopLoading();
         }

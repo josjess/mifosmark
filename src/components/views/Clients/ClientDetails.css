@@ -747,4 +747,79 @@
 .loan-row-in-arrears {
     background-color: rgba(255, 0, 0, 0.1);
 }
+.delete-confirmation-message {
+    font-size: 18px;
+    color: #f6ebeb;
+    text-align: center;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+.document-view {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.document-view a {
+    text-decoration: none;
+}
+.document-icon {
+    color: #007bff;
+    cursor: pointer;
+    font-size: 18px;
+    transition: color 0.3s ease;
+}
 
+.document-icon:hover {
+    color: #0056b3;
+}
+
+.signature-details {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    max-width: 400px;
+    background: #f9f9f9;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+.signature-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.signature-row:last-child {
+    border-bottom: none;
+}
+
+.signature-label {
+    font-weight: bold;
+    color: #333;
+}
+
+.signature-value {
+    color: #555;
+}
+
+.view-signature-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: bold;
+    color: #007bff;
+    text-decoration: none;
+}
+
+.view-signature-link:hover {
+    text-decoration: underline;
+}
+
+.view-signature-icon {
+    font-size: 18px;
+    cursor: pointer;
+}
