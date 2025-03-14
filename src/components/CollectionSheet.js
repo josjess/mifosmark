@@ -191,7 +191,17 @@ const CollectionSheet = () => {
             }
         } catch (err) {
             console.error("Error fetching collection sheet:", err);
-            showNotification("Failed to fetch collection sheet! Please try again!", "error");
+
+            let errorMessage = "Failed to fetch collection sheet! Please try again.";
+            if (err.response?.data?.errors?.length) {
+                errorMessage = err.response.data.errors
+                    .map(err => err.defaultUserMessage || err.developerMessage)
+                    .join(" | ");
+            } else if (err.response?.data?.defaultUserMessage) {
+                errorMessage = err.response.data.defaultUserMessage;
+            }
+
+            showNotification(errorMessage, "error");
         } finally {
             stopLoading();
             setSelectedOffice(null);
@@ -258,7 +268,17 @@ const CollectionSheet = () => {
             setShowForm(true);
         } catch (err) {
             console.error("Error submitting collection sheet:", err);
-            showNotification("Failed to submit collection sheet! Please try again.", "error");
+
+            let errorMessage = "Failed to submit collection sheet! Please try again.";
+            if (err.response?.data?.errors?.length) {
+                errorMessage = err.response.data.errors
+                    .map(err => err.defaultUserMessage || err.developerMessage)
+                    .join(" | ");
+            } else if (err.response?.data?.defaultUserMessage) {
+                errorMessage = err.response.data.defaultUserMessage;
+            }
+
+            showNotification(errorMessage, "error");
         } finally {
             stopLoading();
         }
