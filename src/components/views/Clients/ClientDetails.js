@@ -919,7 +919,19 @@ const ClientDetails = ({ clientId, onClose }) => {
             fetchGeneralTabData();
         } catch (error) {
             console.error("Error disbursing loan:", error);
-            showNotification("Failed to disburse loan. Please try again.", 'error');
+
+            let errorMessage = "Failed to disburse loan. Please try again.";
+
+            if (error.response && error.response.data) {
+                const { defaultUserMessage, errors } = error.response.data;
+                if (errors && errors.length > 0 && errors[0].defaultUserMessage) {
+                    errorMessage = errors[0].defaultUserMessage;
+                } else if (defaultUserMessage) {
+                    errorMessage = defaultUserMessage;
+                }
+            }
+
+            showNotification(errorMessage, 'error');
         } finally {
             setIsSubmitting(false);
         }
