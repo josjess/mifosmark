@@ -551,7 +551,7 @@ const CreateLoanProducts = ({ onSuccess, productToEdit }) => {
                                 <DatePicker
                                     id="startDate"
                                     selected={formData.Details?.startDate ? new Date(formData.Details.startDate) : null}
-                                    onChange={(date) => handleFieldChange("Details", "startDate", date ? date.toISOString().split('T')[0] : "")}
+                                    onChange={(date) => handleFieldChange("Details", "startDate", date ? date.toLocaleDateString('en-CA') : "")}
                                     dateFormat="yyyy-MM-dd"
                                     className="staged-form-input"
                                     placeholderText="Select Start Date"
@@ -565,7 +565,7 @@ const CreateLoanProducts = ({ onSuccess, productToEdit }) => {
                                 <DatePicker
                                     id="closeDate"
                                     selected={formData.Details?.closeDate ? new Date(formData.Details.closeDate) : null}
-                                    onChange={(date) => handleFieldChange("Details", "closeDate", date ? date.toISOString().split('T')[0] : "")}
+                                    onChange={(date) => handleFieldChange("Details", "closeDate", date ? date.toLocaleDateString('en-CA') : "")}
                                     dateFormat="yyyy-MM-dd"
                                     className="staged-form-input"
                                     placeholderText="Select Close Date"

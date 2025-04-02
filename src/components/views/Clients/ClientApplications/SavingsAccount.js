@@ -606,7 +606,7 @@ const SavingsAccount = () => {
                                                         selected={charge.dueDate ? new Date(charge.dueDate) : null}
                                                         onChange={(date) => {
                                                             const updatedCharges = [...addedCharges];
-                                                            updatedCharges[index].dueDate = date.toISOString().split('T')[0];
+                                                            updatedCharges[index].dueDate = date.toLocaleDateString('en-CA');
                                                             setAddedCharges(updatedCharges);
                                                         }}
                                                         className="staged-form-input"

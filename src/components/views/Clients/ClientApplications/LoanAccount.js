@@ -138,19 +138,19 @@ const LoanAccount = () => {
     useEffect(() => {
         if (loanTemplate) {
             setFormData({
-                principal: loanTemplate?.principal || '',
-                loanTerm: loanTemplate?.termFrequency || '',
-                frequency: loanTemplate?.termFrequencyType?.id || '',
-                numberOfRepayments: loanTemplate?.numberOfRepayments || '',
-                firstRepayment: loanTemplate?.expectedFirstRepaymentOnDate || '',
-                interestChargedFrom: loanTemplate?.interestChargedFromDate || '',
-                repaidEvery: loanTemplate?.repaymentEvery || '',
-                frequencyRepaidEvery: loanTemplate?.repaymentFrequencyType?.id || '',
-                nominalInterestRate: loanTemplate?.interestRatePerPeriod || '',
-                interestRateFrequencyType: loanTemplate?.interestRateFrequencyType?.id || '',
-                interestMethod: loanTemplate?.interestType?.id || '',
-                amortization: loanTemplate?.amortizationType?.id || '',
-                isEqualAmortization: loanTemplate?.isEqualAmortization || false,
+                principal: loanTemplate?.principal ?? '',
+                loanTerm: loanTemplate?.termFrequency ?? '',
+                frequency: loanTemplate?.termPeriodFrequencyType?.id ?? '',
+                numberOfRepayments: loanTemplate?.numberOfRepayments ?? '',
+                firstRepayment: loanTemplate?.expectedFirstRepaymentOnDate ?? '',
+                interestChargedFrom: loanTemplate?.interestChargedFromDate ?? '',
+                repaidEvery: loanTemplate?.repaymentEvery ?? '',
+                frequencyRepaidEvery: loanTemplate?.repaymentFrequencyType?.id ?? '',
+                nominalInterestRate: loanTemplate?.interestRatePerPeriod ?? '',
+                interestRateFrequencyType: loanTemplate?.interestRateFrequencyType?.id ?? '',
+                interestMethod: loanTemplate?.interestType?.id ?? '',
+                amortization: loanTemplate?.amortizationType?.id ?? '',
+                isEqualAmortization: loanTemplate?.isEqualAmortization ?? false,
             });
         }
     }, [loanTemplate]);
@@ -188,7 +188,7 @@ const LoanAccount = () => {
                 graceOnArrearsAgeing: formData.graceOnArrearsAgeing
                     ? parseInt(formData.graceOnArrearsAgeing, 10)
                     : loanTemplate?.graceOnArrearsAgeing || 0,
-                interestCalculationPeriodType: formData.interestMethod || loanTemplate?.interestType?.id || null,
+                interestCalculationPeriodType: formData.interestMethod ?? loanTemplate?.interestType?.id ?? null,
                 interestChargedFromDate: formData.interestChargedFrom
                     ? formatDateForPayload(new Date(formData.interestChargedFrom))
                     : null,
@@ -196,7 +196,7 @@ const LoanAccount = () => {
                 interestRatePerPeriod: formData.nominalInterestRate
                     ? parseFloat(formData.nominalInterestRate)
                     : loanTemplate?.interestRatePerPeriod || 0,
-                interestType: formData.interestMethod || loanTemplate?.interestType?.id || null,
+                interestType: formData.interestMethod ?? loanTemplate?.interestType?.id ?? null,
                 isEqualAmortization: formData.isEqualAmortization ?? loanTemplate?.isEqualAmortization ?? false,
                 isTopup: formData.isTopup ?? false,
                 linkAccountId: formData.linkSavings ? parseInt(formData.linkSavings, 10) : loanTemplate?.accountLinkingOptions?.[0]?.id || null,
@@ -559,7 +559,7 @@ const LoanAccount = () => {
                                             onChange={(date) =>
                                                 setFormData((prev) => ({
                                                     ...prev,
-                                                    submittedOn: date.toISOString().split('T')[0],
+                                                    submittedOn: date.toLocaleDateString('en-CA'),
                                                     disbursementOn: "",
                                                 }))
                                             }
@@ -581,7 +581,7 @@ const LoanAccount = () => {
                                             onChange={(date) =>
                                                 setFormData((prev) => ({
                                                     ...prev,
-                                                    disbursementOn: date.toISOString().split('T')[0],
+                                                    disbursementOn: date.toLocaleDateString('en-CA'),
                                                 }))
                                             }
                                             className="staged-form-input"
@@ -711,7 +711,7 @@ const LoanAccount = () => {
                                     onChange={(date) => handleInputChange({
                                         target: {
                                             id: 'firstRepayment',
-                                            value: date.toISOString().split('T')[0]
+                                            value: date.toLocaleDateString('en-CA')
                                         }
                                     })}
                                     className="staged-form-input"
@@ -732,7 +732,7 @@ const LoanAccount = () => {
                                     onChange={(date) => handleInputChange({
                                         target: {
                                             id: 'interestChargedFrom',
-                                            value: date.toISOString().split('T')[0]
+                                            value: date.toLocaleDateString('en-CA')
                                         }
                                     })}
                                     className="staged-form-input"
@@ -1017,7 +1017,7 @@ const LoanAccount = () => {
                                                             selected={charge.dueDate ? new Date(charge.dueDate) : null}
                                                             onChange={(date) => {
                                                                 const updatedCharges = [...formData.addedCharges];
-                                                                updatedCharges[index].dueDate = date.toISOString().split('T')[0];
+                                                                updatedCharges[index].dueDate = date.toLocaleDateString('en-CA');
                                                                 setFormData((prev) => ({
                                                                     ...prev,
                                                                     addedCharges: updatedCharges
@@ -1225,7 +1225,7 @@ const LoanAccount = () => {
                 graceOnArrearsAgeing: formData.graceOnArrearsAgeing
                     ? parseInt(formData.graceOnArrearsAgeing, 10)
                     : loanTemplate?.graceOnArrearsAgeing || 1,
-                interestCalculationPeriodType: formData.interestMethod || loanTemplate?.interestType?.id || null,
+                interestCalculationPeriodType: formData.interestMethod ?? loanTemplate?.interestType?.id ?? null,
                 interestChargedFromDate: formData.interestChargedFrom
                     ? formatDateForPayload(new Date(formData.interestChargedFrom))
                     : null,
@@ -1233,7 +1233,7 @@ const LoanAccount = () => {
                 interestRatePerPeriod: formData.nominalInterestRate
                     ? parseFloat(formData.nominalInterestRate)
                     : loanTemplate?.interestRatePerPeriod || 0,
-                interestType: formData.interestMethod || loanTemplate?.interestType?.id || null,
+                interestType: formData.interestMethod ?? loanTemplate?.interestType?.id ?? null,
                 isEqualAmortization: formData.isEqualAmortization ?? loanTemplate?.isEqualAmortization ?? false,
                 isTopup: formData.isTopup ?? false,
                 linkAccountId: formData.linkSavings ? parseInt(formData.linkSavings, 10) : loanTemplate?.accountLinkingOptions?.[0]?.id || null,
@@ -1382,8 +1382,8 @@ const LoanAccount = () => {
                         loanTemplate?.interestRateFrequencyTypeOptions?.find(f => f.id === parseInt(formData.interestRateFrequencyType, 10))?.value ||
                         loanTemplate?.interestRateFrequencyTypeOptions?.find(f => f.id === loanTemplate?.interestRateFrequencyType?.id)?.value || '',
                     "Interest Method":
-                        loanTemplate?.interestTypeOptions?.find(i => i.id === parseInt(formData.interestMethod, 10))?.value ||
-                        loanTemplate?.interestTypeOptions?.find(i => i.id === loanTemplate?.interestType?.id)?.value || '',
+                        loanTemplate?.interestTypeOptions?.find(i => i.id === parseInt(formData.interestMethod, 10))?.value ??
+                        loanTemplate?.interestTypeOptions?.find(i => i.id === loanTemplate?.interestType?.id)?.value ?? '',
                     "Amortization":
                         loanTemplate?.amortizationTypeOptions?.find(a => a.id === parseInt(formData.amortization, 10))?.value ||
                         loanTemplate?.amortizationTypeOptions?.find(a => a.id === loanTemplate?.amortizationType?.id)?.value || '',

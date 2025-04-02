@@ -155,7 +155,7 @@ const ShareAccount = () => {
                                     id="submittedOn"
                                     selected={submittedOn ? new Date(submittedOn) : null}
                                     onChange={(date) =>
-                                        setSubmittedOn(date.toISOString().split('T')[0])
+                                        setSubmittedOn(date.toLocaleDateString('en-CA'))
                                     }
                                     className="staged-form-input"
                                     placeholderText="Select Submission Date"
@@ -252,7 +252,7 @@ const ShareAccount = () => {
                                 <DatePicker
                                     id="applicationDate"
                                     selected={applicationDate ? new Date(applicationDate) : null}
-                                    onChange={(date) => setApplicationDate(date.toISOString().split('T')[0])}
+                                    onChange={(date) => setApplicationDate(date.toLocaleDateString('en-CA'))}
                                     className="staged-form-input"
                                     placeholderText="Select Application Date"
                                     dateFormat="MMMM d, yyyy"

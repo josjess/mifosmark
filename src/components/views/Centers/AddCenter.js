@@ -14,7 +14,7 @@ const AddCenterForm = ({ onSuccessfulSubmit }) => {
     const [name, setName] = useState('');
     const [isActive, setIsActive] = useState(false);
     const [externalId, setExternalId] = useState('');
-    const [submittedOn, setSubmittedOn] = useState(new Date().toISOString().split('T')[0]);
+    const [submittedOn, setSubmittedOn] = useState(new Date().toLocaleDateString('en-CA'));
     const [addedGroups, setAddedGroups] = useState([]);
     const [offices, setOffices] = useState([]);
     const [staffs, setStaffs] = useState([]);
@@ -160,7 +160,7 @@ const AddCenterForm = ({ onSuccessfulSubmit }) => {
             setName('');
             setOffice('');
             setStaff('');
-            setSubmittedOn(new Date().toISOString().split('T')[0]);
+            setSubmittedOn(new Date().toLocaleDateString('en-CA'));
             setActivationDate(null);
             setIsActive(false);
             setExternalId('');
@@ -278,7 +278,7 @@ const AddCenterForm = ({ onSuccessfulSubmit }) => {
                         <DatePicker
                             id="submittedOn"
                             selected={new Date(submittedOn)}
-                            onChange={(date) => setSubmittedOn(date.toISOString().split('T')[0])}
+                            onChange={(date) => setSubmittedOn(date.toLocaleDateString('en-CA'))}
                             className="staged-form-input"
                             placeholderText="Select Date"
                             dateFormat="dd MMMM yyyy"

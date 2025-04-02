@@ -40,8 +40,8 @@ const AddClientForm = () => {
     const [clientType, setClientType] = useState('');
     const [clientClassification, setClientClassification] = useState('');
     const [externalId, setExternalId] = useState('');
-    const [submittedOn, setSubmittedOn] = useState(new Date().toISOString().split('T')[0]);
-    const [activationDate, setActivationDate] = useState(new Date().toISOString().split('T')[0]);
+    const [submittedOn, setSubmittedOn] = useState(new Date().toLocaleDateString('en-CA'));
+    const [activationDate, setActivationDate] = useState(new Date().toLocaleDateString('en-CA'));
     const [incorporationDate, setIncorporationDate] = useState('');
     const [incorporationValidUntil, setIncorporationValidUntil] = useState('');
     const [incorporationNumber, setIncorporationNumber] = useState('');
@@ -457,7 +457,7 @@ const AddClientForm = () => {
                                     <DatePicker
                                         id="activationDate"
                                         selected={activationDate ? new Date(activationDate) : null}
-                                        onChange={(date) => setActivationDate(date.toISOString().split('T')[0])}
+                                        onChange={(date) => setActivationDate(date.toLocaleDateString('en-CA'))}
                                         className="staged-form-input"
                                         placeholderText="Select Activation Date"
                                         dateFormat="MMMM d, yyyy"

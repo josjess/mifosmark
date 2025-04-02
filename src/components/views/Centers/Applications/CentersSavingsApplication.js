@@ -200,7 +200,7 @@ const CentersSavingsApplication = () => {
                         <DatePicker
                             id="submittedOn"
                             selected={submittedOn ? new Date(submittedOn) : null}
-                            onChange={(date) => setSubmittedOn(date.toISOString().split('T')[0])}
+                            onChange={(date) => setSubmittedOn(date.toLocaleDateString('en-CA'))}
                             minDate={new Date()}
                             dateFormat="dd MMMM yyyy"
                             className="staged-form-input"

@@ -286,7 +286,7 @@ const EditClientDetails = () => {
                                 selected={clientData?.dateOfBirth ? new Date(clientData.dateOfBirth) : convertBackendDateToDate(clientData?.dateOfBirth)}
                                 onChange={(date) =>
                                     handleInputChange('dateOfBirth', date
-                                        ? new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().split('T')[0]
+                                        ? new Date(date.getTime() - date.getTimezoneOffset() * 60000).toLocaleDateString('en-CA')
                                         : ""
                                     )
                                 }
@@ -416,7 +416,7 @@ const EditClientDetails = () => {
                                     ? new Date(clientData.submittedOnDate)
                                     : convertBackendDateToDate(clientData?.timeline?.submittedOnDate)}
                                 onChange={(date) =>
-                                    handleInputChange('submittedOnDate', date ? date.toISOString().split('T')[0] : "")
+                                    handleInputChange('submittedOnDate', date ? date.toLocaleDateString('en-CA') : "")
                                 }
                                 dateFormat="MMMM d, yyyy"
                                 className="staged-form-input"
@@ -436,7 +436,7 @@ const EditClientDetails = () => {
                                     ? new Date(clientData.submittedOnDate)
                                     : convertBackendDateToDate(clientData?.timeline?.submittedOnDate)}
                                 onChange={(date) =>
-                                    handleInputChange('activatedOnDate', date ? date.toISOString().split('T')[0] : "")
+                                    handleInputChange('activatedOnDate', date ? date.toLocaleDateString('en-CA') : "")
                                 }
                                 dateFormat="MMMM d, yyyy"
                                 className="staged-form-input"

@@ -235,7 +235,7 @@ const AddGroupForm = () => {
                         <DatePicker
                             id="submittedOn"
                             selected={new Date(submittedOn)}
-                            onChange={(date) => setSubmittedOn(date.toISOString().split('T')[0])}
+                            onChange={(date) => setSubmittedOn(date.toLocaleDateString('en-CA'))}
                             className="staged-form-input"
                             placeholderText="Select Date"
                             dateFormat="dd MMMM yyyy"

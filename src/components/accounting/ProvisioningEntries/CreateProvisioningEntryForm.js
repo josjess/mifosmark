@@ -10,7 +10,7 @@ import {NotificationContext} from "../../../context/NotificationContext";
 const CreateProvisioningEntryForm = () => {
     const { user } = useContext(AuthContext);
     const navigate = useNavigate();
-    const [provisioningDate, setProvisioningDate] = useState(new Date().toISOString().split('T')[0]);
+    const [provisioningDate, setProvisioningDate] = useState(new Date().toLocaleDateString('en-CA'));
     const [createJournalEntries, setCreateJournalEntries] = useState(false);
     const {showNotification} = useContext(NotificationContext);
 

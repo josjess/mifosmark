@@ -432,7 +432,7 @@ const BulkLoanReassignment = () => {
 
     function getDefaultDate() {
         const today = new Date();
-        return today.toISOString().split('T')[0];
+        return today.toLocaleDateString('en-CA');
     }
 
     const handleSelectAllGroupLoans = (e) => {
@@ -590,7 +590,7 @@ const BulkLoanReassignment = () => {
                     <DatePicker
                         id="assignmentDate"
                         selected={assignmentDate ? new Date(assignmentDate) : null}
-                        onChange={(date) => setAssignmentDate(date.toISOString().split('T')[0])}
+                        onChange={(date) => setAssignmentDate(date.toLocaleDateString('en-CA'))}
                         maxDate={new Date()}
                         placeholderText="Select assignment date"
                         dateFormat="dd MMMM yyyy"

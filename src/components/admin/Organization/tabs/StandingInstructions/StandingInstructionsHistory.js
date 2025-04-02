@@ -120,7 +120,7 @@ const StandingInstructionsHistory = () => {
     const getDefaultDate = () => {
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
-        return yesterday.toISOString().split('T')[0];
+        return yesterday.toLocaleDateString('en-CA');
     };
 
     const handleShowForm = () => {

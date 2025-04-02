@@ -63,7 +63,7 @@ const LoanDetails = () => {
     const [delinquencyActions, setDelinquencyActions] = useState([]);
     const [delinquencyTags, setDelinquencyTags] = useState([]);
     const [isDelinquencyModalOpen, setIsDelinquencyModalOpen] = useState(false);
-    const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
+    const [startDate, setStartDate] = useState(new Date().toLocaleDateString('en-CA'));
     const [endDate, setEndDate] = useState(null);
 
     const [collaterals, setCollaterals] = useState([]);
@@ -4534,7 +4534,7 @@ const LoanDetails = () => {
                                                 id="startDate"
                                                 selected={startDate ? new Date(startDate) : null}
                                                 onChange={(date) => {
-                                                    setStartDate(date.toISOString().split('T')[0]);
+                                                    setStartDate(date.toLocaleDateString('en-CA'));
                                                     if (endDate && new Date(date) > new Date(endDate)) {
                                                         setEndDate(null);
                                                     }
@@ -4558,7 +4558,7 @@ const LoanDetails = () => {
                                             <DatePicker
                                                 id="endDate"
                                                 selected={endDate ? new Date(endDate) : null}
-                                                onChange={(date) => setEndDate(date.toISOString().split('T')[0])}
+                                                onChange={(date) => setEndDate(date.toLocaleDateString('en-CA'))}
                                                 className="create-provisioning-criteria-input"
                                                 placeholderText="Select End Date"
                                                 dateFormat="MMMM d, yyyy"

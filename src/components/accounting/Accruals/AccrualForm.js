@@ -11,7 +11,7 @@ const AccrualForm = () => {
     const { user } = useContext(AuthContext);
     const navigate = useNavigate();
     const {showNotification} = useContext(NotificationContext);
-    const [accrueUntil, setAccrueUntil] = useState(new Date().toISOString().split('T')[0]);
+    const [accrueUntil, setAccrueUntil] = useState(new Date().toLocaleDateString('en-CA'));
 
     const handleSubmit = async (e) => {
         e.preventDefault();

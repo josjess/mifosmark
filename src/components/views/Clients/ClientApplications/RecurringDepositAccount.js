@@ -257,7 +257,7 @@ const RecurringDeposits = () => {
                                             id="submittedOn"
                                             selected={submittedOn ? new Date(submittedOn) : null}
                                             onChange={(date) =>
-                                                setSubmittedOn(date.toISOString().split('T')[0])
+                                                setSubmittedOn(date.toLocaleDateString('en-CA'))
                                             }
                                             className="staged-form-input"
                                             placeholderText="Select Submission Date"
@@ -274,7 +274,7 @@ const RecurringDeposits = () => {
                                             id="disbursementOn"
                                             selected={disbursementOn ? new Date(disbursementOn) : null}
                                             onChange={(date) =>
-                                                setDisbursementOn(date.toISOString().split('T')[0])
+                                                setDisbursementOn(date.toLocaleDateString('en-CA'))
                                             }
                                             className="staged-form-input"
                                             placeholderText="Select Disbursement Date"
@@ -541,7 +541,7 @@ const RecurringDeposits = () => {
                                 <DatePicker
                                     id="depositStartDate"
                                     selected={depositStartDate ? new Date(depositStartDate) : null}
-                                    onChange={(date) => setDepositStartDate(date.toISOString().split('T')[0])}
+                                    onChange={(date) => setDepositStartDate(date.toLocaleDateString('en-CA'))}
                                     className="staged-form-input"
                                     placeholderText="Select Start Date"
                                     dateFormat="MMMM d, yyyy"
@@ -750,7 +750,7 @@ const RecurringDeposits = () => {
                                 <DatePicker
                                     id="validFromDate"
                                     selected={validFromDate ? new Date(validFromDate) : null}
-                                    onChange={(date) => setValidFromDate(date.toISOString().split('T')[0])}
+                                    onChange={(date) => setValidFromDate(date.toLocaleDateString('en-CA'))}
                                     className="staged-form-input"
                                     placeholderText="Select Valid From Date"
                                     dateFormat="MMMM d, yyyy"
@@ -765,7 +765,7 @@ const RecurringDeposits = () => {
                                 <DatePicker
                                     id="invalidDate"
                                     selected={invalidDate ? new Date(invalidDate) : null}
-                                    onChange={(date) => setInvalidDate(date.toISOString().split('T')[0])}
+                                    onChange={(date) => setInvalidDate(date.toLocaleDateString('en-CA'))}
                                     className="staged-form-input"
                                     placeholderText="Select Invalid Date"
                                     showMonthDropdown

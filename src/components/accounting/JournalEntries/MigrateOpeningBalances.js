@@ -14,7 +14,7 @@ const MigrateOpeningBalancesPage = () => {
     const [office, setOffice] = useState('');
     const [currency, setCurrency] = useState('');
     const [openingBalances, setOpeningBalances] = useState([]);
-    const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+    const [date, setDate] = useState(new Date().toLocaleDateString('en-CA'));
     const [formErrors, setFormErrors] = useState({});
     const [contraAccount, setContraAccount] = useState(null);
     const navigate = useNavigate();
