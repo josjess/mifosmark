@@ -443,6 +443,14 @@ const LoanDetails = () => {
     const [journalEntries, setJournalEntries] = useState([]);
     const [isLoadingJournal, setIsLoadingJournal] = useState(false);
 
+    const [isDeleteConfirmationOpen, setIsDeleteConfirmationOpen] = useState(false);
+    const [isEditChargeModalOpen, setIsEditChargeModalOpen] = useState(false);
+    const [editChargePayload, setEditChargePayload] = useState({
+        amount: "",
+        dueDate: null,
+    });
+
+
     const fetchJournalEntries = async (transactionId) => {
         try {
             setIsLoadingJournal(true);
@@ -3277,6 +3285,94 @@ const LoanDetails = () => {
         setIsAdjustmentModalOpen(true);
     };
 
+    const handleEditCharge = (charge) => {
+        setSelectedCharge(charge);
+        setEditChargePayload({
+            amount: charge.amount,
+            dueDate: charge.dueDate ? new Date(charge.dueDate.join("-")) : null,
+        });
+        setIsEditChargeModalOpen(true);
+    };
+
+    const handleConfirmEditCharge = async () => {
+        try {
+            startLoading();
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+            };
+
+            await axios.put(
+                `${API_CONFIG.baseURL}/loans/${loanId}/charges/${selectedCharge.id}`,
+                {
+                    amount: editChargePayload.amount,
+                    dueDate: editChargePayload.dueDate
+                        ? new Date(editChargePayload.dueDate).toLocaleDateString("en-GB", {
+                            day: "2-digit",
+                            month: "long",
+                            year: "numeric",
+                        })
+                        : null,
+                    dateFormat: "dd MMMM yyyy",
+                    locale: "en",
+                },
+                { headers }
+            );
+
+            showNotification("Charge Edited Successfully!", "success");
+            fetchLoanData();
+        } catch (error) {
+            console.error("Error updating charge:", error);
+
+            let errorMessage = "Error Editing Charge!";
+            if (error.response?.data?.errors?.length > 0) {
+                errorMessage = error.response.data.errors
+                    .map((err) => err.defaultUserMessage)
+                    .join(" ");
+            }
+
+            showNotification(errorMessage, "error");
+        } finally {
+            setIsEditChargeModalOpen(false);
+            stopLoading();
+        }
+    };
+
+    const handleDeleteCharge = (charge) => {
+        setSelectedCharge(charge);
+        setIsDeleteConfirmationOpen(true);
+    };
+
+    const handleConfirmDeleteCharge = async () => {
+        try {
+            startLoading();
+            const headers = {
+                Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
+                'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
+            };
+            await axios.delete(
+                `${API_CONFIG.baseURL}/loans/${loanId}/charges/${selectedCharge.id}`,
+                { headers }
+            );
+            showNotification('Charge Deleted successfully!', 'success');
+            fetchLoanData();
+        } catch (error) {
+            console.error("Error deleting charge:", error);
+
+            let errorMessage = "Error Deleting Charge!";
+            if (error.response?.data?.errors?.length > 0) {
+                errorMessage = error.response.data.errors
+                    .map((err) => err.defaultUserMessage)
+                    .join(" ");
+            }
+
+            showNotification(errorMessage, "error");
+        } finally {
+            setIsDeleteConfirmationOpen(false);
+            stopLoading();
+        }
+    };
+
     const handleWaiveCharge = (charge) => {
         setSelectedCharge(charge);
         setIsWaiveConfirmationOpen(true);
@@ -4779,20 +4875,41 @@ const LoanDetails = () => {
                                                 })}`}
                                         </td>
                                         <td className="charges-action-buttons">
-                                            <button
-                                                className="charges-action-button adjust-charge"
-                                                onClick={() => handleAdjustCharge(charge)}
-                                                title="Adjust Charge"
-                                            >
-                                                <FaToolbox className="charges-action-icon"/>
-                                            </button>
-                                            <button
-                                                className="charges-action-button waive-charge"
-                                                onClick={() => handleWaiveCharge(charge)}
-                                                title="Waive Charge"
-                                            >
-                                                <FaExclamationTriangle className="charges-action-icon"/>
-                                            </button>
+                                            {loanDetails?.status?.code === "loanStatusType.submitted.and.pending.approval" ? (
+                                                <>
+                                                    <button
+                                                        className="charges-action-button adjust-charge"
+                                                        onClick={() => handleEditCharge(charge)}
+                                                        title="Edit Charge"
+                                                    >
+                                                        <FaEdit className="charges-action-icon"/>
+                                                    </button>
+                                                    <button
+                                                        className="charges-action-button waive-charge"
+                                                        onClick={() => handleDeleteCharge(charge)}
+                                                        title="Delete Charge"
+                                                    >
+                                                        <FaTrash className="charges-action-icon"/>
+                                                    </button>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <button
+                                                        className="charges-action-button adjust-charge"
+                                                        onClick={() => handleAdjustCharge(charge)}
+                                                        title="Adjust Charge"
+                                                    >
+                                                        <FaToolbox className="charges-action-icon"/>
+                                                    </button>
+                                                    <button
+                                                        className="charges-action-button waive-charge"
+                                                        onClick={() => handleWaiveCharge(charge)}
+                                                        title="Waive Charge"
+                                                    >
+                                                        <FaExclamationTriangle className="charges-action-icon"/>
+                                                    </button>
+                                                </>
+                                            )}
                                         </td>
                                     </tr>
                                 ))}
@@ -5874,6 +5991,71 @@ const LoanDetails = () => {
                     </div>
                 </div>
             )}
+            {isEditChargeModalOpen && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <h4 className="create-modal-title">Edit Charge</h4>
+
+                        {/* Amount Field */}
+                        <div className="create-provisioning-criteria-group">
+                            <label htmlFor="editAmount" className="create-provisioning-criteria-label">
+                                Amount <span>*</span>
+                            </label>
+                            <input
+                                type="number"
+                                id="editAmount"
+                                value={editChargePayload.amount}
+                                onChange={(e) =>
+                                    setEditChargePayload((prev) => ({ ...prev, amount: e.target.value }))
+                                }
+                                className="create-provisioning-criteria-input"
+                            />
+                        </div>
+
+                        {/* Due Date Field */}
+                        <div className="create-provisioning-criteria-group">
+                            <label htmlFor="editDueDate" className="create-provisioning-criteria-label">
+                                Due Date
+                            </label>
+                            <DatePicker
+                                id="editDueDate"
+                                selected={editChargePayload.dueDate}
+                                onChange={(date) =>
+                                    setEditChargePayload((prev) => ({ ...prev, dueDate: date }))
+                                }
+                                className="create-provisioning-criteria-input"
+                                placeholderText="Select Due Date"
+                                dateFormat="dd MMMM yyyy"
+                                showMonthDropdown
+                                showYearDropdown
+                                dropdownMode="select"
+                            />
+                        </div>
+
+                        {/* Actions */}
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button
+                                className="create-provisioning-criteria-cancel"
+                                onClick={() => setIsEditChargeModalOpen(false)}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="create-provisioning-criteria-confirm"
+                                onClick={handleConfirmEditCharge}
+                                disabled={
+                                    editChargePayload.amount === selectedCharge.amount &&
+                                    editChargePayload.dueDate?.toLocaleDateString('en-CA') ===
+                                    selectedCharge.dueDate?.join("-")
+                                }
+                            >
+                                Confirm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {isWaiveConfirmationOpen && (
                 <div className="create-provisioning-criteria-modal-overlay">
                     <div className="create-provisioning-criteria-modal-content">
@@ -5886,6 +6068,29 @@ const LoanDetails = () => {
                             <button
                                 className="create-provisioning-criteria-confirm"
                                 onClick={handleConfirmWaiveCharge}>Confirm</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isDeleteConfirmationOpen && (
+                <div className="create-provisioning-criteria-modal-overlay">
+                    <div className="create-provisioning-criteria-modal-content">
+                        <p className="create-provisioning-criteria-label">
+                            Are you sure you want to delete this charge?
+                        </p>
+                        <div className="create-provisioning-criteria-modal-actions">
+                            <button
+                                className="create-provisioning-criteria-cancel"
+                                onClick={() => setIsDeleteConfirmationOpen(false)}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="create-provisioning-criteria-confirm"
+                                onClick={handleConfirmDeleteCharge}
+                            >
+                                Confirm
+                            </button>
                         </div>
                     </div>
                 </div>

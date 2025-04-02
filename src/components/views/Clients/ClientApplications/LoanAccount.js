@@ -591,7 +591,7 @@ const LoanAccount = () => {
                                             showYearDropdown
                                             minDate={
                                                 formData.submittedOn
-                                                    ? new Date(new Date(formData.submittedOn).setDate(new Date(formData.submittedOn).getDate() + 1))
+                                                    ? new Date(new Date(formData.submittedOn).setDate(new Date(formData.submittedOn).getDate()))
                                                     : null
                                             }
                                             dropdownMode="select"

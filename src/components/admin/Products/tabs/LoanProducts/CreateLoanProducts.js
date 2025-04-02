@@ -59,11 +59,11 @@ const CreateLoanProducts = ({ onSuccess, productToEdit }) => {
                 },
                 Settings: {
                     amortization: productToEdit.amortizationType.id,
-                    interestMethod: productToEdit.interestMethod,
-                    interestCalculationPeriod: productToEdit.interestCalculationPeriod,
+                    interestMethod: productToEdit.interestType.id ?? '',
+                    interestCalculationPeriod: productToEdit.interestCalculationPeriodType.id,
                     isEqualAmortization: productToEdit.isEqualAmortization,
                     calculateInterestForExactDays: productToEdit.calculateInterestForExactDays,
-                    loanScheduleType: productToEdit.loanScheduleType,
+                    loanScheduleType: productToEdit.loanScheduleType.id,
                     repaymentStrategy: productToEdit.repaymentStrategy,
                     enableMultipleDisbursals: productToEdit.multiDisburseLoan,
                     maxTrancheCount: productToEdit.maxTrancheCount,
@@ -422,10 +422,16 @@ const CreateLoanProducts = ({ onSuccess, productToEdit }) => {
             }
         } catch (error) {
             console.error("Error in handleSubmit:", error);
-            showNotification(
-                error.response?.data?.defaultUserMessage ||
-                "An unexpected error occurred.", 'error'
-            );
+
+            let errorMessage = "An unexpected error occurred.";
+
+            if (error.response?.data?.errors?.length > 0) {
+                errorMessage = error.response.data.errors
+                    .map((err) => err.defaultUserMessage)
+                    .join(" ");
+            }
+
+            showNotification(errorMessage, "error");
         }
     };
 
