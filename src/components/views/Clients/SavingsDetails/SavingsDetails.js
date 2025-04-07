@@ -196,6 +196,8 @@ const SavingsAccounts = () => {
         activatedOnDate: new Date(),
     });
 
+    const [standingInstructions, setStandingInstructions] = useState([]);
+
     const handleOpenActivateModal = () => {
         setActivateForm({
             activatedOnDate: new Date(),
@@ -1502,8 +1504,6 @@ const SavingsAccounts = () => {
         }
     };
 
-    const [standingInstructions, setStandingInstructions] = useState([]);
-
     const fetchStandingInstructions = async () => {
         startLoading();
         try {
@@ -2163,9 +2163,11 @@ const SavingsAccounts = () => {
                                                 <button onClick={() => viewTransaction(transaction.id)}>View
                                                     Transaction
                                                 </button>
-                                                <button onClick={() => undoTransaction(transaction.id)}>Undo
-                                                    Transaction
-                                                </button>
+                                                {!transaction.reversed && (
+                                                    <button onClick={() => undoTransaction(transaction.id)}>Undo
+                                                        Transaction
+                                                    </button>
+                                                )}
                                                 <button onClick={() => viewReceipts(transaction.id)}>View Receipts
                                                 </button>
                                                 <button onClick={() => viewJournalEntries(transaction.id)}>View Journal
@@ -3003,17 +3005,79 @@ const SavingsAccounts = () => {
                             </select>
                         </div>
 
-                        <div className="create-provisioning-criteria-group">
-                            <label className="create-provisioning-criteria-label" htmlFor="receipt">Receipt
-                                Number</label>
-                            <input
-                                type="text"
-                                placeholder="Receipt #"
-                                value={depositReceiptNumber}
-                                onChange={(e) => setDepositReceiptNumber(e.target.value)}
-                                className="create-provisioning-criteria-input"
-                            />
+                        <div className="create-holiday-row">
+                            <label className="create-provisioning-criteria-label" htmlFor="showPaymentDetails">
+                                Show Payment Details
+                            </label>
+                            <div className="switch-toggle">
+                                <label className="switch">
+                                    <input
+                                        type="checkbox"
+                                        id="showPaymentDetails"
+                                        checked={showDepositPaymentDetails}
+                                        onChange={(e) => setShowDepositPaymentDetails(e.target.checked)}
+                                    />
+                                    <span className="slider round"></span>
+                                </label>
+                            </div>
                         </div>
+
+                        {/* Payment Details Fields */}
+                        {showDepositPaymentDetails && (
+                            <>
+                                <div className="create-holiday-row">
+                                    <input
+                                        type="text"
+                                        placeholder="Account Number"
+                                        value={depositAccountNumber}
+                                        onChange={(e) => setDepositAccountNumber(e.target.value)}
+                                        className="create-provisioning-criteria-input"
+                                    />
+                                    <input
+                                        type="text"
+                                        placeholder="Cheque Number"
+                                        value={depositChequeNumber}
+                                        onChange={(e) => setDepositChequeNumber(e.target.value)}
+                                        className="create-provisioning-criteria-input"
+                                    />
+                                    <input
+                                        type="text"
+                                        placeholder="Routing Code"
+                                        value={depositRoutingCode}
+                                        onChange={(e) => setDepositRoutingCode(e.target.value)}
+                                        className="create-provisioning-criteria-input"
+                                    />
+                                </div>
+                                <div className="create-holiday-row">
+                                    <input
+                                        type="text"
+                                        placeholder="Receipt Number"
+                                        value={depositReceiptNumber}
+                                        onChange={(e) => setDepositReceiptNumber(e.target.value)}
+                                        className="create-provisioning-criteria-input"
+                                    />
+                                    <input
+                                        type="text"
+                                        placeholder="Bank"
+                                        value={depositBankNumber}
+                                        onChange={(e) => setDepositBankNumber(e.target.value)}
+                                        className="create-provisioning-criteria-input"
+                                    />
+                                </div>
+                            </>
+                        )}
+
+                        {/*<div className="create-provisioning-criteria-group">*/}
+                        {/*    <label className="create-provisioning-criteria-label" htmlFor="receipt">Receipt*/}
+                        {/*        Number</label>*/}
+                        {/*    <input*/}
+                        {/*        type="text"*/}
+                        {/*        placeholder="Receipt #"*/}
+                        {/*        value={depositReceiptNumber}*/}
+                        {/*        onChange={(e) => setDepositReceiptNumber(e.target.value)}*/}
+                        {/*        className="create-provisioning-criteria-input"*/}
+                        {/*    />*/}
+                        {/*</div>*/}
 
                         {/* Note */}
                         <div className="create-provisioning-criteria-group">
@@ -3970,46 +4034,71 @@ const SavingsAccounts = () => {
                         ) : (
                             <table className="create-provisioning-criteria-table">
                                 <tbody>
-                                <tr>
-                                    <td className="create-provisioning-criteria-label">ID</td>
-                                    <td>{transactionDetails.id || ""}</td>
-                                </tr>
-                                <tr>
-                                    <td className="create-provisioning-criteria-label">Transaction Type</td>
-                                    <td>{transactionDetails.transactionType?.value || ""}</td>
-                                </tr>
-                                <tr>
-                                    <td className="create-provisioning-criteria-label">Transaction Date</td>
-                                    <td>
-                                        {transactionDetails.date
-                                            ? new Date(transactionDetails.date.join("-")).toLocaleDateString("en-GB", {
-                                                day: "2-digit",
-                                                month: "long",
-                                                year: "numeric",
-                                            })
-                                            : ""}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td className="create-provisioning-criteria-label">Currency</td>
-                                    <td>{transactionDetails.currency?.name || ""}</td>
-                                </tr>
-                                <tr>
-                                    <td className="create-provisioning-criteria-label">Amount</td>
-                                    <td>{`${transactionDetails.currency?.code || ""} ${transactionDetails.amount.toFixed(2)}`}</td>
-                                </tr>
-                                <tr>
-                                    <td className="create-provisioning-criteria-label">Note</td>
-                                    <td>{transactionDetails.note || ""}</td>
-                                </tr>
-                                <tr>
-                                    <td className="create-provisioning-criteria-label">Payment Type</td>
-                                    <td>{transactionDetails.paymentDetailData?.paymentType?.name || ""}</td>
-                                </tr>
-                                <tr>
-                                    <td className="create-provisioning-criteria-label">Payment Details</td>
-                                    <td>Receipt: {transactionDetails.paymentDetailData?.receiptNumber || ""}</td>
-                                </tr>
+                                    <tr>
+                                        <td className="create-provisioning-criteria-label">ID</td>
+                                        <td>{transactionDetails.id || ""}</td>
+                                    </tr>
+                                    <tr>
+                                        <td className="create-provisioning-criteria-label">Transaction Type</td>
+                                        <td>{transactionDetails.transactionType?.value || ""}</td>
+                                    </tr>
+                                    <tr>
+                                        <td className="create-provisioning-criteria-label">Transaction Date</td>
+                                        <td>
+                                            {transactionDetails.date
+                                                ? new Date(transactionDetails.date.join("-")).toLocaleDateString("en-GB", {
+                                                    day: "2-digit",
+                                                    month: "long",
+                                                    year: "numeric",
+                                                })
+                                                : ""}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td className="create-provisioning-criteria-label">Currency</td>
+                                        <td>{transactionDetails.currency?.name || ""}</td>
+                                    </tr>
+                                    <tr>
+                                        <td className="create-provisioning-criteria-label">Amount</td>
+                                        <td>{`${transactionDetails.currency?.code || ""} ${transactionDetails.amount.toFixed(2)}`}</td>
+                                    </tr>
+                                    <tr>
+                                        <td className="create-provisioning-criteria-label">Note</td>
+                                        <td>{transactionDetails.note || ""}</td>
+                                    </tr>
+                                    <tr>
+                                        <td className="create-provisioning-criteria-label">Payment Type</td>
+                                        <td>{transactionDetails.paymentDetailData?.paymentType?.name || ""}</td>
+                                    </tr>
+                                    <tr>
+                                        <td className="create-provisioning-criteria-label">Payment Details</td>
+                                        <td>
+                                            {transactionDetails.paymentDetailData &&
+                                                (() => {
+                                                    const {
+                                                        receiptNumber,
+                                                        accountNumber,
+                                                        bankNumber,
+                                                        checkNumber,
+                                                        routingCode
+                                                    } =
+                                                        transactionDetails.paymentDetailData;
+                                                    const items = [
+                                                        receiptNumber && `Receipt: ${receiptNumber}`,
+                                                        accountNumber && `Account Number: ${accountNumber}`,
+                                                        bankNumber && `Bank Number: ${bankNumber}`,
+                                                        checkNumber && `Check Number: ${checkNumber}`,
+                                                        routingCode && `Routing Code: ${routingCode}`,
+                                                    ].filter(Boolean);
+
+                                                    return items.length
+                                                        ?
+                                                        <ul style={{margin: 0, paddingLeft: "1em"}}>{items.map((item, i) =>
+                                                            <li key={i}>{item}</li>)}</ul>
+                                                        : null;
+                                                })()}
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         )}

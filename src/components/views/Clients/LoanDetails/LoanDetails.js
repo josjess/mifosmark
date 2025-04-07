@@ -39,9 +39,7 @@ const LoanDetails = () => {
     const currentPageData = (loanDetails?.transactions || [])
         .filter((transaction) =>
             (!hideReversed || !transaction.manuallyReversed) &&
-            (!hideAccruals || !transaction.type.accrual)
-        )
-        .slice((currentPage - 1) * pageSize, currentPage * pageSize);
+            (!hideAccruals || !transaction.type.accrual)).slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
     useEffect(() => {
         const filteredTransactions = loanDetails?.transactions?.filter(
@@ -449,7 +447,6 @@ const LoanDetails = () => {
         amount: "",
         dueDate: null,
     });
-
 
     const fetchJournalEntries = async (transactionId) => {
         try {
@@ -6055,7 +6052,6 @@ const LoanDetails = () => {
                     </div>
                 </div>
             )}
-
             {isWaiveConfirmationOpen && (
                 <div className="create-provisioning-criteria-modal-overlay">
                     <div className="create-provisioning-criteria-modal-content">
@@ -8344,7 +8340,7 @@ const LoanDetails = () => {
                             </label>
                             <input
                                 type="number"
-                                value={approveForm.transactionAmount}
+                                value={approveForm.approvedLoanAmount}
                                 onChange={(e) =>
                                     setApproveForm((prev) => ({ ...prev, transactionAmount: e.target.value }))
                                 }

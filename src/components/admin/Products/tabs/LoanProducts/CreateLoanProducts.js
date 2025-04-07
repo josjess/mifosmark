@@ -40,7 +40,6 @@ const CreateLoanProducts = ({ onSuccess, productToEdit }) => {
 
     useEffect(() => {
         if (productToEdit) {
-
             setFormData({
                 Details: {
                     productName: productToEdit.name,
@@ -58,13 +57,13 @@ const CreateLoanProducts = ({ onSuccess, productToEdit }) => {
                     installmentMultiples: productToEdit.installmentAmountInMultiplesOf,
                 },
                 Settings: {
-                    amortization: productToEdit.amortizationType.id,
-                    interestMethod: productToEdit.interestType.id ?? '',
-                    interestCalculationPeriod: productToEdit.interestCalculationPeriodType.id,
+                    amortization: productToEdit.amortizationType.id.toString(),
+                    interestMethod: productToEdit.interestType.id?.toString() ?? '',
+                    interestCalculationPeriod: productToEdit.interestCalculationPeriodType.id.toString(),
                     isEqualAmortization: productToEdit.isEqualAmortization,
                     calculateInterestForExactDays: productToEdit.calculateInterestForExactDays,
-                    loanScheduleType: productToEdit.loanScheduleType.id,
-                    repaymentStrategy: productToEdit.repaymentStrategy,
+                    loanScheduleType: productToEdit.loanScheduleType.code || '',
+                    repaymentStrategy: productToEdit.transactionProcessingStrategyCode || '',
                     enableMultipleDisbursals: productToEdit.multiDisburseLoan,
                     maxTrancheCount: productToEdit.maxTrancheCount,
                     maxOutstandingBalance: productToEdit.maxOutstandingBalance,
@@ -78,13 +77,13 @@ const CreateLoanProducts = ({ onSuccess, productToEdit }) => {
                     enableInstallmentLevelDelinquency: productToEdit.enableInstallmentLevelDelinquency,
                     interestFreePeriod: productToEdit.interestFreePeriod,
                     arrearsTolerance: productToEdit.inArrearsTolerance,
-                    daysInYear: productToEdit.daysInYear,
-                    daysInMonth: productToEdit.daysInMonth,
+                    daysInYear: productToEdit.daysInYearType.id ?? '',
+                    daysInMonth: productToEdit.daysInMonthType.id ?? '',
                     allowFixingInstallmentAmount: productToEdit.allowFixingInstallmentAmount,
                     onArrearsAging: productToEdit.onArrearsAging,
                     overdueDays: productToEdit.overdueDays,
                     accountMovesOutOfNPA: productToEdit.accountMovesOutOfNPAOnlyOnArrearsCompletion,
-                    principalThreshold: productToEdit.principalThreshold,
+                    principalThreshold: productToEdit.principalThresholdForLastInstallment,
                     variableInstallments: productToEdit.allowVariableInstallments,
                     topUpLoans: productToEdit.topUpLoans,
                     minGap: productToEdit.minimumGap,
@@ -107,35 +106,40 @@ const CreateLoanProducts = ({ onSuccess, productToEdit }) => {
                     allowApprovalAboveLoanAmount: productToEdit.allowApprovalAboveLoanAmount,
                     overAmountCalcType: productToEdit.overAmountCalcType,
                     overAmount: productToEdit.overAmount,
-                    installmentDayCalcFrom: productToEdit.repaymentStartDateType.id,
+                    installmentDayCalcFrom: productToEdit.repaymentStartDateType.id.toString(),
                     nominalInterestDefault: productToEdit.interestRatePerPeriod,
                     repaymentDefault: productToEdit.numberOfRepayments,
                     repaymentMin: productToEdit.minNumberOfRepayments,
                     repaymentMax: productToEdit.maxNumberOfRepayments,
-                    frequency: productToEdit.repaymentEvery,
-                    frequencyType: productToEdit.repaymentFrequencyType.id,
+                    frequency: productToEdit.interestRateFrequencyType.id.toString(),
+                    frequencyRepaid: productToEdit.repaymentEvery,
+                    frequencyType: productToEdit.repaymentFrequencyType.id.toString(),
                     isZeroInterestRate: productToEdit.isZeroInterestRate,
                     isLinkedToFloatingRate: productToEdit.isLinkedToFloatingRate,
                 },
-                Charges: productToEdit.charges || [],
                 Accounting: {
-                    selectedOption: productToEdit.accountingRule,
-                    fundSource: productToEdit?.accountingMappings?.fundSourceAccount.id,
-                    loanPortfolio: productToEdit?.accountingMappings?.loanPortfolioAccount.id,
+                    selectedOption: {
+                        NONE: "None",
+                        'CASH BASED': "Cash Based",
+                        'ACCRUAL PERIODIC': "Accrual Periodic",
+                        'ACCRUAL UPFRONT': "Accrual Upfront",
+                    }[productToEdit.accountingRule?.value] || "",
+                    fundSource: productToEdit?.accountingMappings?.fundSourceAccount.id.toString(),
+                    loanPortfolio: productToEdit?.accountingMappings?.loanPortfolioAccount.id.toString(),
                     transferSuspense: productToEdit?.accountingMappings?.transferSuspense,
-                    incomeInterest: productToEdit?.accountingMappings?.interestOnLoanAccount.id,
-                    incomeFees: productToEdit?.accountingMappings?.incomeFromFeeAccount.id,
-                    incomePenalties: productToEdit?.accountingMappings?.incomeFromPenaltyAccount.id,
-                    incomeRecovery: productToEdit?.accountingMappings?.incomeFromRecoveryAccount.id,
-                    incomeChargeOffInterest: productToEdit?.accountingMappings?.incomeFromChargeOffInterestAccount.id,
-                    incomeChargeOffFees: productToEdit?.accountingMappings?.incomeFromChargeOffFeesAccount.id,
-                    incomeChargeOffPenalty: productToEdit?.accountingMappings?.incomeFromChargeOffPenaltyAccount.id,
-                    incomeGoodwillCreditInterest: productToEdit?.accountingMappings?.incomeFromGoodwillCreditInterestAccount.id,
-                    incomeGoodwillCreditFees: productToEdit?.accountingMappings?.incomeFromGoodwillCreditFeesAccount.id,
-                    incomeGoodwillCreditPenalty: productToEdit?.accountingMappings?.incomeFromGoodwillCreditPenaltyAccount.id,
-                    lossesWrittenOff: productToEdit?.accountingMappings?.writeOffAccount.id,
-                    goodwillCreditExpenses: productToEdit?.accountingMappings?.goodwillCreditAccount.id,
-                    overpaymentLiability: productToEdit?.accountingMappings?.overpaymentLiabilityAccount.id,
+                    incomeInterest: productToEdit?.accountingMappings?.interestOnLoanAccount.id.toString(),
+                    incomeFees: productToEdit?.accountingMappings?.incomeFromFeeAccount.id.toString(),
+                    incomePenalties: productToEdit?.accountingMappings?.incomeFromPenaltyAccount.id.toString(),
+                    incomeRecovery: productToEdit?.accountingMappings?.incomeFromRecoveryAccount.id.toString(),
+                    incomeChargeOffInterest: productToEdit?.accountingMappings?.incomeFromChargeOffInterestAccount.id.toString(),
+                    incomeChargeOffFees: productToEdit?.accountingMappings?.incomeFromChargeOffFeesAccount.id.toString(),
+                    incomeChargeOffPenalty: productToEdit?.accountingMappings?.incomeFromChargeOffPenaltyAccount.id.toString(),
+                    incomeGoodwillCreditInterest: productToEdit?.accountingMappings?.incomeFromGoodwillCreditInterestAccount.id.toString(),
+                    incomeGoodwillCreditFees: productToEdit?.accountingMappings?.incomeFromGoodwillCreditFeesAccount.id.toString(),
+                    incomeGoodwillCreditPenalty: productToEdit?.accountingMappings?.incomeFromGoodwillCreditPenaltyAccount.id.toString(),
+                    lossesWrittenOff: productToEdit?.accountingMappings?.writeOffAccount.id.toString(),
+                    goodwillCreditExpenses: productToEdit?.accountingMappings?.goodwillCreditAccount.id.toString(),
+                    overpaymentLiability: productToEdit?.accountingMappings?.overpaymentLiabilityAccount.id.toString(),
                 },
             });
 
@@ -143,6 +147,14 @@ const CreateLoanProducts = ({ onSuccess, productToEdit }) => {
                 principal: productToEdit.loanCyclePrincipalVariations || [],
                 repayments: productToEdit.loanCycleRepaymentVariations || [],
                 interest: productToEdit.loanCycleInterestVariations || [],
+                charges: productToEdit.charges?.map((charge) => ({
+                    id: charge.id,
+                    charge: charge.id?.toString(),
+                })) || [],
+                overdueCharges: productToEdit.overdueCharges?.map((charge) => ({
+                    id: charge.id,
+                    overdueCharge: charge.id?.toString(),
+                })) || [],
             });
         }
     }, [productToEdit]);
@@ -368,7 +380,7 @@ const CreateLoanProducts = ({ onSuccess, productToEdit }) => {
                 "overpaymentLiabilityAccountId": parseInt(formData.Accounting.overpaymentLiability, 10),
                 "preClosureInterestCalculationStrategy": parseInt(formData.Settings?.preClosureRule),
                 "principal": formData.Terms?.principalDefault,
-                "principalThresholdForLastInstallment": formData.Settings?.principalThreshold || "",
+                "principalThresholdForLastInstallment": formData.Settings?.principalThreshold || 0,
                 "repaymentEvery": formData.Terms?.frequencyRepaid || "",
                 "repaymentFrequencyType": parseInt(formData.Terms?.frequencyType),
                 "repaymentStartDateType": parseInt(formData.Terms?.installmentDayCalcFrom),
@@ -376,7 +388,7 @@ const CreateLoanProducts = ({ onSuccess, productToEdit }) => {
                 "shortName": formData.Details?.shortName || '',
                 "startDate": formatDateForPreview(formData.Details?.startDate),
                 "transactionProcessingStrategyCode": formData.Settings?.repaymentStrategy || "",
-                "interestType": 0,
+                "interestType": parseInt(formData.Settings?.interestMethod || ''),
                 "writeOffAccountId": 25,
                 "transfersInSuspenseAccountId": 1,
                 "receivableInterestAccountId": 1,
@@ -1172,7 +1184,7 @@ const CreateLoanProducts = ({ onSuccess, productToEdit }) => {
                             </div>
                             <div className="staged-form-field">
                                 <label htmlFor="principalThreshold">
-                                    Principal Threshold (%) for Last Installment <span>*</span>
+                                    Principal Threshold (%) for Last Installment
                                 </label>
                                 <input
                                     id="principalThreshold"
