@@ -102,7 +102,7 @@ const BulkLoanReassignment = () => {
     const fetchSavingsAccounts = async (officerId) => {
         startLoading();
         try {
-            const response = await axios.get(`${API_CONFIG.baseURL}/savingsaccounts`, {  // Removed officerId from URL
+            const response = await axios.get(`${API_CONFIG.baseURL}/savingsaccounts`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
                     'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
@@ -126,7 +126,7 @@ const BulkLoanReassignment = () => {
     const fetchLoans = async (officerId) => {
         startLoading();
         try {
-            const response = await axios.get(`${API_CONFIG.baseURL}/loans`, {  // Removed officerId from URL
+            const response = await axios.get(`${API_CONFIG.baseURL}/loans`, {
                 headers: {
                     Authorization: `Basic ${user.base64EncodedAuthenticationKey}`,
                     'Fineract-Platform-TenantId': `${API_CONFIG.tenantId}`,
@@ -257,6 +257,8 @@ const BulkLoanReassignment = () => {
 
     const handleSubmit = async () => {
         startLoading();
+        const errors = [];
+
         try {
             const formattedAssignmentDate = new Date(assignmentDate).toLocaleDateString('en-GB', {
                 day: '2-digit',
@@ -271,54 +273,71 @@ const BulkLoanReassignment = () => {
             };
 
             for (const clientId of selectedClientIds) {
-                const clientPayload = { staffId: toLoanOfficer };
-                await axios.post(
-                    `${API_CONFIG.baseURL}/clients/${clientId}?command=assignStaff`,
-                    clientPayload,
-                    {headers}
-                );
+                try {
+                    await axios.post(
+                        `${API_CONFIG.baseURL}/clients/${clientId}?command=assignStaff`,
+                        { staffId: toLoanOfficer },
+                        { headers }
+                    );
+                } catch (err) {
+                    console.error(`Failed to assign client ${clientId}`, err);
+                    errors.push(`Client ${clientId}`);
+                }
             }
 
             for (const loanId of [...selectedClientLoans, ...selectedGroupLoans]) {
-                const loanPayload = {
-                    fromLoanOfficerId: fromLoanOfficer || null,
-                    toLoanOfficerId: toLoanOfficer,
-                    assignmentDate: formattedAssignmentDate,
-                    locale: 'en',
-                    dateFormat: 'dd MMMM yyyy',
-                };
-
                 try {
-                    await axios.post(
-                        `${API_CONFIG.baseURL}/loans/${loanId}?command=assignLoanOfficer`,
-                        loanPayload,
-                        { headers }
-                    );
-                } catch (error) {
-                    console.warn(`Reassignment failed for loan ID ${loanId}. Checking if unassigned...`);
+                    const { data: loan } = await axios.get(`${API_CONFIG.baseURL}/loans/${loanId}`, { headers });
 
-                    try {
-                        const { data: loan } = await axios.get(`${API_CONFIG.baseURL}/loans/${loanId}`, { headers });
+                    if (!loan.loanOfficerId || loan.loanOfficerId === parseInt(fromLoanOfficer)) {
+                        const payload = {
+                            fromLoanOfficerId: fromLoanOfficer || null,
+                            toLoanOfficerId: toLoanOfficer,
+                            assignmentDate: formattedAssignmentDate,
+                            locale: 'en',
+                            dateFormat: 'dd MMMM yyyy',
+                        };
 
-                        if (!loan.loanOfficerId) {
-                            const assignPayload = {
-                                toLoanOfficerId: toLoanOfficer,
-                                assignmentDate: formattedAssignmentDate,
-                                locale: 'en',
-                                dateFormat: 'dd MMMM yyyy',
-                            };
+                        await axios.post(
+                            `${API_CONFIG.baseURL}/loans/${loanId}?command=assignLoanOfficer`,
+                            payload,
+                            { headers }
+                        );
+                    } else {
+                        const unassignPayload = {
+                            locale: 'en',
+                            dateFormat: 'dd MMMM yyyy',
+                            unassignedDate: formattedAssignmentDate,
+                        };
+
+                        const reassignPayload = {
+                            fromLoanOfficerId: null,
+                            toLoanOfficerId: toLoanOfficer,
+                            assignmentDate: formattedAssignmentDate,
+                            locale: 'en',
+                            dateFormat: 'dd MMMM yyyy',
+                        };
+
+                        try {
+                            await axios.post(
+                                `${API_CONFIG.baseURL}/loans/${loanId}?command=unassignLoanOfficer`,
+                                unassignPayload,
+                                { headers }
+                            );
 
                             await axios.post(
                                 `${API_CONFIG.baseURL}/loans/${loanId}?command=assignLoanOfficer`,
-                                assignPayload,
+                                reassignPayload,
                                 { headers }
                             );
-                        } else {
-                            throw error;
+                        } catch (innerErr) {
+                            console.error(`Unassign and reassign failed for loan ${loanId}`, innerErr);
+                            errors.push(`Loan ${loanId}`);
                         }
-                    } catch (fetchError) {
-                        throw fetchError;
                     }
+                } catch (outerErr) {
+                    console.error(`Failed to process loan ${loanId}`, outerErr);
+                    errors.push(`Loan ${loanId}`);
                 }
             }
 
@@ -395,8 +414,13 @@ const BulkLoanReassignment = () => {
                 }
             }
 
-            showNotification('Bulk reassignment successful!', 'success');
-            navigate('/organization');
+            if (errors.length > 0) {
+                showNotification(`Some items failed: ${errors.join(', ')}`, 'warning');
+                await fetchAndGroupAccounts(fromLoanOfficer);
+            } else {
+                showNotification('Bulk reassignment successful!', 'success')
+                navigate('/organization');
+            }
         } catch (error) {
             console.error('Error submitting reassignment:', error);
 
